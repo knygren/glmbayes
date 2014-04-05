@@ -1,0 +1,12 @@
+Package: glmbayes
+Type: Package
+Title: iid Sampling for Bayesian Generalized Linear Models
+Version: 1.0
+Date: 2014-03-11
+Author: Kjell Nygren
+Maintainer: Kjell Nygren <kjell.a.nygren@gmail.com>
+Description: This package can be used for Bayesian analysis of most generalized linear models available in the glm function
+License: GPL-2
+Imports: Rcpp (>= 0.11.0), RcppArmadillo (>= 0.4.100.2.1)
+LinkingTo: Rcpp, RcppArmadillo
+Suggests: MASS

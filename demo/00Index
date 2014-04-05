@@ -1,0 +1,4 @@
+glmbmenarche   Binomial models for age of menarche in Warsaw data
+glmbcarinsca   Poisson and Gamma Regression models for Canadian Car Insurance Data
+Dobsonlinreg   Two-Block Gibbs Sampling for Dobson plant weight data
+DobsonPoisson   Poisson Regression
