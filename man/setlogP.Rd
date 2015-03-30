@@ -24,7 +24,7 @@ A matrix containing the points of tangency for each component of the grid.
 }
 }
 \details{
-Set Probabilities of each part of the grid from which enveloping function is built and also sets a constant used during simulation.
+Set Probabilities of each part of the grid from which enveloping function is built and also sets a constant used during simulation. 
 }
 \value{
 A list with two components
