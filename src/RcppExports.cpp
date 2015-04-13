@@ -432,3 +432,90 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// glmbenvelope_c
+List glmbenvelope_c(NumericVector bStar, NumericMatrix A, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, std::string family = "binomial", std::string link = "logit", int Gridtype = 2, int n = 1, bool sortgrid = false);
+RcppExport SEXP glmbayes_glmbenvelope_c(SEXP bStarSEXP, SEXP ASEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP, SEXP nSEXP, SEXP sortgridSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< NumericVector >::type bStar(bStarSEXP );
+        Rcpp::traits::input_parameter< NumericMatrix >::type A(ASEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP );
+        Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP );
+        Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP );
+        Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP );
+        Rcpp::traits::input_parameter< std::string >::type family(familySEXP );
+        Rcpp::traits::input_parameter< std::string >::type link(linkSEXP );
+        Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP );
+        Rcpp::traits::input_parameter< int >::type n(nSEXP );
+        Rcpp::traits::input_parameter< bool >::type sortgrid(sortgridSEXP );
+        List __result = glmbenvelope_c(bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// glmbsim_NGauss_cpp
+Rcpp::List glmbsim_NGauss_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P, NumericVector offset2, NumericVector wt, double dispersion, Rcpp::List famfunc, Function f1, Function f2, Function f3, NumericVector start, std::string family = "binomial", std::string link = "logit", int Gridtype = 2);
+RcppExport SEXP glmbayes_glmbsim_NGauss_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP offset2SEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP famfuncSEXP, SEXP f1SEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< int >::type n(nSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP );
+        Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type mu(muSEXP );
+        Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type offset2(offset2SEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP );
+        Rcpp::traits::input_parameter< double >::type dispersion(dispersionSEXP );
+        Rcpp::traits::input_parameter< Rcpp::List >::type famfunc(famfuncSEXP );
+        Rcpp::traits::input_parameter< Function >::type f1(f1SEXP );
+        Rcpp::traits::input_parameter< Function >::type f2(f2SEXP );
+        Rcpp::traits::input_parameter< Function >::type f3(f3SEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type start(startSEXP );
+        Rcpp::traits::input_parameter< std::string >::type family(familySEXP );
+        Rcpp::traits::input_parameter< std::string >::type link(linkSEXP );
+        Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP );
+        Rcpp::List __result = glmbsim_NGauss_cpp(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// glmbsim_Gauss_cpp
+Rcpp::List glmbsim_Gauss_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P, NumericVector offset2, NumericVector wt, double dispersion, Rcpp::List famfunc, Function f1, Function f2, Function f3, NumericVector start, std::string family = "binomial", std::string link = "logit", int Gridtype = 2);
+RcppExport SEXP glmbayes_glmbsim_Gauss_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP offset2SEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP famfuncSEXP, SEXP f1SEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< int >::type n(nSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP );
+        Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type mu(muSEXP );
+        Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type offset2(offset2SEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP );
+        Rcpp::traits::input_parameter< double >::type dispersion(dispersionSEXP );
+        Rcpp::traits::input_parameter< Rcpp::List >::type famfunc(famfuncSEXP );
+        Rcpp::traits::input_parameter< Function >::type f1(f1SEXP );
+        Rcpp::traits::input_parameter< Function >::type f2(f2SEXP );
+        Rcpp::traits::input_parameter< Function >::type f3(f3SEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type start(startSEXP );
+        Rcpp::traits::input_parameter< std::string >::type family(familySEXP );
+        Rcpp::traits::input_parameter< std::string >::type link(linkSEXP );
+        Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP );
+        Rcpp::List __result = glmbsim_Gauss_cpp(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}

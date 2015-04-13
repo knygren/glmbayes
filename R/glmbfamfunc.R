@@ -37,8 +37,13 @@ if(family$family=="gaussian")
 	f4<-function(b,y,x,alpha=0,wt=1,dispersion=1){
 		dispersion*(2*f1(b,y,x,alpha,wt)+2*sum(dnorm(y, mean=y,sd=sqrt(1/wt),log=TRUE)))
 				}
-	
 
+  # Edit This
+	f5<-f2_gaussian
+	f6<-f3_gaussian
+	
+  
+  
 	}
 
 # Check if Poisson weight should be outside or inside function

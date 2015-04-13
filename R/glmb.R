@@ -1,11 +1,11 @@
-glmb<-function(n,formula, family = binomial,dispersion=NULL,mu,Sigma,Gridtype=1, data, weights, subset2, 
+glmb<-function(n,formula, family = binomial,dispersion=NULL,mu,Sigma,nu=NULL,V=NULL,Gridtype=1, data, weights, subset2, 
     na.action, start = NULL, etastart, mustart, offset, control = list(...), 
     model = TRUE, method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
     ...) UseMethod("glmb")
 
 
 
-glmb.default<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,Gridtype=1, data, weights, subset2, 
+glmb.default<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,nu=NULL,V=NULL,Gridtype=1, data, weights, subset2, 
     na.action, start = NULL, etastart, mustart, offset, control = list(...), 
     model = TRUE, method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
     ...) 
@@ -93,8 +93,11 @@ glmb.default<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,Gr
     wtin<-fit$prior.weights	
 
 
-      sim<-rglmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,dispersion=dispersion,offset2=offset,family=family,start=b,Gridtype=Gridtype)
-		
+
+sim<-rglmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,dispersion=dispersion,nu=nu,V=V,offset2=offset,family=family,
+           start=b,Gridtype=Gridtype)
+
+
 	dispersion2<-sim$dispersion
 	famfunc<-sim$famfunc
 	
@@ -103,13 +106,32 @@ glmb.default<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,Gr
 	names(Prior$mean)<-colnames(fit$x)
 	colnames(Prior$Variance)<-colnames(fit$x)
 	rownames(Prior$Variance)<-colnames(fit$x)
-#	DICinfo<-glmbdic(sim$coefficients,y=y,x=x,f1=famfunc$f1,f4=famfunc$f4,wt=wtin)
-	DICinfo<-glmbdic(sim$coefficients,y=y,x=x,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion2)
 
+  
+if (!is.null(offset)) {
+  if(length(dispersion2)==1){
+    
+    DICinfo<-glmbdic(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
+  }
+  
+  if(length(dispersion2)>1){
+    DICinfo<-glmbdic(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+  }
+  
+  linear.predictors<-t(offset+x%*%t(sim$coefficients))}
+if (is.null(offset)) {
+  if(length(dispersion2)==1){
+        
+    DICinfo<-glmbdic(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
+  }
+  
+  if(length(dispersion2)>1){
+    DICinfo<-glmbdic(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+  }
+  
+  linear.predictors<-t(x%*%t(sim$coefficients))
 
-
-if (!is.null(offset)) {linear.predictors<-t(offset+x%*%t(sim$coefficients))}
-if (is.null(offset)) {linear.predictors<-t(x%*%t(sim$coefficients))}
+  }
 	linkinv<-fit$family$linkinv
 	fitted.values<-linkinv(linear.predictors)
 
@@ -120,7 +142,12 @@ if (is.null(offset)) {linear.predictors<-t(x%*%t(sim$coefficients))}
 	deviance=DICinfo$Deviance,
 	pD=DICinfo$pD,
 	Dbar=DICinfo$Dbar,Dthetabar=DICinfo$Dthetabar,
-	DIC=DICinfo$DIC,famfunc=famfunc,iters=sim$iters,dispersion=dispersion)
+	DIC=DICinfo$DIC,
+  famfunc=famfunc,iters=sim$iters,
+#  dispersion=dispersion
+#,
+  dispersion=dispersion2
+)
 
 	outlist$call<-match.call()
 

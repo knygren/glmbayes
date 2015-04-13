@@ -1,60 +1,33 @@
-\name{glmbenvelope}
-\alias{glmbenvelope}
-\alias{glmbenvelope_c}
+\name{EnvelopeSort}
+\alias{EnvelopeSort}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Constructs Enveloping function for simulation
+Sorts Enveloping function
 }
 \description{
-Constructs Enveloping function for simulation
+Sorts Enveloping function
 }
 \usage{
-%glmbenvelope(bStar, A, f2, f3,f5,f6, y, x, mu, P, alpha, wt = 1, Gridtype = 3, n %= 1)
 
-glmbenvelope_c(bStar, A, y, x, mu, P, alpha, wt, family = "binomial", link = "logit", Gridtype = 2, n = 1, sortgrid = FALSE)
+EnvelopeSort(l1,l2,GIndex,G3,cbars,logU,logrt,loglt,logP,LLconst,PLSD,a1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{bStar}{Point at which envelope should be centered (typically posterior mode)
-}
-  \item{A}{Diagonal precision matrix for log-likelihood function associated with model in standard form
-}
-%  \item{f2}{Negative log-posterior function}
-%  \item{f3}{Gradient function for Negative log-posterior function  }
-%  \item{f5}{Vectorized version of Negative log-posterior function}
-%  \item{f6}{Vectorized version of Gradient function for Negative log-posterior %function}
-  \item{y}{
-a vector of observations of length m
-}
-  \item{x}{
-a design matrix of dimension m*p
-}
-  \item{mu}{
-a vector giving the prior means of the variables.
-}
-  \item{P}{
-a positive-definite symmetric matrix specifying the prior precision matrix of the variables.
-}
-  \item{alpha}{offset vector 
-}
-  \item{wt}{
-a vector of weights
-}
-  \item{family}{Family for the envelope. Can take on values binomial, quasibinomial, poisson, quasibinomial, and Gamma}
-  \item{link}{Link function for the envelope. Valid links for the binomial and quasibinomial families are logit, probit, and cloglog. The valid value for the poisson, quasipoisson, and the Gamma families is the log}
-  
-  \item{Gridtype}{
-an optional argument specifying the method used to determine number of likelihood subgradient 
-densities used to construct the enveloping function.
-}
-  \item{n}{
-number of draws to generate from posterior density. Used here to help determine the size of the grid (Gridtype 1 and 2 only)
-}
-  \item{sortgrid}{ 
-an optional Logical argument determining whether the final envelope should be sorted in descending order based on probability for each part of the envelope}
-}
+  \item{l1}{dimension for model (number of independent variables in X matrix)}
+  \item{l2}{dimension for Envelope (number of components)}
+  \item{GIndex}{ matrix containing information on how each dimension should be sampled (1 means left tail of a restricted normal, 2 center, 3 right tail, and 4 the entire line)}
+  \item{G3}{A matrix containing the points of tangencies associated with each component of the grid}
+  \item{cbars}{A matrix containing the gradients for the negative log-likelihood at each tangency}
+  \item{logU}{A matrix containing the log of the cummulative probability associated with each dimension}
+  \item{logrt}{A matrix containing the log of the probability associated with the right tail (i.e. that to the right of the lower bound)}
+  \item{loglt}{A matrix containing the log of the probability associated with the left tail (i.e., that to the left of the upper bound)}
+  \item{logP}{A matrix containing log-probabilities related to the components of the grid}
+  \item{LLconst}{A vector containing constant for each component of the grid used during the accept-reject procedure}
+  \item{PLSD}{A vector containing the probability of each component in the Grid}
+  \item{a1}{A vector containing the diagonal of the standardized precision matrix}
+  }
 \details{
-This function identfies tangency points and intervals for the enveloping function, evaluates the log-likelihood function and gradients for the log-likelihood at each point, and calculates additional constants.
+This function sorts the envelope in descending order based on the probability associated with each component in the Grid. Sorting helps speed up simulation once the envelope is constructed.
 }
 \value{
 The function returns a list consisting of the following components (the first six of which are matrics with number of rows equal to the number of components in the Grid and columns equal to the number of parameters):

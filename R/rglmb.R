@@ -1,8 +1,11 @@
-rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=2)UseMethod("rglmb")
+rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=2)UseMethod("rglmb")
 
-rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=2
+rglmb.default_Old<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=2
 )
 {
+  
+  
+  
     if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
 	is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
 	
@@ -84,8 +87,9 @@ rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,family=gaussian(),offs
 	# Produce Maximum a posteriori estimates and get outputs)
 
 	alpha<-x%*%mu+offset2  # Offset
-
-
+  
+  
+  
 	if(family$family=="gaussian")
 		{
 		x2<-x*sqrt(wt2)
@@ -116,20 +120,25 @@ rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,family=gaussian(),offs
 		}	
 	
 	else{
-   
+
+#	  start.timeE<-Sys.time()
+	  
+  
     
 	opt1<-optim(par=start-mu, fn=f2, gr = f3,y=y,x=x,mu=mu-mu,P=P,
 	alpha=alpha,wt=wt2,method="BFGS", hessian = TRUE)
 
-
-
+	
+  
 	min1<-opt1$value
-      b1<-as.matrix(opt1$par)
-	A1<-opt1$hessian	
-	grad1<-f3(b1,y,x,mu-mu,P=P,alpha=alpha,wt=wt2)
+#	grad1<-f3(b1,y,x,mu-mu,P=P,alpha=alpha,wt=wt2)
 	conver1<-opt1$convergence
 	if(conver1>0) stop("Posterior Optimization failed")
+	
 
+  b1<-as.matrix(opt1$par)
+  A1<-opt1$hessian	
+	
 
 	# Replace With solution from optim (may be more stable)
 
@@ -217,36 +226,44 @@ rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,family=gaussian(),offs
 	A4<-t(L3Inv)%*%A3%*%L3Inv
 	P5<-t(L3Inv)%*%P4%*%L3Inv
 	P6Temp<-P5+diag(nvars)
-	epsilontemp<-t(L3Inv)%*%epsilon%*%L3Inv
-	
+#	epsilontemp<-t(L3Inv)%*%epsilon%*%L3Inv
+
+
+
 	opt3<-optim(par=b4, fn=f2, gr = f3,y=y,x=x4,mu=mu4-mu4,P=P6Temp,
 	alpha=alpha,wt=wt2,method="BFGS", hessian = TRUE)
 
 
-	min4<-opt3$value
+#	min4<-opt3$value
 	b4temp<-opt3$par
-	conver3<-opt3$convergence
+#	conver3<-opt3$convergence
 	Atemp<-opt3$hessian	
 	atemp<-sqrt(diag(Atemp))
 
-	minlist<-list(min=min1,min4=min4)
-	valcheck<-list(b1=b1,b2=b2)
-	hcheck<-list(A1=A1,A2=A2)
-	gradcheck<-list(grad1=grad1)
-	ctest<-t(f3(b=b4,y=y,x=x4,mu=mu4,P=P5,alpha=alpha,wt=wt2))
+
+#  minlist<-list(min=min1,min4=min4)
+#	valcheck<-list(b1=b1,b2=b2)
+#	hcheck<-list(A1=A1,A2=A2)
+#	gradcheck<-list(grad1=grad1)
+#	ctest<-t(f3(b=b4,y=y,x=x4,mu=mu4,P=P5,alpha=alpha,wt=wt2))
 	ctest2<-t(f3(b=b4temp,y=y,x=x4,mu=mu4,P=P5,alpha=alpha,wt=wt2))
 
+  
+	
 	
 	# Create enveloping function
 
-#	start.timeE<-Sys.time()
 	
-	Envelope<-glmbenvelope(bStar=b4temp,A=A4,f2=f2,f3=f3,f5=f5,f6=f6,y=y,x=x4,mu=mu4,P=P5,alpha=alpha,wt=wt2,Gridtype=Gridtype,n=n)
+#	Envelope<-glmbenvelope(bStar=b4temp,A=A4,f2=f2,f3=f3,f5=f5,f6=f6,y=y,x=x4,mu=mu4,P=P5,alpha=alpha,wt=wt2,Gridtype=Gridtype,n=n)
 	
-#  end.timeE<-Sys.time()
-#	time.takenE<-end.timeE-start.timeE
-#	print("Time taken for Envelope Construction")
-#	print(time.takenE)
+  if(n==1){
+  Envelope<-glmbenvelope_c(bStar=b4temp, A=A4,y=y, x=x4,mu=mu4,P=P5,alpha=alpha,wt=wt2,family=family$family,link=family$link,Gridtype=Gridtype, n=n,sortgrid=FALSE)
+  
+  }
+  if(n>1){
+  Envelope<-glmbenvelope_c(bStar=b4temp, A=A4,y=y, x=x4,mu=mu4,P=P5,alpha=alpha,wt=wt2,family=family$family,link=family$link,Gridtype=Gridtype, n=n,sortgrid=TRUE)
+  }
+
 	
 	
 	qa1<-max(abs(b4-b4temp)*atemp)
@@ -254,24 +271,9 @@ rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,family=gaussian(),offs
 	if(qa1>0.01) {warning("Possible numeric imprecision during transformations type 1. \n Consider a stronger prior.")}
 	if(qa2>0.01) {warning("Possible numeric imprecision during transformations type 2. \n Consider a stronger prior.")}
 
-	optlist<-list(b4=b4,b4temp=as.matrix(b4temp),ctest=as.matrix(t(ctest)),ctest2=as.matrix(t(ctest2)),qa1=qa1,qa2=qa2)
+#	optlist<-list(b4=b4,b4temp=as.matrix(b4temp),ctest=as.matrix(t(ctest)),ctest2=as.matrix(t(ctest2)),qa1=qa1,qa2=qa2)
 
 	# Simulate
-
-
-
-
-#start.time<-Sys.time()
-
-#  sim<-glmbsim(n=n,y=y,x=x4,mu=mu4,P=P5,alpha=alpha,wt=wt2,f2=f2,Envelope=Envelope)
-	
-#end.time<-Sys.time()
-#time.taken<-end.time-start.time
-#print("Time for glmbsim")
-#print(time.taken)
-
-#print(colMeans(sim$out))
-
 # New glmbsim (Cpp)
 
 #start.time<-Sys.time()
@@ -281,9 +283,6 @@ sim<-glmbsim_cpp(n=n,y=y,x=x4,mu=mu4,P=P5,alpha=alpha,wt=wt2,f2=f2,Envelope=Enve
 #time.taken<-end.time-start.time
 #print("Time for new glmbsim")
 #print(time.taken)
-#print(family$family)
-#print(sim$famout)
-#print("out")
 
 	# Undo Standardization
 
@@ -301,9 +300,8 @@ sim<-glmbsim_cpp(n=n,y=y,x=x4,mu=mu4,P=P5,alpha=alpha,wt=wt2,f2=f2,Envelope=Enve
 	
   
 
-#	outlist<-list(coefficients=out,PostMode=b2,Prior=Prior,n=n,iters=sim$draws,famfunc=famfunc,Envelope=Envelope,ctest=ctest,minlist=minlist,optlist=optlist,epsilontemp=epsilontemp,valcheck=valcheck,hcheck=hcheck,gradcheck=gradcheck,conver1=conver1,conver3=conver3)
-#	outlist<-list(coefficients=out,PostMode=b2,Prior=Prior,n=n,iters=sim$draws,famfunc=famfunc,Envelope=Envelope,dispersion=dispersion2)
-  outlist<-list(coefficients=out,PostMode=b2,Prior=Prior,iters=sim$draws,famfunc=famfunc,Envelope=Envelope,dispersion=dispersion2,loglike=LL)
+#  outlist<-list(coefficients=out,PostMode=b2+mu,Prior=Prior,iters=sim$draws,famfunc=famfunc,Envelope=Envelope,dispersion=dispersion2,loglike=LL,b1=b1,A1=A1)
+  outlist<-list(coefficients=out,PostMode=b2+mu,Prior=Prior,iters=sim$draws,famfunc=famfunc,Envelope=Envelope,dispersion=dispersion2,loglike=LL)
   colnames(outlist$coefficients)<-colnames(x)
 
 	}
@@ -386,6 +384,130 @@ printCoefmat(x$Percentiles,digits=4)
 }
 
 
+rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=2
+)
+{
+  
+  
+  
+  if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
+       is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
+  
+  x <- as.matrix(x)
+  mu<-as.matrix(as.vector(mu))
+  P<-as.matrix(P)    
+  xnames <- dimnames(x)[[2L]]
+  ynames <- if (is.matrix(y)) 
+    rownames(y)
+  else names(y)
+  if(length(n)>1) n<-length(n)	   
+  nobs <- NROW(y)
+  nvars <- ncol(x)
+  EMPTY <- nvars == 0
+  if (is.null(offset2)) 
+    offset2 <- rep(0, nobs)
+  nvars2<-length(mu)	
+  if(!nvars==nvars2) stop("incompatible dimensions")
+  if (!all(dim(P) == c(nvars2, nvars2))) 
+    stop("incompatible dimensions")
+  if(!isSymmetric(P))stop("matrix P must be symmetric")
+  tol<- 1e-06 # Link this to Magnitude of P	
+  eS <- eigen(P, symmetric = TRUE,only.values = FALSE)
+  ev <- eS$values
+  if (!all(ev >= -tol * abs(ev[1L]))) 
+    stop("'P' is not positive definite")
+  
+  if (is.null(start)) 
+    start <- mu
+  if (is.null(offset2)) 
+    offset2 <- rep.int(0, nobs)
+  if (is.character(family)) 
+    family <- get(family, mode = "function", envir = parent.frame())
+  if (is.function(family)) 
+    family <- family()
+  if (is.null(family$family)) {
+    print(family)
+    stop("'family' not recognized")
+  }
+  
+  okfamilies <- c("gaussian","poisson","binomial","quasipoisson","quasibinomial","Gamma")
+  if(family$family %in% okfamilies){
+    if(family$family=="gaussian") oklinks<-c("identity")
+    if(family$family=="poisson"||family$family=="quasipoisson") oklinks<-c("log")		
+    if(family$family=="binomial"||family$family=="quasibinomial") oklinks<-c("logit","probit","cloglog")		
+    if(family$family=="Gamma") oklinks<-c("log")		
+    if(family$link %in% oklinks){
+      
+      famfunc<-glmbfamfunc(family)
+      f1<-famfunc$f1
+      f2<-famfunc$f2
+      f3<-famfunc$f3
+      f5<-famfunc$f5
+      f6<-famfunc$f6
+    }
+    else{
+      stop(gettextf("link \"%s\" not available for selected family; available links are %s", 
+                    family$link , paste(sQuote(oklinks), collapse = ", ")), 
+           domain = NA)
+      
+    }	
+    
+  }		
+  else {
+    stop(gettextf("family \"%s\" not available in glmb; available families are %s", 
+                  family$family , paste(sQuote(okfamilies), collapse = ", ")), 
+         domain = NA)
+  }
+  if(family$family=="poisson"||family$family=="binomial")dispersion2<-1
+  else dispersion2<-dispersion
+
+
+  
+  if(family$family=="gaussian"){
+    dispersion2=dispersion
+    if(is.null(dispersion)){dispersion2=0}
+    if(dispersion2>0){outlist<-glmbsim_Gauss_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)
+    }
+
+    else{
+         
+      
+         sim<-rmultireg(n=n,Y=matrix((y-offset2)*sqrt(wt),nrow=length(y)),X=x*sqrt(wt),Bbar=mu,A=P,nu=nu,V=V)
+         draws<-matrix(1,n)
+         LL<-matrix(1,n)
+         
+         for(i in 1:n){
+            LL[i]<-f1(b=sim$B[i,],y=y,x=x,alpha=offset2,wt=wt/sim$Sigma[i])	
+         }
+         
+         outlist<-list(coefficients=sim$B,PostMode=sim$BStar,
+                       Prior=list(mean=as.numeric(mu),Precision=P),
+                       iters=draws,famfunc=famfunc,Envelope=NULL,
+                       dispersion=sim$Sigma,loglike=LL)
+         
+        }
+    
+  }
+    
+    
+    
+    
+  else{
+ #   dispersion2=dispersion
+    if(is.null(dispersion)){dispersion2=1}
+    outlist<-glmbsim_NGauss_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,famfunc=famfunc,f1=f1,f2=f2,f3=f3,
+    start=mu,family=family$family,link=family$link)
+    
+  }
+  
+  colnames(outlist$coefficients)<-colnames(x)
+  
+  outlist$call<-match.call()
+  
+  class(outlist)<-c(outlist$class,"rglmb")
+  outlist
+  
+}
 
 
 

@@ -85,3 +85,15 @@ glmbsim_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link) {
     .Call('glmbayes_glmbsim_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, family, link)
 }
 
+glmbenvelope_c <- function(bStar, A, y, x, mu, P, alpha, wt, family = "binomial", link = "logit", Gridtype = 2L, n = 1L, sortgrid = FALSE) {
+    .Call('glmbayes_glmbenvelope_c', PACKAGE = 'glmbayes', bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid)
+}
+
+glmbsim_NGauss_cpp <- function(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L) {
+    .Call('glmbayes_glmbsim_NGauss_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype)
+}
+
+glmbsim_Gauss_cpp <- function(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L) {
+    .Call('glmbayes_glmbsim_Gauss_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype)
+}
+

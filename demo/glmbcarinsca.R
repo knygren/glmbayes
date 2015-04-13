@@ -1,5 +1,4 @@
 
-rm(list = ls())
 
 data(carinsca)
 carinsca$Merit <- ordered(carinsca$Merit)
@@ -103,6 +102,8 @@ out2<-rglmb(n = 1000, out$y, out$x, mu=mu, P=P, wt = out$prior.weights, dispersi
             offset2 = rep(0, 20), start = out$coefficients, Gridtype = 2) 
 
 summary(out2)
+
+
 
 a0<-0.01
 m0<-0.01

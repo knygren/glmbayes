@@ -53,7 +53,12 @@ G3<-expand.grid(G2)
 GIndex<-expand.grid(GIndex1)
 
 
+G3<-as.matrix(G3)
+GIndex<-as.matrix(GIndex)
+G3<-as.matrix(G3)
+
 l2<-length(GIndex[,1])
+
 
 cbars<-matrix(0,nrow=l2,ncol=l1)
 NegLL<-matrix(0,nrow=l2,ncol=1)
@@ -69,7 +74,6 @@ PLSD<-matrix(0,nrow=l2,ncol=1)
 LLconst<-matrix(0,nrow=l2,ncol=1)
 
 
-G3<-as.matrix(G3)
 
 
 cbars<-f6(b=t(G3),y=y,x=x,mu=mu,P=P,alpha=alpha,wt=wt)
@@ -81,7 +85,6 @@ NegLL<-f5(b=t(G3),y=y,x=x,mu=mu,P=P,alpha=alpha,wt=wt)
 
 # New Set Grid starts here
 
-GIndex<-as.matrix(GIndex)
 
 outloop<-Set_Grid(GIndex,cbars,Lint)
 
@@ -95,7 +98,6 @@ logU<-outloop$logU
 logP<-outloop$logP
 
 
-G3<-as.matrix(G3)
 
 logout<-setlogP(logP,NegLL,cbars,G3)
 
@@ -111,9 +113,13 @@ PLSD<-PLSD/sumP
 
 PLSD<-as.matrix(PLSD)
 
+
+
 Envelope<-data.frame(GIndex=GIndex,G3=G3,cbars=cbars,logU=logU,logrt=logrt,loglt=loglt,logP=logP[,1],LLconst=LLconst,PLSD=PLSD)
 
 Envelope=Envelope[order(-Envelope$PLSD),]
+
+
 
 
 
@@ -132,6 +138,9 @@ else{
   
 }
 
+
+
+return(outlist)
 
 }
 
