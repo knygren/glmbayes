@@ -89,11 +89,23 @@ glmbenvelope_c <- function(bStar, A, y, x, mu, P, alpha, wt, family = "binomial"
     .Call('glmbayes_glmbenvelope_c', PACKAGE = 'glmbayes', bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid)
 }
 
+optPostMode <- function(y, x, mu, P, alpha, wt, b, bstar, family = "binomial", link = "logit") {
+    .Call('glmbayes_optPostMode', PACKAGE = 'glmbayes', y, x, mu, P, alpha, wt, b, bstar, family, link)
+}
+
 glmbsim_NGauss_cpp <- function(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L) {
     .Call('glmbayes_glmbsim_NGauss_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype)
 }
 
 glmbsim_Gauss_cpp <- function(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L) {
     .Call('glmbayes_glmbsim_Gauss_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype)
+}
+
+glmbsim_NGauss2_cpp <- function(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L) {
+    .Call('glmbayes_glmbsim_NGauss2_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype)
+}
+
+rglmb_rand_cpp <- function(n, y, x, mu, P_0, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L) {
+    .Call('glmbayes_rglmb_rand_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P_0, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype)
 }
 

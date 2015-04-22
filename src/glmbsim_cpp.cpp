@@ -408,6 +408,262 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
 }
 
 
+int Initialize_bstar(NumericVector y, NumericMatrix x,NumericVector mu, NumericMatrix P,
+NumericVector alpha,NumericVector wt,
+NumericVector b,NumericVector xb,NumericMatrix Ptemp,
+NumericVector bstar){
+
+  int l1 = x.nrow(), l2 = x.ncol();
+  
+  NumericMatrix bmu(l2,1);
+  arma::mat x2(x.begin(), l1, l2, false); 
+  arma::mat mu2(mu.begin(), l2, 1, false); 
+  arma::mat P2(P.begin(), l2, l2, false); 
+  arma::mat alpha2(alpha.begin(), l1, 1, false); 
+  arma::mat b2(b.begin(), l2, 1, false);
+  arma::colvec xb2(xb.begin(),l1,false); // Reuse memory - update both below  
+  NumericVector xrow = x( 0, _);
+  arma::vec xrow2(xrow.begin(),l2);
+  arma::mat Ptemp2(Ptemp.begin(), l2, l2, false);  
+  arma::vec bstar2(bstar.begin(), l2, false);
+  arma::mat bmu2(bmu.begin(), l2, 1, false); 
+
+  int j;
+  
+  xb2=exp(-alpha2- x2 * b2);
+  
+  
+    for(j=0;j<l2;j++){
+    xb(j)=1/(1+xb(j));  
+    xrow = x( j, _);
+    Ptemp2=Ptemp2+wt(j)*xb(j)*(1-xb(j))*trans(xrow2)*xrow2;
+    
+    }
+  
+   if(arma::is_finite(bstar2))
+    {
+      b2=inv_sympd(Ptemp2)*((Ptemp2-P2)*bstar2+P2*mu2); 
+      xb2=exp(-alpha2- x2 * b2);
+      for(int j=0;j<l2;j++)
+      {
+        xb(j)=1/(1+xb(j));  
+      } 
+    }
+  
+     
+    bmu2=b2-mu2;
+
+    double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+    NumericVector yy=-dbinom_glmb(y,wt,xb,true);    
+    double res2=std::accumulate(yy.begin(), yy.end(), res1);
+  
+  
+  return(1);
+  
+  
+}
+
+// [[Rcpp::export]]
+
+Rcpp::List optPostMode(NumericVector y,NumericMatrix x,
+NumericVector mu,NumericMatrix P, NumericVector alpha,
+NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomial",
+      std::string link="logit"
+){
+    int l1 = x.nrow(), l2 = x.ncol();
+
+    NumericMatrix Pout(clone(P));
+    NumericMatrix bmu(l2,1);
+    Rcpp::NumericVector xb(l1);
+    NumericVector xrow = x( 0, _);
+    NumericMatrix Ptemp(clone(P));
+    NumericVector grad(l2);
+    NumericVector gradb(l2);
+    NumericVector btemp(l2);
+    NumericVector bmutemp(l2);
+    Rcpp::NumericVector xbtemp(l1);
+    double maxgrad;
+    double stepsize=1;
+    double res3;
+    int k;
+    
+    arma::mat y2(y.begin(), l1, 1, false);
+    arma::mat x2(x.begin(), l1, l2, false); 
+    arma::mat mu2(mu.begin(), l2, 1, false); 
+    arma::mat P2(P.begin(), l2, l2, false); 
+    arma::mat alpha2(alpha.begin(), l1, 1, false); 
+    arma::mat b2(b.begin(), l2, 1, false);
+    arma::vec bstar2(bstar.begin(), l2, false);
+
+    arma::mat Pout2(Pout.begin(), l2, l2, false); 
+    arma::mat bmu2(bmu.begin(), l2, 1, false); 
+    arma::colvec xb2(xb.begin(),l1,false); // Reuse memory - update both below  
+    arma::vec xrow2(xrow.begin(),l2);
+    arma::mat Ptemp2(Ptemp.begin(), l2, l2, false);  
+    arma::vec grad2(grad.begin(),l2);
+    arma::vec gradb2(grad.begin(),l2);
+    arma::vec btemp2(btemp.begin(), l2, 1, false);
+    arma::vec bmutemp2(bmutemp.begin(), l2, 1, false);
+    arma::colvec xbtemp2(xbtemp.begin(),l1,false); // Reuse memory - update both below  
+ 
+ 
+    Initialize_bstar(y, x, mu,P, alpha,wt,b, xb, Ptemp,bstar);
+    
+ 
+    // Initialize Algorithm (modify how initial point is selected)
+    // Use "Fraction" of maximum likelihood estimate (when it is well defined)
+    
+    // Get Estimate for xb and Posterior Precision Matrix at provided 
+    // value for b2
+    
+    ///////////////////////////////////////////////////////
+    
+    
+    
+    xb2=exp(-alpha2- x2 * b2);
+
+    for(int j=0;j<l2;j++){
+    xb(j)=1/(1+xb(j));  
+    xrow = x( j, _);
+    Ptemp2=Ptemp2+wt(j)*xb(j)*(1-xb(j))*trans(xrow2)*xrow2;
+    
+    }
+
+    // If Maximum likelihood estimate is finite, then 
+    // set b2 to approximate posterior mode (based on 
+    // quadratic approximation) and
+    // re-compute xb at this value for b2    
+    //log(y2/(1-y2))
+    if(arma::is_finite(bstar2))
+    {
+      b2=inv_sympd(Ptemp2)*((Ptemp2-P2)*bstar2+P2*mu2); 
+      xb2=exp(-alpha2- x2 * b2);
+      for(int j=0;j<l2;j++)
+      {
+        xb(j)=1/(1+xb(j));  
+      } 
+    }
+
+    //  Find the value for objective function at the initial point 
+    
+    bmu2=b2-mu2;
+
+    double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+    NumericVector yy=-dbinom_glmb(y,wt,xb,true);    
+    double res2=std::accumulate(yy.begin(), yy.end(), res1);
+       
+    ///////////////////////////////////////////////////////
+    
+    
+       
+    // Initialize while loop
+    
+    int i=0;
+    int check=0;
+    int check2=0;
+    
+    while(i<30 && check==0){
+
+    /////////////////////////////////////////////////////////////
+
+    // Calculate Function Value and gradient At Latest Iteration 
+
+    Pout=clone(P);
+
+    xb2=exp(-alpha2- x2 * b2);
+    bmu2=b2-mu2;
+
+    
+    
+    for(int j=0;j<l1;j++){
+    xb(j)=1/(1+xb(j));  
+    xrow = x( j, _);
+
+    Pout2=Pout2+wt(j)*xb(j)*(1-xb(j))*trans(xrow2)*xrow2;
+    }
+
+    Pout2=inv_sympd(Pout2);
+
+    res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+    yy=-dbinom_glmb(y,wt,xb,true);    
+    res2=std::accumulate(yy.begin(), yy.end(), res1);
+
+    for(int j=0;j<l1;j++){
+       xb(j)=(xb(j)-y(j))*wt(j);
+    }
+    
+    grad2=(P2 * bmu2+x2.t() * xb2);
+       
+    if(arma::any(grad2)==false){
+      check=1;
+    }
+   
+    gradb2=inv_sympd(P2)*grad2;
+    gradb2=abs(2*gradb2/(2*b2+gradb2));
+    maxgrad=max(gradb2);
+    if(maxgrad<0.0001){
+      check=1;
+    }
+    
+    
+    
+    //////////////////////////////////////////////////////////////////
+    
+    
+    // Update b2 (Newton-Rhapson update)
+    // Reduce stepsize if function value increases
+    
+    stepsize=1;
+    
+    check2=0;
+    k=0;
+    
+    while(check2==0&& k<10 && check==0){
+
+    //////////////   Set candidate point and check function value 
+
+    btemp2=b2-stepsize*Pout2*(P2 * bmu2+x2.t() * xb2);    
+    bmutemp2=btemp2-mu2;
+
+    xbtemp2=exp(-alpha2- x2 * btemp2);
+
+    for(int j=0;j<l2;j++){
+    xbtemp(j)=1/(1+xbtemp(j));  
+    
+    } 
+
+    res1=0.5*arma::as_scalar(bmutemp2.t() * P2 *  bmutemp2);
+    yy=-dbinom_glmb(y,wt,xbtemp,true);    
+    res3=std::accumulate(yy.begin(), yy.end(), res1);
+
+    ///////////////////////////////////////////////////////////
+
+
+    if(res3<res2){
+    b2= btemp2;
+    check2=1;
+    
+    }
+    else{
+      stepsize=stepsize/2.0;
+    } 
+    
+    k++;
+    }
+    
+    i++;
+    
+    
+
+    }
+ 
+
+
+
+    Rcpp::List opt=Rcpp::List::create(Rcpp::Named("bstar")=b);  
+  
+  return(opt);
+}
 
 
 
@@ -446,44 +702,17 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector  wt2=wt/dispersion2;
     arma::vec wt3(wt2.begin(), x.nrow());
     
-    
     alpha2=x2*mu2+offset2b;
 
-    // Move inside If Statement once confirmed works
-    
-        int i;
-        NumericVector  y1=y-offset2;
-        NumericVector  y2=y1;
-        arma::vec y2b(y2.begin(),l2,false);
+    int i;
 
-    
-        for(i=0;i<l2;i++){
-          x2b(i,_) =x2b(i,_)*sqrt(wt2[i]);
-          y2(i)=y2(i)*sqrt(wt2[i]);
-          }        
-        arma::mat RA=arma::chol(P2);
-
-        NumericMatrix W1(l2+l1,l1);
-        arma::mat W(W1.begin(), W1.nrow(), W1.ncol(), false);
-        NumericVector z1(l2+l1);
-        arma::vec z(z1.begin(),l2+l1,false);
-
-        W.rows(0,l2-1)=x2;
-        W.rows(l2,l2+l1-1)=RA;
-        z.rows(0,l2-1)=y2b;
-        z.rows(l2,l1+l2-1)=RA*mu2;
-        arma::mat IR=arma::trans(arma::inv(trimatu(chol(trans(W)*W))));
-      
-//      arma::mat W;
-//      .rows(first_row, last_row)
     
     NumericVector parin=start-mu;
     NumericVector mu1=mu-mu;
     Rcpp::Function optfun("optim");
     
-
-
-    List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,_["x"]=x,
+    List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,
+    _["x"]=x,
     _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
 
  
@@ -605,22 +834,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector b5=asVec(b4_1);
     Rcpp::List Envelope;
 
-//     return(Rcpp::List::create(
-//    Rcpp::Named("b5")=b5,
-//    Rcpp::Named("A4_1")=A4_1,
-//    Rcpp::Named("y")=y,
-//    Rcpp::Named("x4_1")=x4_1,
-//    Rcpp::Named("mu4_1")=mu4_1,
-//    Rcpp::Named("P5_1")=P5_1,
-//    Rcpp::Named("alpha")=alpha,
-//    Rcpp::Named("wt2")=wt2,
-//    Rcpp::Named("family")=family,
-//    Rcpp::Named("link")=link,
-//    Rcpp::Named("Gridtype")=Gridtype,
-//    Rcpp::Named("n")=n
-//));
-
-
     if(n==1){
     Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
     P5_1,alpha,wt2,family,link,Gridtype, n,false);
@@ -706,7 +919,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     
     // Is this needed (Check Offset code works properly-Both new and old code)
     
-    //alpha2=x2*mu2+offset2b;
 
     // Move inside If Statement once confirmed works
     
@@ -762,14 +974,374 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
               Rcpp::Named("loglike")=LL
           );  
 
-
-
-
     return(outlist);
 
+}
 
 
 
+// [[Rcpp::export]]
+
+Rcpp::List glmbsim_NGauss2_cpp(int n,NumericVector y,NumericMatrix x, 
+NumericVector mu,NumericMatrix P,NumericVector offset2,NumericVector wt,
+double dispersion,Rcpp::List
+famfunc, Function f1,Function f2,Function f3,NumericVector start,
+      std::string family="binomial",
+      std::string link="logit",
+      int Gridtype=2      
+) {
+
+    Rcpp::Function asMat("as.matrix");
+    Rcpp::Function asVec("as.vector");
+    int l1=x.ncol();
+    int l2=x.nrow();
+
+    double dispersion2;
+    NumericVector alpha(l2);
+    NumericMatrix mu2a=asMat(mu);
+
+    arma::mat x2(x.begin(), l2, l1, false);
+    arma::vec alpha2(alpha.begin(),l2,false);  
+    arma::vec offset2b(offset2.begin(),l2,false);  
+    arma::mat mu2(mu2a.begin(), mu2a.nrow(), mu2a.ncol(), false);
+
+    arma::mat P2(P.begin(), P.nrow(), P.ncol(), false);
+
+    if(family=="poisson"||family=="binomial") dispersion2=1;
+    else dispersion2=dispersion;
+  
+    NumericVector  wt2=wt/dispersion2;
+    
+    alpha2=x2*mu2+offset2b;
+
+    int i;
+
+    
+    NumericVector parin=start-mu;
+    NumericVector mu1=mu-mu;
+    Rcpp::Function optfun("optim");
+
+    NumericMatrix b2a(l1);
+    NumericVector parin2(clone(parin));
+    List opt1=optPostMode(y,x,mu1, P, alpha,wt2,
+     parin2,log(y/(1-y)),"binomial","logit");
+
+    arma::vec parin2b(parin2.begin(),l1);
+    parin2b.print("New Optimization:");
+
+    List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,_["x"]=x,
+    _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
+
+
+    b2a=asMat(opt[0]);
+    arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
+    b2.print("Old Optimization:");
+    
+    NumericVector min1=opt[1];
+    int conver1=opt[3];
+    NumericMatrix A1=opt[5];
+
+    if(conver1>0){Rcpp::stop("Posterior Optimization failed");}
+    
+    arma::mat A1_b(A1.begin(), l1, l1, false); 
+    arma::vec mu_0(mu.begin(), l1, false);
+    
+    arma::vec eigval_1;
+    arma::mat eigvec_1;
+
+    eig_sym(eigval_1, eigvec_1, A1_b);
+
+    NumericMatrix L2Inv_1(l1, l1);
+    arma::mat L2Inv(L2Inv_1.begin(), L2Inv_1.nrow(), L2Inv_1.ncol(), false);
+
+
+    // Standardize Model to Have Diagonal Variance-Covariance Matrix at Posterior Mode
+    
+    arma::mat D1=arma::diagmat(eigval_1);
+    arma::mat L2= arma::sqrt(D1)*trans(eigvec_1);
+    L2Inv=eigvec_1*sqrt(inv_sympd(D1));
+    arma::mat b3=L2*b2; 
+    arma::mat mu3=L2*mu2;
+    arma::mat x3=x2*L2Inv;
+    arma::mat P3=trans(L2Inv)*P2*L2Inv;
+
+//   Find diagonal matrix that has "smaller" precision than prior  
+//   Follows Definition 3, and procedure on p. 1150 in Nygren 
+//   Puts model into standard form 
+
+
+    arma::mat P3Diag=arma::diagmat(arma::diagvec(P3));
+    arma::mat epsilon=P3Diag;
+    arma::mat P4=P3Diag;   
+    
+    double scale=1;
+    int check=0;
+    arma::vec eigval_2;
+    arma::mat eigvec_2;
+    double eigval_temp;
+    
+    while(check==0){
+    	epsilon=scale*P3Diag;
+  		P4=P3-epsilon;				
+      eig_sym(eigval_2, eigvec_2, P4);
+      eigval_temp=arma::min(eigval_2);
+      if(eigval_temp>0){check=1;}
+      else{scale=scale/2;}
+		}
+
+
+    int check2=0;
+    double scale2=scale;
+    arma::mat epsilon_temp=P3Diag;   
+    arma::mat P4_temp=P3Diag;   
+
+    while(check2==0){
+    
+    scale=scale+(scale2/10);
+		epsilon_temp=scale*P3Diag;
+		P4_temp=P3-epsilon_temp;
+    eig_sym(eigval_2, eigvec_2, P4_temp);
+    eigval_temp=arma::min(eigval_2);
+
+    if(eigval_temp>0){
+  					epsilon=epsilon_temp;
+						P4=P4_temp;	
+						}		
+		else{check2=1;}
+      
+  	}    
+
+    arma::mat ident=arma::mat (l1,l1,arma::fill::eye);
+    arma::mat A3=ident-epsilon;	
+    
+//   Put into Standard form
+
+    eig_sym(eigval_2, eigvec_2, epsilon);
+
+    arma::mat D2=arma::diagmat(eigval_2);
+
+
+    NumericMatrix b4_1(l1,1);
+    NumericMatrix mu4_1(l1,1);
+    NumericMatrix x4_1(x.nrow(), x.ncol());
+    NumericMatrix A4_1(l1, l1);
+    NumericMatrix P5_1(l1, l1);
+    NumericMatrix P6Temp_1(l1, l1);
+    NumericMatrix L3Inv_1(l1, l1);
+    arma::mat b4(b4_1.begin(), b4_1.nrow(), b4_1.ncol(), false);
+    arma::mat mu4(mu4_1.begin(), mu4_1.nrow(), mu4_1.ncol(), false);
+    arma::mat x4(x4_1.begin(), x4_1.nrow(), x4_1.ncol(), false);
+    arma::mat A4(A4_1.begin(), A4_1.nrow(), A4_1.ncol(), false);
+    arma::mat P5(P5_1.begin(), P5_1.nrow(), P5_1.ncol(), false);
+    arma::mat P6Temp(P6Temp_1.begin(), P6Temp_1.nrow(), P6Temp_1.ncol(), false);
+    arma::mat L3Inv(L3Inv_1.begin(), L3Inv_1.nrow(), L3Inv_1.ncol(), false);
+    
+
+    arma::mat L3= arma::sqrt(D2)*trans(eigvec_2);
+    L3Inv=eigvec_2*sqrt(inv_sympd(D2));
+    b4=L3*b3; 
+    mu4=L3*mu3; 
+    x4=x3*L3Inv;
+    A4=trans(L3Inv)*A3*L3Inv;
+    P5=trans(L3Inv)*P4*L3Inv;
+    P6Temp=P5+ident;  
+    NumericVector b5=asVec(b4_1);
+    Rcpp::List Envelope;
+
+    if(n==1){
+    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
+    P5_1,alpha,wt2,family,link,Gridtype, n,false);
+    }
+    if(n>1){
+    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,family,link,Gridtype, n,true);
+    }
+
+    Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,Envelope,family,link);
+
+    NumericMatrix sim2=sim[0];
+    arma::mat sim2b(sim2.begin(), sim2.nrow(), sim2.ncol(), false);
+    NumericMatrix out(l1,n);
+    arma::mat out2(out.begin(), out.nrow(), out.ncol(), false);
+    
+    out2=L2Inv*L3Inv*trans(sim2b);
+    
+    for(i=0;i<n;i++){
+    out(_,i)=out(_,i)+mu;
+    }
+      
+  Rcpp::List outlist=Rcpp::List::create(Rcpp::Named("coefficients")=trans(out2),
+  Rcpp::Named("Envelope")=Envelope);  
+
+    return(outlist);
+}
+
+
+
+
+
+
+// [[Rcpp::export]]
+
+Rcpp::List rglmb_rand_cpp(int n,NumericVector y,NumericMatrix x, 
+NumericVector mu,NumericMatrix P_0,NumericMatrix P,
+NumericVector offset2,NumericVector wt,double dispersion,Rcpp::List
+famfunc, Function f1,Function f2,Function f3,NumericVector start,
+      std::string family="binomial",
+      std::string link="logit",
+      int Gridtype=2      
+) {
+  Rcpp::Function asMat("as.matrix");
+  Rcpp::Function asVec("as.vector");
+
+
+  int l1=x.ncol();
+  int l2=x.nrow();
+  int i;
+  int j;
+  double dispersion2;
+  NumericVector alpha(l2);
+
+  NumericMatrix mutemp(l2,1);   
+  NumericMatrix xtemp(1,1); 
+  std::fill(xtemp.begin(), xtemp.end(), 1);
+  
+  arma::mat x2(x.begin(), x.nrow(), x.ncol(), false);
+  arma::vec alpha2(alpha.begin(),l2,false);  
+  arma::vec offset2b(offset2.begin(),l2,false);  
+  arma::vec start2(start.begin(),l1,false);
+  arma::mat mutemp2(mutemp.begin(), mutemp.nrow(), mutemp.ncol(), false);     
+  
+  mutemp2=x2*start2;
+  
+  
+  NumericMatrix betaout(n,l2);
+  NumericMatrix alphaout(n,l1);
+  NumericMatrix betatemp(l2,1);
+  NumericVector alphatemp(l1);
+  NumericVector offset3(l2);
+  NumericVector wt3(l2);
+  NumericVector temp(1);
+  
+  Rcpp::List out1;
+  Rcpp::List out2;
+  std::fill(wt3.begin(), wt3.end(), 1);
+
+  if(family=="poisson"||family=="binomial") dispersion2=1;
+  else dispersion2=dispersion;
+  
+    NumericVector  wt2=wt/dispersion2;
+
+    NumericVector parin(1);
+    NumericVector mu1=mu-mu;
+    Rcpp::Function optfun("optim");
+    arma::vec y2(y.begin(),l2, false);
+    arma::vec ystar=log(y2/(1-y2));
+    NumericVector qc1(l2);
+    arma::vec qc(qc1.begin(),l2,false);
+    
+    ystar.print("ystar:");
+
+    NumericVector low(l2);
+    NumericVector high(l2);
+    arma::vec low2(low.begin(),l2, false);
+    arma::vec high2(high.begin(),l2, false);
+
+
+
+    List opt;
+  
+  for(i=0;i<n;i++){
+
+    alpha2=mutemp2+offset2b;
+      qc=ystar-alpha2;
+//    qc.print("qc:");  
+    low=pmin(qc1,0);
+    high=pmax(qc1,0);
+
+
+//    low2.print("low2:");
+//    high2.print("high2:");
+    
+
+  for(j=0;j<l2;j++){
+
+  if(low(j)==high(j)){
+    low(j)=-0.001;
+    high(j)=0.001;
+    
+  }
+  
+
+if(i==0){  parin=  asVec(0);}
+
+if(i>0){parin=asVec(betatemp(j-1,0)-mutemp(j,0));}
+
+//if(arma::is_finite(low2(j)))
+//{  opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=asVec(y[j]),
+//  _["x"]=xtemp,_["mu"]=asMat(mutemp[j]),_["P"]=P,_["alpha"]=asVec(alpha[j]),
+//  _["wt"]=asVec(wt2[j]),_["method"]="Brent",_["lower"]=low[j],
+//  _["upper"]=high[j],
+//  _["hessian"]=true);
+//}
+//else{
+  opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=asVec(y[j]),
+  _["x"]=xtemp,_["mu"]=asMat(mutemp[j]),_["P"]=P,_["alpha"]=asVec(alpha[j]),
+  _["wt"]=asVec(wt2[j]),_["method"]="BFGS",
+  _["hessian"]=true);
+//}
+
+
+  if(i==0){   
+    out1=glmbsim_NGauss2_cpp(1,asVec(y[j]),xtemp,
+                                 asMat(mutemp[j]),P,
+                                 asVec(offset2[j]),
+                                 asVec(wt[j]),
+                                 dispersion,
+                                 famfunc,f1,f2,f3,
+                                 asMat(mutemp[j]),
+                                 family=family,
+                                 link=link,
+                                 Gridtype=Gridtype);
+                                 }
+    if(i>0){   
+    out1=glmbsim_NGauss2_cpp(1,asVec(y[j]),xtemp,
+                                 asMat(mutemp[j]),P,
+                                 asVec(offset2[j]),
+                                 asVec(wt[j]),
+                                 dispersion,
+                                 famfunc,f1,f2,f3,asMat(betatemp(j-1,0)),
+                                 family=family,
+                                 link=link,
+                                 Gridtype=Gridtype);
+                                 }
+            temp=out1(0);                     
+            betatemp(j,0)=temp(0);
+           betaout(i,j)=temp(0);
+            
+      }
+    
+    out2=glmbsim_Gauss_cpp(1,betatemp,x,
+                        mu,P_0,offset3
+                        ,wt3,
+                        1/P(0,0),
+                        famfunc,f1,f2,f3,
+                        mu);   
+    alphatemp=out2(0);    
+    arma::vec alphatemp2(alphatemp.begin(), l1, false);
+    
+    for(j=0;j<l1;j++) {alphaout(i,j)=alphatemp(j);}
+
+      mutemp2=x2*alphatemp2;
+
+
+}
+  
+Rcpp::List Out=Rcpp::List::create(Rcpp::Named("betaout")=betaout,Rcpp::Named("alphaout")=alphaout,
+Rcpp::Named("Envelope")=out1[1]);  
+  
+  
+return(Out  ) ; 
+  
 }
 
 

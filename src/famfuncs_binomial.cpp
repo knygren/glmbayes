@@ -205,6 +205,7 @@ arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,Nu
 
     xb2=exp(-alpha2- x2 * b2);
     
+    
 
     for(int j=0;j<l1;j++){
     xb(j)=1/(1+xb(j));  
