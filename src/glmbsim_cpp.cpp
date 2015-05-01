@@ -408,59 +408,582 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
 }
 
 
-int Initialize_bstar(NumericVector y, NumericMatrix x,NumericVector mu, NumericMatrix P,
-NumericVector alpha,NumericVector wt,
-NumericVector b,NumericVector xb,NumericMatrix Ptemp,
-NumericVector bstar){
+double Initialize_bstar(const NumericVector& y, arma::mat& x2,
+arma::mat& mu2, 
+const arma::mat& P2,
+const arma::mat& alpha2,const NumericVector& wt,
+arma::mat& b2,NumericVector& xb,
+arma::colvec& xb2,
+arma::mat& Ptemp2,
+arma::mat& bmu2,
+arma::vec& bstar2,
+NumericVector& yy,
+std::string family="binomial",
+      std::string link="logit"){
 
-  int l1 = x.nrow(), l2 = x.ncol();
+  int l1 = x2.n_rows;
+
+  arma::mat xrow2=x2.row(0);
   
-  NumericMatrix bmu(l2,1);
-  arma::mat x2(x.begin(), l1, l2, false); 
-  arma::mat mu2(mu.begin(), l2, 1, false); 
-  arma::mat P2(P.begin(), l2, l2, false); 
-  arma::mat alpha2(alpha.begin(), l1, 1, false); 
-  arma::mat b2(b.begin(), l2, 1, false);
-  arma::colvec xb2(xb.begin(),l1,false); // Reuse memory - update both below  
-  NumericVector xrow = x( 0, _);
-  arma::vec xrow2(xrow.begin(),l2);
-  arma::mat Ptemp2(Ptemp.begin(), l2, l2, false);  
-  arma::vec bstar2(bstar.begin(), l2, false);
-  arma::mat bmu2(bmu.begin(), l2, 1, false); 
-
   int j;
+  double res2=0;
   
-  xb2=exp(-alpha2- x2 * b2);
+  /////////////////// binomial - logit /////////////////////////////
   
+  if(family=="binomial" && link=="logit")
+  {
+      xb2=exp(-alpha2- x2 * b2);
+      for(j=0;j<l1;j++){
+        xb(j)=1/(1+xb(j));  
+        xrow2=x2.row(j);
+        Ptemp2=Ptemp2+wt(j)*xb(j)*(1-xb(j))*trans(xrow2)*xrow2;}
   
-    for(j=0;j<l2;j++){
-    xb(j)=1/(1+xb(j));  
-    xrow = x( j, _);
-    Ptemp2=Ptemp2+wt(j)*xb(j)*(1-xb(j))*trans(xrow2)*xrow2;
-    
-    }
-  
-   if(arma::is_finite(bstar2))
-    {
+    if(arma::is_finite(bstar2)){
       b2=inv_sympd(Ptemp2)*((Ptemp2-P2)*bstar2+P2*mu2); 
       xb2=exp(-alpha2- x2 * b2);
-      for(int j=0;j<l2;j++)
-      {
-        xb(j)=1/(1+xb(j));  
-      } 
-    }
-  
+      for(int j=0;j<l1;j++)
+      {   xb(j)=1/(1+xb(j));  } 
+       }
      
     bmu2=b2-mu2;
-
     double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
-    NumericVector yy=-dbinom_glmb(y,wt,xb,true);    
-    double res2=std::accumulate(yy.begin(), yy.end(), res1);
+    yy=-dbinom_glmb(y,wt,xb,true);    
+    res2=std::accumulate(yy.begin(), yy.end(), res1);
+  }
+
+  /////////////////// binomial - probit /////////////////////////////
+  
+  if(family=="binomial" && link=="probit")
+  {
+
+        NumericVector p1(l1);
+        NumericVector p2(l1);
+        NumericVector d1(l1);
+
+        xb2=alpha2+ x2 * b2;
+        
+        p1=pnorm(xb,0.0,1.0);
+        p2=pnorm(-xb,0.0,1.0);
+        d1=dnorm(xb,0.0,1.0);
+
+// This part must be edited (using Hessian)
+
+      for(int j=0;j<l1;j++){
+        xrow2=x2.row(j);
+        Ptemp2=Ptemp2
+        +wt(j)*d1(j)*(y(j)*(d1(j)+xb(j)*p1(j))/(p1(j)*p1(j))
+        +(1-y(j))*(d1(j)-xb(j)*p2(j))/(p2(j)*p2(j)))*trans(xrow2)*xrow2;
+      }
+
+      xb=pnorm(xb,0.0,1.0);
+
+
+///////////////////////////
   
   
-  return(1);
+    if(arma::is_finite(bstar2)){
+      b2=inv_sympd(Ptemp2)*((Ptemp2-P2)*bstar2+P2*mu2); 
+        xb2=alpha2+ x2 * b2;
+        xb=pnorm(xb,0.0,1.0);
+    }
+    
+    bmu2=b2-mu2;
+    double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+    yy=-dbinom_glmb(y,wt,xb,true);    
+    res2=std::accumulate(yy.begin(), yy.end(), res1);
+  }
+  
+    
+
+  /////////////////// quasibinomial - logit /////////////////////////////
+
+  if(family=="quasibinomial"  && link=="logit")
+  {
+      xb2=exp(-alpha2- x2 * b2);
+      for(j=0;j<l1;j++){
+        xb(j)=1/(1+xb(j));  
+        xrow2=x2.row(j);
+        Ptemp2=Ptemp2+wt(j)*xb(j)*(1-xb(j))*trans(xrow2)*xrow2;}
+  
+    if(arma::is_finite(bstar2)){
+      b2=inv_sympd(Ptemp2)*((Ptemp2-P2)*bstar2+P2*mu2); 
+      xb2=exp(-alpha2- x2 * b2);
+      for(int j=0;j<l1;j++)
+      {   xb(j)=1/(1+xb(j));  } 
+       }
+     
+    bmu2=b2-mu2;
+    double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+    yy=-dbinom_glmb(y,wt,xb,true);    
+    res2=std::accumulate(yy.begin(), yy.end(), res1);
+  }
+
+
+
+  /////////////////// poisson /////////////////////////////
+
+  if(family=="poisson")
+  {
+      xb2=exp(-alpha2- x2 * b2);
+      for(j=0;j<l1;j++){
+        xrow2=x2.row(j);
+        Ptemp2=Ptemp2+wt(j)*xb(j)*trans(xrow2)*xrow2;
+        }
+  
+    if(arma::is_finite(bstar2)){
+      b2=inv_sympd(Ptemp2)*((Ptemp2-P2)*bstar2+P2*mu2); 
+      xb2=exp(-alpha2- x2 * b2);
+     
+    bmu2=b2-mu2;
+    double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+    yy=-dpois_glmb(y,xb,true);    
+        
+    for(int j=0;j<l1;j++){
+       yy[j]=yy[j]*wt[j];  
+                    }
+     
+    res2=std::accumulate(yy.begin(), yy.end(), res1);
+    }
+  }
+
+
+/////////////////// quasipoisson /////////////////////////////
+
+  if(family=="quasipoisson")
+  {
+      xb2=exp(-alpha2- x2 * b2);
+      for(j=0;j<l1;j++){
+        xrow2=x2.row(j);
+        Ptemp2=Ptemp2+wt(j)*xb(j)*trans(xrow2)*xrow2;
+        }
+  
+    if(arma::is_finite(bstar2)){
+      b2=inv_sympd(Ptemp2)*((Ptemp2-P2)*bstar2+P2*mu2); 
+      xb2=exp(-alpha2- x2 * b2);
+     
+    bmu2=b2-mu2;
+    double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+    yy=-dpois_glmb(y,xb,true);    
+        
+    for(int j=0;j<l1;j++){
+    yy[j]=yy[j]*wt[j];  
+    }
+
+    res2=std::accumulate(yy.begin(), yy.end(), res1);
+
+    }
+  }
+  return(res2);
   
   
+}
+
+
+
+
+double Find_Value(const NumericVector& y,arma::mat& x2,arma::mat& mu2,
+const arma::mat& P2,const arma::mat& alpha2, const NumericVector& wt, 
+const arma::vec& b2, 
+NumericVector& xb,
+NumericVector& yy,
+arma::vec& grad2,
+arma::mat& Pout2,
+arma::mat& Varout,
+arma::colvec& xb2,
+arma::mat& bmu2,
+arma::colvec& xbtemp2,
+std::string family="binomial",
+      std::string link="logit"
+){
+
+  int l1 = x2.n_rows;
+  double res2=0;
+//  int l2 = x2.n_cols;
+
+  arma::mat xrow2=x2.row(0);
+
+  /////////////////// binomial - logit /////////////////////////////
+  
+  if(family=="binomial" && link=="logit")
+  {
+
+      xb2=exp(-alpha2- x2 * b2);
+      bmu2=b2-mu2;
+
+        for(int j=0;j<l1;j++){
+          xb(j)=1/(1+xb(j));  
+          xrow2=x2.row(j);
+          Pout2=Pout2+wt(j)*xb(j)*(1-xb(j))*trans(xrow2)*xrow2;
+        }
+
+
+        Varout=inv_sympd(Pout2);
+
+
+        double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+        yy=-dbinom_glmb(y,wt,xb,true);    
+        res2=std::accumulate(yy.begin(), yy.end(), res1);
+
+        for(int j=0;j<l1;j++){
+          xb(j)=(xb(j)-y(j))*wt(j);
+        }
+
+        grad2=(P2 * bmu2+x2.t() * xb2);
+
+    }
+
+  /////////////////// binomial - probit /////////////////////////////
+  
+  if(family=="binomial" && link=="probit")
+  {
+        NumericVector p1(l1);
+        NumericVector p2(l1);
+        NumericVector d1(l1);
+
+        xb2=alpha2+ x2 * b2;
+
+        bmu2=b2-mu2;
+
+        p1=pnorm(xb,0.0,1.0);
+        p2=pnorm(-xb,0.0,1.0);
+        d1=dnorm(xb,0.0,1.0);
+        
+
+      // Edit (Hessian)
+      for(int j=0;j<l1;j++){
+        xrow2=x2.row(j);
+        Pout2=Pout2
+        +wt(j)*d1(j)*(y(j)*(d1(j)+xb(j)*p1(j))/(p1(j)*p1(j))
+        +(1-y(j))*(d1(j)-xb(j)*p2(j))/(p2(j)*p2(j)))*trans(xrow2)*xrow2;
+      }
+
+
+// This part should be good 
+
+        Varout=inv_sympd(Pout2);
+
+        double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+        yy=-dbinom_glmb(y,wt,xb,true);    
+        res2=std::accumulate(yy.begin(), yy.end(), res1);
+
+    
+        for(int j=0;j<l1;j++){
+          xb(j)=(y(j)*d1(j)/p1(j)-(1-y(j))*d1(j)/p2(j))*wt(j);    
+        }
+
+
+        grad2=(P2 * bmu2-x2.t() * xb2);
+
+
+    }
+
+
+
+
+
+  /////////////////// quasi-binomial - logit /////////////////////////////
+
+  if(family=="quasibinomial" && link=="logit")
+  {
+
+      xb2=exp(-alpha2- x2 * b2);
+      bmu2=b2-mu2;
+
+        for(int j=0;j<l1;j++){
+          xb(j)=1/(1+xb(j));  
+          xrow2=x2.row(j);
+          Pout2=Pout2+wt(j)*xb(j)*(1-xb(j))*trans(xrow2)*xrow2;
+        }
+
+
+        Varout=inv_sympd(Pout2);
+
+
+        double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+        yy=-dbinom_glmb(y,wt,xb,true);    
+        res2=std::accumulate(yy.begin(), yy.end(), res1);
+
+        for(int j=0;j<l1;j++){
+          xb(j)=(xb(j)-y(j))*wt(j);
+        }
+
+        grad2=(P2 * bmu2+x2.t() * xb2);
+
+    }    
+    
+  /////////////////// poisson /////////////////////////////
+  
+  if(family=="poisson" )
+  {
+
+      xb2=exp(-alpha2- x2 * b2);
+      bmu2=b2-mu2;
+
+        for(int j=0;j<l1;j++){  
+          xrow2=x2.row(j);
+          Pout2=Pout2+wt(j)*xb(j)*trans(xrow2)*xrow2;
+        }
+
+
+        Varout=inv_sympd(Pout2);
+
+
+        double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+        yy=-dpois_glmb(y,xb,true);    
+        for(int j=0;j<l1;j++){
+        yy[j]=yy[j]*wt[j];  }
+        res2=std::accumulate(yy.begin(), yy.end(), res1);
+
+        
+        for(int j=0;j<l1;j++){
+          xb(j)=(y(j)-xb(j))*wt(j);  
+        }
+        
+
+        grad2=(P2 * bmu2+x2.t() * xb2);
+
+    }
+
+  /////////////////// quasipoisson /////////////////////////////
+  
+  if(family=="quasipoisson" )
+  {
+
+      xb2=exp(-alpha2- x2 * b2);
+      bmu2=b2-mu2;
+
+        for(int j=0;j<l1;j++){  
+          xrow2=x2.row(j);
+          Pout2=Pout2+wt(j)*xb(j)*trans(xrow2)*xrow2;
+        }
+
+
+        Varout=inv_sympd(Pout2);
+
+
+        double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+        yy=-dpois_glmb(y,xb,true);    
+        for(int j=0;j<l1;j++){
+        yy[j]=yy[j]*wt[j];  }
+        res2=std::accumulate(yy.begin(), yy.end(), res1);
+
+        
+        for(int j=0;j<l1;j++){
+          xb(j)=(y(j)-xb(j))*wt(j);  
+        }
+        
+
+        grad2=(P2 * bmu2+x2.t() * xb2);
+
+    }
+
+
+
+    Rcpp::List out=Rcpp::List::create(Rcpp::Named("grad2")=grad2,
+    Rcpp::Named("Pout2")=Pout2);  
+    
+
+  return(res2);
+}
+
+
+double set_candidate(const arma::vec& b2, const double& stepsize,
+const arma::mat& Pout2,
+const arma::mat& Varout,
+const arma::mat& P2,const arma::mat& bmu2,
+const arma::mat& alpha2,
+const arma::mat& x2,const arma::mat& xb2,const arma::mat& mu2,
+arma::vec& btemp2,arma::vec& bmutemp2,arma::colvec& xbtemp2,
+const NumericVector& y,const NumericVector& wt,
+NumericVector& xbtemp,NumericVector& yy, const double& res2
+,
+std::string family="binomial",
+      std::string link="logit"){
+  
+    int l1 = x2.n_rows;
+    double res3=0;
+
+    //////////////   Set candidate point and check function value 
+
+  /////////////////// binomial - logit /////////////////////////////
+  
+  if(family=="binomial" && link=="logit")
+  {
+        btemp2=b2-stepsize*Varout*(P2 * bmu2+x2.t() * xb2);    
+        bmutemp2=btemp2-mu2;
+
+        xbtemp2=exp(-alpha2- x2 * btemp2);
+
+        for(int j=0;j<l1;j++){
+          xbtemp(j)=1/(1+xbtemp(j));      
+        } 
+
+
+        double res1=0.5*arma::as_scalar(bmutemp2.t() * P2 *  bmutemp2);
+        yy=-dbinom_glmb(y,wt,xbtemp,true);    
+        res3=std::accumulate(yy.begin(), yy.end(), res1);
+    }
+
+
+  /////////////////// binomial - probit /////////////////////////////
+  
+  if(family=="binomial" && link=="probit")
+  {
+    
+        btemp2=b2-stepsize*Varout*(P2 * bmu2-x2.t() * xb2);    
+        bmutemp2=btemp2-mu2;
+
+        xbtemp2=alpha2+ x2 * btemp2;
+        xbtemp=pnorm(xbtemp,0.0,1.0);
+  
+        double res1=0.5*arma::as_scalar(bmutemp2.t() * P2 *  bmutemp2);
+        yy=-dbinom_glmb(y,wt,xbtemp,true);    
+        res3=std::accumulate(yy.begin(), yy.end(), res1);
+
+
+}
+
+
+  /////////////////// quasi-binomial - logit /////////////////////////////
+
+  if(family=="quasibinomial" && link=="logit")
+  {
+        btemp2=b2-stepsize*Varout*(P2 * bmu2+x2.t() * xb2);    
+        bmutemp2=btemp2-mu2;
+
+        xbtemp2=exp(-alpha2- x2 * btemp2);
+
+        for(int j=0;j<l1;j++){
+          xbtemp(j)=1/(1+xbtemp(j));      
+        } 
+
+
+        double res1=0.5*arma::as_scalar(bmutemp2.t() * P2 *  bmutemp2);
+        yy=-dbinom_glmb(y,wt,xbtemp,true);    
+        res3=std::accumulate(yy.begin(), yy.end(), res1);
+  }
+  
+  /////////////////// poisson /////////////////////////////
+  
+  if(family=="poisson" )
+  {
+        btemp2=b2-stepsize*Varout*(P2 * bmu2+x2.t() * xb2);    
+        bmutemp2=btemp2-mu2;
+
+        xbtemp2=exp(-alpha2- x2 * btemp2);
+
+
+        double res1=0.5*arma::as_scalar(bmutemp2.t() * P2 *  bmutemp2);
+        yy=-dpois_glmb(y,xbtemp,true); 
+        for(int j=0;j<l1;j++){
+        yy[j]=yy[j]*wt[j];  }
+        res3=std::accumulate(yy.begin(), yy.end(), res1);
+    }
+
+  /////////////////// quasipoisson /////////////////////////////
+  
+  if(family=="quasipoisson" )
+  {
+        btemp2=b2-stepsize*Varout*(P2 * bmu2+x2.t() * xb2);    
+        bmutemp2=btemp2-mu2;
+
+        xbtemp2=exp(-alpha2- x2 * btemp2);
+
+
+        double res1=0.5*arma::as_scalar(bmutemp2.t() * P2 *  bmutemp2);
+        yy=-dpois_glmb(y,xbtemp,true); 
+        for(int j=0;j<l1;j++){
+        yy[j]=yy[j]*wt[j];  }
+        res3=std::accumulate(yy.begin(), yy.end(), res1);
+    }
+  
+  
+    return(res3);
+
+}
+
+
+void set_Pout(const arma::vec& b2,const NumericVector& y, 
+const arma::mat& alpha2,
+const int& l1,const arma::mat& P2, const arma::mat& x2,
+const NumericVector& wt,const NumericVector& xbtemp,arma::colvec& xbtemp2,
+arma::mat& xrow2,
+arma::mat& Pout2,
+std::string family="binomial",
+      std::string link="logit"
+){
+      
+      Pout2=P2;
+
+  /////////////////// binomial - logit /////////////////////////////
+  
+  if(family=="binomial" && link=="logit")
+  {
+      for(int j=0;j<l1;j++){
+        xrow2=x2.row(j);
+        Pout2=Pout2+wt(j)*xbtemp(j)*(1-xbtemp(j))*trans(xrow2)*xrow2;
+      }
+  }
+
+
+  /////////////////// binomial - probit /////////////////////////////
+  
+  if(family=="binomial" && link=="probit")
+  {
+        NumericVector p1(l1);
+        NumericVector p2(l1);
+        NumericVector d1(l1);
+
+
+        p1=pnorm(xbtemp,0.0,1.0);
+        p2=pnorm(-xbtemp,0.0,1.0);
+        d1=dnorm(xbtemp,0.0,1.0);
+
+        xbtemp2=alpha2+ x2 * b2;
+
+      // Edit (Hessian)
+      for(int j=0;j<l1;j++){
+        xrow2=x2.row(j);
+        Pout2=Pout2
+        +wt(j)*d1(j)*(y(j)*(d1(j)+xbtemp(j)*p1(j))/(p1(j)*p1(j))
+        +(1-y(j))*(d1(j)-xbtemp(j)*p2(j))/(p2(j)*p2(j)))*trans(xrow2)*xrow2;
+      }
+  }
+
+
+  /////////////////// quasi-binomial - logit /////////////////////////////
+
+  if(family=="quasibinomial" && link=="logit")
+  {
+      for(int j=0;j<l1;j++){
+        xrow2=x2.row(j);
+        Pout2=Pout2+wt(j)*xbtemp(j)*(1-xbtemp(j))*trans(xrow2)*xrow2;
+      }
+    
+  }  
+
+  /////////////////// poisson /////////////////////////////
+  
+  if(family=="poisson")
+  {
+      for(int j=0;j<l1;j++){
+        xrow2=x2.row(j);
+        Pout2=Pout2+wt(j)*xbtemp(j)*trans(xrow2)*xrow2;
+      }
+  }
+
+  /////////////////// quasipoisson /////////////////////////////
+  
+  if(family=="quasipoisson")
+  {
+      for(int j=0;j<l1;j++){
+        xrow2=x2.row(j);
+        Pout2=Pout2+wt(j)*xbtemp(j)*trans(xrow2)*xrow2;
+      }
+  }
+
+
+
 }
 
 // [[Rcpp::export]]
@@ -473,6 +996,7 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
     int l1 = x.nrow(), l2 = x.ncol();
 
     NumericMatrix Pout(clone(P));
+    NumericMatrix Varout1(clone(P));
     NumericMatrix bmu(l2,1);
     Rcpp::NumericVector xb(l1);
     NumericVector xrow = x( 0, _);
@@ -496,69 +1020,36 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
     arma::vec bstar2(bstar.begin(), l2, false);
 
     arma::mat Pout2(Pout.begin(), l2, l2, false); 
+    arma::mat Varout(Varout1.begin(), l2, l2, false); 
     arma::mat bmu2(bmu.begin(), l2, 1, false); 
     arma::colvec xb2(xb.begin(),l1,false); // Reuse memory - update both below  
-    arma::vec xrow2(xrow.begin(),l2);
+//    arma::vec xrow2(xrow.begin(),l2);
+    arma::mat xrow2=x2.row(0);
+
     arma::mat Ptemp2(Ptemp.begin(), l2, l2, false);  
     arma::vec grad2(grad.begin(),l2);
     arma::vec gradb2(grad.begin(),l2);
     arma::vec btemp2(btemp.begin(), l2, 1, false);
     arma::vec bmutemp2(bmutemp.begin(), l2, 1, false);
     arma::colvec xbtemp2(xbtemp.begin(),l1,false); // Reuse memory - update both below  
+    Rcpp::List valuet;
  
- 
-    Initialize_bstar(y, x, mu,P, alpha,wt,b, xb, Ptemp,bstar);
+    double res_final;
+    NumericVector yy(l1);    
     
- 
-    // Initialize Algorithm (modify how initial point is selected)
-    // Use "Fraction" of maximum likelihood estimate (when it is well defined)
-    
-    // Get Estimate for xb and Posterior Precision Matrix at provided 
-    // value for b2
-    
+    // Initialize bstar
+
+    double res2=Initialize_bstar(y, x2, mu2,P2, alpha2,wt,b2, xb,xb2,
+    Ptemp2,bmu2,bstar2,yy);
+
+
     ///////////////////////////////////////////////////////
-    
-    
-    
-    xb2=exp(-alpha2- x2 * b2);
-
-    for(int j=0;j<l2;j++){
-    xb(j)=1/(1+xb(j));  
-    xrow = x( j, _);
-    Ptemp2=Ptemp2+wt(j)*xb(j)*(1-xb(j))*trans(xrow2)*xrow2;
-    
-    }
-
-    // If Maximum likelihood estimate is finite, then 
-    // set b2 to approximate posterior mode (based on 
-    // quadratic approximation) and
-    // re-compute xb at this value for b2    
-    //log(y2/(1-y2))
-    if(arma::is_finite(bstar2))
-    {
-      b2=inv_sympd(Ptemp2)*((Ptemp2-P2)*bstar2+P2*mu2); 
-      xb2=exp(-alpha2- x2 * b2);
-      for(int j=0;j<l2;j++)
-      {
-        xb(j)=1/(1+xb(j));  
-      } 
-    }
-
-    //  Find the value for objective function at the initial point 
-    
-    bmu2=b2-mu2;
-
-    double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
-    NumericVector yy=-dbinom_glmb(y,wt,xb,true);    
-    double res2=std::accumulate(yy.begin(), yy.end(), res1);
-       
-    ///////////////////////////////////////////////////////
-    
     
        
     // Initialize while loop
     
     int i=0;
+    int reset=0;
     int check=0;
     int check2=0;
     
@@ -567,35 +1058,18 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
     /////////////////////////////////////////////////////////////
 
     // Calculate Function Value and gradient At Latest Iteration 
-
-    Pout=clone(P);
-
-    xb2=exp(-alpha2- x2 * b2);
-    bmu2=b2-mu2;
-
+      
     
-    
-    for(int j=0;j<l1;j++){
-    xb(j)=1/(1+xb(j));  
-    xrow = x( j, _);
+      Pout2=P2;
 
-    Pout2=Pout2+wt(j)*xb(j)*(1-xb(j))*trans(xrow2)*xrow2;
-    }
-
-    Pout2=inv_sympd(Pout2);
-
-    res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
-    yy=-dbinom_glmb(y,wt,xb,true);    
-    res2=std::accumulate(yy.begin(), yy.end(), res1);
-
-    for(int j=0;j<l1;j++){
-       xb(j)=(xb(j)-y(j))*wt(j);
-    }
-    
-    grad2=(P2 * bmu2+x2.t() * xb2);
-       
+      res2=Find_Value(y,x2, mu2, P2,alpha2,  wt,  b2, xb,yy,grad2,Pout2,Varout,
+      xb2,bmu2,xbtemp2);
+      res_final=res2;
+      
+      reset=0;
+ 
     if(arma::any(grad2)==false){
-      check=1;
+    check=1;
     }
    
     gradb2=inv_sympd(P2)*grad2;
@@ -606,8 +1080,6 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
     }
     
     
-    
-    //////////////////////////////////////////////////////////////////
     
     
     // Update b2 (Newton-Rhapson update)
@@ -622,45 +1094,39 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
 
     //////////////   Set candidate point and check function value 
 
-    btemp2=b2-stepsize*Pout2*(P2 * bmu2+x2.t() * xb2);    
-    bmutemp2=btemp2-mu2;
-
-    xbtemp2=exp(-alpha2- x2 * btemp2);
-
-    for(int j=0;j<l2;j++){
-    xbtemp(j)=1/(1+xbtemp(j));  
-    
-    } 
-
-    res1=0.5*arma::as_scalar(bmutemp2.t() * P2 *  bmutemp2);
-    yy=-dbinom_glmb(y,wt,xbtemp,true);    
-    res3=std::accumulate(yy.begin(), yy.end(), res1);
-
-    ///////////////////////////////////////////////////////////
+    res3=set_candidate( b2,  stepsize, Pout2, Varout,P2, bmu2, alpha2, 
+    x2,xb2, mu2, btemp2, bmutemp2, xbtemp2, y, wt, xbtemp, yy,res2);
 
 
     if(res3<res2){
     b2= btemp2;
+    reset=1;
+    res_final=res3;
+  
     check2=1;
     
     }
+
     else{
       stepsize=stepsize/2.0;
     } 
-    
+
     k++;
     }
     
-    i++;
     
+    i++;
     
 
     }
- 
 
+      // If needed - recalculate Pout - Only if end of loop without full convergence
+      
+      if(reset==1){set_Pout(b2,y,alpha2,l1,P2,x2,wt,xbtemp,xbtemp2,xrow2,Pout2);}
 
-
-    Rcpp::List opt=Rcpp::List::create(Rcpp::Named("bstar")=b);  
+    
+    Rcpp::List opt=Rcpp::List::create(Rcpp::Named("bstar")=b,
+    Rcpp::Named("Pout")=Pout,Rcpp::Named("minval")=res_final);  
   
   return(opt);
 }
@@ -1021,29 +1487,51 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector mu1=mu-mu;
     Rcpp::Function optfun("optim");
 
-    NumericMatrix b2a(l1);
-    NumericVector parin2(clone(parin));
-    List opt1=optPostMode(y,x,mu1, P, alpha,wt2,
-     parin2,log(y/(1-y)),"binomial","logit");
+      NumericMatrix b2a(l1);
+      NumericVector parin2(clone(parin));
+      List opt1=optPostMode(y,x,mu1, P, alpha,wt2,
+      parin2,log(y/(1-y)),"binomial","logit");
 
-    arma::vec parin2b(parin2.begin(),l1);
-    parin2b.print("New Optimization:");
-
-    List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,_["x"]=x,
-    _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
-
-
-    b2a=asMat(opt[0]);
-    arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
-    b2.print("Old Optimization:");
+      b2a=asMat(opt1(0));
+      NumericMatrix A1=opt1(1);
+    NumericVector min1=asVec(opt1[2]);
+    int conver1=0;
     
-    NumericVector min1=opt[1];
-    int conver1=opt[3];
-    NumericMatrix A1=opt[5];
+    arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
+//    arma::mat Atemp_b(Atemp.begin(), l1, l1, false); 
+    arma::mat A1_b(A1.begin(), l1, l1, false); 
+//      b2.print("b2 - New Optimization:");
+//    A1_b.print("A1 -  New Optimization");
+
+
+//    arma::vec parin2b(parin2.begin(),l1);
+//    parin2b.print("New Optimization:");
+
+
+//    List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,_["x"]=x,
+//    _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
+
+
+//    b2a=asMat(opt[0]);
+//    arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
+//    b2.print("Old Optimization:");
+    
+//    NumericVector min1=opt[1];
+//    min1=opt[1];
+//    int conver1=opt[3];
+//    A1=asMat(opt[5]);
+
+//    NumericMatrix  A1=opt[5];
+//    A1=asMat(opt[5]);
 
     if(conver1>0){Rcpp::stop("Posterior Optimization failed");}
-    
-    arma::mat A1_b(A1.begin(), l1, l1, false); 
+
+
+
+
+//    arma::mat A1_b(A1.begin(), l1, l1, false); 
+//    b2.print("b2 - Old Optimization");
+//    A1_b.print("A1 -  Old Optimization");
     arma::vec mu_0(mu.begin(), l1, false);
     
     arma::vec eigval_1;
@@ -1148,6 +1636,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector b5=asVec(b4_1);
     Rcpp::List Envelope;
 
+
+
     if(n==1){
     Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
     P5_1,alpha,wt2,family,link,Gridtype, n,false);
@@ -1155,6 +1645,9 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     if(n>1){
     Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,family,link,Gridtype, n,true);
     }
+
+
+    
 
     Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,Envelope,family,link);
 
@@ -1239,7 +1732,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector qc1(l2);
     arma::vec qc(qc1.begin(),l2,false);
     
-    ystar.print("ystar:");
+//    ystar.print("ystar:");
 
     NumericVector low(l2);
     NumericVector high(l2);
@@ -1284,11 +1777,17 @@ if(i>0){parin=asVec(betatemp(j-1,0)-mutemp(j,0));}
 //  _["hessian"]=true);
 //}
 //else{
-  opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=asVec(y[j]),
-  _["x"]=xtemp,_["mu"]=asMat(mutemp[j]),_["P"]=P,_["alpha"]=asVec(alpha[j]),
-  _["wt"]=asVec(wt2[j]),_["method"]="BFGS",
-  _["hessian"]=true);
+  // Is this needed?
+  
+//opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=asVec(y[j]),
+//  _["x"]=xtemp,_["mu"]=asMat(mutemp[j]),_["P"]=P,_["alpha"]=asVec(alpha[j]),
+//  _["wt"]=asVec(wt2[j]),_["method"]="BFGS",
+//  _["hessian"]=true);
+
+
+
 //}
+
 
 
   if(i==0){   
@@ -1314,7 +1813,8 @@ if(i>0){parin=asVec(betatemp(j-1,0)-mutemp(j,0));}
                                  link=link,
                                  Gridtype=Gridtype);
                                  }
-            temp=out1(0);                     
+      
+        temp=out1(0);                     
             betatemp(j,0)=temp(0);
            betaout(i,j)=temp(0);
             

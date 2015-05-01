@@ -214,7 +214,6 @@ arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,Nu
 
 
 
-
     outtemp2= P2 * bmu2+x2.t() * xb2;
     }
     
@@ -625,18 +624,10 @@ arma::mat  f3_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,
     xb(j)=((y(j)*atemp(j)/p1(j))-((1-y(j))*atemp(j)/p2(j)))*wt(j);    
     }
 
-//  		p1<-1-exp(-exp(Xb))
-//			p2<-exp(-exp(Xb))
-
-//atemp<-exp(Xb-exp(Xb))
-
-//-t(x)%*%as.matrix(((y*atemp/p1)-(1-y)*atemp/p2)*wt)+P%*%(b-mu)
-
 
     outtemp2= P2 * bmu2-x2.t() * xb2;
     }
     
-   // return  b;
   
     return trans(out2);      
 }

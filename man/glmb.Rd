@@ -11,7 +11,7 @@
 a description of the error distribution, and a multivariate normal prior.
 }
 \usage{
-glmb(n, formula, family = binomial, dispersion=NULL, mu, Sigma,  Gridtype = 1, 
+glmb(n, formula, family = binomial, dispersion=NULL, mu, Sigma, nu=NULL,V=NULL, Gridtype = 1, 
 data, weights, subset2, na.action, start = NULL, etastart, mustart, offset, 
 control = list(...), model = TRUE, method = "glm.fit", 
 x = FALSE, y = TRUE, contrasts = NULL, ...)
@@ -37,6 +37,8 @@ families other than the Poisson and Binomial.
 a vector giving the prior means of the variables}
   \item{Sigma}{
 a positive-definite symmetric matrix specifying the prior covariance matrix of the variables.}
+\item{nu}{ Optional prior information for dispersion parameter (gaussian model only)}
+\item{V}{ Optional prior information for dispersion parameter (gaussian model only)}
   \item{Gridtype}{
 an optional argument specifying the method used to determine number of likelihood subgradient 
 densities used to construct the enveloping function.

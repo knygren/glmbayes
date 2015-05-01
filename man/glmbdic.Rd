@@ -9,7 +9,7 @@ Calculates DIC and Deviance Information
 
 }
 \usage{
-glmbdic(coefficients, y, x, f1, f4, wt = 1,dispersion=1)
+glmbdic(coefficients, y, x, alpha=0,f1, f4, wt = 1,dispersion=1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,6 +21,9 @@ a vector of observations of length m
 }
   \item{x}{
 a design matrix of dimension m*p
+}
+  \item{alpha}{
+an offset parameter or vector
 }
   \item{f1}{
 A function used to calculate the negative log-likelihood

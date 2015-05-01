@@ -11,7 +11,8 @@ Producing iid samples for Bayesian Generalized Linear Models
 \code{rglmb} is used to produce iid samples for Bayesian generalized linear models, specified by providing a data vector, a design matrix, a description of the error distribution and a multivariate normal prior
 }
 \usage{
-rglmb(n = 1, y, x, mu, P, wt = 1, dispersion=NULL,family = gaussian(), offset2 = rep(0, nobs), start = NULL, Gridtype = 2)
+rglmb(n = 1, y, x, mu, P, wt = 1, dispersion=NULL,nu=NULL,
+V=NULL,family = gaussian(), offset2 = rep(0, nobs), start = NULL, Gridtype = 2)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -39,6 +40,9 @@ vector.
 the dispersion parameter for the family used. Either a single numerical value or NULL (the default). Must be provided for all
 families other than the Poisson and Binomial.
 }
+\item{nu}{ Optional prior information for dispersion parameter (gaussian model only)}
+\item{V}{ Optional prior information for dispersion parameter (gaussian model only)}
+
   \item{family}{
 a description of the error distribution and link function to be used in the model. This can be a 
 character string naming a family function, a family function or the result of a call to a family 
