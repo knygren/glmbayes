@@ -493,7 +493,57 @@ std::string family="binomial",
     res2=std::accumulate(yy.begin(), yy.end(), res1);
   }
   
+
+
+  /////////////////// binomial - cloglog /////////////////////////////
+  
+  if(family=="binomial" && link=="cloglog")
+  {
+
+        NumericVector exb(l1);
+        NumericVector p1(l1);
+        NumericVector p2(l1);
+        NumericVector atemp(l1);
+
+        xb2=alpha2+ x2 * b2;
+        exb=exp(xb);
     
+
+// This part must be edited (using Hessian)
+
+
+      for(j=0;j<l1;j++){
+      p1(j)=1-exp(-exb(j));
+      p2(j)=exp(-exb(j));
+      atemp(j)=exp(xb(j)-exb(j));
+
+      xrow2=x2.row(j);
+        Ptemp2=Ptemp2
+        +wt(j)*atemp(j)*(
+          (  ( y(j)*(1-exb(j))/p1(j) ) ) - ( y(j)*p2(j)*exb(j)/(p1(j)*p1(j)))
+  +( (1-y(j))*(1-exb(j)) /p2(j) ) - ( (1-y(j))*exb(j)/p2(j)) )*trans(xrow2)*xrow2;
+
+      }
+
+///////////////////////////
+  
+  
+    if(arma::is_finite(bstar2)){
+      b2=inv_sympd(Ptemp2)*((Ptemp2-P2)*bstar2+P2*mu2); 
+        xb2=alpha2+ x2 * b2;
+        exb=exp(xb);
+        for(j=0;j<1;j++){
+          xb(j)=1-exp(-exb(j));
+        }
+        
+    }
+    
+    bmu2=b2-mu2;
+    double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+    yy=-dbinom_glmb(y,wt,xb,true);    
+    res2=std::accumulate(yy.begin(), yy.end(), res1);
+  }
+
 
   /////////////////// quasibinomial - logit /////////////////////////////
 
@@ -677,6 +727,48 @@ std::string family="binomial",
 
     }
 
+  /////////////////// binomial - cloglog /////////////////////////////
+  
+  if(family=="binomial" && link=="cloglog")
+  {
+
+        NumericVector exb(l1);
+        NumericVector p1(l1);
+        NumericVector p2(l1);
+        NumericVector atemp(l1);
+
+        xb2=alpha2+ x2 * b2;
+        exb=exp(xb);
+      
+      bmu2=b2-mu2;
+
+      for(int j=0;j<l1;j++){
+      p1(j)=1-exp(-exb(j));
+      xb(j)=1-exp(-exb(j));
+      p2(j)=exp(-exb(j));
+      atemp(j)=exp(xb(j)-exb(j));
+
+      xrow2=x2.row(j);
+        Pout2=Pout2
+        +wt(j)*atemp(j)*(
+          (  ( y(j)*(1-exb(j))/p1(j) ) ) - ( y(j)*p2(j)*exb(j)/(p1(j)*p1(j)))
+  +( (1-y(j))*(1-exb(j)) /p2(j) ) - ( (1-y(j))*exb(j)/p2(j)) )*trans(xrow2)*xrow2;
+
+      }
+
+        Varout=inv_sympd(Pout2);
+
+        double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+        yy=-dbinom_glmb(y,wt,xb,true);    
+        res2=std::accumulate(yy.begin(), yy.end(), res1);
+
+        for(int j=0;j<l1;j++){
+          xb(j)=((y(j)*atemp(j)/p1(j))-((1-y(j))*atemp(j)/p2(j)))*wt(j);    
+        }
+
+        grad2=(P2 * bmu2-x2.t() * xb2);
+
+    }
 
 
 
@@ -843,6 +935,31 @@ std::string family="binomial",
 
 }
 
+  /////////////////// binomial - probit /////////////////////////////
+  
+  if(family=="binomial" && link=="cloglog")
+  {
+        NumericVector exb(l1);
+
+    
+        btemp2=b2-stepsize*Varout*(P2 * bmu2-x2.t() * xb2);    
+        bmutemp2=btemp2-mu2;
+
+        xbtemp2=alpha2+ x2 * btemp2;
+
+        exb=exp(xbtemp);
+
+      for(int j=0;j<l1;j++){
+      xbtemp(j)=1-exp(-exb(j));
+      }
+
+
+        double res1=0.5*arma::as_scalar(bmutemp2.t() * P2 *  bmutemp2);
+        yy=-dbinom_glmb(y,wt,xbtemp,true);    
+        res3=std::accumulate(yy.begin(), yy.end(), res1);
+
+
+}
 
   /////////////////// quasi-binomial - logit /////////////////////////////
 
@@ -951,16 +1068,47 @@ std::string family="binomial",
   }
 
 
+
   /////////////////// quasi-binomial - logit /////////////////////////////
 
+  if(family=="binomial" && link=="cloglog")
+  {
+
+      NumericVector p1(l1);
+      NumericVector p2(l1);
+      NumericVector atemp(l1);
+      NumericVector exb(l1);
+
+      xbtemp2=alpha2+ x2 * b2;
+
+      exb=exp(xbtemp);
+
+      for(int j=0;j<l1;j++){
+      p1(j)=1-exp(-exb(j));
+      p2(j)=exp(-exb(j));
+      atemp(j)=exp(xbtemp(j)-exb(j));
+
+      xrow2=x2.row(j);
+        Pout2=Pout2
+        +wt(j)*atemp(j)*(
+          (  ( y(j)*(1-exb(j))/p1(j) ) ) - ( y(j)*p2(j)*exb(j)/(p1(j)*p1(j)))
+  +( (1-y(j))*(1-exb(j)) /p2(j) ) - ( (1-y(j))*exb(j)/p2(j)) )*trans(xrow2)*xrow2;
+
+      }
+
+    
+  }  
+
+  /////////////////// binomial - logit /////////////////////////////
+  
   if(family=="quasibinomial" && link=="logit")
   {
       for(int j=0;j<l1;j++){
         xrow2=x2.row(j);
         Pout2=Pout2+wt(j)*xbtemp(j)*(1-xbtemp(j))*trans(xrow2)*xrow2;
       }
-    
-  }  
+  }
+
 
   /////////////////// poisson /////////////////////////////
   
@@ -1040,7 +1188,7 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
     // Initialize bstar
 
     double res2=Initialize_bstar(y, x2, mu2,P2, alpha2,wt,b2, xb,xb2,
-    Ptemp2,bmu2,bstar2,yy);
+    Ptemp2,bmu2,bstar2,yy,family,link);
 
 
     ///////////////////////////////////////////////////////
@@ -1063,7 +1211,7 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
       Pout2=P2;
 
       res2=Find_Value(y,x2, mu2, P2,alpha2,  wt,  b2, xb,yy,grad2,Pout2,Varout,
-      xb2,bmu2,xbtemp2);
+      xb2,bmu2,xbtemp2,family,link);
       res_final=res2;
       
       reset=0;
@@ -1095,7 +1243,7 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
     //////////////   Set candidate point and check function value 
 
     res3=set_candidate( b2,  stepsize, Pout2, Varout,P2, bmu2, alpha2, 
-    x2,xb2, mu2, btemp2, bmutemp2, xbtemp2, y, wt, xbtemp, yy,res2);
+    x2,xb2, mu2, btemp2, bmutemp2, xbtemp2, y, wt, xbtemp, yy,res2,family,link);
 
 
     if(res3<res2){
@@ -1122,7 +1270,7 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
 
       // If needed - recalculate Pout - Only if end of loop without full convergence
       
-      if(reset==1){set_Pout(b2,y,alpha2,l1,P2,x2,wt,xbtemp,xbtemp2,xrow2,Pout2);}
+      if(reset==1){set_Pout(b2,y,alpha2,l1,P2,x2,wt,xbtemp,xbtemp2,xrow2,Pout2,family,link);}
 
     
     Rcpp::List opt=Rcpp::List::create(Rcpp::Named("bstar")=b,
@@ -1490,7 +1638,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
       NumericMatrix b2a(l1);
       NumericVector parin2(clone(parin));
       List opt1=optPostMode(y,x,mu1, P, alpha,wt2,
-      parin2,log(y/(1-y)),"binomial","logit");
+      parin2,log(y/(1-y)),family,link);
 
       b2a=asMat(opt1(0));
       NumericMatrix A1=opt1(1);
