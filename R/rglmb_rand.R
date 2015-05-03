@@ -87,7 +87,7 @@ rglmb_rand<-function(n=1,y,x,mu,P_0,P,wt=1,dispersion=NULL,
                         ,wt=wt,
                         dispersion=dispersion,
                         famfunc=famfunc,f1=f1,f2=f2,f3=f3,
-                        start=mu,Gridtype=Gridtype) 
+                        start=mu,family=family$family,link=family$link,Gridtype=Gridtype) 
   return(check)
   
 }

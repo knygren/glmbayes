@@ -1749,7 +1749,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     if(family=="quasipoisson"){bstar=log(y)-alpha;}  
     if(family=="Gamma"){bstar=log(y)-alpha;}  
 
-
+    
+    
       List opt1=optPostMode(y,x,mu1, P, alpha,wt2,
       parin2,bstar,family,link);
 
@@ -1761,26 +1762,26 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
 //    arma::mat Atemp_b(Atemp.begin(), l1, l1, false); 
     arma::mat A1_b(A1.begin(), l1, l1, false); 
-//      b2.print("b2 - New Optimization:");
-//    A1_b.print("A1 -  New Optimization");
+      b2.print("b2 - New Optimization:");
+      A1_b.print("A1 -  New Optimization");
 
 
 //    arma::vec parin2b(parin2.begin(),l1);
 //    parin2b.print("New Optimization:");
 
 
-//    List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,_["x"]=x,
-//    _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
+    List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,_["x"]=x,
+    _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
 
 
-//    b2a=asMat(opt[0]);
+      b2a=asMat(opt[0]);
 //    arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
-//    b2.print("Old Optimization:");
+      b2.print("Old Optimization:");
     
-//    NumericVector min1=opt[1];
-//    min1=opt[1];
+//      NumericVector min1=opt[1];
+      min1=opt[1];
 //    int conver1=opt[3];
-//    A1=asMat(opt[5]);
+      A1=asMat(opt[5]);
 
 //    NumericMatrix  A1=opt[5];
 //    A1=asMat(opt[5]);
@@ -1792,7 +1793,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
 //    arma::mat A1_b(A1.begin(), l1, l1, false); 
 //    b2.print("b2 - Old Optimization");
-//    A1_b.print("A1 -  Old Optimization");
+      A1_b.print("A1 -  Old Optimization");
     arma::vec mu_0(mu.begin(), l1, false);
     
     arma::vec eigval_1;
@@ -2003,7 +2004,10 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
 
     List opt;
-  
+
+  Rcpp::Rcout << "Family inside rglmb_rand_cpp:" << std::endl << family << std::endl;  
+  Rcpp::Rcout << "Link inside rglmb_rand_cpp:" << std::endl << link << std::endl;  
+
   for(i=0;i<n;i++){
 
     alpha2=mutemp2+offset2b;
