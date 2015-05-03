@@ -741,6 +741,8 @@ std::string family="binomial",
 
 
 // This part should be good 
+        xb=pnorm(xb,0.0,1.0);
+
 
         Varout=inv_sympd(Pout2);
 
@@ -988,9 +990,10 @@ std::string family="binomial",
   
   if(family=="binomial" && link=="probit")
   {
-    
+
         btemp2=b2-stepsize*Varout*(P2 * bmu2-x2.t() * xb2);    
-        bmutemp2=btemp2-mu2;
+
+    bmutemp2=btemp2-mu2;
 
         xbtemp2=alpha2+ x2 * btemp2;
         xbtemp=pnorm(xbtemp,0.0,1.0);
@@ -1286,9 +1289,13 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
     
     // Initialize bstar
 
+//    Rcpp::Rcout << "Enter Initialize_bstar:" << std::endl << res_final << std::endl;
+    
     double res2=Initialize_bstar(y, x2, mu2,P2, alpha2,wt,b2, xb,xb2,
     Ptemp2,bmu2,bstar2,yy,family,link);
 
+//    Rcpp::Rcout << "Exit Initialize_bstar:" << std::endl << res2 << std::endl;
+    b2.print("b2 - Initial value");
 
     ///////////////////////////////////////////////////////
     
@@ -1309,9 +1316,13 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
     
       Pout2=P2;
 
+
       res2=Find_Value(y,x2, mu2, P2,alpha2,  wt,  b2, xb,yy,grad2,Pout2,Varout,
       xb2,bmu2,xbtemp2,family,link);
-      res_final=res2;
+//      grad2.print("Value for gradient:");
+      
+      
+    res_final=res2;
       
       reset=0;
  
@@ -1341,9 +1352,18 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
 
     //////////////   Set candidate point and check function value 
 
+//    Rcpp::Rcout << "Enter set_candidate:" << std::endl << res2 << std::endl;
+//    b2.print("b2 entering set_candidate:");
+
+
     res3=set_candidate( b2,  stepsize, Pout2, Varout,P2, bmu2, alpha2, 
     x2,xb2, mu2, btemp2, bmutemp2, xbtemp2, y, wt, xbtemp, yy,res2,family,link);
+//    btemp2.print("btemp2 exiting set_candidate:");
 
+//    b2.print("b2 exiting set candidate");
+//    b2.print("btemp2 exiting set candidate");
+//    Rcpp::Rcout << "Value for res2 exiting set candidate:" << std::endl << res2 << std::endl;
+//    Rcpp::Rcout << "Value for res3 exiting set candidate:" << std::endl << res3 << std::endl;
 
     if(res3<res2){
     b2= btemp2;
@@ -1369,9 +1389,15 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
 
       // If needed - recalculate Pout - Only if end of loop without full convergence
       
-      if(reset==1){set_Pout(b2,y,alpha2,l1,P2,x2,wt,xbtemp,xbtemp2,xrow2,Pout2,family,link);}
+      if(reset==1){
+            Rcpp::Rcout << "Enter set_Pout:" << std::endl << res2 << std::endl;
 
-    
+        set_Pout(b2,y,alpha2,l1,P2,x2,wt,xbtemp,xbtemp2,xrow2,Pout2,family,link);
+          Rcpp::Rcout << "Exit set_Pout:" << std::endl << res2 << std::endl;
+        }
+
+    b2.print("b2 final value-New optimization:");
+        
     Rcpp::List opt=Rcpp::List::create(Rcpp::Named("bstar")=b,
     Rcpp::Named("Pout")=Pout,Rcpp::Named("minval")=res_final);  
   
@@ -1759,10 +1785,10 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector min1=asVec(opt1[2]);
     int conver1=0;
     
-    arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
+//    arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
 //    arma::mat Atemp_b(Atemp.begin(), l1, l1, false); 
     arma::mat A1_b(A1.begin(), l1, l1, false); 
-      b2.print("b2 - New Optimization:");
+//      b2.print("b2 - New Optimization:");
       A1_b.print("A1 -  New Optimization");
 
 
@@ -1775,7 +1801,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
 
       b2a=asMat(opt[0]);
-//    arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
+      arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
       b2.print("Old Optimization:");
     
 //      NumericVector min1=opt[1];
@@ -1784,7 +1810,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
       A1=asMat(opt[5]);
 
 //    NumericMatrix  A1=opt[5];
-//    A1=asMat(opt[5]);
+//    arma::mat A1_b(A1.begin(), l1, l1, false); 
+    A1=asMat(opt[5]);
 
     if(conver1>0){Rcpp::stop("Posterior Optimization failed");}
 
