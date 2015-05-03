@@ -574,7 +574,7 @@ std::string family="binomial",
 
   if(family=="poisson")
   {
-      xb2=exp(-alpha2- x2 * b2);
+      xb2=exp(alpha2+ x2 * b2);
       for(j=0;j<l1;j++){
         xrow2=x2.row(j);
         Ptemp2=Ptemp2+wt(j)*xb(j)*trans(xrow2)*xrow2;
@@ -582,7 +582,7 @@ std::string family="binomial",
   
     if(arma::is_finite(bstar2)){
       b2=inv_sympd(Ptemp2)*((Ptemp2-P2)*bstar2+P2*mu2); 
-      xb2=exp(-alpha2- x2 * b2);
+      xb2=exp(alpha2+ x2 * b2);
      
     bmu2=b2-mu2;
     double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
@@ -601,7 +601,7 @@ std::string family="binomial",
 
   if(family=="quasipoisson")
   {
-      xb2=exp(-alpha2- x2 * b2);
+      xb2=exp(alpha2+ x2 * b2);
       for(j=0;j<l1;j++){
         xrow2=x2.row(j);
         Ptemp2=Ptemp2+wt(j)*xb(j)*trans(xrow2)*xrow2;
@@ -609,7 +609,7 @@ std::string family="binomial",
   
     if(arma::is_finite(bstar2)){
       b2=inv_sympd(Ptemp2)*((Ptemp2-P2)*bstar2+P2*mu2); 
-      xb2=exp(-alpha2- x2 * b2);
+      xb2=exp(alpha2+ x2 * b2);
      
     bmu2=b2-mu2;
     double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
@@ -623,7 +623,39 @@ std::string family="binomial",
 
     }
   }
-  return(res2);
+
+  /////////////////// Gamma /////////////////////////////
+
+  if(family=="Gamma")
+  {
+      xb2=exp(-alpha2- x2 * b2);
+      for(j=0;j<l1;j++){
+        xrow2=x2.row(j);
+        Ptemp2=Ptemp2+wt(j)*y(j)*xb(j)*trans(xrow2)*xrow2;
+        }
+  
+    if(arma::is_finite(bstar2)){
+      b2=inv_sympd(Ptemp2)*((Ptemp2-P2)*bstar2+P2*mu2); 
+      xb2=exp(alpha2+ x2 * b2);
+     
+    bmu2=b2-mu2;
+    
+    for(int j=0;j<l1;j++){
+      
+    xb[j]=xb[j]/wt[j];  
+    }
+
+    double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+    yy=-dgamma_glmb(y,wt,xb,true);
+        
+     
+    res2=std::accumulate(yy.begin(), yy.end(), res1);
+    }
+  }
+
+
+
+return(res2);
   
   
 }
@@ -808,7 +840,7 @@ std::string family="binomial",
   if(family=="poisson" )
   {
 
-      xb2=exp(-alpha2- x2 * b2);
+      xb2=exp(alpha2+ x2 * b2);
       bmu2=b2-mu2;
 
         for(int j=0;j<l1;j++){  
@@ -841,7 +873,7 @@ std::string family="binomial",
   if(family=="quasipoisson" )
   {
 
-      xb2=exp(-alpha2- x2 * b2);
+      xb2=exp(alpha2+ x2 * b2);
       bmu2=b2-mu2;
 
         for(int j=0;j<l1;j++){  
@@ -868,6 +900,41 @@ std::string family="binomial",
         grad2=(P2 * bmu2+x2.t() * xb2);
 
     }
+
+  if(family=="Gamma" )
+  {
+
+      xb2=exp(alpha2+ x2 * b2);
+      bmu2=b2-mu2;
+
+        for(int j=0;j<l1;j++){
+        xrow2=x2.row(j);
+        Pout2=Pout2+(wt(j)*y(j)/xb(j))*trans(xrow2)*xrow2;
+        }
+
+        Varout=inv_sympd(Pout2);
+
+
+        for(int j=0;j<l1;j++){
+        xb[j]=xb[j]/wt[j];  
+          }
+
+        double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+        yy=-dgamma_glmb(y,wt,xb,true);
+                 
+        res2=std::accumulate(yy.begin(), yy.end(), res1);
+
+        
+        xb2=exp(alpha2+ x2 * b2);
+    
+        for(int j=0;j<l1;j++){
+          xb[j]=(1-y[j]/xb[j])*wt[j];
+        }
+
+        grad2= P2 * bmu2+x2.t() * xb2;
+
+    }
+
 
 
 
@@ -987,7 +1054,7 @@ std::string family="binomial",
         btemp2=b2-stepsize*Varout*(P2 * bmu2+x2.t() * xb2);    
         bmutemp2=btemp2-mu2;
 
-        xbtemp2=exp(-alpha2- x2 * btemp2);
+        xbtemp2=exp(alpha2+ x2 * btemp2);
 
 
         double res1=0.5*arma::as_scalar(bmutemp2.t() * P2 *  bmutemp2);
@@ -1004,7 +1071,7 @@ std::string family="binomial",
         btemp2=b2-stepsize*Varout*(P2 * bmu2+x2.t() * xb2);    
         bmutemp2=btemp2-mu2;
 
-        xbtemp2=exp(-alpha2- x2 * btemp2);
+        xbtemp2=exp(alpha2+ x2 * btemp2);
 
 
         double res1=0.5*arma::as_scalar(bmutemp2.t() * P2 *  bmutemp2);
@@ -1014,7 +1081,28 @@ std::string family="binomial",
         res3=std::accumulate(yy.begin(), yy.end(), res1);
     }
   
+  /////////////////// poisson /////////////////////////////
   
+  if(family=="Gamma" )
+  {
+        btemp2=b2-stepsize*Varout*(P2 * bmu2+x2.t() * xb2);    
+        bmutemp2=btemp2-mu2;
+
+        xbtemp2=exp(alpha2+ x2 * btemp2);
+
+        for(int j=0;j<l1;j++){
+        xbtemp2[j]=xbtemp2[j]/wt[j];  
+          }
+
+        double res1=0.5*arma::as_scalar(bmutemp2.t() * P2 *  bmutemp2);
+        yy=-dgamma_glmb(y,wt,xbtemp,true);
+                 
+
+        res3=std::accumulate(yy.begin(), yy.end(), res1);
+    }
+
+
+
     return(res3);
 
 }
@@ -1127,6 +1215,17 @@ std::string family="binomial",
       for(int j=0;j<l1;j++){
         xrow2=x2.row(j);
         Pout2=Pout2+wt(j)*xbtemp(j)*trans(xrow2)*xrow2;
+      }
+  }
+
+
+  /////////////////// poisson /////////////////////////////
+  
+  if(family=="Gamma")
+  {
+      for(int j=0;j<l1;j++){
+        xrow2=x2.row(j);
+        Pout2=Pout2+(wt(j)*y(j)/xbtemp(j))*trans(xrow2)*xrow2;
       }
   }
 
@@ -1634,11 +1733,25 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector parin=start-mu;
     NumericVector mu1=mu-mu;
     Rcpp::Function optfun("optim");
+    NumericVector bstar(l2);
 
-      NumericMatrix b2a(l1);
-      NumericVector parin2(clone(parin));
+    NumericMatrix b2a(l1);
+    NumericVector parin2(clone(parin));
+    
+      
+    if(family=="binomial" && link=="logit"){bstar=log(y/(1-y))-alpha;}  
+    if(family=="quasibinomial" && link=="logit"){bstar=log(y/(1-y))-alpha;}  
+    if(family=="binomial" && link=="probit"){bstar=log(y/(1-y))-alpha;}  
+    if(family=="quasibinomial" && link=="probit"){bstar=qnorm(y,0.0,1.0)-alpha;}  
+    if(family=="binomial" && link=="cloglog"){bstar=qnorm(y,0.0,1.0)-alpha;}  
+    if(family=="quasibinomial" && link=="cloglog"){bstar=log(-log(1-y))-alpha;}  
+    if(family=="poisson"){bstar=log(y)-alpha;}  
+    if(family=="quasipoisson"){bstar=log(y)-alpha;}  
+    if(family=="Gamma"){bstar=log(y)-alpha;}  
+
+
       List opt1=optPostMode(y,x,mu1, P, alpha,wt2,
-      parin2,log(y/(1-y)),family,link);
+      parin2,bstar,family,link);
 
       b2a=asMat(opt1(0));
       NumericMatrix A1=opt1(1);

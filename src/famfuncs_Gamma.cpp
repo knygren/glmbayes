@@ -222,8 +222,6 @@ arma::mat  f3_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatr
       
     }
 
-
-
     outtemp2= P2 * bmu2+x2.t() * xb2;
     }
     
