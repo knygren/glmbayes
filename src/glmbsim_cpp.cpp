@@ -511,22 +511,29 @@ std::string family="binomial",
 
 // This part must be edited (using Hessian)
 
-
+      Ptemp2.print("Ptemp2 before loop");
+      
       for(j=0;j<l1;j++){
-      p1(j)=1-exp(-exb(j));
-      p2(j)=exp(-exb(j));
-      atemp(j)=exp(xb(j)-exb(j));
+//      p1(j)=1-exp(-exb(j));
+//      p2(j)=exp(-exb(j));
+
+      atemp(j)=exp(exb(j))-1;
 
       xrow2=x2.row(j);
-        Ptemp2=Ptemp2
-        +wt(j)*atemp(j)*(
-          (  ( y(j)*(1-exb(j))/p1(j) ) ) - ( y(j)*p2(j)*exb(j)/(p1(j)*p1(j)))
-  +( (1-y(j))*(1-exb(j)) /p2(j) ) - ( (1-y(j))*exb(j)/p2(j)) )*trans(xrow2)*xrow2;
+        Ptemp2=Ptemp2+wt(j)*(1-y(j))*exb(j)*trans(xrow2)*xrow2
+        +wt(j)*y(j)*(exb(j)*exb(j)*exp(exb(j))/(atemp(j)*atemp(j) ))*trans(xrow2)*xrow2
+        -wt(j)*y(j)*(exb(j)/atemp(j))*trans(xrow2)*xrow2;
+        
 
       }
 
+      Ptemp2.print("Ptemp2 after loop");
+
+
 ///////////////////////////
   
+    bstar2.print("bstar2");
+    mu2.print("mu2");
   
     if(arma::is_finite(bstar2)){
       b2=inv_sympd(Ptemp2)*((Ptemp2-P2)*bstar2+P2*mu2); 
@@ -780,27 +787,34 @@ std::string family="binomial",
       p1(j)=1-exp(-exb(j));
       xb(j)=1-exp(-exb(j));
       p2(j)=exp(-exb(j));
-      atemp(j)=exp(xb(j)-exb(j));
+
+      atemp(j)=exp(exb(j))-1;
 
       xrow2=x2.row(j);
-        Pout2=Pout2
-        +wt(j)*atemp(j)*(
-          (  ( y(j)*(1-exb(j))/p1(j) ) ) - ( y(j)*p2(j)*exb(j)/(p1(j)*p1(j)))
-  +( (1-y(j))*(1-exb(j)) /p2(j) ) - ( (1-y(j))*exb(j)/p2(j)) )*trans(xrow2)*xrow2;
+        Pout2=Pout2+wt(j)*(1-y(j))*exb(j)*trans(xrow2)*xrow2
+        +wt(j)*y(j)*(exb(j)*exb(j)*exp(exb(j))/(atemp(j)*atemp(j) ))*trans(xrow2)*xrow2
+        -wt(j)*y(j)*(exb(j)/atemp(j))*trans(xrow2)*xrow2;
 
       }
-
+        
+        
         Varout=inv_sympd(Pout2);
 
         double res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
         yy=-dbinom_glmb(y,wt,xb,true);    
         res2=std::accumulate(yy.begin(), yy.end(), res1);
 
+        xb2=alpha2+ x2 * b2;
+
         for(int j=0;j<l1;j++){
-          xb(j)=((y(j)*atemp(j)/p1(j))-((1-y(j))*atemp(j)/p2(j)))*wt(j);    
+      atemp(j)=exp(xb(j)-exb(j));
+
+        xb(j)=((y(j)*atemp(j)/p1(j))-((1-y(j))*atemp(j)/p2(j)))*wt(j);    
         }
 
+
         grad2=(P2 * bmu2-x2.t() * xb2);
+
 
     }
 
@@ -1155,7 +1169,8 @@ std::string family="binomial",
         Pout2=Pout2
         +wt(j)*d1(j)*(y(j)*(d1(j)+xbtemp(j)*p1(j))/(p1(j)*p1(j))
         +(1-y(j))*(d1(j)-xbtemp(j)*p2(j))/(p2(j)*p2(j)))*trans(xrow2)*xrow2;
-      }
+
+}
   }
 
 
@@ -1175,15 +1190,14 @@ std::string family="binomial",
       exb=exp(xbtemp);
 
       for(int j=0;j<l1;j++){
-      p1(j)=1-exp(-exb(j));
-      p2(j)=exp(-exb(j));
-      atemp(j)=exp(xbtemp(j)-exb(j));
+
+
+      atemp(j)=exp(exb(j))-1;
 
       xrow2=x2.row(j);
-        Pout2=Pout2
-        +wt(j)*atemp(j)*(
-          (  ( y(j)*(1-exb(j))/p1(j) ) ) - ( y(j)*p2(j)*exb(j)/(p1(j)*p1(j)))
-  +( (1-y(j))*(1-exb(j)) /p2(j) ) - ( (1-y(j))*exb(j)/p2(j)) )*trans(xrow2)*xrow2;
+        Pout2=Pout2+wt(j)*(1-y(j))*exb(j)*trans(xrow2)*xrow2
+        +wt(j)*y(j)*(exb(j)*exb(j)*exp(exb(j))/(atemp(j)*atemp(j) ))*trans(xrow2)*xrow2
+        -wt(j)*y(j)*(exb(j)/atemp(j))*trans(xrow2)*xrow2;
 
       }
 
@@ -1307,7 +1321,7 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
     int check=0;
     int check2=0;
     
-    while(i<30 && check==0){
+    while(i<5 && check==0){
 
     /////////////////////////////////////////////////////////////
 
@@ -1329,9 +1343,18 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
     if(arma::any(grad2)==false){
     check=1;
     }
-   
-    gradb2=inv_sympd(P2)*grad2;
+   // Why is this using P2 instead of Pout2?
+    
+    grad2.print("Value for gradient");
+    
+//    gradb2=inv_sympd(P2)*grad2;
+
+    gradb2=inv_sympd(Pout2)*grad2;
+    
+//    gradb2.print("Value for gradb2 - Unstandardized");
+    
     gradb2=abs(2*gradb2/(2*b2+gradb2));
+//    gradb2.print("Value for gradb2 - standardized");
     maxgrad=max(gradb2);
     if(maxgrad<0.0001){
       check=1;
@@ -1348,22 +1371,23 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
     check2=0;
     k=0;
     
-    while(check2==0&& k<10 && check==0){
+    while(check2==0&& k<5 && check==0){
 
     //////////////   Set candidate point and check function value 
 
 //    Rcpp::Rcout << "Enter set_candidate:" << std::endl << res2 << std::endl;
-//    b2.print("b2 entering set_candidate:");
+    b2.print("b2 entering set_candidate:");
 
 
     res3=set_candidate( b2,  stepsize, Pout2, Varout,P2, bmu2, alpha2, 
     x2,xb2, mu2, btemp2, bmutemp2, xbtemp2, y, wt, xbtemp, yy,res2,family,link);
-//    btemp2.print("btemp2 exiting set_candidate:");
+    btemp2.print("btemp2 exiting set_candidate:");
 
 //    b2.print("b2 exiting set candidate");
-//    b2.print("btemp2 exiting set candidate");
-//    Rcpp::Rcout << "Value for res2 exiting set candidate:" << std::endl << res2 << std::endl;
-//    Rcpp::Rcout << "Value for res3 exiting set candidate:" << std::endl << res3 << std::endl;
+//      btemp2.print("btemp2 exiting set candidate");
+//      Rcpp::Rcout << "Value for res2 exiting set candidate:" << std::endl << res2 << std::endl;
+//      Rcpp::Rcout << "Value for res3 exiting set candidate:" << std::endl << res3 << std::endl;
+      Rcpp::Rcout << "Proposed change in value:" << std::endl << res3-res2 << std::endl;
 
     if(res3<res2){
     b2= btemp2;
@@ -1390,13 +1414,13 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
       // If needed - recalculate Pout - Only if end of loop without full convergence
       
       if(reset==1){
-            Rcpp::Rcout << "Enter set_Pout:" << std::endl << res2 << std::endl;
+//            Rcpp::Rcout << "Enter set_Pout:" << std::endl << res2 << std::endl;
 
         set_Pout(b2,y,alpha2,l1,P2,x2,wt,xbtemp,xbtemp2,xrow2,Pout2,family,link);
-          Rcpp::Rcout << "Exit set_Pout:" << std::endl << res2 << std::endl;
+//          Rcpp::Rcout << "Exit set_Pout:" << std::endl << res2 << std::endl;
         }
 
-    b2.print("b2 final value-New optimization:");
+//    b2.print("b2 final value-New optimization:");
         
     Rcpp::List opt=Rcpp::List::create(Rcpp::Named("bstar")=b,
     Rcpp::Named("Pout")=Pout,Rcpp::Named("minval")=res_final);  
@@ -1767,9 +1791,9 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
       
     if(family=="binomial" && link=="logit"){bstar=log(y/(1-y))-alpha;}  
     if(family=="quasibinomial" && link=="logit"){bstar=log(y/(1-y))-alpha;}  
-    if(family=="binomial" && link=="probit"){bstar=log(y/(1-y))-alpha;}  
+    if(family=="binomial" && link=="probit"){bstar=qnorm(y,0.0,1.0)-alpha;}  
     if(family=="quasibinomial" && link=="probit"){bstar=qnorm(y,0.0,1.0)-alpha;}  
-    if(family=="binomial" && link=="cloglog"){bstar=qnorm(y,0.0,1.0)-alpha;}  
+    if(family=="binomial" && link=="cloglog"){bstar=log(-log(1-y))-alpha;}  
     if(family=="quasibinomial" && link=="cloglog"){bstar=log(-log(1-y))-alpha;}  
     if(family=="poisson"){bstar=log(y)-alpha;}  
     if(family=="quasipoisson"){bstar=log(y)-alpha;}  
@@ -1785,11 +1809,11 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector min1=asVec(opt1[2]);
     int conver1=0;
     
-//    arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
+    arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
 //    arma::mat Atemp_b(Atemp.begin(), l1, l1, false); 
     arma::mat A1_b(A1.begin(), l1, l1, false); 
-//      b2.print("b2 - New Optimization:");
-      A1_b.print("A1 -  New Optimization");
+      b2.print("b2 - New Optimization:");
+//      A1_b.print("A1 -  New Optimization");
 
 
 //    arma::vec parin2b(parin2.begin(),l1);
@@ -1801,17 +1825,17 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
 
       b2a=asMat(opt[0]);
-      arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
+//      arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
       b2.print("Old Optimization:");
     
 //      NumericVector min1=opt[1];
       min1=opt[1];
 //    int conver1=opt[3];
-      A1=asMat(opt[5]);
+//      A1=asMat(opt[5]);
 
 //    NumericMatrix  A1=opt[5];
 //    arma::mat A1_b(A1.begin(), l1, l1, false); 
-    A1=asMat(opt[5]);
+//    A1=asMat(opt[5]);
 
     if(conver1>0){Rcpp::stop("Posterior Optimization failed");}
 
@@ -1820,7 +1844,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
 //    arma::mat A1_b(A1.begin(), l1, l1, false); 
 //    b2.print("b2 - Old Optimization");
-      A1_b.print("A1 -  Old Optimization");
+//      A1_b.print("A1 -  Old Optimization");
     arma::vec mu_0(mu.begin(), l1, false);
     
     arma::vec eigval_1;
