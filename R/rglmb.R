@@ -128,7 +128,6 @@ rglmb.default_Old<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,family=gaussian(),
 	opt1<-optim(par=start-mu, fn=f2, gr = f3,y=y,x=x,mu=mu-mu,P=P,
 	alpha=alpha,wt=wt2,method="BFGS", hessian = TRUE)
 
-	
   
 	min1<-opt1$value
 #	grad1<-f3(b1,y,x,mu-mu,P=P,alpha=alpha,wt=wt2)
@@ -364,10 +363,10 @@ rownames(TAB2)<-rownames(TAB)
 
 res<-list(call=object$call,n=n,coefficients1=Tab1,coefficients=TAB,Percentiles=TAB2)
 
-
 class(res)<-"summary.rglmb"
 
 res
+
 }
 
 
@@ -466,7 +465,8 @@ rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=
   if(family$family=="gaussian"){
     dispersion2=dispersion
     if(is.null(dispersion)){dispersion2=0}
-    if(dispersion2>0){outlist<-glmbsim_Gauss_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)
+    if(dispersion2>0){
+      outlist<-glmbsim_Gauss_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)
     }
 
     else{
@@ -495,11 +495,22 @@ rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=
   else{
  #   dispersion2=dispersion
     if(is.null(dispersion)){dispersion2=1}
+    print(y)
+    print(x)
+    print(mu)
+    print(P)
+    print(offset2)
+    print(wt)
+    print(dispersion2)
+    print(mu)
+    
+    
     outlist<-glmbsim_NGauss_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,famfunc=famfunc,f1=f1,f2=f2,f3=f3,
     start=mu,family=family$family,link=family$link)
     
   }
   
+ 
   colnames(outlist$coefficients)<-colnames(x)
   
   outlist$call<-match.call()

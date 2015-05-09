@@ -511,7 +511,6 @@ std::string family="binomial",
 
 // This part must be edited (using Hessian)
 
-      Ptemp2.print("Ptemp2 before loop");
       
       for(j=0;j<l1;j++){
 //      p1(j)=1-exp(-exb(j));
@@ -527,13 +526,10 @@ std::string family="binomial",
 
       }
 
-      Ptemp2.print("Ptemp2 after loop");
 
 
 ///////////////////////////
   
-    bstar2.print("bstar2");
-    mu2.print("mu2");
   
     if(arma::is_finite(bstar2)){
       b2=inv_sympd(Ptemp2)*((Ptemp2-P2)*bstar2+P2*mu2); 
@@ -880,7 +876,7 @@ std::string family="binomial",
         }
         
 
-        grad2=(P2 * bmu2+x2.t() * xb2);
+        grad2=(P2 * bmu2-x2.t() * xb2);
 
     }
 
@@ -913,7 +909,7 @@ std::string family="binomial",
         }
         
 
-        grad2=(P2 * bmu2+x2.t() * xb2);
+        grad2=(P2 * bmu2-x2.t() * xb2);
 
     }
 
@@ -1068,7 +1064,7 @@ std::string family="binomial",
   
   if(family=="poisson" )
   {
-        btemp2=b2-stepsize*Varout*(P2 * bmu2+x2.t() * xb2);    
+        btemp2=b2-stepsize*Varout*(P2 * bmu2-x2.t() * xb2);    
         bmutemp2=btemp2-mu2;
 
         xbtemp2=exp(alpha2+ x2 * btemp2);
@@ -1085,7 +1081,7 @@ std::string family="binomial",
   
   if(family=="quasipoisson" )
   {
-        btemp2=b2-stepsize*Varout*(P2 * bmu2+x2.t() * xb2);    
+        btemp2=b2-stepsize*Varout*(P2 * bmu2-x2.t() * xb2);    
         bmutemp2=btemp2-mu2;
 
         xbtemp2=exp(alpha2+ x2 * btemp2);
@@ -1098,7 +1094,7 @@ std::string family="binomial",
         res3=std::accumulate(yy.begin(), yy.end(), res1);
     }
   
-  /////////////////// poisson /////////////////////////////
+  /////////////////// Gamma /////////////////////////////
   
   if(family=="Gamma" )
   {
@@ -1236,7 +1232,7 @@ std::string family="binomial",
   }
 
 
-  /////////////////// poisson /////////////////////////////
+  /////////////////// Gamma /////////////////////////////
   
   if(family=="Gamma")
   {
@@ -1309,7 +1305,7 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
     Ptemp2,bmu2,bstar2,yy,family,link);
 
 //    Rcpp::Rcout << "Exit Initialize_bstar:" << std::endl << res2 << std::endl;
-    b2.print("b2 - Initial value");
+//    b2.print("b2 - Initial value");
 
     ///////////////////////////////////////////////////////
     
@@ -1330,11 +1326,13 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
     
       Pout2=P2;
 
+//    Rcpp::Rcout << "Enter Find Value:" << std::endl << res_final << std::endl;
 
       res2=Find_Value(y,x2, mu2, P2,alpha2,  wt,  b2, xb,yy,grad2,Pout2,Varout,
       xb2,bmu2,xbtemp2,family,link);
+//    Rcpp::Rcout << "Exit Find Value:" << std::endl << res_final << std::endl;
 //      grad2.print("Value for gradient:");
-      
+//        b2.print("b2 value after find value");      
       
     res_final=res2;
       
@@ -1345,7 +1343,7 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
     }
    // Why is this using P2 instead of Pout2?
     
-    grad2.print("Value for gradient");
+//    grad2.print("Value for gradient");
     
 //    gradb2=inv_sympd(P2)*grad2;
 
@@ -1376,18 +1374,18 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
     //////////////   Set candidate point and check function value 
 
 //    Rcpp::Rcout << "Enter set_candidate:" << std::endl << res2 << std::endl;
-    b2.print("b2 entering set_candidate:");
+//    b2.print("b2 entering set_candidate:");
 
 
     res3=set_candidate( b2,  stepsize, Pout2, Varout,P2, bmu2, alpha2, 
     x2,xb2, mu2, btemp2, bmutemp2, xbtemp2, y, wt, xbtemp, yy,res2,family,link);
-    btemp2.print("btemp2 exiting set_candidate:");
+//    btemp2.print("btemp2 exiting set_candidate:");
 
 //    b2.print("b2 exiting set candidate");
 //      btemp2.print("btemp2 exiting set candidate");
 //      Rcpp::Rcout << "Value for res2 exiting set candidate:" << std::endl << res2 << std::endl;
 //      Rcpp::Rcout << "Value for res3 exiting set candidate:" << std::endl << res3 << std::endl;
-      Rcpp::Rcout << "Proposed change in value:" << std::endl << res3-res2 << std::endl;
+//      Rcpp::Rcout << "Proposed change in value:" << std::endl << res3-res2 << std::endl;
 
     if(res3<res2){
     b2= btemp2;
@@ -1473,7 +1471,12 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector parin=start-mu;
     NumericVector mu1=mu-mu;
     Rcpp::Function optfun("optim");
+  
+//  Rcpp::List funclist=Rcpp::List::create(Rcpp::Named("f2")=f2,
+//  Rcpp::Named("f3")=f3);  
     
+//  return(funclist);
+
     List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,
     _["x"]=x,
     _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
@@ -1482,6 +1485,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
     NumericMatrix b2a=asMat(opt[0]);
     arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
+
+    b2.print("b2 inside rglmb");
 
     NumericVector min1=opt[1];
     int conver1=opt[3];
@@ -1492,7 +1497,9 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     
     arma::mat A1_b(A1.begin(), l1, l1, false); 
     arma::vec mu_0(mu.begin(), l1, false);
-    
+
+    A1_b.print("A1_b inside rglmb");
+
     arma::vec eigval_1;
     arma::mat eigvec_1;
 
@@ -1604,11 +1611,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     if(n>1){
     Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,family,link,Gridtype, n,true);
     }
-
-
-//   return(Rcpp::List::create(Rcpp::Named("mean")=mu,Rcpp::Named("Precision")=P));
-
-//    return(Envelope);
+    
 
     Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,Envelope,family,link);
 
@@ -1722,6 +1725,9 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
         for(i=0;i<n;i++){
            U1( _, i)=rnorm(l1);
           out2.row(i)=trans(b2+IR*U2.col(i));
+//  Log-likelihood not set correctly if wrong famfuncs passed to this function
+// Poisson throws warning....
+
         LL[i]=as<double>(f1(_["b"]=out(i,_),_["y"]=y,_["x"]=x,offset2,wt2));
 
           }
@@ -1812,7 +1818,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
 //    arma::mat Atemp_b(Atemp.begin(), l1, l1, false); 
     arma::mat A1_b(A1.begin(), l1, l1, false); 
-      b2.print("b2 - New Optimization:");
+//      b2.print("b2 - New Optimization:");
 //      A1_b.print("A1 -  New Optimization");
 
 
@@ -1820,17 +1826,18 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 //    parin2b.print("New Optimization:");
 
 
-    List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,_["x"]=x,
-    _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
+//    List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,_["x"]=x,
+//    _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
 
 
-      b2a=asMat(opt[0]);
+//      b2a=asMat(opt[0]);
 //      arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
-      b2.print("Old Optimization:");
+//      arma::mat bx(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
+//      bx.print("Old Optimization:");
     
 //      NumericVector min1=opt[1];
-      min1=opt[1];
-//    int conver1=opt[3];
+//      min1=opt[1];
+//      int conver1=opt[3];
 //      A1=asMat(opt[5]);
 
 //    NumericMatrix  A1=opt[5];
@@ -1949,8 +1956,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector b5=asVec(b4_1);
     Rcpp::List Envelope;
 
-
-
+    
+    
     if(n==1){
     Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
     P5_1,alpha,wt2,family,link,Gridtype, n,false);
@@ -1960,9 +1967,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     }
 
 
-    
-
     Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,Envelope,family,link);
+
 
     NumericMatrix sim2=sim[0];
     arma::mat sim2b(sim2.begin(), sim2.nrow(), sim2.ncol(), false);
@@ -1970,13 +1976,23 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::mat out2(out.begin(), out.nrow(), out.ncol(), false);
     
     out2=L2Inv*L3Inv*trans(sim2b);
-    
+    NumericVector LL(n);
+
+
     for(i=0;i<n;i++){
     out(_,i)=out(_,i)+mu;
+    
+    // How much does log-likelihood evaluation slows this down?
+    LL[i]=as<double>(f1(_["b"]=out(_,i),_["y"]=y,_["x"]=x,offset2,wt2));
     }
-      
-  Rcpp::List outlist=Rcpp::List::create(Rcpp::Named("coefficients")=trans(out2),
-  Rcpp::Named("Envelope")=Envelope);  
+
+
+
+  Rcpp::List outlist=Rcpp::List::create(
+    Rcpp::Named("coefficients")=trans(out2),
+//  Rcpp::Named("Envelope")=Envelope,
+            Rcpp::Named("loglike")=LL
+);  
 
     return(outlist);
 }
@@ -1998,12 +2014,14 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 ) {
   Rcpp::Function asMat("as.matrix");
   Rcpp::Function asVec("as.vector");
+  Rcpp::Function asDob("as.double");
 
 
   int l1=x.ncol();
   int l2=x.nrow();
   int i;
   int j;
+  int k;
   double dispersion2;
   NumericVector alpha(l2);
 
@@ -2027,6 +2045,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
   NumericVector offset3(l2);
   NumericVector wt3(l2);
   NumericVector temp(1);
+  NumericVector temp2(1);
   
   Rcpp::List out1;
   Rcpp::List out2;
@@ -2052,12 +2071,42 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::vec low2(low.begin(),l2, false);
     arma::vec high2(high.begin(),l2, false);
 
-
-
+    NumericVector LL(n);
     List opt;
+    NumericVector b2a(1);
+    NumericVector b2b(l2);
 
-  Rcpp::Rcout << "Family inside rglmb_rand_cpp:" << std::endl << family << std::endl;  
-  Rcpp::Rcout << "Link inside rglmb_rand_cpp:" << std::endl << link << std::endl;  
+    arma::vec b2(b2b.begin(), l2, false);
+    arma::mat P_0b(P_0.begin(), P_0.nrow(), P_0.ncol(), false);
+    arma::mat P2(P.begin(), P.nrow(), P.ncol(), false);
+    arma::vec mu2(mu.begin(), l1);
+
+
+    arma::mat P_Post=P2(0,0)*x2.t()*x2+P_0b;
+    arma::mat Var_Post=inv_sympd(P_Post);
+    
+    arma::vec mu_star2=Var_Post*(P2(0,0)*x2.t()*b2+P_0b*mu2);    
+      
+  for(k=0;k<10;k++){
+
+  for(j=0;j<l2;j++){
+
+    opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=asVec(y[j]),
+    _["x"]=xtemp,_["mu"]=asMat(mutemp[j]),_["P"]=P,_["alpha"]=asVec(alpha[j]),
+    _["wt"]=asVec(wt2[j]),_["method"]="BFGS",
+        _["hessian"]=true);
+
+    b2a=asVec(opt[0]);
+    b2(j)=b2a(0);  
+
+  }
+
+
+  mu_star2=Var_Post*(P2(0,0)*x2.t()*b2+P_0b*mu2);
+  mutemp2=x2*mu_star2;
+
+  }
+
 
   for(i=0;i<n;i++){
 
@@ -2085,26 +2134,6 @@ if(i==0){  parin=  asVec(0);}
 
 if(i>0){parin=asVec(betatemp(j-1,0)-mutemp(j,0));}
 
-//if(arma::is_finite(low2(j)))
-//{  opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=asVec(y[j]),
-//  _["x"]=xtemp,_["mu"]=asMat(mutemp[j]),_["P"]=P,_["alpha"]=asVec(alpha[j]),
-//  _["wt"]=asVec(wt2[j]),_["method"]="Brent",_["lower"]=low[j],
-//  _["upper"]=high[j],
-//  _["hessian"]=true);
-//}
-//else{
-  // Is this needed?
-  
-//opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=asVec(y[j]),
-//  _["x"]=xtemp,_["mu"]=asMat(mutemp[j]),_["P"]=P,_["alpha"]=asVec(alpha[j]),
-//  _["wt"]=asVec(wt2[j]),_["method"]="BFGS",
-//  _["hessian"]=true);
-
-
-
-//}
-
-
 
   if(i==0){   
     out1=glmbsim_NGauss2_cpp(1,asVec(y[j]),xtemp,
@@ -2129,13 +2158,23 @@ if(i>0){parin=asVec(betatemp(j-1,0)-mutemp(j,0));}
                                  link=link,
                                  Gridtype=Gridtype);
                                  }
-      
-        temp=out1(0);                     
+
+
+
+        temp=out1(0);
             betatemp(j,0)=temp(0);
            betaout(i,j)=temp(0);
-            
+           
+        //   Not: Index to which temp 2 should be set depends on what 
+        //  index LL has
+           
+        temp2=out1(1);
+        LL(i)=LL(i)+temp2(0);
+        
       }
-    
+
+    // Should edit famfunc passed here....
+
     out2=glmbsim_Gauss_cpp(1,betatemp,x,
                         mu,P_0,offset3
                         ,wt3,
@@ -2151,9 +2190,19 @@ if(i>0){parin=asVec(betatemp(j-1,0)-mutemp(j,0));}
 
 
 }
-  
-Rcpp::List Out=Rcpp::List::create(Rcpp::Named("betaout")=betaout,Rcpp::Named("alphaout")=alphaout,
-Rcpp::Named("Envelope")=out1[1]);  
+
+
+Rcpp::List Prior=Rcpp::List::create(Rcpp::Named("mean")=mu,
+Rcpp::Named("Precision")=P_0);
+
+Rcpp::List Out=Rcpp::List::create(Rcpp::Named("coefficients")=alphaout,
+Rcpp::Named("PostMode")=mu_star2,
+Rcpp::Named("Prior")=Prior,
+Rcpp::Named("iters")=1,
+Rcpp::Named("famfunc")=famfunc,
+Rcpp::Named("dispersion")=dispersion,
+Rcpp::Named("loglike")=LL
+);  
   
   
 return(Out  ) ; 

@@ -74,20 +74,27 @@ rglmb_rand<-function(n=1,y,x,mu,P_0,P,wt=1,dispersion=NULL,
   if(family$family=="poisson"||family$family=="binomial")dispersion2<-1
   else dispersion2<-dispersion
   
-  mutemp<-x%*%start
-  xtemp<-diag(1) 
+#  mutemp<-x%*%start
+#  xtemp<-diag(1) 
   
-  betaout<-matrix(0,nrow=n,ncol=length(y))
-  alphaout<-matrix(0,nrow=n,ncol=length(mu))
-  betatemp<-mutemp
+#  betaout<-matrix(0,nrow=n,ncol=length(y))
+#  alphaout<-matrix(0,nrow=n,ncol=length(mu))
+#  betatemp<-mutemp
   
   
-  check<-rglmb_rand_cpp(n=n,y=y,x=x,
+  outlist<-rglmb_rand_cpp(n=n,y=y,x=x,
                         mu=mu,P_0=P_0,P=P,offset2=offset2
                         ,wt=wt,
                         dispersion=dispersion,
                         famfunc=famfunc,f1=f1,f2=f2,f3=f3,
                         start=mu,family=family$family,link=family$link,Gridtype=Gridtype) 
-  return(check)
+  
+  colnames(outlist$coefficients)<-colnames(x)
+  
+  outlist$call<-match.call()
+  
+  class(outlist)<-c(outlist$class,"rglmb")
+  outlist
+  
   
 }

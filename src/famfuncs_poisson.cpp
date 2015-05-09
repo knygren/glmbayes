@@ -8,6 +8,7 @@ using namespace Rcpp;
 NumericVector dpois_glmb( NumericVector x, NumericVector means, int lg){
     int n = x.size() ;
     NumericVector res(n) ;
+
     for( int i=0; i<n; i++) res[i] = R::dpois( x[i], means[i], lg ) ;
     return res ;
 }

@@ -78,7 +78,7 @@ An object of class "rglmb" is a list containing at least the following component
   \item{famfunc}{an object of class famfunc}
   \item{Envelope}{an object of class envelope}
   \item{dispersion}{the dispersion parameter used in the model}
-  \item{loglike}{an n by 1 matrix containing the loglikelihood for each sample.}
+  \item{loglike}{an n by 1 matrix containing the negative loglikelihood for each sample.}
 }
 \references{
 Nygren, K.N, and Nygren, L.M, Likelihood Subgradient Densities.  Journal of the American Statistical Association.

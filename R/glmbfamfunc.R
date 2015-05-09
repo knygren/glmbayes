@@ -61,7 +61,8 @@ if(family$family=="poisson"||family$family=="quasipoisson")
 		}
 	f3<-function(b,y,x,mu,P,alpha=0,wt=1){
 		-t(x)%*%((y-exp(alpha+x%*%b))*wt)+P%*%(b-mu)
-		}
+		
+	}
 	f4<-function(b,y,x,alpha=0,wt=1,dispersion=1){
 		dispersion*(2*f1(b,y,x,alpha,wt)+2*sum(dpois(y, y,log=TRUE)*wt))
 				}
