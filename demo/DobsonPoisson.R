@@ -27,23 +27,36 @@ dispersion<-1
 wt2<-wt1/dispersion
 alpha1<-rep(0,length(y))
 mu<-matrix(0,5)
+
+
 P_0<-1*diag(5)
-
-
-# Initialize Simulation
-n<-1000
-
-betaout<-matrix(0,nrow=n,ncol=length(y))
-alphaout<-matrix(0,nrow=n,ncol=length(mu))
-xtemp<-diag(1) 
 P<-1
 
-P_0<-0.01*P_0
+P_0<-1*P_0
+P<-0.05*P
 
-qc1<-rglmb_rand(n=100,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
+
+qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
                 nu=NULL,V=NULL,family=poisson(log),offset2=alpha1,start=mu,Gridtype=3)
 
+
+
 summary(qc1)
+
+
+
+XTPX<-t(x)%*%(P*diag(9))%*%x
+
+eigdecomp<-eigen(XTPX)
+
+eigdecomp
+values<-eigdecomp$values
+vectors<-eigdecomp$vectors
+
+values
+vectors
+
+values^(-0.5) * t(vectors)
 
 
 2*qc1$loglike

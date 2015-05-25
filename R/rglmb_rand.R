@@ -74,12 +74,7 @@ rglmb_rand<-function(n=1,y,x,mu,P_0,P,wt=1,dispersion=NULL,
   if(family$family=="poisson"||family$family=="binomial")dispersion2<-1
   else dispersion2<-dispersion
   
-#  mutemp<-x%*%start
-#  xtemp<-diag(1) 
   
-#  betaout<-matrix(0,nrow=n,ncol=length(y))
-#  alphaout<-matrix(0,nrow=n,ncol=length(mu))
-#  betatemp<-mutemp
   
   
   outlist<-rglmb_rand_cpp(n=n,y=y,x=x,

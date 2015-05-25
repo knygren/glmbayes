@@ -1728,7 +1728,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 //  Log-likelihood not set correctly if wrong famfuncs passed to this function
 // Poisson throws warning....
 
-        LL[i]=as<double>(f1(_["b"]=out(i,_),_["y"]=y,_["x"]=x,offset2,wt2));
+//        LL[i]=as<double>(f1(_["b"]=out(i,_),_["y"]=y,_["x"]=x,offset2,wt2));
 
           }
       Rcpp::List Prior=Rcpp::List::create(Rcpp::Named("mean")=mu,Rcpp::Named("Precision")=P);  
@@ -1816,42 +1816,13 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     int conver1=0;
     
     arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
-//    arma::mat Atemp_b(Atemp.begin(), l1, l1, false); 
     arma::mat A1_b(A1.begin(), l1, l1, false); 
-//      b2.print("b2 - New Optimization:");
-//      A1_b.print("A1 -  New Optimization");
 
 
-//    arma::vec parin2b(parin2.begin(),l1);
-//    parin2b.print("New Optimization:");
 
-
-//    List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,_["x"]=x,
-//    _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
-
-
-//      b2a=asMat(opt[0]);
-//      arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
-//      arma::mat bx(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
-//      bx.print("Old Optimization:");
-    
-//      NumericVector min1=opt[1];
-//      min1=opt[1];
-//      int conver1=opt[3];
-//      A1=asMat(opt[5]);
-
-//    NumericMatrix  A1=opt[5];
-//    arma::mat A1_b(A1.begin(), l1, l1, false); 
-//    A1=asMat(opt[5]);
 
     if(conver1>0){Rcpp::stop("Posterior Optimization failed");}
 
-
-
-
-//    arma::mat A1_b(A1.begin(), l1, l1, false); 
-//    b2.print("b2 - Old Optimization");
-//      A1_b.print("A1 -  Old Optimization");
     arma::vec mu_0(mu.begin(), l1, false);
     
     arma::vec eigval_1;
@@ -1998,6 +1969,319 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 }
 
 
+double get_n(double gammastar,double trace_const, double lambda_star,
+double epsilon1, double epsilon_converge){
+  
+    double alpha_out=(1+gammastar)/(1+trace_const+lambda_star*gammastar);
+    double U_out=(1+trace_const+2*lambda_star*gammastar);
+    double A1_out=(1-exp(log(epsilon1)-gammastar));
+
+    double rstar1=log(alpha_out)/(log(U_out)+log(alpha_out)-log(A1_out));
+    double A3=pow(A1_out,rstar1);
+    double log_A3=log(A3);
+    double log_A3_2=-rstar1*exp(log(epsilon1)-gammastar);
+
+// Adjustment in case log_A3=0 
+// May want to use even if log_A3 if only close to zero
+
+    if(log_A3==0){
+          log_A3=log_A3_2;
+    }
+    
+    double nstar=((log(epsilon_converge))-log(2+gammastar))/log_A3;
+
+    return nstar;
+
+}
+
+
+Rcpp::List golden_n(double trace_const, double lambda_star,
+double epsilon1, double epsilon_converge,
+double gamma_star_lower){
+  
+    // Initialize Golden Section Search
+
+    double gammastar=gamma_star_lower+0.001;
+    double gammastar_low2=gamma_star_lower;
+    double min=0;
+//    double low=0;
+//    double high=0;
+    double val=0;
+    double gamma_star_upper=gammastar;
+    double gamma_opt=gammastar;
+    double golden=(1+sqrt(5))/2;
+    int upper_set=0;
+    int lower_set=0;
+    double a=0;
+    double b=0;
+    
+    // Find Initial Value  
+
+
+    val=get_n(gammastar,trace_const, lambda_star, epsilon1,  epsilon_converge);
+
+    min=val;
+//    low=val;
+//    high=val;
+
+    // Find Upper Bound
+    
+    while(upper_set==0){
+    
+    gammastar=2*gammastar;
+    gamma_star_upper=gammastar;
+    val=get_n(gammastar,trace_const, lambda_star, epsilon1,  epsilon_converge);
+    
+    if (val>min) {
+//      high=val;
+    upper_set=1;  
+      
+    }
+
+    if (val<min) {
+//      high=val;
+      min=val;
+      gamma_opt=gammastar;
+// Was this causing an issue ?
+//    lower_set=1;  
+      
+    }
+
+    }
+
+
+
+    // Find Lower Bound  
+
+    while(lower_set==0){
+    
+    a=(1/(1+golden))*(gamma_star_upper-gammastar_low2);
+    b=gamma_star_upper-a-gammastar_low2;
+    gammastar=gammastar_low2+a;
+    val=get_n(gammastar,trace_const, lambda_star, epsilon1,  epsilon_converge);
+
+    if(val>min){
+      gamma_star_upper=gammastar;
+//      high=val;
+      
+    }
+    
+    if(val<min){
+      gamma_opt=gammastar;
+    lower_set=1;  
+    min=val;      
+    }
+
+
+    }
+
+
+
+    // Iterate Golden Section search    
+
+
+    for(int i=0;i<20;i++){
+
+
+    a=gamma_opt-gammastar_low2;
+    b=gamma_star_upper-gamma_opt;
+
+    gammastar=gammastar_low2+(gamma_star_upper-gamma_opt);
+
+
+    
+    if(gammastar>gamma_star_upper){
+
+    }
+
+    val=get_n(gammastar,trace_const, lambda_star, epsilon1,  epsilon_converge);
+
+
+    
+    if(b>a){
+            if(val>min){
+  
+            gamma_star_upper=gammastar;
+//              high=val;
+            }
+              
+            if(val<min){  
+
+            gammastar_low2=gamma_opt;
+//            low=min;
+            min=val;
+            gamma_opt=gammastar;
+
+          }
+    }
+
+    if(b<a){
+            if(val>min){
+
+              gammastar_low2=gammastar;
+//              low=val;
+
+            }
+            if(val<min){  
+              
+            gamma_star_upper=gamma_opt;
+//            high=min;
+            min=val;
+            gamma_opt=gammastar;
+
+          }
+        
+
+    }
+
+
+    }
+    
+
+    // Return Final Estimate of gammastar
+
+    Rcpp::List outlist=Rcpp::List::create(
+    Rcpp::Named("gammastar")=gammastar,
+            Rcpp::Named("nstar")=min);  
+
+
+    return(outlist);
+
+  
+}
+
+
+Rcpp::List set_nstar(NumericMatrix x, NumericMatrix P, NumericMatrix P_0){
+
+
+    int l1=x.ncol();
+
+    arma::mat P2(P.begin(),P.nrow(),P.ncol(),false);
+    arma::mat x2(x.begin(), x.nrow(), x.ncol(), false);
+    arma::mat P_0b(P_0.begin(), P_0.nrow(), P_0.ncol(), false);
+
+    arma::mat PX=P2*x2;
+    arma::mat XTPX=x2.t()*PX;
+    arma::mat P_Inner=P_0b+XTPX;
+    
+    arma::vec eigval;
+    arma::mat eigvec;
+    
+    eig_sym(eigval, eigvec, XTPX);
+    
+    arma::mat eigvec2=eigvec.t();
+
+      for(int i=0;i<l1;i++)    eigvec2.row(i)=eigvec2.row(i)/sqrt(eigval(i));
+
+    arma::mat InvXTPX_1_2=eigvec*eigvec2;
+
+    arma::mat P_AA=InvXTPX_1_2*P_Inner*InvXTPX_1_2;
+    arma::mat P_AB=-InvXTPX_1_2*PX.t();
+    arma::mat P_BA=P_AB.t();
+    arma::mat P_BB=P2;
+    arma::mat P2_AB=inv_sympd(P_AA)*P_AB*inv_sympd(P_BB)*P_BA;
+    
+    arma::vec  eigen_out=eig_sym(P2_AB.t()*P2_AB) ;
+    
+    double lambda_star=sqrt(eigen_out(l1-1));
+
+    arma::mat P_Initial=P_0b+XTPX;    
+    arma::mat P_Upper=P_0b+XTPX;    
+    arma::mat P_Lower=P_Initial-PX.t()*inv_sympd(P2+PX*inv_sympd(P_Initial)*PX.t())*PX;
+  
+    double  det_P_Upper=det(P_Upper);
+    double  det_P_Lower=det(P_Lower);
+    double  epsilon1=sqrt(det_P_Lower/det_P_Upper);
+
+    eigvec2=eigvec.t();
+    
+    for(int i=0;i<l1;i++)    eigvec2.row(i)=eigvec2.row(i)*sqrt(eigval(i));
+
+    arma::mat W_1_2=eigvec*eigvec2;
+    
+    double trace_const = trace(W_1_2*inv_sympd(P_Lower)*W_1_2);
+    double gamma_star_lower=trace_const/(1-lambda_star);
+          
+    Rcpp::Rcout << "lambda_star - bounded (strictly) from above by 1 and from below by 0 - smaller is better:" << std::endl << lambda_star << std::endl;
+    Rcpp::Rcout << "epsilon1 - bounded (strictly) from below by 0 and from above by 1 - larger is better:" << std::endl << epsilon1 << std::endl;
+    Rcpp::Rcout << "trace constant - smaller is better:" << std::endl << trace_const << std::endl;
+    Rcpp::Rcout << "gamma_star_lower - smaller is better:" << std::endl << gamma_star_lower << std::endl;
+
+    // Initialize Golden Section Search
+    
+    double epsilon_converge=0.01;
+    
+    Rcpp::List golden_out=golden_n(trace_const, lambda_star,
+    epsilon1,  epsilon_converge,gamma_star_lower);
+    
+    NumericVector temp=golden_out(0);
+    double gammastar=temp(0);
+    temp=golden_out(1);
+    
+    double nstar2=temp(0);
+
+    Rcpp::Rcout << "gammastar optimized:" << std::endl << gammastar << std::endl;
+
+    
+    double alpha_out=(1+gammastar)/(1+trace_const+lambda_star*gammastar);
+    double U_out=(1+trace_const+2*lambda_star*gammastar);
+    double epsilon=exp(log(epsilon1)-gammastar);
+    double A1_out=(1-exp(log(epsilon1)-gammastar));
+  
+    double rstar1=log(alpha_out)/(log(U_out)+log(alpha_out)-log(A1_out));
+    double A3=pow(A1_out,rstar1);
+    double log_A3=log(A3);
+    double log_A3_2=-rstar1*exp(log(epsilon1)-gammastar);
+
+// Adjustment in case log_A3=0 
+// May want to use even if log_A3 if only close to zero
+
+    if(log_A3==0){
+          log_A3=log_A3_2;
+    }
+    
+    double nstar=((log(epsilon_converge))-log(2+gammastar))/log_A3;
+
+    double tau=1+2*((1/(1-lambda_star))-1);
+
+    Rcpp::Rcout << "Corresponding epsilon - closer to 1 is better:" << std::endl << epsilon << std::endl;
+    Rcpp::Rcout << "rstar:" << std::endl << rstar1 << std::endl;
+    Rcpp::Rcout << "nstar optimized:" << std::endl << nstar2 << std::endl;
+    Rcpp::Rcout << "sample size multiplier:" << std::endl << tau << std::endl;
+//    Rcpp::Rcout << "nstar optimized:" << std::endl << nstar << std::endl;
+
+
+//   Rcpp::Rcout << "exp(-20):" << std::endl << exp(-20) << std::endl;
+//   Rcpp::Rcout << "exp(-30):" << std::endl << exp(-30) << std::endl;
+//   Rcpp::Rcout << "exp(-40):" << std::endl << exp(-40) << std::endl;
+   
+ //   SEXP nstar=set_nstar(par_in,epsilon_converge,trace_const,lambda_star,epsilon1);
+
+//    Rcpp::Rcout << "alpha_out:" << std::endl << alpha_out << std::endl;
+//    Rcpp::Rcout << "U_out:" << std::endl << U_out << std::endl;
+//    Rcpp::Rcout << "A1_out:" << std::endl << A1_out << std::endl;
+//    Rcpp::Rcout << "rstar1" << std::endl << rstar1 << std::endl;
+//    Rcpp::Rcout << "A3" << std::endl << A3 << std::endl;
+//    Rcpp::Rcout << "log(A3)" << std::endl << log(A3) << std::endl;
+//    Rcpp::Rcout << "log_A3_2" << std::endl << log_A3_2 << std::endl;
+
+//    Rcpp::Rcout << "1/log(A3)" << std::endl << -1/log(A3) << std::endl;
+//    Rcpp::Rcout << "min" << std::endl << min << std::endl;
+//    Rcpp::Rcout << "nstar" << std::endl << nstar << std::endl;
+//    Rcpp::Rcout << "n_star1" << std::endl << n_star1 << std::endl;
+    
+
+    Rcpp::List outlist=Rcpp::List::create(
+    Rcpp::Named("nstar")=nstar,
+            Rcpp::Named("tau")=tau);  
+
+
+    return(outlist);
+
+    
+    return(nstar);
+  
+}
 
 
 
@@ -2015,7 +2299,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
   Rcpp::Function asMat("as.matrix");
   Rcpp::Function asVec("as.vector");
   Rcpp::Function asDob("as.double");
-
+  Rcpp::Function set_lambda("set_nstar");
 
   int l1=x.ncol();
   int l2=x.nrow();
@@ -2037,9 +2321,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
   
   mutemp2=x2*start2;
   
-  
-  NumericMatrix betaout(n,l2);
-  NumericMatrix alphaout(n,l1);
   NumericMatrix betatemp(l2,1);
   NumericVector alphatemp(l1);
   NumericVector offset3(l2);
@@ -2071,7 +2352,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::vec low2(low.begin(),l2, false);
     arma::vec high2(high.begin(),l2, false);
 
-    NumericVector LL(n);
     List opt;
     NumericVector b2a(1);
     NumericVector b2b(l2);
@@ -2082,9 +2362,41 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::vec mu2(mu.begin(), l1);
 
 
-    arma::mat P_Post=P2(0,0)*x2.t()*x2+P_0b;
-    arma::mat Var_Post=inv_sympd(P_Post);
+//  Calculate Constants for Convergence rate calculations
+
+    NumericMatrix P_rand(l2,l2);
+    P_rand.fill_diag(P(0,0));
     
+    List nstar_lambda_star=set_nstar(x, P_rand,P_0);
+
+    NumericVector temp3=nstar_lambda_star(0);
+    double nstar=temp3(0);
+    temp3=nstar_lambda_star(1);
+    
+    double tau=temp3(0);
+
+    int nstar2=nstar+0.5;    
+    int nstar3=n*tau+0.5;    
+    int nstar4=nstar2+nstar3;
+
+    Rcpp::Rcout << "Burn-in iterations" << std::endl << nstar2 << std::endl;
+    Rcpp::Rcout << "Post Burn-in iterations" << std::endl << nstar3 << std::endl;
+
+
+    NumericMatrix betaout(nstar4,l2);
+    NumericMatrix alphaout(nstar4,l1);
+    NumericVector LL(nstar4);
+    NumericVector LL2(nstar3);
+//    NumericMatrix LL(nstar4,0);
+
+//    NumericMatrix betaout(n,l2);
+//    NumericMatrix alphaout(n,l1);
+
+
+
+
+    arma::mat P_Post=P2(0,0)*x2.t()*x2+P_0b;
+    arma::mat Var_Post=inv_sympd(P_Post);    
     arma::vec mu_star2=Var_Post*(P2(0,0)*x2.t()*b2+P_0b*mu2);    
       
   for(k=0;k<10;k++){
@@ -2108,7 +2420,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
   }
 
 
-  for(i=0;i<n;i++){
+  for(i=0;i<nstar4;i++){
 
     alpha2=mutemp2+offset2b;
       qc=ystar-alpha2;
@@ -2165,11 +2477,13 @@ if(i>0){parin=asVec(betatemp(j-1,0)-mutemp(j,0));}
             betatemp(j,0)=temp(0);
            betaout(i,j)=temp(0);
            
-        //   Not: Index to which temp 2 should be set depends on what 
+        //   Note: Index to which temp 2 should be set depends on what 
         //  index LL has
            
         temp2=out1(1);
-        LL(i)=LL(i)+temp2(0);
+//        LL(i)=LL(i)+temp2(0);
+        if(i>(nstar2-1)) LL2(i-nstar2)=LL2(i-nstar2)+temp2(0); 
+//    Rcpp::Rcout << "Setting LL" << std::endl << LL(i,0) << std::endl;
         
       }
 
@@ -2191,17 +2505,23 @@ if(i>0){parin=asVec(betatemp(j-1,0)-mutemp(j,0));}
 
 }
 
+NumericMatrix alphaout2 = alphaout( Range(nstar2,nstar4-1),Range(0,l1-1));
+
+
+//NumericMatrix LL2=LL(Range(nstar2,nstar4-1),Range(0,0));
+
 
 Rcpp::List Prior=Rcpp::List::create(Rcpp::Named("mean")=mu,
 Rcpp::Named("Precision")=P_0);
 
-Rcpp::List Out=Rcpp::List::create(Rcpp::Named("coefficients")=alphaout,
+
+Rcpp::List Out=Rcpp::List::create(Rcpp::Named("coefficients")=alphaout2,
 Rcpp::Named("PostMode")=mu_star2,
 Rcpp::Named("Prior")=Prior,
 Rcpp::Named("iters")=1,
 Rcpp::Named("famfunc")=famfunc,
 Rcpp::Named("dispersion")=dispersion,
-Rcpp::Named("loglike")=LL
+Rcpp::Named("loglike")=LL2
 );  
   
   
