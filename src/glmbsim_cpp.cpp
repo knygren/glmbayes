@@ -111,6 +111,9 @@ Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,N
   NumericVector testll(1);
 
     for(int i=0;i<n;i++){
+      
+    Rcpp::checkUserInterrupt();
+
     a1=0;
     draws(i)=1;
     while(a1==0){
@@ -2242,7 +2245,7 @@ Rcpp::List set_nstar(NumericMatrix x, NumericMatrix P, NumericMatrix P_0){
     
     double nstar=((log(epsilon_converge))-log(2+gammastar))/log_A3;
 
-    double tau=1+2*((1/(1-lambda_star))-1);
+    double tau=1+2*((1/(1-sqrt(lambda_star))-1));
 
     Rcpp::Rcout << "Corresponding epsilon - closer to 1 is better:" << std::endl << epsilon << std::endl;
     Rcpp::Rcout << "rstar:" << std::endl << rstar1 << std::endl;
@@ -2283,6 +2286,41 @@ Rcpp::List set_nstar(NumericMatrix x, NumericMatrix P, NumericMatrix P_0){
   
 }
 
+
+
+
+void progress_bar(double x, double N)
+{
+    // how wide you want the progress meter to be
+    int totaldotz=40;
+    double fraction = x / N;
+    // part of the progressmeter that's already "full"
+    int dotz = round(fraction * totaldotz);
+
+    // create the "meter"
+    int ii=0;
+    printf("%3.0f%% [",fraction*100);
+    // part  that's full already
+    for ( ; ii < dotz;ii++) {
+        printf("=");
+    }
+    // remaining part (spaces)
+    for ( ; ii < totaldotz;ii++) {
+        printf(" ");
+    }
+    // and back to line begin - do not forget the fflush to avoid output buffering problems!
+    printf("]\r");
+    fflush(stdout);
+}
+
+// [[Rcpp::export]]
+int interupts( double ntimes ){
+    int i = 0 ;
+    for( i=0; i<ntimes; i++){
+        Rcpp::checkUserInterrupt() ;
+    }
+    return i ;
+}
 
 
 
@@ -2413,7 +2451,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
   }
 
-
   mu_star2=Var_Post*(P2(0,0)*x2.t()*b2+P_0b*mu2);
   mutemp2=x2*mu_star2;
 
@@ -2422,33 +2459,28 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
   for(i=0;i<nstar4;i++){
 
+    Rcpp::checkUserInterrupt();
+
+  if(i==0) {Rcpp::Rcout << "Running burnin simulation:" << std::endl;}
+
+  if(i<nstar2) {  
+    progress_bar(i, nstar2-1);}
+  if(i==nstar2) {Rcpp::Rcout << "" << std::endl
+  << "Running main simulation:" << std::endl;}
+  if(i>(nstar2-1)) {  progress_bar(i-nstar2, nstar4-nstar2);
+  }
+
+
     alpha2=mutemp2+offset2b;
-      qc=ystar-alpha2;
-//    qc.print("qc:");  
-    low=pmin(qc1,0);
-    high=pmax(qc1,0);
-
-
-//    low2.print("low2:");
-//    high2.print("high2:");
     
 
   for(j=0;j<l2;j++){
 
-  if(low(j)==high(j)){
-    low(j)=-0.001;
-    high(j)=0.001;
-    
-  }
-  
+      if(i==0){  parin=  asVec(0);}
+      if(i>0){parin=asVec(betatemp(j-1,0)-mutemp(j,0));}
 
-if(i==0){  parin=  asVec(0);}
-
-if(i>0){parin=asVec(betatemp(j-1,0)-mutemp(j,0));}
-
-
-  if(i==0){   
-    out1=glmbsim_NGauss2_cpp(1,asVec(y[j]),xtemp,
+    if(i==0){   
+        out1=glmbsim_NGauss2_cpp(1,asVec(y[j]),xtemp,
                                  asMat(mutemp[j]),P,
                                  asVec(offset2[j]),
                                  asVec(wt[j]),
@@ -2460,7 +2492,7 @@ if(i>0){parin=asVec(betatemp(j-1,0)-mutemp(j,0));}
                                  Gridtype=Gridtype);
                                  }
     if(i>0){   
-    out1=glmbsim_NGauss2_cpp(1,asVec(y[j]),xtemp,
+        out1=glmbsim_NGauss2_cpp(1,asVec(y[j]),xtemp,
                                  asMat(mutemp[j]),P,
                                  asVec(offset2[j]),
                                  asVec(wt[j]),
@@ -2473,7 +2505,7 @@ if(i>0){parin=asVec(betatemp(j-1,0)-mutemp(j,0));}
 
 
 
-        temp=out1(0);
+            temp=out1(0);
             betatemp(j,0)=temp(0);
            betaout(i,j)=temp(0);
            
@@ -2502,13 +2534,11 @@ if(i>0){parin=asVec(betatemp(j-1,0)-mutemp(j,0));}
 
       mutemp2=x2*alphatemp2;
 
-
-}
+    
+    
+    }
 
 NumericMatrix alphaout2 = alphaout( Range(nstar2,nstar4-1),Range(0,l1-1));
-
-
-//NumericMatrix LL2=LL(Range(nstar2,nstar4-1),Range(0,0));
 
 
 Rcpp::List Prior=Rcpp::List::create(Rcpp::Named("mean")=mu,

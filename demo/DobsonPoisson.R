@@ -19,6 +19,9 @@ summary(glm.D93)
 summary(glmb.D93)
 
 
+#interupts(10000000000)
+
+
 y<-glm.D93$y
 x<-glm.D93$x
 b1<-glm.D93$coefficients
@@ -38,8 +41,6 @@ P<-0.05*P
 
 qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
                 nu=NULL,V=NULL,family=poisson(log),offset2=alpha1,start=mu,Gridtype=3)
-
-
 
 summary(qc1)
 
