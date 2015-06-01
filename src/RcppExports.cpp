@@ -469,17 +469,6 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
-// interupts
-int interupts(double ntimes);
-RcppExport SEXP glmbayes_interupts(SEXP ntimesSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< double >::type ntimes(ntimesSEXP);
-    __result = Rcpp::wrap(interupts(ntimes));
-    return __result;
-END_RCPP
-}
 // rglmb_rand_cpp
 Rcpp::List rglmb_rand_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P_0, NumericMatrix P, NumericVector offset2, NumericVector wt, double dispersion, Rcpp::List famfunc, Function f1, Function f2, Function f3, NumericVector start, std::string family, std::string link, int Gridtype);
 RcppExport SEXP glmbayes_rglmb_rand_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP P_0SEXP, SEXP PSEXP, SEXP offset2SEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP famfuncSEXP, SEXP f1SEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP) {

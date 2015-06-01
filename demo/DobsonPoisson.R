@@ -34,15 +34,31 @@ mu<-matrix(0,5)
 
 P_0<-1*diag(5)
 P<-1
+P<-1.0*P
 
-P_0<-1*P_0
-P<-0.05*P
+m0<-5
+
+P*t(x)%*%x
+P_0_temp<-as.matrix(m0*P*t(x)%*%x)
+P_0
+P
+
+for(i in 1:5){
+      for(j in 1:5){
+        P_0[i,j]<-P_0_temp[i,j]
+        
+      }
+}
+
+P_0
 
 
 qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
                 nu=NULL,V=NULL,family=poisson(log),offset2=alpha1,start=mu,Gridtype=3)
 
+
 summary(qc1)
+summary(qc1$randcoefficients)
 
 
 
