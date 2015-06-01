@@ -1980,18 +1980,32 @@ double beta_const){
     double gammastar2=(1+t_star)*gammastar;
     double trace_const2=(1+t_star)*trace_const;
     double mu_const2=(1+t_star)*mu_const;
-    double beta_const2=beta_const/t_star;
+    
+    double beta_const2=0;
+    if(t_star>0) beta_const2=beta_const/t_star;
+    
     double gammastar_lower2=(1+t_star)*gammastar_lower;
+    
+
     
     // Old Calculations 
 
-    double alpha_out=(1+gammastar)/(1+trace_const+lambda_star*gammastar);
-    double U_out=(1+trace_const+2*lambda_star*gammastar);
-    double A1_out=(1-exp(log(epsilon1)-gammastar));
+//    double alpha_out=(1+gammastar)/(1+trace_const+lambda_star*gammastar);
+//    double U_out=(1+trace_const+2*lambda_star*gammastar);
+//    double A1_out=(1-exp(log(epsilon1)-gammastar));
+//    double rstar1=log(alpha_out)/(log(U_out)+log(alpha_out)-log(A1_out));
+//    double A3=pow(A1_out,rstar1);
+//    double log_A3=log(A3);
+//    double log_A3_2=-rstar1*exp(log(epsilon1)-gammastar);
+
+    double alpha_out=(1+gammastar2)/(1+trace_const2+lambda_star*gammastar2);
+    double U_out=(1+trace_const2+2*lambda_star*gammastar2);
+    double A1_out=(1-exp(log(epsilon1)-beta_const2-gammastar2));
     double rstar1=log(alpha_out)/(log(U_out)+log(alpha_out)-log(A1_out));
     double A3=pow(A1_out,rstar1);
     double log_A3=log(A3);
-    double log_A3_2=-rstar1*exp(log(epsilon1)-gammastar);
+    double log_A3_2=-rstar1*exp(log(epsilon1)-beta_const2-gammastar2);
+
 
 // Adjustment in case log_A3=0 
 // May want to use even if log_A3 if only close to zero
@@ -2001,7 +2015,7 @@ double beta_const){
     }
 
 
-    double nstar=((log(epsilon_converge))-log(2+gammastar_lower+mu_const))/log_A3;
+    double nstar=((log(epsilon_converge))-log(2+gammastar_lower2+mu_const2))/log_A3;
 
     return nstar;
 
@@ -2032,13 +2046,11 @@ double gamma_star_lower,double mu_const, double beta_const){
 
     val=get_n(gammastar,trace_const, lambda_star, epsilon1,  epsilon_converge,gamma_star_lower,mu_const, beta_const);
 
-
     min=val;
 //    low=val;
 //    high=val;
 
     // Find Upper Bound
-
 
     while(upper_set==0){
 
@@ -2046,8 +2058,17 @@ double gamma_star_lower,double mu_const, double beta_const){
 
     gammastar=2*gammastar;
     gamma_star_upper=gammastar;
+
+//    Rcpp::Rcout << "check 1.1   "  << std::endl ;
+
     val=get_n(gammastar,trace_const, lambda_star, epsilon1,  epsilon_converge,gamma_star_lower,mu_const,beta_const);
-    
+
+//    Rcpp::Rcout << "min-value"  << std::endl << min  << std::endl ;
+//    Rcpp::Rcout << "val"  << std::endl << val  << std::endl ;
+
+
+//    Rcpp::Rcout << "check 1.2   "  << std::endl ;
+
     if (val>min) {
 //      high=val;
 
@@ -2078,10 +2099,10 @@ double gamma_star_lower,double mu_const, double beta_const){
 //    Rcpp::Rcout << "gamma_star_upper  "  << std::endl <<  gamma_star_upper <<std::endl;
 //    Rcpp::Rcout << "min-value  "  << std::endl <<  min <<std::endl;
 
-    int k=0;
 
     gamma_opt=gamma_star_upper;
     double high=min;
+//    Rcpp::Rcout << "check 2.0   "  << std::endl ;
 
 
     while(lower_set==0 ){
@@ -2135,7 +2156,6 @@ double gamma_star_lower,double mu_const, double beta_const){
 
 
     }
-
 
 
 
@@ -2303,19 +2323,30 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2){
     double gammastar2=(1+t_star)*gammastar;
     double trace_const2=(1+t_star)*trace_const;
     double mu_const2=(1+t_star)*mu_const(0);
-    double beta_const2=beta_const(0)/t_star;
+    double beta_const2=0;
+    if(t_star>0) beta_const2=beta_const(0)/t_star;
     double gamma_star_lower2=(1+t_star)*gamma_star_lower;
       
     
-    double alpha_out=(1+gammastar)/(1+trace_const+lambda_star*gammastar);
-    double U_out=(1+trace_const+2*lambda_star*gammastar);
-    double epsilon=exp(log(epsilon1)-gammastar);
-    double A1_out=(1-exp(log(epsilon1)-gammastar));
-  
+//    double alpha_out=(1+gammastar)/(1+trace_const+lambda_star*gammastar);
+//    double U_out=(1+trace_const+2*lambda_star*gammastar);
+//    double epsilon=exp(log(epsilon1)-gammastar);
+//    double A1_out=(1-exp(log(epsilon1)-gammastar));  
+//    double rstar1=log(alpha_out)/(log(U_out)+log(alpha_out)-log(A1_out));
+//    double A3=pow(A1_out,rstar1);
+//    double log_A3=log(A3);
+//    double log_A3_2=-rstar1*exp(log(epsilon1)-gammastar);
+
+    double alpha_out=(1+gammastar2)/(1+trace_const2+lambda_star*gammastar2);
+    double U_out=(1+trace_const2+2*lambda_star*gammastar2);
+    double epsilon=exp(log(epsilon1)-beta_const2-gammastar2);
+    double A1_out=(1-exp(log(epsilon1)-beta_const2-gammastar2));
     double rstar1=log(alpha_out)/(log(U_out)+log(alpha_out)-log(A1_out));
     double A3=pow(A1_out,rstar1);
     double log_A3=log(A3);
-    double log_A3_2=-rstar1*exp(log(epsilon1)-gammastar);
+    double log_A3_2=-rstar1*exp(log(epsilon1)-beta_const2-gammastar2);
+
+
 
 // Adjustment in case log_A3=0 
 // May want to use even if log_A3 if only close to zero
@@ -2330,7 +2361,9 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2){
 
 
 //    double nstar=((log(epsilon_converge))-log(2+gammastar))/log_A3;
-    double nstar=((log(epsilon_converge))-log(2+gamma_star_lower+mu_const(0)))/log_A3;
+//    double nstar=((log(epsilon_converge))-log(2+gamma_star_lower+mu_const(0)))/log_A3;
+    double nstar=((log(epsilon_converge))-log(2+gamma_star_lower2+mu_const2))/log_A3;
+
 
     double tau=1+2*((1/(1-sqrt(lambda_star))-1));
 
