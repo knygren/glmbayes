@@ -2372,9 +2372,10 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2){
     Rcpp::Rcout << "lambdastar (Drift Condition):         " << std::flush << lambda_star << std::endl;
     Rcpp::Rcout << "epsilon1 (Minorization Condition):    " << std::flush << epsilon1 << std::endl;
     Rcpp::Rcout << "gammastar_lower:                      " << std::flush << gamma_star_lower << std::endl;
-    Rcpp::Rcout << "mu_constant (asymmetry):              " << std::flush << mu_const(0) << std::endl;
-    Rcpp::Rcout << "beta_constant (asymmetry):            " << std::flush << beta_const(0) << std::endl;
+    Rcpp::Rcout << "mu_constant:                          " << std::flush << mu_const(0) << std::endl;
+    Rcpp::Rcout << "beta_constant:                        " << std::flush << beta_const(0) << std::endl;
     Rcpp::Rcout << "gammastar:                            " << std::flush << gammastar << std::endl;
+    Rcpp::Rcout << "tstar:                                " << std::flush << t_star << std::endl;
     Rcpp::Rcout << "epsilonstar:                          " << std::flush << epsilon << std::endl;
     Rcpp::Rcout << "rstar:                                " << std::flush << rstar1 << std::endl;
     Rcpp::Rcout << "nstar:                                " << std::flush << nstar2 << std::endl;
@@ -2426,7 +2427,134 @@ void progress_bar2(double x, double N)
 }
 
 
+Rcpp::List set_beta_const(arma::mat x2,arma::vec offset2b,arma::vec mu_star2,
+int n,NumericVector y,NumericMatrix xtemp, 
+NumericVector mutemp,NumericMatrix P,NumericVector offset2,NumericVector wt,
+double dispersion,Rcpp::List
+famfunc, Function f1,Function f2,Function f3,NumericMatrix betatemp,
+NumericMatrix x,
+NumericVector mu,
+NumericMatrix P_0,
+NumericVector offset3,
+NumericVector wt3,
+      std::string family="binomial",
+      std::string link="logit",
+      int Gridtype=2){
 
+  int l1=x2.n_cols;
+  int l2=x2.n_rows;
+
+  Rcpp::Function asMat("as.matrix");
+  Rcpp::Function asVec("as.vector");
+  Rcpp::List out1;
+  Rcpp::List out2;
+  NumericMatrix betastarout(1000,l2);
+  NumericVector temp(1);
+  NumericVector b3(l2);
+  arma::vec mu_star3(b3.begin(), l1);
+  NumericMatrix Ptilde=clone(P);
+  Ptilde(0,0)=2*P(0,0);
+
+
+      arma::vec mutemp2=x2*mu_star2;
+      arma::vec alpha2=mutemp2+offset2b;
+
+  for(int i=0;i<1000;i++){
+
+    Rcpp::checkUserInterrupt();
+
+
+  if(i==0) {    Rcpp::Rcout << "Running simulation for betastar:" << std::endl;}
+
+    progress_bar2(i, 999);
+
+    if(i==999) {Rcpp::Rcout << "" << std::endl;}
+
+  for(int j=0;j<l2;j++){
+
+        out1=glmbsim_NGauss2_cpp(1,asVec(y[j]),xtemp,
+                                 asMat(mutemp[j]),P,
+                                 asVec(offset2[j]),
+                                 asVec(wt[j]),
+                                 dispersion,
+                                 famfunc,f1,f2,f3,asMat(betatemp(j-1,0)),
+                                 family=family,
+                                 link=link,
+                                 Gridtype=Gridtype);
+            temp=out1(0);
+            betatemp(j,0)=temp(0);
+           betastarout(i,j)=temp(0); 
+
+                    }
+      }
+
+arma::vec beta_star=mutemp2;
+
+for(int j=0;j<l2;j++){  beta_star(j)=mean(betastarout(_,j));
+}
+
+//beta_star.print("beta_star - inside function");
+
+Rcpp::Rcout.precision(5);
+
+      out2=glmbsim_Gauss_cpp(1,betatemp,x,
+                        mu,P_0,offset3
+                        ,wt3,
+                        1/P(0,0),
+                        famfunc,f1,f2,f3,
+                        mu);   
+
+      b3=out2(1);    
+
+      // Simulate for bstar2
+
+      arma::vec mu_star4=(mu_star2+mu_star3)/2;    
+      mutemp2=x2*mu_star4;
+      alpha2=mutemp2+offset2b;
+
+
+  for(int i=0;i<1000;i++){
+
+    Rcpp::checkUserInterrupt();
+
+
+  if(i==0) {    Rcpp::Rcout << "Running simulation for betastar2:" << std::endl;}
+
+    progress_bar2(i, 999);
+
+    if(i==999) {Rcpp::Rcout << "" << std::endl;}
+
+  for(int j=0;j<l2;j++){
+
+        out1=glmbsim_NGauss2_cpp(1,asVec(y[j]),xtemp,
+                                 asMat(mutemp[j]),Ptilde,
+                                 asVec(offset2[j]),
+                                 asVec(wt[j]),
+                                 dispersion,
+                                 famfunc,f1,f2,f3,asMat(betatemp(j-1,0)),
+                                 family=family,
+                                 link=link,
+                                 Gridtype=Gridtype);
+            temp=out1(0);
+           betastarout(i,j)=temp(0); 
+      }
+
+    }
+
+arma::vec beta_star2=1*beta_star+0;
+for(int j=0;j<l2;j++){  beta_star2(j)=mean(betastarout(_,j));}
+
+//beta_star2.print("beta_star2 - Inside function");
+
+
+Rcpp::List beta_stars=Rcpp::List::create(Rcpp::Named("beta_star")=beta_star,
+Rcpp::Named("beta_star2")=beta_star2);
+
+//      double beta_const=0;
+      
+      return(beta_stars);
+  
+}
 
 
 // [[Rcpp::export]]
@@ -2545,11 +2673,24 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     P_rand.fill_diag(P(0,0));
 
     Rcpp::Rcout << " " << std::endl;
+    Rcpp::Rcout << "############  Deriving Initial Constants for Convergence Bounds (assuming symmetry) ############" << std::endl;
+    Rcpp::Rcout << " " << std::endl;
+
+List beta_stars=set_beta_const(x2,offset2,mu_star2,
+1,y,xtemp,mutemp,P,offset2,wt,
+dispersion,famfunc,f1,f2,f3,betatemp,x,mu,P_0,offset3,wt3,
+family=family,link=link,
+Gridtype=Gridtype);
+
+arma::vec beta_star=beta_stars(0);
+arma::vec beta_star2=beta_stars(1);
+
+    Rcpp::Rcout << " " << std::endl;
     Rcpp::Rcout << "############  Initial Constants for Convergence Bounds (assuming symmetry) ############" << std::endl;
 
     Rcpp::Rcout.precision(5);
 
-    List nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_star2,mu_star2,b2,b2);
+    List nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_star2,mu_star2,beta_star,beta_star2);
 
     NumericVector temp3=nstar_lambda_star(0);
     double nstar=temp3(0);
@@ -2666,7 +2807,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 NumericMatrix alphaout2 = alphaout( Range(nstar2,nstar4-1),Range(0,l1-1));
 
 Rcpp::Rcout << " " << std::endl;
-Rcpp::Rcout << "############  Checking asymmetry... ############" << std::endl;
+Rcpp::Rcout << "############  Confirming convergence... ############" << std::endl;
 Rcpp::Rcout << " " << std::endl;
 
 // Calculate mustar
@@ -2678,99 +2819,14 @@ arma::vec mu_star3(b3.begin(), l1);
 
 for(i=0;i<l1;i++){mu_star2(i)=mean(alphaout2(_,i));}
 
-// Run 1000 iterations in order to calculate betastar and mustarstar
+beta_stars=set_beta_const(x2,offset2,mu_star2,
+1,y,xtemp,mutemp,P,offset2,wt,
+dispersion,famfunc,f1,f2,f3,betatemp,x,mu,P_0,offset3,wt3,
+family=family,link=link,
+Gridtype=Gridtype);
 
-      mutemp2=x2*mu_star2;
-      alpha2=mutemp2+offset2b;
-
-
-  for(i=0;i<1000;i++){
-
-    Rcpp::checkUserInterrupt();
-
-
-  if(i==0) {    Rcpp::Rcout << "Running simulation for betastar:" << std::endl;}
-
-    progress_bar2(i, 999);
-
-    if(i==999) {Rcpp::Rcout << "" << std::endl;}
-
-  for(j=0;j<l2;j++){
-
-        out1=glmbsim_NGauss2_cpp(1,asVec(y[j]),xtemp,
-                                 asMat(mutemp[j]),P,
-                                 asVec(offset2[j]),
-                                 asVec(wt[j]),
-                                 dispersion,
-                                 famfunc,f1,f2,f3,asMat(betatemp(j-1,0)),
-                                 family=family,
-                                 link=link,
-                                 Gridtype=Gridtype);
-            temp=out1(0);
-            betatemp(j,0)=temp(0);
-           betastarout(i,j)=temp(0); 
-      }
-
-    }
-
-arma::vec beta_star=mutemp2;
-
-for(j=0;j<l2;j++){  beta_star(j)=mean(betastarout(_,j));
-betatemp(j,0)= beta_star(j);
-}
-
-Rcpp::Rcout.precision(5);
-
-    out2=glmbsim_Gauss_cpp(1,betatemp,x,
-                        mu,P_0,offset3
-                        ,wt3,
-                        1/P(0,0),
-                        famfunc,f1,f2,f3,
-                        mu);   
-
-    b3=out2(1);    
-
-// Simulate for bstar2
-
-arma::vec mu_star4=(mu_star2+mu_star3)/2;    
-      mutemp2=x2*mu_star4;
-      alpha2=mutemp2+offset2b;
-
-
-
-  for(i=0;i<1000;i++){
-
-    Rcpp::checkUserInterrupt();
-
-
-  if(i==0) {    Rcpp::Rcout << "Running simulation for betastar2:" << std::endl;}
-
-    progress_bar2(i, 999);
-
-    if(i==999) {Rcpp::Rcout << "" << std::endl;}
-
-  for(j=0;j<l2;j++){
-
-        out1=glmbsim_NGauss2_cpp(1,asVec(y[j]),xtemp,
-                                 asMat(mutemp[j]),Ptilde,
-                                 asVec(offset2[j]),
-                                 asVec(wt[j]),
-                                 dispersion,
-                                 famfunc,f1,f2,f3,asMat(betatemp(j-1,0)),
-                                 family=family,
-                                 link=link,
-                                 Gridtype=Gridtype);
-            temp=out1(0);
-            betatemp(j,0)=temp(0);
-           betastarout(i,j)=temp(0); 
-      }
-
-    }
-
-arma::vec beta_star2=1*beta_star+0;
-for(j=0;j<l2;j++){  beta_star2(j)=mean(betastarout(_,j));}
-
-arma::vec beta_diff=beta_star2-beta_star;
+arma::vec b_star=beta_stars(0);
+arma::vec b_star2=beta_stars(1);
 
 
 Rcpp::Rcout.precision(5);
@@ -2779,7 +2835,22 @@ Rcpp::Rcout << " " << std::endl;
 Rcpp::Rcout << "############  Revised Constants for Convergence Bounds (Controlling for asymmetry) ############" << std::endl;
 
 
-nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_0,mu_star2,beta_star,beta_star2);
+nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_0,mu_star2,b_star,b_star2);
+
+    temp3=nstar_lambda_star(0);
+double nstarb=temp3(0);
+
+    Rcpp::Rcout << "Old nstar:         " << std::flush << nstar << std::endl;
+    Rcpp::Rcout << "New nstar:         " << std::flush << nstarb << std::endl;
+
+if(nstar>=nstarb){
+Rcpp::Rcout << "No additional iterations required:" <<  std::endl;
+
+}
+
+if(nstar<nstarb){
+Rcpp::Rcout << "An additional " << std::flush << nstarb-nstar << std::flush  <<" iterations required:" <<  std::endl;
+}
 
 
 Rcpp::List Prior=Rcpp::List::create(Rcpp::Named("mean")=mu,
