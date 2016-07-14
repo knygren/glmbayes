@@ -7,11 +7,19 @@ seedcount <-c(39,39,51,30,12,7,62,6,79,28,41,81,74,13,45,30,51,72,16,4,51)
 seedtype  <-c(0,0,0,1,1,1,0,0,0,1,1,0,0,0,1,1,0,0,1,1,1)
 extract   <-c(0,0,1,0,1,1,0,1,1,0,1,0,1,1,0,1,0,1,0,0,1)
 
+
+
 out<-glm(cbind(germinated, seedcount-germinated) ~ seedtype+extract+seedtype*extract,family=binomial(logit), x=TRUE)
 
 out
 
 y<-out$y
+
+#epsilon<-0.1
+
+#y<-(1-epsilon)*y+epsilon*sum(germinated)/sum(seedcount)
+
+
 x<-out$x
 b1<-out$coefficients
 wt1<-out$prior.weights
@@ -28,7 +36,7 @@ n<-1000
 betaout<-matrix(0,nrow=n,ncol=length(y))
 alphaout<-matrix(0,nrow=n,ncol=length(mu))
 xtemp<-diag(1) 
-P<-1
+P<-10
 
 
 
@@ -37,15 +45,39 @@ P<-1
 P<-14.02
 sqrt(1/P)
 
+# Smaller P improves convergence
+
+P<-5
+
 
 P_0<-diag(4)
-P_0<-0.01*P_0
+#P_0<-0.01*P_0
+
+# Note: Larger P_0 improves convergence
+P_0<-400*P_0
+
+
+# lg_A1_out_New Fails for this 
+
+#P_0<-4*P_0
+
+# lg_A1_out Fails for this 
+
+#P_0<-10*P_0
+
+# Lg_alpha_out fails for this
+
+#P_0<-0.0001*P_0
 
 ################################### Logit #################
 
  
 qc1<-rglmb_rand(n=11000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
               nu=NULL,V=NULL,family=binomial(logit),offset2=alpha1,start=mu,Gridtype=3)
+
+
+
+summary(qc1)
 
 
 
@@ -117,4 +149,4 @@ frame3<-data.frame(m1,s1)
 frame3
 
 
-
+-5.19748e-010
