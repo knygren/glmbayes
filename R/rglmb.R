@@ -178,14 +178,14 @@ rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=
   else{
  #   dispersion2=dispersion
     if(is.null(dispersion)){dispersion2=1}
-    print(y)
-    print(x)
-    print(mu)
-    print(P)
-    print(offset2)
-    print(wt)
-    print(dispersion2)
-    print(mu)
+ #   print(y)
+#    print(x)
+#    print(mu)
+#    print(P)
+#    print(offset2)
+#    print(wt)
+#    print(dispersion2)
+#    print(mu)
     
     
     outlist<-glmbsim_NGauss_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,famfunc=famfunc,f1=f1,f2=f2,f3=f3,
