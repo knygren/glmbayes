@@ -2,7 +2,7 @@
 
 // we only include RcppArmadillo.h which pulls Rcpp.h in for us
 #include "RcppArmadillo.h"
-#include "famfuncs.h"
+//#include "famfuncs.h"
 
 using namespace Rcpp;
 

@@ -53,6 +53,8 @@ res
 }
 
 
+
+
 print.summary.rglmb<-function(x,...){
 cat("Call\n")
 print(x$call)
@@ -64,6 +66,8 @@ cat("\nDistribution Percentiles\n\n")
 printCoefmat(x$Percentiles,digits=4)
 
 }
+
+
 
 
 rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=2

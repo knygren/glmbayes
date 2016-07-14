@@ -105,7 +105,7 @@ glmbsim_NGauss2_cpp <- function(n, y, x, mu, P, offset2, wt, dispersion, famfunc
     .Call('glmbayes_glmbsim_NGauss2_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype)
 }
 
-rglmb_rand_cpp <- function(n, y, x, mu, P_0, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L) {
-    .Call('glmbayes_rglmb_rand_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P_0, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype)
+rglmb_rand_cpp <- function(n, y, x, mu, P_0, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L, epsilon_converge = 0.01) {
+    .Call('glmbayes_rglmb_rand_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P_0, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype, epsilon_converge)
 }
 

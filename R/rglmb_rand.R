@@ -1,5 +1,86 @@
 rglmb_rand<-function(n=1,y,x,mu,P_0,P,wt=1,dispersion=NULL,
-                     nu=NULL,V=NULL,family=gaussian(),offset2=NULL,start=NULL,Gridtype=2)
+                     nu=NULL,V=NULL,family=gaussian(),offset2=NULL,start=NULL,Gridtype=2,
+                     epsilon_converge=0.01)UseMethod("rglmb_rand")
+
+
+
+print.rglmb_rand<-function (x, digits = max(3, getOption("digits") - 3), ...) 
+{
+  
+  cat("\nCall:  ", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  if (length(coef(x))) {
+    cat("Simulated Coefficients")
+    cat(":\n")
+    print.default(format(x$coefficients, digits = digits), 
+                  print.gap = 2, quote = FALSE)
+  }
+  else cat("No coefficients\n\n")
+}
+
+
+summary.rglmb_rand<-function(object,...){
+  
+  
+  n<-length(object$coefficients[,1])  
+  l1<-length(object$PostMode)
+  percentiles<-matrix(0,nrow=l1,ncol=7)
+  se<-sqrt(diag(var(object$coefficients)))
+  mc<-se/n
+  Priorwt<-(se/sqrt(diag(solve(object$Prior$Precision))))^2
+  priorrank<-matrix(0,nrow=l1,ncol=1)
+  pval1<-matrix(0,nrow=l1,ncol=1)
+  pval2<-matrix(0,nrow=l1,ncol=1)
+  for(i in 1:l1){
+    percentiles[i,]<-quantile(object$coefficients[,i],probs=c(0.01,0.025,0.05,0.5,0.95,0.975,0.99))
+    test<-append(object$coefficients[,i],object$Prior$mean[i])
+    test2<-rank(test)
+    priorrank[i,1]<-test2[n+1]
+    pval1[i,1]<-priorrank[i,1]/(n+1)
+    pval2[i,1]<-min(pval1[i,1],1-pval1[i,1])
+    
+  }
+  
+  Tab1<-cbind("Prior Mean"=object$Prior$mean,"Prior.sd"=as.numeric(sqrt(diag(solve(object$Prior$Precision)))),"Approx.Prior.wt"=Priorwt)
+  TAB<-cbind("Post.Mode"=as.numeric(object$PostMode),"Post.Mean"=colMeans(coef(object)),"Post.Sd"=se,"MC Error"=as.numeric(mc),"Pr(tail)"=as.numeric(pval2))
+  TAB2<-cbind("1.0%"=percentiles[,1],"2.5%"=percentiles[,2],"5.0%"=percentiles[,3],Median=as.numeric(percentiles[,4]),"95.0%"=percentiles[,5],"97.5%"=as.numeric(percentiles[,6]),"99.0%"=as.numeric(percentiles[,7]))
+  
+  rownames(Tab1)<-rownames(TAB)
+  rownames(TAB2)<-rownames(TAB)
+  
+  res<-list(call=object$call,n=n,coefficients1=Tab1,coefficients=TAB,Percentiles=TAB2)
+  
+  class(res)<-"summary.rglmb_rand"
+  
+  res
+  
+}
+
+
+
+
+print.summary.rglmb_rand<-function(x,...){
+  cat("Call\n")
+  print(x$call)
+  cat("\nPrior Estimates with Standard Deviations\n\n")
+  printCoefmat(x$coefficients1,digits=4)
+  cat("\nBayesian Estimates Based on",x$n,"Two-Block Gibbs Sampling Draws\n\n")
+  printCoefmat(x$coefficients,digits=4,P.values=TRUE,has.Pvalue=TRUE)
+  cat("\nDistribution Percentiles\n\n")
+  printCoefmat(x$Percentiles,digits=4)
+  
+}
+
+
+
+
+
+
+
+rglmb_rand.default<-function(n=1,y,x,mu,P_0,P,wt=1,dispersion=NULL,
+                     nu=NULL,V=NULL,family=gaussian(),offset2=NULL,start=NULL,Gridtype=2,
+                     epsilon_converge=0.01
+                     )
 {
   
   if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
@@ -82,13 +163,14 @@ rglmb_rand<-function(n=1,y,x,mu,P_0,P,wt=1,dispersion=NULL,
                         ,wt=wt,
                         dispersion=dispersion,
                         famfunc=famfunc,f1=f1,f2=f2,f3=f3,
-                        start=mu,family=family$family,link=family$link,Gridtype=Gridtype) 
+                        start=mu,family=family$family,link=family$link,Gridtype=Gridtype,
+                        epsilon_converge=epsilon_converge) 
   
   colnames(outlist$coefficients)<-colnames(x)
   
   outlist$call<-match.call()
   
-  class(outlist)<-c(outlist$class,"rglmb")
+  class(outlist)<-c(outlist$class,"rglmb_rand")
   outlist
   
   

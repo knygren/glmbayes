@@ -47,14 +47,40 @@ sqrt(1/P)
 
 # Smaller P improves convergence
 
-P<-5
+
+P<-0.1 # Seems to impact on beta_constant but not trace constant, lambda star, or epsilon1 
+
+# Smaller P allows tstar to be smaller so that adjusted trace_constant and adjusted gammstar
+# can be kept closer to unadjusted values
+
+m0<-2  
+
+# Trace constant gets larger as m0 decreases
+# epsilon1 gets smaller as m0 decreases
+
+lambdastar<-1/(m0+1)   # Lambdastar will equal this (1-prior weight)
+
+#P_0<-diag(4)
+P_0<-as.matrix(m0*P*t(x)%*%x)
+P_0
+
+#det(P*t(x)%*%x)
 
 
-P_0<-diag(4)
+#det(P_0+P*t(x)%*%x)
+
+#det(P_0+P*t(x)%*%x)/det(P*t(x)%*%x)
+
+#(1+m0)^4
+#((m0+1)-((m0+1)/(m0+2)))^4
+
+
+
+
 #P_0<-0.01*P_0
 
 # Note: Larger P_0 improves convergence
-P_0<-400*P_0
+#P_0<-100*P_0
 
 
 # lg_A1_out_New Fails for this 
@@ -69,15 +95,52 @@ P_0<-400*P_0
 
 #P_0<-0.0001*P_0
 
+num1<-length(P_0[,1])
+denom1<-(m0+1)-((m0+1)/(m0+2))
+
+trace_constant<-num1/denom1
+
+trace_constant
+
+gammastar_Lower<-trace_constant/(1-lambdastar)
+
+gammastar_Lower
+
+
+
+epsilon1<-sqrt(((m0+1)-((m0+1)/(m0+2)))^4/(1+m0)^4)
+epsilon1
+
+epsilon1*exp(-gammastar_Lower)
+
+
+1-epsilon1*exp(-gammastar_Lower)
+
+
 ################################### Logit #################
 
  
-qc1<-rglmb_rand(n=11000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
-              nu=NULL,V=NULL,family=binomial(logit),offset2=alpha1,start=mu,Gridtype=3)
+qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
+              nu=NULL,V=NULL,family=binomial(logit),offset2=alpha1,start=mu,Gridtype=3,
+              epsilon_converge=0.01)
 
 
 
 summary(qc1)
+
+
+library(coda)
+
+
+mcmcout<-mcmc(qc1$coefficients)
+plot(mcmcout)
+
+
+
+mcmcout2<-mcmc(qc1$randcoefficients)
+plot(mcmcout2)
+
+
 
 
 

@@ -2135,6 +2135,8 @@ double beta_const){
 }
 
 
+
+
 Rcpp::List golden_n(double trace_const, double lambda_star,
 double epsilon1, double epsilon_converge,
 double gamma_star_lower,double mu_const, double beta_const){
@@ -2434,7 +2436,7 @@ double gamma_star_lower,double mu_const, double beta_const){
 
 
 Rcpp::List set_nstar(NumericMatrix x, NumericMatrix P, NumericMatrix P_0,
-arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2){
+arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,double epsilon_converge){
 
 
     int l1=x.ncol();
@@ -2477,7 +2479,8 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2){
 
     arma::mat P_Initial=P_0b+XTPX;    
     
-    
+        
+        
     arma::mat P_Upper=P_0b+XTPX;    
     arma::mat P_Lower=P_Initial-PX.t()*inv_sympd(P2+PX*inv_sympd(P_Initial)*PX.t())*PX;
   
@@ -2486,6 +2489,21 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2){
     double  epsilon1=sqrt(det_P_Lower/det_P_Upper);
 
 
+    double  det_XTPX=det(XTPX);
+    
+    double  qc1=det_P_Upper/det_XTPX;
+    double  qc2=det_P_Lower/det_XTPX;
+    
+    Rcpp::Rcout << "det_XTPX:     " << std::flush << det_XTPX << std::endl;
+    Rcpp::Rcout << "qc1:     " << std::flush << qc1 << std::endl;
+    Rcpp::Rcout << "qc2:     " << std::flush << qc2 << std::endl;
+    Rcpp::Rcout << "det_P_Upper:     " << std::flush << det_P_Upper << std::endl;
+    Rcpp::Rcout << "det_P_Lower:     " << std::flush << det_P_Lower << std::endl;
+    Rcpp::Rcout << "epsilon1:     " << std::flush << epsilon1 << std::endl;
+    
+        
+    
+    
     eigvec2=eigvec.t();
     
     for(int i=0;i<l1;i++)    eigvec2.row(i)=eigvec2.row(i)*sqrt(eigval(i));
@@ -2500,7 +2518,7 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2){
     
     // Initialize Golden Section Search
     
-    double epsilon_converge=0.01;
+//    double epsilon_converge=0.01;
     
 
     Rcpp::List golden_out=golden_n(trace_const, lambda_star,
@@ -2628,15 +2646,33 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2){
     Rcpp::Rcout << "sample size multiplier:               " << std::flush << tau << std::endl;
     Rcpp::Rcout << " " << std::endl;
 
+    Rcpp::List simconstants=Rcpp::List::create(
+      Rcpp::Named("trace_const")=trace_const,
+      Rcpp::Named("lambda_star")=lambda_star,
+      Rcpp::Named("epsilon1")=epsilon1,
+      Rcpp::Named("gamma_star_lower")=gamma_star_lower, 
+      Rcpp::Named("mu_constant")=mu_const(0),
+      Rcpp::Named("beta_constant")=beta_const(0),
+      Rcpp::Named("gammastar")=gammastar,
+      Rcpp::Named("tstar")=t_star,
+      Rcpp::Named("epsilonstar")=epsilon,
+      Rcpp::Named("rstar")=rstar1,
+      Rcpp::Named("nstar")=nstar2
+    );  
+    
+    
     Rcpp::List outlist=Rcpp::List::create(
     Rcpp::Named("nstar")=nstar,
-            Rcpp::Named("tau")=tau);  
+            Rcpp::Named("tau")=tau,
+            Rcpp::Named("simconstants")=simconstants
+      );
+    
 
 
     return(outlist);
 
     
-    return(nstar);
+//    return(nstar);
   
 }
 
@@ -2649,7 +2685,7 @@ void progress_bar2(double x, double N)
     // part of the progressmeter that's already "full"
     int dotz = round(fraction * totaldotz);
 
-    Rcpp::Rcout.precision(0);
+    Rcpp::Rcout.precision(3);
     Rcout << "\r                                                                 " << std::flush ;
     Rcout << "\r" << std::flush ;
     Rcout << std::fixed << fraction*100 << std::flush ;
@@ -2811,8 +2847,9 @@ NumericVector offset2,NumericVector wt,double dispersion,Rcpp::List
 famfunc, Function f1,Function f2,Function f3,NumericVector start,
       std::string family="binomial",
       std::string link="logit",
-      int Gridtype=2      
-) {
+      int Gridtype=2,      
+      double epsilon_converge=0.01
+                            ) {
   Rcpp::Function asMat("as.matrix");
   Rcpp::Function asVec("as.vector");
   Rcpp::Function asDob("as.double");
@@ -2942,7 +2979,8 @@ arma::vec beta_star2=beta_stars(1);
 
 //  Rcpp::Rcout << "############  Testing 2" << std::endl;
     
-    List nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_star2,mu_star2,beta_star,beta_star2);
+    
+    List nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_star2,mu_star2,beta_star,beta_star2,epsilon_converge);
 
 //    Rcpp::Rcout << "############  Testing 3" << std::endl;
 
@@ -3018,9 +3056,13 @@ arma::vec beta_star2=beta_stars(1);
 
   if(i==0) {
     Rcpp::Rcout << "Running burnin simulation:" << std::endl;}
+  
+ 
 
   if(i<nstar2) {  
     progress_bar2(i, nstar2-1);}
+  
+  
   if(i==nstar2) {Rcpp::Rcout << "" << std::endl
   << "Running main simulation:" << std::endl;}
   if(i>(nstar2-1)) {  progress_bar2(i-nstar2, nstar4-nstar2);
@@ -3095,12 +3137,13 @@ arma::vec beta_star2=beta_stars(1);
     
     }
 
-
-
-
-
 NumericMatrix alphaout2 = alphaout( Range(nstar2,nstar4-1),Range(0,l1-1));
-
+NumericMatrix betaout2= betaout(Range(nstar2,nstar4-1),Range(0,l2-1));
+  
+//  NumericMatrix betaout(nstar4,l2);
+  
+  
+    
 Rcpp::Rcout << " " << std::endl;
 Rcpp::Rcout << "############  Confirming convergence... ############" << std::endl;
 Rcpp::Rcout << " " << std::endl;
@@ -3130,7 +3173,7 @@ Rcpp::Rcout << " " << std::endl;
 Rcpp::Rcout << "############  Revised Constants for Convergence Bounds (Controlling for asymmetry) ############" << std::endl;
 
 
-nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_0,mu_star2,b_star,b_star2);
+nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_0,mu_star2,b_star,b_star2,epsilon_converge);
 
     temp3=nstar_lambda_star(0);
 double nstarb=temp3(0);
@@ -3153,7 +3196,7 @@ Rcpp::Named("Precision")=P_0);
 
 
 Rcpp::List Out=Rcpp::List::create(Rcpp::Named("coefficients")=alphaout2,
-Rcpp::Named("randcoefficients")=betaout,
+Rcpp::Named("randcoefficients")=betaout2,
 Rcpp::Named("PostMode")=mu_0,
 Rcpp::Named("Prior")=Prior,
 Rcpp::Named("iters")=1,
