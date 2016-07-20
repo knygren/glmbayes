@@ -2367,19 +2367,13 @@ double gamma_star_lower,double mu_const, double beta_const){
     // Initialize Golden Section Search
 
     double gammastar=gamma_star_lower+0.1;
-    double gammastar_low2=gamma_star_lower;
     double min=0;
 //    double low=0;
 //    double high=0;
     double val=0;
-    double gamma_star_upper=gammastar;
     double gamma_opt=gammastar;
-    double golden=(1+sqrt(5))/2;
     int upper_set=0;
-    int lower_set=0;
-    double a=0;
-    double b=0;
-    
+
     // Find Initial Value  
 
 
@@ -2404,7 +2398,7 @@ double gamma_star_lower,double mu_const, double beta_const){
       
     }
     
-    
+//    double gamma_star_upper=0;
         
   //    low=val;
 //    high=val;
@@ -2421,7 +2415,7 @@ double gamma_star_lower,double mu_const, double beta_const){
     gammastar=gammastar+1;
     
     
-    gamma_star_upper=gammastar;
+//    gamma_star_upper=gammastar;
 
 //    Rcpp::Rcout << "check 1.1   "  << std::endl ;
     
@@ -2571,8 +2565,6 @@ double gamma_star_lower,double mu_const, double beta_const){
       }
 
     
-    double gamma_star_temp2=(g1+g2)/2;
-    
     gammastar=  (g1+g2)/2;
     
     min = get_n(gammastar,trace_const, lambda_star, epsilon1,  epsilon_converge,gamma_star_lower,mu_const,beta_const);
@@ -2692,7 +2684,6 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
     double gammastar=temp(0);
     temp=golden_out(1);
     
-    double nstar2=temp(0);
 
     double t_star=sqrt(beta_const(0)/gammastar);
     double gammastar2=(1+t_star)*gammastar;

@@ -1,4 +1,12 @@
 useDynLib(glmbayes)
 import(RcppArmadillo)
 importFrom(Rcpp, evalCpp)
+importFrom("stats", ".getXlevels", "binomial", "coef", "dbinom",
+             "dgamma", "dnorm", "dpois", "gaussian", "is.empty.model",
+             "model.extract", "model.matrix", "model.offset",
+             "model.response", "model.weights", "nobs", "pnorm",
+             "printCoefmat", "qnorm", "quantile", "rchisq", "residuals",
+             "rgamma", "rnorm", "runif", "var")
 exportPattern("^[[:alpha:]]+")
+
+
