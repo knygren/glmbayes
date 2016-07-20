@@ -53,12 +53,19 @@ P<-0.1 # Seems to impact on beta_constant but not trace constant, lambda star, o
 # Smaller P allows tstar to be smaller so that adjusted trace_constant and adjusted gammstar
 # can be kept closer to unadjusted values
 
-m0<-2  
+
+pwt<-0.6
+
+m0<-pwt/(1-pwt)
+
 
 # Trace constant gets larger as m0 decreases
 # epsilon1 gets smaller as m0 decreases
 
 lambdastar<-1/(m0+1)   # Lambdastar will equal this (1-prior weight)
+
+#lambdastar
+
 
 #P_0<-diag(4)
 P_0<-as.matrix(m0*P*t(x)%*%x)
@@ -125,6 +132,322 @@ qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
               epsilon_converge=0.01)
 
 
+
+
+trace_constant<-qc1$simconstants$trace_const
+lambda_star<-qc1$simconstants$lambda_star
+gammastar<-qc1$simconstants$gammastar
+
+mu_constant<-qc1$simconstants$mu_constant
+
+tstar<-qc1$simconstants$tstar
+
+epsilonstar<-qc1$simconstants$epsilonstar
+rstar<-qc1$simconstants$rstar
+nstar<-qc1$simconstants$nstar
+
+U_out<-(1+trace_constant*(1+tstar)+2*lambda_star*gammastar*(1+tstar))
+U_out
+
+alpha_out<-(1+gammastar*(1+tstar))/(1+trace_constant*(1+tstar)+lambda_star*gammastar*(1+tstar))
+
+alpha_out
+
+
+
+ropt<-function(rstar,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant){
+d1<-(1-epsilonstar)^rstar
+d2<-(U_out^rstar)/(alpha_out^(1-rstar))
+d1^nstar+(d2^nstar)*(1+gammastar*(1+tstar)+mu_constant*(1+tstar))
+}
+
+
+old_opt<-ropt(rstar,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant)
+
+low<-old_opt
+
+
+# Initialize sc_temp
+
+sc_temp1<-0.001
+
+
+sc_temp<-(sc_temp1/(1+sc_temp1))*rstar
+
+
+
+
+
+golden.section.search = function(){
+
+golden.ratio = 2/(sqrt(5) + 1)
+upper.bound<-rstar
+lower.bound<-0
+tolerance<-0.00001
+
+
+### Use the golden ratio to set the initial test points
+r1 = upper.bound - golden.ratio*(upper.bound-lower.bound)
+r2 = lower.bound + golden.ratio*(upper.bound - lower.bound)
+
+
+ropt(rstar,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant)
+f1<-ropt(r1,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant)
+f2<-ropt(r2,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant)
+
+iteration = 0
+
+while (abs(upper.bound - lower.bound) > tolerance){
+
+  iteration = iteration + 1
+  cat('', '\n')
+  cat('Iteration #', iteration, '\n')
+  cat('f1 =', f1, '\n')
+  cat('f2 =', f2, '\n')
+  
+  if (f2 > f1){
+  # then the minimum is to the left of r2
+  # let r2 be the new upper bound
+  # let r1 be the new upper test point
+    cat('f2 > f1', '\n')
+    ### Set the new upper bound
+  ### Set the new upper bound
+  upper.bound <- r2  
+  cat('New Upper Bound =', upper.bound, '\n')
+  cat('New Lower Bound =', lower.bound, '\n')
+  
+  ### Set the new upper test point
+  ### Use the special result of the golden ratio
+  r2 = r1
+  cat('New Upper Test Point = ', r2, '\n')
+  f2 = f1
+
+  ### Set the new lower test point
+  r1 = upper.bound - golden.ratio*(upper.bound - lower.bound)
+  cat('New Lower Test Point = ', r1, '\n')
+  f1 <- ropt(r1,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant)
+    
+}
+
+else
+  
+{
+  cat('f2 < f1', '\n')
+  # the minimum is to the right of x1
+  # let x1 be the new lower bound
+  # let x2 be the new lower test point
+  
+  ### Set the new lower bound
+  lower.bound = r1
+  cat('New Upper Bound =', upper.bound, '\n')
+  cat('New Lower Bound =', lower.bound, '\n')
+  
+  ### Set the new lower test point
+  r1 = r2
+  cat('New Lower Test Point = ', r1, '\n')
+  
+  f1 = f2
+  
+  ### Set the new upper test point
+  r2 = lower.bound + golden.ratio*(upper.bound - lower.bound)
+  cat('New Upper Test Point = ', r2, '\n')
+  f2 = ropt(r2,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant)
+}
+
+}
+
+
+  
+  
+}
+
+
+
+
+
+
+
+
+
+sc_temp
+
+
+rdown_bound_flag<-0
+  
+rup<-rstar
+
+rprior<-rup
+
+rstar_new<-rstar
+  
+while(rdown_bound_flag==0){
+
+rdown<-rstar-sc_temp
+
+down<-ropt(rdown,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant)
+diff_down<-down-old_opt
+
+
+if(diff_down<0)
+{
+  if(down<low){
+  low<-down
+  rup<-rprior
+  rstar_new<-rdown
+  }
+  sc_temp1<-sc_temp1*10
+
+  sc_temp<-(sc_temp1/(1+sc_temp1))*rstar
+  
+  }
+
+if(diff_down>0)
+{
+  rdown_bound<-rdown
+  rdown_bound_flag<-1
+}
+
+
+rprior<-rdown
+
+
+}
+
+
+rstar
+rup
+rstar_new
+rdown
+
+rdown_bound
+
+gold_ratio<-(1+sqrt(5))/2
+
+gold_ratio
+
+rstart<-rdown_bound+(1/(1+gold_ratio))*(rup-rdown_bound)
+
+
+rstart
+
+
+(rup-rstart)/(rstart-rdown_bound)
+
+
+sc_temp
+
+
+old_opt
+low
+
+
+rdown_bound_flag
+sc_temp
+
+
+# Iteration 2
+
+
+rdown<-rstar-sc_temp
+
+down<-ropt(rdown,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant)
+diff_down<-down-old_opt
+
+diff_down
+
+
+if(diff_down<0)
+{
+  low<-down
+  
+  sc_temp<-sc_temp*10
+}
+
+if(diff_down>0)
+{
+  rdown_bound<-rdown
+  rdown_bound_flag<-1
+}
+
+
+rdown_bound_flag
+sc_temp
+
+
+# Iteration 3
+
+
+rdown<-rstar-sc_temp
+
+down<-ropt(rdown,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant)
+diff_down<-down-old_opt
+
+diff_down
+
+
+if(diff_down<0)
+{
+  low<-down
+  
+  sc_temp<-sc_temp*10
+}
+
+if(diff_down>0)
+{
+  rdown_bound<-rdown
+  rdown_bound_flag<-1
+}
+
+
+rdown_bound_flag
+sc_temp
+
+
+
+# Iteration 4
+
+
+rdown<-rstar-sc_temp
+
+down<-ropt(rdown,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant)
+diff_down<-down-old_opt
+
+diff_down
+
+
+if(diff_down<0)
+{
+  low<-down
+  
+  sc_temp<-sc_temp*10
+}
+
+if(diff_down>0)
+{
+  rdown_bound<-rdown
+  rdown_bound_flag<-1
+}
+
+
+rdown_bound_flag
+sc_temp
+
+
+
+#################################################################33
+
+
+
+
+
+min(diff1,diff2)
+
+
+
+#Change due to rstar
+
+(d1^nstar)*nstar*log(1-epsilonstar)
++(1+gammastar*(1+tstar)+mu_constant*(1+tstar))((1/(alpha_out^(1-rstar)))*log(U_out))
 
 summary(qc1)
 

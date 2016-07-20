@@ -1972,12 +1972,232 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 }
 
 
+double get_epsilon1(double rstar,double epsilonstar,double U_out,
+                    double alpha_out,double nstar, double gammastar,double tstar,double mu_constant){
+  
+  double d1=pow(1-epsilonstar,rstar);
+  
+  double d2=pow(U_out,rstar)/pow(alpha_out,1-rstar);
+  
+  
+  //  ropt<-function(rstar,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant){
+  //    d1<-(1-epsilonstar)^rstar
+  //    d2<-(U_out^rstar)/(alpha_out^(1-rstar))
+  //    d1^nstar+(d2^nstar)*(1+gammastar*(1+tstar)+mu_constant*(1+tstar))
+  
+  double epsilonout=pow(d1,nstar)+pow(d2,nstar)*(1+gammastar*(1+tstar)+mu_constant*(1+tstar));
+  
+  return(epsilonout);
+  
+}
+
+
+double golden_r(double upper_bound,double lower_bound,double epsilonstar, double U_out,double alpha_out,
+                double nstar, double gammastar, double tstar, double mu_constant
+){
+  
+  // Inititialize Variables 
+  
+  double golden_ratio = 2/(sqrt(5) + 1);
+//  double  upper_bound=rstar;
+  
+//  double lower_bound=0;
+  double tolerance=0.00001;
+  
+  // Use the golden ratio to set the initial test points
+  
+  double r1 = upper_bound - golden_ratio*(upper_bound-lower_bound);
+  double r2 = lower_bound + golden_ratio*(upper_bound - lower_bound);
+  
+  
+  double  f1=get_epsilon1(r1,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant);
+  double  f2=get_epsilon1(r2,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant);
+  
+  
+  
+  int iteration = 0;
+  
+  double gap=upper_bound - lower_bound;
+  
+  //      f2<-ropt(r2,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant)
+  
+  
+  while (gap > tolerance && iteration<30){
+    
+    
+    iteration = iteration + 1;
+    
+    
+    if (f2 > f1){
+      // then the minimum is to the left of r2
+      // let r2 be the new upper bound
+      // let r1 be the new upper test point
+      
+      //### Set the new upper bound
+      //### Set the new upper bound
+      upper_bound= r2;  
+      
+      
+      // Set the new upper test point
+      // Use the special result of the golden ratio
+      
+      r2 = r1;
+      
+      f2 = f1;
+      
+      //### Set the new lower test point
+      
+      r1 = upper_bound - golden_ratio*(upper_bound - lower_bound);
+      f1=  get_epsilon1(r1,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant);
+      
+      gap=  upper_bound - lower_bound;    
+    }
+    
+    else{
+      
+      //# the minimum is to the right of x1
+      //# let r1 be the new lower bound
+      //# let r2 be the new lower test point
+      
+      //### Set the new lower bound
+      lower_bound = r1;
+      
+      //### Set the new lower test point
+      r1 = r2;
+      
+      f1 = f2;
+      
+      //### Set the new upper test point
+      r2 = lower_bound + golden_ratio*(upper_bound - lower_bound);
+      
+      f2=get_epsilon1(r2,epsilonstar,U_out,alpha_out,nstar,gammastar,tstar,mu_constant);
+      gap=  upper_bound - lower_bound;    
+      
+      
+    }
+    
+  }
+  
+  //### Use the mid-point of the final interval as the estimate of the optimzer
+  
+  double rstar_out = (lower_bound + upper_bound)/2;
+  
+  //  double rstar=1;
+  
+  return(rstar_out);
+  
+  
+}
+
+
+
+
+double find_nstar(double upper_bound,double lower_bound,double rstar2,
+                  double epsilon,double U_out,double alpha_out,
+                  double gammastar,
+                  double t_star,
+                  double mu_const){
+  
+  
+  double golden_ratio = 2/(sqrt(5) + 1);
+  
+  // Use the golden ratio to set the initial test points
+  
+  double  n1 = upper_bound - golden_ratio*(upper_bound - lower_bound);
+  double  n2 = lower_bound + golden_ratio*(upper_bound - lower_bound);
+  
+  
+  // ### Evaluate the function at the test points
+  
+  double epsilon_temp2=get_epsilon1( rstar2,epsilon, U_out,alpha_out,n1,  gammastar,t_star, mu_const);
+  double  f1 = (epsilon_temp2-0.01)*(epsilon_temp2-0.01);
+  
+  
+  
+  epsilon_temp2=get_epsilon1( rstar2,epsilon, U_out,alpha_out,n2,  gammastar,t_star, mu_const);
+  double  f2 = (epsilon_temp2-0.01)*(epsilon_temp2-0.01);
+  
+  
+  
+  double gap=upper_bound-lower_bound;
+  
+  int iter1=0;
+  
+  
+  while(gap>1 && iter1<20){
+    
+    iter1=iter1+1;
+    
+    
+    if(f2>f1){
+      
+      // then the minimum is to the left of n2
+      // let n2 be the new upper bound
+      // let n1 be the new upper test point
+      
+      
+      upper_bound = n2;
+      
+      n2=n1;
+      
+      f2=f1;
+      
+      n1 = upper_bound - golden_ratio*(upper_bound - lower_bound);
+      
+      epsilon_temp2=get_epsilon1( rstar2,epsilon, U_out,alpha_out,n1,  gammastar,t_star, mu_const);
+      f1 = (epsilon_temp2-0.01)*(epsilon_temp2-0.01);
+      
+      gap=upper_bound-lower_bound;
+    }
+    
+    else{
+      
+      
+      //      Rcpp::Rcout << "f1>f2:  "  << std::endl;
+      
+      //      Rcpp::Rcout << "n1:                                " << std::flush << n1 << std::endl;
+      //      Rcpp::Rcout << "n2:                                " << std::flush << n2 << std::endl;
+      //      Rcpp::Rcout << "f1:                                " << std::flush << f1 << std::endl;
+      //      Rcpp::Rcout << "f2:                                " << std::flush << f2 << std::endl;
+      
+      lower_bound = n1;
+      
+      n1=n2;
+      
+      f1=f2;
+      
+      n2 = lower_bound + golden_ratio*(upper_bound - lower_bound);
+      
+      epsilon_temp2=get_epsilon1( rstar2,epsilon, U_out,alpha_out,n2,  gammastar,t_star, mu_const);
+      f2 = (epsilon_temp2-0.01)*(epsilon_temp2-0.01);
+      
+      gap=upper_bound-lower_bound;
+      
+    }
+    
+    //      Rcpp::Rcout << "lower_bound:  " << std::flush << lower_bound << std::endl;
+    //    Rcpp::Rcout << "upper_bound:  " << std::flush << upper_bound << std::endl;
+    
+    
+  }
+  
+  //  Rcpp::Rcout << "rstar_first:                                " << std::flush << rstar1 << std::endl;
+  //  Rcpp::Rcout << "nstar_first:                                " << std::flush << nstar << std::endl;
+  
+  
+  //  rstar1=rstar2;
+  
+  double nstar=(n1+n2)/2;
+  
+  return(nstar);
+}
+
+
+
 double get_n(double gammastar,double trace_const, double lambda_star,
 double epsilon1, double epsilon_converge,double gammastar_lower,double mu_const,
 double beta_const){
 
-  
-  
     
     double t_star=sqrt(beta_const/gammastar);
     double gammastar2=(1+t_star)*gammastar;
@@ -1989,30 +2209,11 @@ double beta_const){
     
     double gammastar_lower2=(1+t_star)*gammastar_lower;
     
-//    Rcpp::Rcout << "gammastar: Inside"  << std::endl << gammastar  << std::endl ;
-//    Rcpp::Rcout << "beta_const: Inside"  << std::endl << beta_const  << std::endl ;
-//    Rcpp::Rcout << "t_star: Inside"  << std::endl << t_star  << std::endl ;
-//    Rcpp::Rcout << "gammastar2: Inside"  << std::endl << gammastar2  << std::endl ;
-//    Rcpp::Rcout << "trace_const: Inside"  << std::endl << trace_const  << std::endl ;
-//    Rcpp::Rcout << "trace_const2: Inside"  << std::endl << trace_const2  << std::endl ;
-//    Rcpp::Rcout << "mu_const: Inside"  << std::endl << mu_const  << std::endl ;
-//    Rcpp::Rcout << "mu_const2: Inside"  << std::endl << mu_const2  << std::endl ;
-//    Rcpp::Rcout << "beta_const2: Inside"  << std::endl << beta_const2  << std::endl ;
-//    Rcpp::Rcout << "gammastar_lower: Inside"  << std::endl << gammastar_lower  << std::endl ;
-//    Rcpp::Rcout << "gammastar_lower2: Inside"  << std::endl << gammastar_lower2  << std::endl ;
+    double epsilon=exp(log(epsilon1)-beta_const2-gammastar2);
     
     
-    // Old Calculations 
 
-//    double alpha_out=(1+gammastar)/(1+trace_const+lambda_star*gammastar);
-//    double U_out=(1+trace_const+2*lambda_star*gammastar);
-//    double A1_out=(1-exp(log(epsilon1)-gammastar));
-//    double rstar1=log(alpha_out)/(log(U_out)+log(alpha_out)-log(A1_out));
-//    double A3=pow(A1_out,rstar1);
-//    double log_A3=log(A3);
-//    double log_A3_2=-rstar1*exp(log(epsilon1)-gammastar);
-
-//    double alpha_out=(1+gammastar2)/(1+trace_const2+lambda_star*gammastar2);
+    double alpha_out=(1+gammastar2)/(1+trace_const2+lambda_star*gammastar2);
     double U_out=(1+trace_const2+2*lambda_star*gammastar2);
 //    double A1_out=(1-exp(log(epsilon1)-beta_const2-gammastar2));
     double lg_A1_out=log(1-exp(log(epsilon1)-beta_const2-gammastar2));
@@ -2031,21 +2232,9 @@ double beta_const){
       
           }
     
-//    double qc_A1_out=-x1+0.5*x1*x1;
     double qc_lg_A1_out=-x1-0.5*x1*x1;
     
-//    Rcpp::Rcout << "lg_alpha_out: "  << std::scientific   << std::endl ;
-    
-    
-        
-//        Rcpp::Rcout << "t_star"  << std::endl << t_star  << std::endl ;
-//        Rcpp::Rcout << "gammastar"  << std::endl << gammastar  << std::endl ;
-//        Rcpp::Rcout << "epsilon1"  << std::endl << epsilon1  << std::endl ;
-//        Rcpp::Rcout << "beta_const2"  << std::endl << beta_const2  << std::endl ;
-//        Rcpp::Rcout << "gammastar2"  << std::endl << gammastar2  << std::endl ;
-//        Rcpp::Rcout << "x1"  << std::endl << x1  << std::endl ;
-//    Rcpp::Rcout << "qc_lg_A1_out"  << std::endl << qc_lg_A1_out  << std::endl ;
-    
+
     
     if(lg_A1_out>-2.47036e-012)
     {
@@ -2054,14 +2243,9 @@ double beta_const){
       
     }
         
-//        Rcpp::Rcout << "lg_A1_out_Final:"  << std::endl << lg_A1_out  << std::endl ;
+
     
-    
-//    double qc_lg_A1_out=(log(epsilon1)-beta_const2-gammastar2);
-    
-        
-//    double lg_U_out=log(U_out);
-    
+
     
 //    double qc_lg_alpha_out=log(1+gammastar2)-log(1+trace_const2+lambda_star*gammastar2);
       double lg_alpha_out=log(1+(1/gammastar2))-log(lambda_star+( (1+trace_const2)/gammastar2));
@@ -2070,10 +2254,7 @@ double beta_const){
         double qc_lg_alpha_out2= -x2+0.5*x2*x2;
         
     
-//      Rcpp::Rcout << "x1"  << std::endl << x1  << std::endl ;
-    //    Rcpp::Rcout << "x2"  << std::endl << x2  << std::endl ;
-//    Rcpp::Rcout << "lg_alpha_out"  << std::endl << lg_alpha_out  << std::endl ;
-    
+
     
     if (lg_alpha_out<5.00028e-014){
       
@@ -2091,45 +2272,87 @@ double beta_const){
     double log_A3_2=-rstar1*exp(log(epsilon1)-beta_const2-gammastar2);
 
 
-// Adjustment in case log_A3=0 
-// May want to use even if log_A3 is only close to zero
 
-//    Rcpp::Rcout << "rstar1"  << std::endl << rstar1  << std::endl ;
-//    Rcpp::Rcout << "log_epsilon1"  << std::endl << log(epsilon1)  << std::endl ;
-//    Rcpp::Rcout << "beta_const2"  << std::endl << beta_const2  << std::endl ;
-//      Rcpp::Rcout << "t_star"  << std::endl << t_star  << std::endl ;
-//      Rcpp::Rcout << "gammastar: Inside"  << std::endl << gammastar  << std::endl ;
-//      Rcpp::Rcout << "gammastar2"  << std::endl << gammastar2  << std::endl ;
-//    Rcpp::Rcout << "A3"  << std::endl << A3  << std::endl ;
-
-//    Rcpp::Rcout << "A1_out"  << std::endl << A1_out  << std::endl ;
-//    Rcpp::Rcout << "qc_A1_out"  << std::endl << qc_A1_out  << std::endl ;
-    
-    
-    //    Rcpp::Rcout << "U_out"  << std::endl << U_out  << std::endl ;
-//    Rcpp::Rcout << "lg_U_out"  << std::endl << lg_U_out  << std::endl ;
-    
-    
-    
-//    Rcpp::Rcout << "qc_lg_alpha_out"  << std::endl << qc_lg_alpha_out  << std::endl ;
-//    Rcpp::Rcout << "qc_lg_alpha_out2"  << std::endl << qc_lg_alpha_out2  << std::endl ;
-//    Rcpp::Rcout << "lg_alpha_out Final:"  << std::endl << lg_alpha_out  << std::endl ;
-//    Rcpp::Rcout << "alpha_out"  << std::endl << alpha_out  << std::endl ;
-//    Rcpp::Rcout << "rstar1"  << std::endl << rstar1  << std::endl ;
-//    Rcpp::Rcout << "log_A3_temp"  << std::endl << log_A3_temp  << std::endl ;
-//    Rcpp::Rcout << "log_A3"  << std::endl << log_A3  << std::endl ;
-//    Rcpp::Rcout << "log_A3_2"  << std::endl << log_A3_2  << std::endl ;
-    
 
     if(log_A3==0){
           log_A3=log_A3_2;
     }
 
 
-    
+
+    // Initialize nstar     
     
     double nstar=((log(epsilon_converge))-log(2+gammastar_lower2+mu_const2))/log_A3;
 
+    double rstar2=rstar1;  
+
+//    Rcpp::Rcout << "rstar_in:                                " << std::flush << rstar1 << std::endl;
+//    Rcpp::Rcout << "nstar_in:                                " << std::flush << nstar << std::endl;
+    
+        
+    int i=0;
+    
+while(i<10){    
+    
+//    Rcpp::Rcout << "get_n_Iter:                                " << std::flush << i << std::endl;
+  
+    rstar2=golden_r(rstar1,0,epsilon, U_out,alpha_out,nstar, gammastar,t_star, mu_const);
+
+//    Rcpp::Rcout << "rstar2:                                " << std::flush << rstar2 << std::endl;
+  
+    
+    double nstar_temp=nstar;
+    
+    //    get_epsilon1
+    double epsilon_temp=get_epsilon1( rstar2,epsilon, U_out,alpha_out,nstar,  gammastar,t_star, mu_const);
+    
+    double epsilon_temp2=epsilon_temp;
+    
+    while(epsilon_temp2<0.01){
+      
+      nstar_temp=nstar_temp/2;
+      
+      epsilon_temp2=get_epsilon1( rstar2,epsilon, U_out,alpha_out,nstar_temp,  gammastar,t_star, mu_const);
+      
+    }
+    
+    
+    double upper_bound=nstar;
+    double lower_bound=nstar_temp;
+    
+    
+    
+    nstar=find_nstar(upper_bound,lower_bound,rstar2,
+                     epsilon,U_out, alpha_out,gammastar,t_star,mu_const);
+
+//    Rcpp::Rcout << "nstar:                                " << std::flush << nstar << std::endl;
+    
+        
+    rstar1=rstar2;
+
+    
+    
+//    Rcpp::Rcout << "rstar1:                                " << std::flush << rstar1 << std::endl;
+    
+    i=i+1;
+
+    
+    
+    }
+    
+    
+    
+//    double rstar3=golden_r(rstar1,0,epsilon, U_out,alpha_out,nstar, gammastar,t_star, mu_const);
+    
+    
+        
+//    Rcpp::Rcout << "rstar_third:                                " << std::flush << rstar3 << std::endl;
+    
+        
+//    Rcpp::Rcout << "nstar_Out:                                " << std::flush << nstar << std::endl;
+//    Rcpp::Rcout << "rstar_Out:                                " << std::flush << rstar1 << std::endl;
+
+            
     return nstar;
 
 }
@@ -2143,7 +2366,7 @@ double gamma_star_lower,double mu_const, double beta_const){
   
     // Initialize Golden Section Search
 
-    double gammastar=gamma_star_lower+0.001;
+    double gammastar=gamma_star_lower+0.1;
     double gammastar_low2=gamma_star_lower;
     double min=0;
 //    double low=0;
@@ -2159,23 +2382,18 @@ double gamma_star_lower,double mu_const, double beta_const){
     
     // Find Initial Value  
 
-//    Rcpp::Rcout << "############  Testing 2.1.1" << std::endl;
-//    Rcpp::Rcout << "gammastar"  << std::endl << gammastar  << std::endl ;
-//      Rcpp::Rcout << "trace_const"  << std::endl << trace_const  << std::endl ;
-//      Rcpp::Rcout << "lambda_star"  << std::endl << lambda_star  << std::endl ;
-//    Rcpp::Rcout << "epsilon1"  << std::endl << epsilon1  << std::endl ;
-//    Rcpp::Rcout << "epsilon_converge"  << std::endl << epsilon_converge  << std::endl ;
-//      Rcpp::Rcout << "gamma_star_lower"  << std::endl << gamma_star_lower  << std::endl ;
-//    Rcpp::Rcout << "mu_const"  << std::endl << mu_const  << std::endl ;
-//    Rcpp::Rcout << "beta_const"  << std::endl << beta_const  << std::endl ;
-    
+
     val=get_n(gammastar,trace_const, lambda_star, epsilon1,  epsilon_converge,gamma_star_lower,mu_const, beta_const);
- 
+
+    double lower_bound=gamma_star_lower;
+    min=val;
+     
 //    Rcpp::Rcout << "############  Testing 2.1.2" << std::endl;
 
 
  
-//    Rcpp::Rcout << "val: Initial value"  << std::endl << val  << std::endl ;
+ Rcpp::Rcout << "Gamma Opt: Initial Gammastar"  << std::endl << gammastar  << std::endl ;
+ Rcpp::Rcout << "Gamma Opt: Initial n"  << std::endl << val  << std::endl ;
  
     
     min=val;
@@ -2207,13 +2425,13 @@ double gamma_star_lower,double mu_const, double beta_const){
 
 //    Rcpp::Rcout << "check 1.1   "  << std::endl ;
     
-//    Rcpp::Rcout << "gammastar:Outside"  << std::endl << gammastar  << std::endl ;
+    Rcpp::Rcout << "gammastar:Proposed"  << std::endl << gammastar  << std::endl ;
     
 // Temporarily edit this out        
     val=get_n(gammastar,trace_const, lambda_star, epsilon1,  epsilon_converge,gamma_star_lower,mu_const,beta_const);
 
 //    Rcpp::Rcout << "min-value"  << std::endl << min  << std::endl ;
-//    Rcpp::Rcout << "val Out"  << std::endl << val  << std::endl ;
+      Rcpp::Rcout << "proposed val at upper"  << std::endl << val  << std::endl ;
 
 
 //    Rcpp::Rcout << "check 1.2   "  << std::endl ;
@@ -2233,7 +2451,7 @@ double gamma_star_lower,double mu_const, double beta_const){
 //      high=val;
 
     // Edit - Set min=val regardless
-    min=val;
+//    min=val;
     gamma_opt=gammastar;
     
     upper_set=1;  
@@ -2243,6 +2461,7 @@ double gamma_star_lower,double mu_const, double beta_const){
     if (val<min) {
 //      high=val;
       min=val;
+      lower_bound=gamma_opt;
       gamma_opt=gammastar;
 // Was this causing an issue ?
 //    lower_set=1;  
@@ -2250,176 +2469,116 @@ double gamma_star_lower,double mu_const, double beta_const){
     }
 
     }
-
+    double upper_bound=gammastar;
+    
+    
+    Rcpp::Rcout << "lower_bound  "  <<  std::endl << lower_bound <<std::endl;
+    Rcpp::Rcout << "upper_bound  "  <<  std::endl << upper_bound <<std::endl;
+    Rcpp::Rcout << "Value at current min  "  <<  std::endl << min <<std::endl;
+    Rcpp::Rcout << "Value at upper_bound  "  <<  std::endl << val <<std::endl;
+    
+    
     if(min==R_PosInf){
       Rcpp::stop("Min Value After Upper Is Set is Positive Infinity");
 //      Rcpp::warning("Min Value After Upper Is Set is Positive Infinity");
-      
-    }
-
-  //  Rcpp::Rcout << "min: Out of Upper"  << std::endl << min  << std::endl ;
-    
-    
-    // Find Lower Bound  
-
-//    Rcpp::Rcout << "gamma_star_low2  "  <<  std::endl << gammastar_low2 <<std::endl;
-//    Rcpp::Rcout << "gamma_star_upper  "  << std::endl <<  gamma_star_upper <<std::endl;
-//    Rcpp::Rcout << "min-value  "  << std::endl <<  min <<std::endl;
-
-
-    gamma_opt=gamma_star_upper;
-    double high=min;
-//    Rcpp::Rcout << "check 2.0   "  << std::endl ;
-
-
-
-
-
-    while(lower_set==0 ){
-
-    Rcpp::checkUserInterrupt();
-    
-
-    a=(1/(1+golden))*(gamma_opt-gammastar_low2);
-    b=gamma_opt-a-gammastar_low2;
-    gammastar=gammastar_low2+a;
-
-// Temporarily edit this out 
-
-    val=get_n(gammastar,trace_const, lambda_star, epsilon1,  epsilon_converge,gamma_star_lower,mu_const,beta_const);
-
-//    Rcpp::Rcout << "high val   "  << std::endl <<  high <<std::endl;
-//    Rcpp::Rcout << "min val   "  << std::endl <<  min <<std::endl;
-//    Rcpp::Rcout << "proposed val   "  << std::endl <<  val <<std::endl;
-
-
-    if(val>high){
-
-
-    gammastar_low2=gammastar;
-    lower_set=1;  
-      
     }
     
-    if(val<high){
+    
+    
 
-    if(min==high){
-      
-      min=val;
-      gamma_opt=gammastar;
-      
-    } 
+    double golden_ratio = 2/(sqrt(5) + 1);
+    
+    // Use the golden ratio to set the initial test points
+    
+    double  g1 = upper_bound - golden_ratio*(upper_bound - lower_bound);
+    double  g2 = lower_bound + golden_ratio*(upper_bound - lower_bound);
+    
+    
+    // ### Evaluate the function at the test points
 
-    if(min<high && val>min){
-    gammastar_low2=gammastar;
-    lower_set=1;  
-      
-    }
 
-    if(min<high && val<min) {
-      gamma_star_upper=gamma_opt;
-      gamma_opt=gammastar;
-      high=min;
-      min=val;
+    double  f1 = get_n(g1,trace_const, lambda_star, epsilon1,  epsilon_converge,gamma_star_lower,mu_const,beta_const);
+    double  f2 = get_n(g2,trace_const, lambda_star, epsilon1,  epsilon_converge,gamma_star_lower,mu_const,beta_const);
+
+    double gap=upper_bound-lower_bound;
+    
+    int iter1=0;
+    
+    while(gap>0.001 && iter1<20){
+      
+      iter1=iter1+1;
+
+//      Rcpp::Rcout << "iter  "  <<  std::endl << iter1 <<std::endl;
+      
+      if(f2>f1){
+
+//        Rcpp::Rcout << "f2>f1:  "  << std::endl;
+        
+//        Rcpp::Rcout << "g1:                                " << std::flush << g1 << std::endl;
+//        Rcpp::Rcout << "g2:                                " << std::flush << g2 << std::endl;
+//        Rcpp::Rcout << "f1:                                " << std::flush << f1 << std::endl;
+//        Rcpp::Rcout << "f2:                                " << std::flush << f2 << std::endl;
+        
+        
+                
+        // then the minimum is to the left of n2
+        // let n2 be the new upper bound
+        // let n1 be the new upper test point
+        
+        
+        upper_bound = g2;
+        
+        g2=g1;
+        
+        f2=f1;
+        
+        g1 = upper_bound - golden_ratio*(upper_bound - lower_bound);
+        
+        f1 = get_n(g1,trace_const, lambda_star, epsilon1,  epsilon_converge,gamma_star_lower,mu_const,beta_const);
+        
+        gap=upper_bound-lower_bound;
+      }
+      
+
+      else{
+        
+        
+//              Rcpp::Rcout << "f1>f2:  "  << std::endl;
+        
+//              Rcpp::Rcout << "g1:                                " << std::flush << g1 << std::endl;
+//              Rcpp::Rcout << "g2:                                " << std::flush << g2 << std::endl;
+//              Rcpp::Rcout << "f1:                                " << std::flush << f1 << std::endl;
+//              Rcpp::Rcout << "f2:                                " << std::flush << f2 << std::endl;
+        
+        lower_bound = g1;
+        
+        g1=g2;
+        
+        f1=f2;
+        
+        g2 = lower_bound + golden_ratio*(upper_bound - lower_bound);
+        
+        f2 = get_n(g2,trace_const, lambda_star, epsilon1,  epsilon_converge,gamma_star_lower,mu_const,beta_const);
+        
+        gap=upper_bound-lower_bound;
+        
+        }
+
+//          Rcpp::Rcout << "lower_bound  "  << std::endl <<  lower_bound <<std::endl;
+//          Rcpp::Rcout << "upper_bound  "  << std::endl <<  upper_bound <<std::endl;
+      
+            
       }
 
-    }
-
-
-    }
-
-    if(min==R_PosInf){
-      Rcpp::warning("Min Value After Lower Is Set is Positive Infinity");
-      
-    }
     
+    double gamma_star_temp2=(g1+g2)/2;
     
+    gammastar=  (g1+g2)/2;
     
-
-    a=(1/(1+golden))*(gamma_star_upper-gammastar_low2);
-    b=gamma_star_upper-a-gammastar_low2;
-    gammastar=gammastar_low2+a;
-
-    gamma_opt=gammastar;
-
-    // Iterate Golden Section search    
-
-//        Rcpp::Rcout << "gammastar_low2: Initial   "  << std::endl <<  gammastar_low2 <<std::endl;
-//        Rcpp::Rcout << "gamma_star_upper: Initial   "  << std::endl <<  gamma_star_upper <<std::endl;
-//        Rcpp::Rcout << "gamma_opt: Initial   "  << std::endl <<  gamma_opt <<std::endl;
+    min = get_n(gammastar,trace_const, lambda_star, epsilon1,  epsilon_converge,gamma_star_lower,mu_const,beta_const);
     
-//    Rcpp::Rcout << "high: Initial   "  << std::endl <<  high <<std::endl;
-//    Rcpp::Rcout << "min: Initial   "  << std::endl <<  min <<std::endl;
+    Rcpp::Rcout << "min: Out of Golden Section search"  << std::endl << min  << std::endl ;
     
-
-    for(int i=0;i<20;i++){
-
-//    Rcpp::Rcout << "Golden Section iter   "  << std::endl <<  i <<std::endl;
-      
-    a=gamma_opt-gammastar_low2;
-    b=gamma_star_upper-gamma_opt;
-
-    gammastar=gammastar_low2+(gamma_star_upper-gamma_opt);
-
-    
-//    Rcpp::Rcout << "gammastar:   "  << std::endl <<  gammastar <<std::endl;
-
-    
-    if(gammastar>gamma_star_upper){
-
-    }
-
-    val=get_n(gammastar,trace_const, lambda_star, epsilon1,  epsilon_converge,gamma_star_lower,mu_const,beta_const);
-
-
-//    Rcpp::Rcout << "value at gammastar:   "  << std::endl <<  val <<std::endl;
-    
-    
-    if(b>a){
-            if(val>min){
-  
-            gamma_star_upper=gammastar;
-//              high=val;
-            }
-              
-            if(val<min){  
-
-            gammastar_low2=gamma_opt;
-//            low=min;
-            min=val;
-            gamma_opt=gammastar;
-
-          }
-    }
-
-    if(b<a){
-            if(val>min){
-
-              gammastar_low2=gammastar;
-//              low=val;
-
-            }
-            if(val<min){  
-              
-            gamma_star_upper=gamma_opt;
-//            high=min;
-            min=val;
-            gamma_opt=gammastar;
-
-          }
-        
-
-    }
-
-//    Rcpp::Rcout << "gammastar_low2: Irevised  "  << std::endl <<  gammastar_low2 <<std::endl;
-//    Rcpp::Rcout << "gamma_star_upper: revised   "  << std::endl <<  gamma_star_upper <<std::endl;
-//    Rcpp::Rcout << "gamma_opt: revised   "  << std::endl <<  gamma_opt <<std::endl;
-    
-    
-//    Rcpp::Rcout << "Min: Revised   "  << std::endl <<  min <<std::endl;
-    
-    
-    }
     
 
     // Return Final Estimate of gammastar
@@ -2433,6 +2592,9 @@ double gamma_star_lower,double mu_const, double beta_const){
 
   
 }
+
+
+
 
 
 Rcpp::List set_nstar(NumericMatrix x, NumericMatrix P, NumericMatrix P_0,
@@ -2489,17 +2651,16 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
     double  epsilon1=sqrt(det_P_Lower/det_P_Upper);
 
 
-    double  det_XTPX=det(XTPX);
+//    double  det_XTPX=det(XTPX);
+//    double  qc1=det_P_Upper/det_XTPX;
+//    double  qc2=det_P_Lower/det_XTPX;
     
-    double  qc1=det_P_Upper/det_XTPX;
-    double  qc2=det_P_Lower/det_XTPX;
-    
-    Rcpp::Rcout << "det_XTPX:     " << std::flush << det_XTPX << std::endl;
-    Rcpp::Rcout << "qc1:     " << std::flush << qc1 << std::endl;
-    Rcpp::Rcout << "qc2:     " << std::flush << qc2 << std::endl;
-    Rcpp::Rcout << "det_P_Upper:     " << std::flush << det_P_Upper << std::endl;
-    Rcpp::Rcout << "det_P_Lower:     " << std::flush << det_P_Lower << std::endl;
-    Rcpp::Rcout << "epsilon1:     " << std::flush << epsilon1 << std::endl;
+//    Rcpp::Rcout << "det_XTPX:     " << std::flush << det_XTPX << std::endl;
+//    Rcpp::Rcout << "qc1:     " << std::flush << qc1 << std::endl;
+//    Rcpp::Rcout << "qc2:     " << std::flush << qc2 << std::endl;
+//    Rcpp::Rcout << "det_P_Upper:     " << std::flush << det_P_Upper << std::endl;
+//    Rcpp::Rcout << "det_P_Lower:     " << std::flush << det_P_Lower << std::endl;
+//    Rcpp::Rcout << "epsilon1:     " << std::flush << epsilon1 << std::endl;
     
         
     
@@ -2551,7 +2712,7 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
 //    double log_A3=log(A3);
 //    double log_A3_2=-rstar1*exp(log(epsilon1)-gammastar);
 
-//    double alpha_out=(1+gammastar2)/(1+trace_const2+lambda_star*gammastar2);
+    double alpha_out=(1+gammastar2)/(1+trace_const2+lambda_star*gammastar2);
     double U_out=(1+trace_const2+2*lambda_star*gammastar2);
     double epsilon=exp(log(epsilon1)-beta_const2-gammastar2);
 //    double A1_out=(1-exp(log(epsilon1)-beta_const2-gammastar2));
@@ -2573,6 +2734,10 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
     double qc_lg_alpha_out2= -x3+0.5*x3*x3;
     
     
+          Rcpp::Rcout << "U_out"  << std::endl << U_out  << std::endl ;
+          Rcpp::Rcout << "alpha_out"  << std::endl << alpha_out  << std::endl ;
+          
+          
     //      Rcpp::Rcout << "x1"  << std::endl << x1  << std::endl ;
     //    Rcpp::Rcout << "x2"  << std::endl << x2  << std::endl ;
     //    Rcpp::Rcout << "lg_alpha_out"  << std::endl << lg_alpha_out  << std::endl ;
@@ -2599,6 +2764,7 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
     double log_A3_2=-rstar1*exp(log(epsilon1)-beta_const2-gammastar2);
     
     
+    
 
 // Adjustment in case log_A3=0 
 // May want to use even if log_A3 if only close to zero
@@ -2622,9 +2788,50 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
 
 //    double nstar=((log(epsilon_converge))-log(2+gammastar))/log_A3;
 //    double nstar=((log(epsilon_converge))-log(2+gamma_star_lower+mu_const(0)))/log_A3;
-    double nstar=((log(epsilon_converge))-log(2+gamma_star_lower2+mu_const2))/log_A3;
 
+
+// Initialize nstar 
+
+    double nstar=((log(epsilon_converge))-log(2+gamma_star_lower2+mu_const2))/log_A3;
     
+    double rstar2=golden_r(rstar1,0,epsilon, U_out,alpha_out,nstar, gammastar,t_star, mu_const(0));
+    
+
+    double nstar_temp=nstar;
+    
+//    get_epsilon1
+    double epsilon_temp=get_epsilon1( rstar2,epsilon, U_out,alpha_out,nstar,  gammastar,t_star, mu_const(0));
+
+    double epsilon_temp2=epsilon_temp;
+
+    while(epsilon_temp2<0.01){
+    
+    nstar_temp=nstar_temp/2;
+        
+    epsilon_temp2=get_epsilon1( rstar2,epsilon, U_out,alpha_out,nstar_temp,  gammastar,t_star, mu_const(0));
+    
+    }
+    
+
+    double upper_bound=nstar;
+    double lower_bound=nstar_temp;
+  
+  Rcpp::Rcout << "rstar_first:                                " << std::flush << rstar1 << std::endl;
+  Rcpp::Rcout << "nstar_first:                                " << std::flush << nstar << std::endl;
+  
+  
+  nstar=find_nstar(upper_bound,lower_bound,rstar2,
+                    epsilon,U_out, alpha_out,gammastar,t_star,mu_const(0));
+
+  rstar1=rstar2;
+
+  
+    Rcpp::Rcout << "rstar_Second:                                " << std::flush << rstar1 << std::endl;
+    Rcpp::Rcout << "nstar_Second:                                " << std::flush << nstar << std::endl;
+    
+  
+    
+
 
     double tau=1+2*((1/(1-sqrt(lambda_star))-1));
 
@@ -2642,10 +2849,11 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
     Rcpp::Rcout << "epsilonstar:                          " << std::flush << epsilon << std::endl;
     Rcpp::Rcout << ""  << std::fixed    ;
     Rcpp::Rcout << "rstar:                                " << std::flush << rstar1 << std::endl;
-    Rcpp::Rcout << "nstar:                                " << std::flush << nstar2 << std::endl;
+    Rcpp::Rcout << "nstar:                                " << std::flush << nstar << std::endl;
     Rcpp::Rcout << "sample size multiplier:               " << std::flush << tau << std::endl;
     Rcpp::Rcout << " " << std::endl;
 
+    
     Rcpp::List simconstants=Rcpp::List::create(
       Rcpp::Named("trace_const")=trace_const,
       Rcpp::Named("lambda_star")=lambda_star,
@@ -2657,7 +2865,7 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
       Rcpp::Named("tstar")=t_star,
       Rcpp::Named("epsilonstar")=epsilon,
       Rcpp::Named("rstar")=rstar1,
-      Rcpp::Named("nstar")=nstar2
+      Rcpp::Named("nstar")=nstar
     );  
     
     
@@ -2669,6 +2877,7 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
     
 
 
+    
     return(outlist);
 
     
@@ -2973,31 +3182,31 @@ arma::vec beta_star2=beta_stars(1);
 
     Rcpp::Rcout << " " << std::endl;
     Rcpp::Rcout << "############  Initial Constants for Convergence Bounds (assuming symmetry) ############" << std::endl;
-//    Rcpp::Rcout << "############  Testing 1" << std::endl;
-    
+
     Rcpp::Rcout.precision(5);
 
-//  Rcpp::Rcout << "############  Testing 2" << std::endl;
-    
     
     List nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_star2,mu_star2,beta_star,beta_star2,epsilon_converge);
 
-//    Rcpp::Rcout << "############  Testing 3" << std::endl;
 
     NumericVector temp3=nstar_lambda_star(0);
     double nstar=temp3(0);
 
+    
+    
     if (nstar-1>LLONG_MAX){
       Rcpp::stop("Number of Required Burn-in Iterations Exceeds Integer Long Long Limitations");
       
     } 
     
-
     
     temp3=nstar_lambda_star(1);
     
-    
+  
     double tau=temp3(0);
+  
+    Rcpp::List simconstants=nstar_lambda_star(2);
+  
     
     double uppern;
     uppern=nstar+n*tau+1;
@@ -3012,7 +3221,6 @@ arma::vec beta_star2=beta_stars(1);
     
 //    Rcpp::Rcout << "LLONG_MAX:         " << std::flush << LLONG_MAX << std::endl;
 //    Rcpp::Rcout << "ULONG_MAX:         " << std::flush << ULONG_MAX << std::endl;
-    
     
     
     if (uppern>LLONG_MAX){
@@ -3202,7 +3410,8 @@ Rcpp::Named("Prior")=Prior,
 Rcpp::Named("iters")=1,
 Rcpp::Named("famfunc")=famfunc,
 Rcpp::Named("dispersion")=dispersion,
-Rcpp::Named("loglike")=LL2
+Rcpp::Named("loglike")=LL2,
+Rcpp::Named("simconstants")=simconstants
 );  
   
   
