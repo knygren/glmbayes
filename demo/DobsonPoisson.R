@@ -34,7 +34,7 @@ mu<-matrix(0,5)
 P<-0.1   # Determines beta constant (Smaller values shrinks it  which helps convergence)
 P<-1.0*P
 
-m0<-5
+m0<-1.5
 
 m0/(1+m0) # Approximate prior weight
 

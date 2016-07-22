@@ -2096,7 +2096,8 @@ double find_nstar(double upper_bound,double lower_bound,double rstar2,
                   double epsilon,double U_out,double alpha_out,
                   double gammastar,
                   double t_star,
-                  double mu_const){
+                  double mu_const,
+                  double epsilon_converge){
   
   
   double golden_ratio = 2/(sqrt(5) + 1);
@@ -2110,12 +2111,12 @@ double find_nstar(double upper_bound,double lower_bound,double rstar2,
   // ### Evaluate the function at the test points
   
   double epsilon_temp2=get_epsilon1( rstar2,epsilon, U_out,alpha_out,n1,  gammastar,t_star, mu_const);
-  double  f1 = (epsilon_temp2-0.01)*(epsilon_temp2-0.01);
+  double  f1 = (epsilon_temp2-epsilon_converge)*(epsilon_temp2-epsilon_converge);
   
   
   
   epsilon_temp2=get_epsilon1( rstar2,epsilon, U_out,alpha_out,n2,  gammastar,t_star, mu_const);
-  double  f2 = (epsilon_temp2-0.01)*(epsilon_temp2-0.01);
+  double  f2 = (epsilon_temp2-epsilon_converge)*(epsilon_temp2-epsilon_converge);
   
   
   
@@ -2145,7 +2146,7 @@ double find_nstar(double upper_bound,double lower_bound,double rstar2,
       n1 = upper_bound - golden_ratio*(upper_bound - lower_bound);
       
       epsilon_temp2=get_epsilon1( rstar2,epsilon, U_out,alpha_out,n1,  gammastar,t_star, mu_const);
-      f1 = (epsilon_temp2-0.01)*(epsilon_temp2-0.01);
+      f1 = (epsilon_temp2-epsilon_converge)*(epsilon_temp2-epsilon_converge);
       
       gap=upper_bound-lower_bound;
     }
@@ -2169,7 +2170,7 @@ double find_nstar(double upper_bound,double lower_bound,double rstar2,
       n2 = lower_bound + golden_ratio*(upper_bound - lower_bound);
       
       epsilon_temp2=get_epsilon1( rstar2,epsilon, U_out,alpha_out,n2,  gammastar,t_star, mu_const);
-      f2 = (epsilon_temp2-0.01)*(epsilon_temp2-0.01);
+      f2 = (epsilon_temp2-epsilon_converge)*(epsilon_temp2-epsilon_converge);
       
       gap=upper_bound-lower_bound;
       
@@ -2308,7 +2309,7 @@ while(i<10){
     
     double epsilon_temp2=epsilon_temp;
     
-    while(epsilon_temp2<0.01){
+    while(epsilon_temp2<epsilon_converge){
       
       nstar_temp=nstar_temp/2;
       
@@ -2323,7 +2324,7 @@ while(i<10){
     
     
     nstar=find_nstar(upper_bound,lower_bound,rstar2,
-                     epsilon,U_out, alpha_out,gammastar,t_star,mu_const);
+                     epsilon,U_out, alpha_out,gammastar,t_star,mu_const,epsilon_converge);
 
 //    Rcpp::Rcout << "nstar:                                " << std::flush << nstar << std::endl;
     
@@ -2610,6 +2611,7 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
     arma::vec eigval;
     arma::mat eigvec;
     
+    
     eig_sym(eigval, eigvec, XTPX);
 
 
@@ -2620,6 +2622,12 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
 
     arma::mat InvXTPX_1_2=eigvec*eigvec2;
 
+    // Calculations of lambda_star should change if Data Precision is bounded from below
+    //  Need Matrix P_D so that 
+    //    arma::mat P_BB=P2+P_D;
+
+    
+    
     arma::mat P_AA=InvXTPX_1_2*P_Inner*InvXTPX_1_2;
     arma::mat P_AB=-InvXTPX_1_2*PX.t();
     arma::mat P_BA=P_AB.t();
@@ -2633,7 +2641,10 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
 
     arma::mat P_Initial=P_0b+XTPX;    
     
-        
+    // P_Lower calculations should change if Data Precision is bounded from below
+    //  Need Matrix P_D so that 
+    //      arma::mat P_Lower=P_Initial-PX.t()*inv_sympd(P2+P_D+PX*inv_sympd(P_Initial)*PX.t())*PX;
+
         
     arma::mat P_Upper=P_0b+XTPX;    
     arma::mat P_Lower=P_Initial-PX.t()*inv_sympd(P2+PX*inv_sympd(P_Initial)*PX.t())*PX;
@@ -2655,7 +2666,8 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
 //    Rcpp::Rcout << "epsilon1:     " << std::flush << epsilon1 << std::endl;
     
         
-    
+    // Verify Calculation for W_1_2 
+    // needs to be edited if P_D is added to calculation 
     
     eigvec2=eigvec.t();
     
