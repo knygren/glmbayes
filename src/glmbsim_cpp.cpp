@@ -2196,7 +2196,7 @@ double find_nstar(double upper_bound,double lower_bound,double rstar2,
 
 double get_n(double gammastar,double trace_const, double lambda_star,
 double epsilon1, double epsilon_converge,double gammastar_lower,double mu_const,
-double beta_const){
+double beta_const, int type=0 ){
 
     
     double t_star=sqrt(beta_const/gammastar);
@@ -2352,8 +2352,12 @@ while(i<10){
 //    Rcpp::Rcout << "nstar_Out:                                " << std::flush << nstar << std::endl;
 //    Rcpp::Rcout << "rstar_Out:                                " << std::flush << rstar1 << std::endl;
 
+    double out=nstar;
+    
+    if(type==1){out=rstar1;}
+    
             
-    return nstar;
+    return out;
 
 }
 
@@ -2386,8 +2390,8 @@ double gamma_star_lower,double mu_const, double beta_const){
 
 
  
- Rcpp::Rcout << "Gamma Opt: Initial Gammastar"  << std::endl << gammastar  << std::endl ;
- Rcpp::Rcout << "Gamma Opt: Initial n"  << std::endl << val  << std::endl ;
+// Rcpp::Rcout << "Gamma Opt: Initial Gammastar"  << std::endl << gammastar  << std::endl ;
+// Rcpp::Rcout << "Gamma Opt: Initial n"  << std::endl << val  << std::endl ;
  
     
     min=val;
@@ -2419,13 +2423,13 @@ double gamma_star_lower,double mu_const, double beta_const){
 
 //    Rcpp::Rcout << "check 1.1   "  << std::endl ;
     
-    Rcpp::Rcout << "gammastar:Proposed"  << std::endl << gammastar  << std::endl ;
+//    Rcpp::Rcout << "gammastar:Proposed"  << std::endl << gammastar  << std::endl ;
     
 // Temporarily edit this out        
     val=get_n(gammastar,trace_const, lambda_star, epsilon1,  epsilon_converge,gamma_star_lower,mu_const,beta_const);
 
 //    Rcpp::Rcout << "min-value"  << std::endl << min  << std::endl ;
-      Rcpp::Rcout << "proposed val at upper"  << std::endl << val  << std::endl ;
+//      Rcpp::Rcout << "proposed val at upper"  << std::endl << val  << std::endl ;
 
 
 //    Rcpp::Rcout << "check 1.2   "  << std::endl ;
@@ -2466,10 +2470,10 @@ double gamma_star_lower,double mu_const, double beta_const){
     double upper_bound=gammastar;
     
     
-    Rcpp::Rcout << "lower_bound  "  <<  std::endl << lower_bound <<std::endl;
-    Rcpp::Rcout << "upper_bound  "  <<  std::endl << upper_bound <<std::endl;
-    Rcpp::Rcout << "Value at current min  "  <<  std::endl << min <<std::endl;
-    Rcpp::Rcout << "Value at upper_bound  "  <<  std::endl << val <<std::endl;
+//    Rcpp::Rcout << "lower_bound  "  <<  std::endl << lower_bound <<std::endl;
+//    Rcpp::Rcout << "upper_bound  "  <<  std::endl << upper_bound <<std::endl;
+//    Rcpp::Rcout << "Value at current min  "  <<  std::endl << min <<std::endl;
+//    Rcpp::Rcout << "Value at upper_bound  "  <<  std::endl << val <<std::endl;
     
     
     if(min==R_PosInf){
@@ -2558,9 +2562,7 @@ double gamma_star_lower,double mu_const, double beta_const){
         
         }
 
-//          Rcpp::Rcout << "lower_bound  "  << std::endl <<  lower_bound <<std::endl;
-//          Rcpp::Rcout << "upper_bound  "  << std::endl <<  upper_bound <<std::endl;
-      
+
             
       }
 
@@ -2568,16 +2570,14 @@ double gamma_star_lower,double mu_const, double beta_const){
     gammastar=  (g1+g2)/2;
     
     min = get_n(gammastar,trace_const, lambda_star, epsilon1,  epsilon_converge,gamma_star_lower,mu_const,beta_const);
+    double rstar = get_n(gammastar,trace_const, lambda_star, epsilon1,  epsilon_converge,gamma_star_lower,mu_const,beta_const,1);
     
-    Rcpp::Rcout << "min: Out of Golden Section search"  << std::endl << min  << std::endl ;
-    
-    
-
     // Return Final Estimate of gammastar
 
     Rcpp::List outlist=Rcpp::List::create(
     Rcpp::Named("gammastar")=gammastar,
-            Rcpp::Named("nstar")=min);  
+            Rcpp::Named("nstar")=min,
+            Rcpp::Named("rstar")=rstar);  
 
 
     return(outlist);
@@ -2683,145 +2683,24 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
     NumericVector temp=golden_out(0);
     double gammastar=temp(0);
     temp=golden_out(1);
-    
+    double nstar=temp(0);
+    temp=golden_out(2);
+    double rstar1=temp(0);
+      
+        
 
     double t_star=sqrt(beta_const(0)/gammastar);
     double gammastar2=(1+t_star)*gammastar;
     double trace_const2=(1+t_star)*trace_const;
-    double mu_const2=(1+t_star)*mu_const(0);
+//    double mu_const2=(1+t_star)*mu_const(0);
     double beta_const2=0;
     if(t_star>0) beta_const2=beta_const(0)/t_star;
-    double gamma_star_lower2=(1+t_star)*gamma_star_lower;
-      
-    
-//    double alpha_out=(1+gammastar)/(1+trace_const+lambda_star*gammastar);
-//    double U_out=(1+trace_const+2*lambda_star*gammastar);
-//    double epsilon=exp(log(epsilon1)-gammastar);
-//    double A1_out=(1-exp(log(epsilon1)-gammastar));  
-//    double rstar1=log(alpha_out)/(log(U_out)+log(alpha_out)-log(A1_out));
-//    double A3=pow(A1_out,rstar1);
-//    double log_A3=log(A3);
-//    double log_A3_2=-rstar1*exp(log(epsilon1)-gammastar);
 
+  
     double alpha_out=(1+gammastar2)/(1+trace_const2+lambda_star*gammastar2);
     double U_out=(1+trace_const2+2*lambda_star*gammastar2);
     double epsilon=exp(log(epsilon1)-beta_const2-gammastar2);
-//    double A1_out=(1-exp(log(epsilon1)-beta_const2-gammastar2));
-    double lg_A1_out=log(1-exp(log(epsilon1)-beta_const2-gammastar2));
-    
-    double x1=exp(log(epsilon1)-beta_const2-gammastar2);
-    double qc_lg_A1_out=-x1-0.5*x1*x1;
-  
-    if(lg_A1_out>-2.47036e-012)
-    {
-      lg_A1_out=-2.47036e-012;
-      if(qc_lg_A1_out>-2.47036e-012)  lg_A1_out=qc_lg_A1_out;
       
-    }
-    
-    double lg_alpha_out=log(1+(1/gammastar2))-log(lambda_star+( (1+trace_const2)/gammastar2));
-    double x3=((lambda_star-1)+ (trace_const2)/gammastar2);
-    
-    double qc_lg_alpha_out2= -x3+0.5*x3*x3;
-    
-    
-          Rcpp::Rcout << "U_out"  << std::endl << U_out  << std::endl ;
-          Rcpp::Rcout << "alpha_out"  << std::endl << alpha_out  << std::endl ;
-          
-          
-    //      Rcpp::Rcout << "x1"  << std::endl << x1  << std::endl ;
-    //    Rcpp::Rcout << "x2"  << std::endl << x2  << std::endl ;
-    //    Rcpp::Rcout << "lg_alpha_out"  << std::endl << lg_alpha_out  << std::endl ;
-    
-    
-    if (lg_alpha_out<5.00028e-014){
-      
-      lg_alpha_out=5.00028e-014;
-      if(qc_lg_alpha_out2<5.00028e-014) lg_alpha_out=qc_lg_alpha_out2;
-      
-    } 
-    
-  
-    
-//    double rstar1=log(alpha_out)/(log(U_out)+log(alpha_out)-log(A1_out));
-//    double A3=pow(A1_out,rstar1);
-//    double log_A3=log(A3);
-//    double log_A3_2=-rstar1*exp(log(epsilon1)-beta_const2-gammastar2);
-
-
-    double rstar1=lg_alpha_out/(log(U_out)+lg_alpha_out-lg_A1_out);
-//    double A3=pow(A1_out,rstar1);
-    double log_A3=rstar1*lg_A1_out;
-    double log_A3_2=-rstar1*exp(log(epsilon1)-beta_const2-gammastar2);
-    
-    
-    
-
-// Adjustment in case log_A3=0 
-// May want to use even if log_A3 if only close to zero
-
-    if(log_A3==0){
-          log_A3=log_A3_2;
-    }
-
-    if (log_A3==0){
-      Rcpp::stop("Function Returned positive infinity");
-      
-    } 
-    
-    
-    
-    
-//      W_1_2
-
-//    Rcpp::Rcout << "gamma_star_lower" << std::endl << gamma_star_lower << std::endl;
-
-
-//    double nstar=((log(epsilon_converge))-log(2+gammastar))/log_A3;
-//    double nstar=((log(epsilon_converge))-log(2+gamma_star_lower+mu_const(0)))/log_A3;
-
-
-// Initialize nstar 
-
-    double nstar=((log(epsilon_converge))-log(2+gamma_star_lower2+mu_const2))/log_A3;
-    
-    double rstar2=golden_r(rstar1,0,epsilon, U_out,alpha_out,nstar, gammastar,t_star, mu_const(0));
-    
-
-    double nstar_temp=nstar;
-    
-//    get_epsilon1
-    double epsilon_temp=get_epsilon1( rstar2,epsilon, U_out,alpha_out,nstar,  gammastar,t_star, mu_const(0));
-
-    double epsilon_temp2=epsilon_temp;
-
-    while(epsilon_temp2<0.01){
-    
-    nstar_temp=nstar_temp/2;
-        
-    epsilon_temp2=get_epsilon1( rstar2,epsilon, U_out,alpha_out,nstar_temp,  gammastar,t_star, mu_const(0));
-    
-    }
-    
-
-    double upper_bound=nstar;
-    double lower_bound=nstar_temp;
-  
-  Rcpp::Rcout << "rstar_first:                                " << std::flush << rstar1 << std::endl;
-  Rcpp::Rcout << "nstar_first:                                " << std::flush << nstar << std::endl;
-  
-  
-  nstar=find_nstar(upper_bound,lower_bound,rstar2,
-                    epsilon,U_out, alpha_out,gammastar,t_star,mu_const(0));
-
-  rstar1=rstar2;
-
-  
-    Rcpp::Rcout << "rstar_Second:                                " << std::flush << rstar1 << std::endl;
-    Rcpp::Rcout << "nstar_Second:                                " << std::flush << nstar << std::endl;
-    
-  
-    
 
 
     double tau=1+2*((1/(1-sqrt(lambda_star))-1));
@@ -2839,6 +2718,8 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
     Rcpp::Rcout << ""  << std::scientific    ;
     Rcpp::Rcout << "epsilonstar:                          " << std::flush << epsilon << std::endl;
     Rcpp::Rcout << ""  << std::fixed    ;
+    Rcpp::Rcout << "alpha:                                " << std::flush << alpha_out << std::endl;
+    Rcpp::Rcout << "U:                                    " << std::flush << U_out << std::endl;
     Rcpp::Rcout << "rstar:                                " << std::flush << rstar1 << std::endl;
     Rcpp::Rcout << "nstar:                                " << std::flush << nstar << std::endl;
     Rcpp::Rcout << "sample size multiplier:               " << std::flush << tau << std::endl;

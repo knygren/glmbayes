@@ -133,6 +133,23 @@ qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
 
 
 
+ftemp<-function(b,y1,y2){
+  
+  
+  p<-exp(b)/(1+exp(b))
+
+  
+  f<-(p^y1)*(1-p)^y2
+  
+  return(f)
+    
+}
+
+
+ftemp(0,1,1)
+
+integrate(ftemp,-10,+10,2,1)
+
 
 trace_constant<-qc1$simconstants$trace_const
 lambda_star<-qc1$simconstants$lambda_star
