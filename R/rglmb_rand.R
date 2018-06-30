@@ -157,13 +157,29 @@ rglmb_rand.default<-function(n=1,y,x,mu,P_0,P,wt=1,dispersion=NULL,
   
   
   
+  #    NumericMatrix PD(l2,l2);
+  
+  
+
+  
+  #    wt_D=0
+      
+      
+  #    for(i in 1:nobs){
+        
+  #      if(wt_D>PD[i,i]/(P+PD[i,i])) PD[i,i]=wt_D*P/(1-wt_D);
+  #    }
+      
+      
+  PD<-diag(1,nobs,nobs)
+      
   
   outlist<-rglmb_rand_cpp(n=n,y=y,x=x,
                         mu=mu,P_0=P_0,P=P,offset2=offset2
                         ,wt=wt,
                         dispersion=dispersion,
                         famfunc=famfunc,f1=f1,f2=f2,f3=f3,
-                        start=mu,family=family$family,link=family$link,Gridtype=Gridtype,
+                        start=mu,PD=PD,family=family$family,link=family$link,Gridtype=Gridtype,
                         epsilon_converge=epsilon_converge) 
   
   colnames(outlist$coefficients)<-colnames(x)

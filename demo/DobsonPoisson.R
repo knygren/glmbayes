@@ -1,3 +1,5 @@
+rm(list = ls())
+
 ## Dobson (1990) Page 93: Randomized Controlled Trial :
 counts <- c(18,17,15,20,10,20,25,13,12)
 outcome <- gl(3,1,9)
@@ -8,6 +10,8 @@ n<-1000
 mysd<-1
 
 mu<-matrix(0,5)
+
+
 V0<-((mysd)^2)*diag(5)
 
 glm.D93 <- glm(counts ~ outcome + treatment, family = poisson(),x=TRUE)
@@ -31,10 +35,25 @@ wt2<-wt1/dispersion
 alpha1<-rep(0,length(y))
 mu<-matrix(0,5)
 
-P<-0.1   # Determines beta constant (Smaller values shrinks it  which helps convergence)
+mu[1]<-log(mean(counts))
+
+1/var(log(counts))
+
+P<-12   # Determines beta constant (Smaller values shrinks it  which helps convergence)
+P<-12   # Determines beta constant (Smaller values shrinks it  which helps convergence)
+
+#P<-1
+y
+
+
+
 P<-1.0*P
 
-m0<-1.5
+pwt<-0.2
+
+m0<-pwt/(1-pwt)
+
+#m0<-1.5
 
 m0/(1+m0) # Approximate prior weight
 
@@ -42,26 +61,29 @@ P*t(x)%*%x
 P_0<-as.matrix(m0*P*t(x)%*%x)
 
 P_0
+log(counts)
 
+library(mnormt)
 
 qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
                 nu=NULL,V=NULL,family=poisson(log),offset2=alpha1,start=mu,Gridtype=3,
                 epsilon_converge=0.01)
 
 
+
+
 summary(qc1)
-
-
 
 summary(qc1$randcoefficients)
 
 
 library(coda)
 
-
 mcmcout<-mcmc(qc1$coefficients)
 plot(mcmcout)
 
+effectiveSize(mcmcout)
+autocorr.plot(mcmcout)
 
 
 mcmcout2<-mcmc(qc1$randcoefficients)
@@ -73,72 +95,6 @@ effectiveSize(mcmcout2)
 autocorr.plot(mcmcout2)
 
 
-
-densplot(mcmcout2)
-
-
-
-
-library(plotly)
-library(coda)
-
-
-
-tm <- seq(1, 100, by = 10)
-
-plot_ly(x = c(1:100), y = qc1$coefficients[1:100,1], text = paste(tm, "Iteration"))
-
-hist(qc1$coefficients[1:100,1],prob=TRUE)
-
-lines(density(qc1$coefficients[1:100,1]))
-
-hist(qc1$coefficients[1:100,2],prob=TRUE)
-
-lines(density(qc1$coefficients[1:100,2]))
-
-hist(qc1$coefficients[1:100,3],prob=TRUE)
-
-lines(density(qc1$coefficients[1:100,3]))
-
-hist(qc1$coefficients[1:100,4],prob=TRUE)
-
-lines(density(qc1$coefficients[1:100,4]))
-
-
-plot_ly(x = c(1:100), y = qc1$coefficients[1:100,2], text = paste(tm, "Iteration"))
-
-plot_ly(x = c(1:100), y = qc1$coefficients[1:100,3], text = paste(tm, "Iteration"))
-
-
-plot_ly(x = c(1:100), y = qc1$coefficients[1:100,4], text = paste(tm, "Iteration"))
-
-
-plot_ly(x = c(1:3732), y = qc1$coefficients[1:3732,1], text = paste(tm, "Iteration"))
-
-plot_ly(x = c(1:1000), y = qc1$coefficients[1:1000,1], text = paste(tm, "Iteration"))
-
-hist(qc1$coefficients[1:1000,1],prob=TRUE)
-
-lines(density(qc1$coefficients[1:1000,1]))
-
-hist(qc1$coefficients[1:3732,1],prob=TRUE)
-
-lines(density(qc1$coefficients[1:3732,1]))
-
-hist(qc1$coefficients[1:1000,2],prob=TRUE)
-
-lines(density(qc1$coefficients[1:1000,2]))
-
-hist(qc1$coefficients[1:3732,2],prob=TRUE)
-
-lines(density(qc1$coefficients[1:3732,2]))
-
-
-
-
-library(ggplot2)
-
-help(plot)
 
 XTPX<-t(x)%*%(P*diag(9))%*%x
 

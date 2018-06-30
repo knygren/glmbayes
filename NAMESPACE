@@ -1,5 +1,5 @@
 useDynLib(glmbayes)
-import(RcppArmadillo)
+import(RcppArmadillo,mnormt)
 importFrom(Rcpp, evalCpp)
 importFrom("stats", ".getXlevels", "binomial", "coef", "dbinom",
              "dgamma", "dnorm", "dpois", "gaussian", "is.empty.model",

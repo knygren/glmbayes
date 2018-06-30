@@ -42,8 +42,25 @@ if(family$family=="gaussian")
 	f5<-f2_gaussian
 	f6<-f3_gaussian
 	
-  
-  
+	f7<-function(b,y,x,mu,P,alpha=0,wt=1){
+	  l2<-length(y)
+	  ltemp<-length(wt)
+	  yxb2<-NULL
+	  if(ltemp==1){
+	    Ptemp<-wt*diag(l2)
+	  }
+	  else {
+	    Ptemp<-diag(wt)      
+	  }
+	  Pout<-t(x)%*%(Ptemp)%*%x
+    Pout
+	}
+	
+	
+	  
+
+	
+	  
 	}
 
 # Check if Poisson weight should be outside or inside function
@@ -68,7 +85,23 @@ if(family$family=="poisson"||family$family=="quasipoisson")
 				}
   f5<-f2_poisson
   f6<-f3_poisson
-
+  
+  f7<-function(b,y,x,mu,P,alpha=0,wt=1){
+    l2<-length(y)
+    ltemp<-length(wt)
+    yxb2<-NULL
+    if(ltemp==1){
+      Ptemp<-wt*diag(l2)
+    }
+    else {
+      Ptemp<-diag(wt)      
+    }
+    Pout<-t(x)%*%(Ptemp)%*%x*exp(alpha+x%*%b)
+    Pout
+  }
+  
+  
+  
 	}
 
 if(family$family %in%  c("binomial","quasibinomial") && family$link=="logit")
@@ -92,7 +125,34 @@ if(family$family %in%  c("binomial","quasibinomial") && family$link=="logit")
 		}
   f5<-f2_binomial_logit
   f6<-f3_binomial_logit
-}
+
+  
+  f7<-function(b,y,x,mu,P,alpha=0,wt=1){
+    
+    l2<-length(y)
+    l1<-length(b)
+    ltemp<-length(wt)
+    if(ltemp==1){
+      Ptemp<-wt*diag(l2)
+    }
+    else {
+      Ptemp<-diag(wt)      
+    }
+    
+    p<-1/(1+t(exp(-alpha-x%*%b)))
+    
+    
+    Pout<-matrix(0,nrow=l1,ncol=l1)
+    
+    for(i in 1:l2){
+      Pout<-Pout+Ptemp[i,i]*p[i]*(1-p[i])*x[i,]%*%t(x[i,])
+                }
+    
+      Pout
+      }
+  
+  
+  }
 
 if(family$family %in%  c("binomial","quasibinomial") && family$link=="probit")
 	{
@@ -117,6 +177,37 @@ if(family$family %in%  c("binomial","quasibinomial") && family$link=="probit")
 		}
   f5<-f2_binomial_probit
   f6<-f3_binomial_probit
+
+  
+  ##########  This should be replaced!
+  
+  f7<-function(b,y,x,mu,P,alpha=0,wt=1){
+    
+    l2<-length(y)
+    l1<-length(b)
+    ltemp<-length(wt)
+    if(ltemp==1){
+      Ptemp<-wt*diag(l2)
+    }
+    else {
+      Ptemp<-diag(wt)      
+    }
+    
+    p<-1/(1+t(exp(-alpha-x%*%b)))
+    
+    
+    Pout<-matrix(0,nrow=l1,ncol=l1)
+    
+    for(i in 1:l2){
+      Pout<-Pout+Ptemp[i,i]*p[i]*(1-p[i])*x[i,]%*%t(x[i,])
+    }
+    
+    Pout
+  }
+  
+  
+  
+    
 
 	}
 if(family$family %in%  c("binomial","quasibinomial") && family$link=="cloglog")
@@ -144,6 +235,34 @@ if(family$family %in%  c("binomial","quasibinomial") && family$link=="cloglog")
   f5<-f2_binomial_cloglog
   f6<-f3_binomial_cloglog
 
+  ##########  This should be replaced!
+  
+  f7<-function(b,y,x,mu,P,alpha=0,wt=1){
+    
+    l2<-length(y)
+    l1<-length(b)
+    ltemp<-length(wt)
+    if(ltemp==1){
+      Ptemp<-wt*diag(l2)
+    }
+    else {
+      Ptemp<-diag(wt)      
+    }
+    
+    p<-1/(1+t(exp(-alpha-x%*%b)))
+    
+    
+    Pout<-matrix(0,nrow=l1,ncol=l1)
+    
+    for(i in 1:l2){
+      Pout<-Pout+Ptemp[i,i]*p[i]*(1-p[i])*x[i,]%*%t(x[i,])
+    }
+    
+    Pout
+  }
+  
+  
+  
 }
 if(family$family=="Gamma" && family$link=="log")
 	{
@@ -177,12 +296,41 @@ if(family$family=="Gamma" && family$link=="log")
   f5<-f2_gamma
   f6<-f3_gamma
 
+  ##########  This should be replaced!
+  
+  f7<-function(b,y,x,mu,P,alpha=0,wt=1){
+    
+    l2<-length(y)
+    l1<-length(b)
+    ltemp<-length(wt)
+    if(ltemp==1){
+      Ptemp<-wt*diag(l2)
+    }
+    else {
+      Ptemp<-diag(wt)      
+    }
+    
+    p<-1/(1+t(exp(-alpha-x%*%b)))
+    
+    
+    Pout<-matrix(0,nrow=l1,ncol=l1)
+    
+    for(i in 1:l2){
+      Pout<-Pout+Ptemp[i,i]*p[i]*(1-p[i])*x[i,]%*%t(x[i,])
+    }
+    
+    Pout
+  }
+  
+  
 
 	}	
 
-	list(f1=f1,f2=f2,f3=f3,f4=f4,f5=f5,f6=f6)
+	list(f1=f1,f2=f2,f3=f3,f4=f4,f5=f5,f6=f6,f7=f7)
 	
 }
+
+
 
 
 

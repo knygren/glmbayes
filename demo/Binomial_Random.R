@@ -48,13 +48,13 @@ sqrt(1/P)
 # Smaller P improves convergence
 
 
-P<-0.1 # Seems to impact on beta_constant but not trace constant, lambda star, or epsilon1 
+P<-10 # Seems to impact on beta_constant but not trace constant, lambda star, or epsilon1 
 
 # Smaller P allows tstar to be smaller so that adjusted trace_constant and adjusted gammstar
 # can be kept closer to unadjusted values
 
 
-pwt<-0.7
+pwt<-0.1
 
 m0<-pwt/(1-pwt)
 
@@ -71,36 +71,7 @@ lambdastar<-1/(m0+1)   # Lambdastar will equal this (1-prior weight)
 P_0<-as.matrix(m0*P*t(x)%*%x)
 P_0
 
-#det(P*t(x)%*%x)
 
-
-#det(P_0+P*t(x)%*%x)
-
-#det(P_0+P*t(x)%*%x)/det(P*t(x)%*%x)
-
-#(1+m0)^4
-#((m0+1)-((m0+1)/(m0+2)))^4
-
-
-
-
-#P_0<-0.01*P_0
-
-# Note: Larger P_0 improves convergence
-#P_0<-100*P_0
-
-
-# lg_A1_out_New Fails for this 
-
-#P_0<-4*P_0
-
-# lg_A1_out Fails for this 
-
-#P_0<-10*P_0
-
-# Lg_alpha_out fails for this
-
-#P_0<-0.0001*P_0
 
 num1<-length(P_0[,1])
 denom1<-(m0+1)-((m0+1)/(m0+2))
@@ -134,6 +105,10 @@ qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
 
 
 
+
+qc1$randPostMode
+
+
 trace_constant<-qc1$simconstants$trace_const
 lambda_star<-qc1$simconstants$lambda_star
 gammastar<-qc1$simconstants$gammastar
@@ -156,7 +131,7 @@ alpha_out
 
 
 summary(qc1)
-
+summary(qc1$randcoefficients)
 
 library(coda)
 
@@ -164,10 +139,16 @@ library(coda)
 mcmcout<-mcmc(qc1$coefficients)
 plot(mcmcout)
 
+effectiveSize(mcmcout)
+autocorr.plot(mcmcout)
 
 
 mcmcout2<-mcmc(qc1$randcoefficients)
 plot(mcmcout2)
+
+
+effectiveSize(mcmcout2)
+autocorr.plot(mcmcout2)
 
 
 
@@ -197,6 +178,65 @@ table(mean=mean1,sd=stdev1)
 
 #############################  Probit #############################
 
+P<-14.02
+sqrt(1/P)
+
+# Smaller P improves convergence
+
+
+#P<-8 # Seems to impact on beta_constant but not trace constant, lambda star, or epsilon1 
+
+# Smaller P allows tstar to be smaller so that adjusted trace_constant and adjusted gammstar
+# can be kept closer to unadjusted values
+
+
+pwt<-0.1
+
+m0<-pwt/(1-pwt)
+
+
+# Trace constant gets larger as m0 decreases
+# epsilon1 gets smaller as m0 decreases
+
+lambdastar<-1/(m0+1)   # Lambdastar will equal this (1-prior weight)
+
+#lambdastar
+
+
+#P_0<-diag(4)
+P_0<-as.matrix(m0*P*t(x)%*%x)
+P_0
+
+
+
+num1<-length(P_0[,1])
+denom1<-(m0+1)-((m0+1)/(m0+2))
+
+trace_constant<-num1/denom1
+
+trace_constant
+
+gammastar_Lower<-trace_constant/(1-lambdastar)
+
+gammastar_Lower
+
+
+
+epsilon1<-sqrt(((m0+1)-((m0+1)/(m0+2)))^4/(1+m0)^4)
+epsilon1
+
+epsilon1*exp(-gammastar_Lower)
+
+
+1-epsilon1*exp(-gammastar_Lower)
+
+
+
+
+## Need to investigate why a large number of additional iterations end up being required
+## beta_Constant ends up much larger second time around
+
+
 start.timeE<-Sys.time()
 
 qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
@@ -204,6 +244,27 @@ qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
                 epsilon_converge=0.01)
 
 end.timeE<-Sys.time()
+
+
+summary(qc1)
+summary(qc1$randcoefficients)
+
+library(coda)
+
+
+mcmcout<-mcmc(qc1$coefficients)
+plot(mcmcout)
+
+effectiveSize(mcmcout)
+autocorr.plot(mcmcout)
+
+
+mcmcout2<-mcmc(qc1$randcoefficients)
+plot(mcmcout2)
+
+
+effectiveSize(mcmcout2)
+autocorr.plot(mcmcout2)
 
 
 time.takenE<-end.timeE-start.timeE
@@ -217,11 +278,65 @@ for(i in 1:4){
 }
 
 frame2<-data.frame(m1,s1)
-
 frame2
 
 
+
+
 ##############################   Cloglog ######################################
+
+P<-14.02
+sqrt(1/P)
+
+# Smaller P improves convergence
+
+
+P<-5 # Seems to impact on beta_constant but not trace constant, lambda star, or epsilon1 
+
+# Smaller P allows tstar to be smaller so that adjusted trace_constant and adjusted gammstar
+# can be kept closer to unadjusted values
+
+
+pwt<-0.1
+
+m0<-pwt/(1-pwt)
+
+
+# Trace constant gets larger as m0 decreases
+# epsilon1 gets smaller as m0 decreases
+
+lambdastar<-1/(m0+1)   # Lambdastar will equal this (1-prior weight)
+
+#lambdastar
+
+
+#P_0<-diag(4)
+P_0<-as.matrix(m0*P*t(x)%*%x)
+P_0
+
+
+
+num1<-length(P_0[,1])
+denom1<-(m0+1)-((m0+1)/(m0+2))
+
+trace_constant<-num1/denom1
+
+trace_constant
+
+gammastar_Lower<-trace_constant/(1-lambdastar)
+
+gammastar_Lower
+
+
+
+epsilon1<-sqrt(((m0+1)-((m0+1)/(m0+2)))^4/(1+m0)^4)
+epsilon1
+
+epsilon1*exp(-gammastar_Lower)
+
+
+1-epsilon1*exp(-gammastar_Lower)
+
 
 start.timeE<-Sys.time()
 
@@ -230,6 +345,11 @@ qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
                 epsilon_converge=0.01)
 
 end.timeE<-Sys.time()
+
+
+
+
+
 time.takenE<-end.timeE-start.timeE
 print("Time taken for C Version")
 print(time.takenE)

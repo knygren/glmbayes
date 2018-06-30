@@ -470,8 +470,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // rglmb_rand_cpp
-Rcpp::List rglmb_rand_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P_0, NumericMatrix P, NumericVector offset2, NumericVector wt, double dispersion, Rcpp::List famfunc, Function f1, Function f2, Function f3, NumericVector start, std::string family, std::string link, int Gridtype, double epsilon_converge);
-RcppExport SEXP glmbayes_rglmb_rand_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP P_0SEXP, SEXP PSEXP, SEXP offset2SEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP famfuncSEXP, SEXP f1SEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP, SEXP epsilon_convergeSEXP) {
+Rcpp::List rglmb_rand_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P_0, NumericMatrix P, NumericVector offset2, NumericVector wt, double dispersion, Rcpp::List famfunc, Function f1, Function f2, Function f3, NumericVector start, NumericMatrix PD, std::string family, std::string link, int Gridtype, double epsilon_converge);
+RcppExport SEXP glmbayes_rglmb_rand_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP P_0SEXP, SEXP PSEXP, SEXP offset2SEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP famfuncSEXP, SEXP f1SEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP PDSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP, SEXP epsilon_convergeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -489,11 +489,12 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Function >::type f2(f2SEXP);
     Rcpp::traits::input_parameter< Function >::type f3(f3SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type start(startSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type PD(PDSEXP);
     Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
     Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
     Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
     Rcpp::traits::input_parameter< double >::type epsilon_converge(epsilon_convergeSEXP);
-    __result = Rcpp::wrap(rglmb_rand_cpp(n, y, x, mu, P_0, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype, epsilon_converge));
+    __result = Rcpp::wrap(rglmb_rand_cpp(n, y, x, mu, P_0, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, PD, family, link, Gridtype, epsilon_converge));
     return __result;
 END_RCPP
 }

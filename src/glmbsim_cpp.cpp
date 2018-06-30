@@ -439,7 +439,12 @@ std::string family="binomial",
       for(j=0;j<l1;j++){
         xb(j)=1/(1+xb(j));  
         xrow2=x2.row(j);
-        Ptemp2=Ptemp2+wt(j)*xb(j)*(1-xb(j))*trans(xrow2)*xrow2;}
+
+        Ptemp2=Ptemp2+wt(j)*xb(j)*(1-xb(j))*trans(xrow2)*xrow2;
+
+//Ptemp2(j,j)=Ptemp2(j,j)+wt(j)*xb(j)*(1-xb(j))*trans(xrow2)*xrow2;
+}
+  
   
     if(arma::is_finite(bstar2)){
       b2=inv_sympd(Ptemp2)*((Ptemp2-P2)*bstar2+P2*mu2); 
@@ -1155,12 +1160,15 @@ std::string family="binomial",
         NumericVector p2(l1);
         NumericVector d1(l1);
 
-
+  // Moved to before the evaluation of p1,p2, d1 (after likely problematic - Could be cause of weird earlier behavior)
+  
+        xbtemp2=alpha2+ x2 * b2;
+        
         p1=pnorm(xbtemp,0.0,1.0);
         p2=pnorm(-xbtemp,0.0,1.0);
         d1=dnorm(xbtemp,0.0,1.0);
 
-        xbtemp2=alpha2+ x2 * b2;
+//        xbtemp2=alpha2+ x2 * b2;
 
       // Edit (Hessian)
       for(int j=0;j<l1;j++){
@@ -2586,13 +2594,34 @@ double gamma_star_lower,double mu_const, double beta_const){
   
 }
 
+arma::mat Mat_pow(arma::mat A, double k){
+  
+  int l1=A.n_rows;
+//  int l2=A.n_cols;
 
+  arma::vec eigval;
+  arma::mat eigvec;
+  
+  eig_sym(eigval, eigvec, A);
+  arma::mat eigvecb=eigvec.t();
+  
+  for(int i=0;i<l1;i++)    eigvecb.row(i)=eigvecb.row(i)*pow(eigval(i),k);
+  arma::mat B=eigvec*eigvecb;
+  
+
+  return(B);
+}
 
 
 
 Rcpp::List set_nstar(NumericMatrix x, NumericMatrix P, NumericMatrix P_0,
-arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,double epsilon_converge){
+arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,double epsilon_converge,
+NumericMatrix PD){
 
+  
+    // Temporary
+    
+//    double m_D=1; // Scale to apply to P2 in order to temporarily generate P_D
 
     int l1=x.ncol();
 
@@ -2601,39 +2630,78 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
     arma::mat P_0b(P_0.begin(), P_0.nrow(), P_0.ncol(), false);
     arma::mat PX=P2*x2;
     arma::mat XTPX=x2.t()*PX;
+    
+    
+    // Temporary
+    
+    arma::mat P_D(PD.begin(),PD.nrow(),PD.ncol(),false);
+//    arma::mat P_D=m_D*P2;   // Temporarily set P_D equal to m_D*P2
+    arma::mat V_temp=inv_sympd(P2+P_D);
+
+    arma::mat W=x2.t()*P2*inv_sympd(P2+P_D)*PX;
+    
+    // take square root of P
+    
+//    arma::mat P_1_2=Mat_pow(P2,0.5);
+    
+        
+    
     arma::mat P_Inner=P_0b+XTPX;
     arma::vec mu_diff=mu_0-mu_star;
-    arma::vec mu_const=0.5*mu_diff.t()*XTPX*mu_diff;
+//    arma::vec mu_const=0.5*mu_diff.t()*XTPX*mu_diff; // Old Calculation
+    arma::vec mu_const=0.5*mu_diff.t()*W*mu_diff; // Revised Calculation
+
     arma::vec beta_diff=beta_star2-beta_star;
     
-    arma::vec beta_const=0.5*beta_diff.t()*PX*inv_sympd(XTPX)*PX.t()*beta_diff;
+//    arma::vec beta_const=0.5*beta_diff.t()*PX*inv_sympd(XTPX)*PX.t()*beta_diff; // Old Calculation
+    arma::vec beta_const=0.5*beta_diff.t()*PX*inv_sympd(W)*PX.t()*beta_diff; // New Calculation
+
       
     arma::vec eigval;
     arma::mat eigvec;
     
+      
     
     eig_sym(eigval, eigvec, XTPX);
-
 
     arma::mat eigvec2=eigvec.t();
 
       for(int i=0;i<l1;i++)    eigvec2.row(i)=eigvec2.row(i)/sqrt(eigval(i));
 
-
     arma::mat InvXTPX_1_2=eigvec*eigvec2;
 
+    
+    arma::mat InvW_1_2=Mat_pow(W,-0.5);
+    
+    
     // Calculations of lambda_star should change if Data Precision is bounded from below
     //  Need Matrix P_D so that 
     //    arma::mat P_BB=P2+P_D;
 
     
-    
-    arma::mat P_AA=InvXTPX_1_2*P_Inner*InvXTPX_1_2;
-    arma::mat P_AB=-InvXTPX_1_2*PX.t();
-    arma::mat P_BA=P_AB.t();
-    arma::mat P_BB=P2;
-    arma::mat P2_AB=inv_sympd(P_AA)*P_AB*inv_sympd(P_BB)*P_BA;
-    
+      // Old Calculations
+      
+//    arma::mat P_AA=InvXTPX_1_2*P_Inner*InvXTPX_1_2;
+//    arma::mat P_AB=-InvXTPX_1_2*PX.t();
+//    arma::mat P_BA=P_AB.t();
+//    arma::mat P_BB=P2;
+//    arma::mat P2_AB=inv_sympd(P_AA)*P_AB*inv_sympd(P_BB)*P_BA;
+
+//    Revised Calculations
+
+
+      arma::mat P_AA=InvW_1_2*P_Inner*InvW_1_2;
+      arma::mat P_AB=-InvW_1_2*PX.t();
+      arma::mat P_BA=P_AB.t();
+      arma::mat P_BB=P2+P_D;
+      arma::mat P2_AB=inv_sympd(P_AA)*P_AB*inv_sympd(P_BB)*P_BA;
+
+
+//      W.print("W:");
+//      InvW_1_2.print("InvW_1_2:");
+//      P_AA.print("P_AA:");
+//      P_D.print("P_D:");
+//      P2_AB.print("P2_AB:");
 
     arma::vec  eigen_out=eig_sym(P2_AB.t()*P2_AB) ;
     
@@ -2647,8 +2715,14 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
 
         
     arma::mat P_Upper=P_0b+XTPX;    
-    arma::mat P_Lower=P_Initial-PX.t()*inv_sympd(P2+PX*inv_sympd(P_Initial)*PX.t())*PX;
-  
+    
+    // Old Calculation
+//    arma::mat P_Lower=P_Initial-PX.t()*inv_sympd(P2+PX*inv_sympd(P_Initial)*PX.t())*PX;
+
+//   New Calculation
+
+    arma::mat P_Lower=P_Initial-PX.t()*inv_sympd(P2+P_D+PX*inv_sympd(P_Initial)*PX.t())*PX;
+    
     double  det_P_Upper=det(P_Upper);
     double  det_P_Lower=det(P_Lower);
     double  epsilon1=sqrt(det_P_Lower/det_P_Upper);
@@ -2669,11 +2743,17 @@ arma::vec mu_0, arma::vec mu_star,arma::vec beta_star,arma::vec beta_star2,doubl
     // Verify Calculation for W_1_2 
     // needs to be edited if P_D is added to calculation 
     
-    eigvec2=eigvec.t();
     
-    for(int i=0;i<l1;i++)    eigvec2.row(i)=eigvec2.row(i)*sqrt(eigval(i));
+    // Old calculation
+    
+//    eigvec2=eigvec.t();
+    
+//    for(int i=0;i<l1;i++)    eigvec2.row(i)=eigvec2.row(i)*sqrt(eigval(i));
 
-    arma::mat W_1_2=eigvec*eigvec2;
+//    arma::mat W_1_2=eigvec*eigvec2;
+    
+    arma::mat W_1_2=Mat_pow(W,0.5);
+    
     
     double trace_const = trace(W_1_2*inv_sympd(P_Lower)*W_1_2);
     double gamma_star_lower=trace_const/(1-lambda_star);
@@ -2802,6 +2882,8 @@ void progress_bar2(double x, double N)
 }
 
 
+
+
 Rcpp::List set_beta_const(arma::mat x2,arma::vec offset2b,arma::vec mu_star2,
 int n,NumericVector y,NumericMatrix xtemp, 
 NumericVector mutemp,NumericMatrix P,NumericVector offset2,NumericVector wt,
@@ -2834,6 +2916,13 @@ NumericVector wt3,
       arma::vec mutemp2=x2*mu_star2;
       arma::vec alpha2=mutemp2+offset2b;
 
+      
+//      mutemp2.print("beta_star - inside function");
+
+//   Rcpp::Rcout << "mutemp2: Input         " << std::flush << mutemp2 << std::endl;
+      
+      
+            
   for(int i=0;i<1000;i++){
 
     Rcpp::checkUserInterrupt();
@@ -2932,12 +3021,119 @@ Rcpp::Named("beta_star2")=beta_star2);
 }
 
 
+//NumericMatrix Set_PD(NumericVector y, arma::vec b2,arma::vec wtb,int l2,std::string family="binomial",
+//                     std::string link="logit"){
+
+void Set_PD(const arma::vec& b2,const NumericVector& y, 
+                                         const arma::mat& alpha2,
+                                         const int& l1,const arma::mat& P2, const arma::mat& x2,
+                                         const NumericVector& wt,const NumericVector& xbtemp,arma::colvec& xbtemp2,
+                                         arma::mat& Pout2,
+                                         std::string family="binomial",
+                                         std::string link="logit"){
+    
+  // Initial Setup - Adjust to control for offset and X
+  
+//  Pout2.print("Pout2: Beginning of Set_PD FUnction");
+  
+  
+  int j;
+
+  /////////////////// binomial - logit /////////////////////////////
+  
+  
+  if(family=="binomial"&& link=="logit")
+  {
+
+
+    for(j=0;j<l1;j++){
+      
+//      xbtemp2(j)=exp(-alpha2(j)-x2(j,1)*b2(j));
+      xbtemp2(j)=exp(-alpha2(j)-b2(j));
+      xbtemp2(j)=1/(1+xbtemp2(j));      
+      Pout2(j,j)=wt(j)*xbtemp2(j)*(1-xbtemp2(j));
+                        } 
+    xbtemp2.print("xbtemp2: End of Logit");
+    
+//        Pout2.print("Pout2: End of Logit");
+    
+      }
+  
+  /////////////////// binomial - probit /////////////////////////////
+  
+  double d1;
+  double p1;
+  double p2;
+  
+  
+  if(family=="binomial"&& link=="probit")
+  {
+    
+    for(j=0;j<l1;j++){  
+//      xbtemp2(j)=alpha2(j)+x2(j,1)*b2(j);
+      xbtemp2(j)=alpha2(j)+b2(j);
+      d1=R::dnorm(xbtemp2(j),0,1,FALSE);
+      p1=R::pnorm(xbtemp2(j),0,1,TRUE,FALSE);
+      p2=R::pnorm(xbtemp2(j),0,1,FALSE,FALSE);
+      Pout2(j,j)=wt(j)*d1*((y[j]*(d1+xbtemp2(j)*p1)/(p1*p1))+((1-y[j])*(d1-xbtemp2(j)*p2)/(p2*p2))   );
+    }
+  }
+  
+
+  /////////////////// binomial - cloglog /////////////////////////////
+  
+//  Pout2.print("Pout2: End of Set_PD FUnction");
+
+  double exb;
+  double atemp;
+  
+  if(family=="binomial" && link=="cloglog")
+  {
+    
+
+    
+  for(int j=0;j<l1;j++){
+    
+      exb=exp(alpha2(j)+b2(j));
+//    p1(j)=1-exp(-exb(j));
+//    xb(j)=1-exp(-exb(j));
+//    p2(j)=exp(-exb(j));
+    
+    atemp=exp(exb)-1;
+    
+//    xrow2=x2.row(j);
+    Pout2(j,j)=wt(j)*(1-y(j))*exb
+      +wt(j)*y(j)*(exb*exb*exp(exb)/(atemp*atemp ))
+      -wt(j)*y(j)*(exb/atemp);
+      
+              }
+  }
+  
+
+  /////////////////// poisson /////////////////////////////
+  
+  if(family=="poisson" )
+  {
+    
+    for(int j=0;j<l1;j++){
+      
+      exb=exp(alpha2(j)+b2(j));
+      Pout2(j,j)=wt(j)*exb;
+        
+    }
+  }
+  
+    
+}
+
+
+
 // [[Rcpp::export]]
 
 Rcpp::List rglmb_rand_cpp(int n,NumericVector y,NumericMatrix x, 
 NumericVector mu,NumericMatrix P_0,NumericMatrix P,
 NumericVector offset2,NumericVector wt,double dispersion,Rcpp::List
-famfunc, Function f1,Function f2,Function f3,NumericVector start,
+famfunc, Function f1,Function f2,Function f3,NumericVector start,NumericMatrix PD,
       std::string family="binomial",
       std::string link="logit",
       int Gridtype=2,      
@@ -3043,18 +3239,265 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
   mutemp2=x2*mu_star2;
 
   }
-
-//      b2.print("b2_Opt:");
   
+    arma::mat PD2(PD.begin(), PD.nrow(), PD.ncol(), false);
+    arma::vec wtb(wt.begin(),l2, false);
+
+
+//    PD2.print("PD2:Into C Function");
+
+    Rcpp::Function rand_Norm_apprx("rand_Norm_apprx");
+//    Rcpp::Function test_rand_Norm_apprx("test_rand_Norm_apprx");
+    Rcpp::Function rmnorm("rmnorm");
+    Rcpp::Function rnorm("rnorm");
+    Rcpp::Function KL_Norm_apprx("KL_Norm_apprx");
+
+    Rcpp::List Famin=Rcpp::List::create(Rcpp::Named("family")=family,
+                                      Rcpp::Named("link")=link);  
+    
+    
+    List normsim;
+
+    normsim=rand_Norm_apprx(
+      _["n"]=1000
+    ,  _["y"]=asVec(y)
+      ,      _["x"]=x
+    ,
+    _["P_0"]=P_0
+      ,
+      _["P"]=P,
+      _["mustar"]=mu_star2
+      ,      _["bstar"]=b2
+      ,_["alpha1"]=alpha
+      ,_["family"]=family
+      ,_["link"]=link
+);
+
+    
+    NumericMatrix mu_sim=asMat(normsim[0]);
+    NumericMatrix beta_sim=asMat(normsim[1]);
+    NumericMatrix Pstar=asMat(normsim[2]);
+    NumericVector ystar=asVec(normsim[3]);
+    NumericMatrix Ppost=asMat(normsim[4]);
+    
+
+    arma::mat mu_sim2(mu_sim.begin(), mu_sim.nrow(), mu_sim.ncol(), false);
+    arma::mat beta_sim2(beta_sim.begin(), beta_sim.nrow(), beta_sim.ncol(), false);
+    arma::mat Pstar2(Pstar.begin(), Pstar.nrow(), Pstar.ncol(), false);
+    arma::mat Ppost2(Ppost.begin(), Ppost.nrow(), Ppost.ncol(), false);
+    arma::vec ystar2(ystar.begin(), l2);
+
+
+//      mu_sim2.print("mu_sim:Output:");
+//      beta_sim2.print("beta_Sim:Output:");
+      
+
+    NumericMatrix eps_in(l2,1);
+    NumericMatrix eps_temp(l2,1);
+    NumericMatrix eps_temp2(l2,1);
+    
+    std::fill(eps_in.begin(), eps_in.end(), 1);
+    std::fill(eps_temp.begin(), eps_temp.end(), 1);
+    std::fill(eps_temp2.begin(), eps_temp2.end(), 1);
+    
+//    NumericMatrix eps_in
+            
+//            KL_Norm_apprx<-function(y,x,P,Pstar,ystar,Ppost,mu_sim,family,eps_in)        
+
+    List KL_Est;
+
+    
+    KL_Est=KL_Norm_apprx(
+      _["y"]=y,
+      _["x"]=x,
+      _["P"]=P,
+      _["Pstar"]=Pstar,
+      _["ystar"]=ystar,
+      _["Ppost"]=Ppost,
+      _["mu_sim"]=mu_sim,
+      _["family"]=family,
+      _["link"]=link,
+      _["eps_in"]=eps_in
+    );
+  
+
+  NumericMatrix TV=asMat(KL_Est[10]);
+  arma::mat TV2(TV.begin(), TV.nrow(), TV.ncol(), false);
+
+  
+  NumericMatrix KL_out=asMat(KL_Est[11]);
+  arma::mat KL_out2(KL_out.begin(), KL_out.nrow(), KL_out.ncol(), false);
+  
+  TV2.print("Approximate Total Variation Distance for Normal Approximation:");
+  
+  double testval=1;
+  double testval1=1;
+  
+  
+  for(i=0;i<10;i++){
+  
+  for(j=0;j<l2;j++){
+    
+    testval1=sqrt(0.5*KL_out[j]);
+
+//    Rcpp::Rcout << "testval:    " << std::flush << testval1 << std::endl;
+//    Rcpp::Rcout << "testval:    " << std::flush << eps_temp[j] << std::endl;
+    
+//      testval=0.01/sqrt(0.5*KL_out2(0,j));
+     testval=0.01/testval1;
+     
+     if(testval<1){        eps_temp[j]=testval*eps_temp[j];}
+
+     
+  }
+  
+  
+      KL_Est=KL_Norm_apprx(
+          _["y"]=y,
+          _["x"]=x,
+          _["P"]=P,
+          _["Pstar"]=Pstar,
+          _["ystar"]=ystar,
+          _["Ppost"]=Ppost,
+          _["mu_sim"]=mu_sim,
+          _["family"]=family,
+          _["link"]=link,
+          _["eps_in"]=eps_temp
+                );
+      
+        KL_out=asMat(KL_Est[11]);
+        TV=asMat(KL_Est[10]);
+        TV2(0,0)=TV[0];
+        
+  }
+  
+  TV2.print("Total Variation Distance at Upper bounds:");
+  for(j=0;j<l2;j++){
+    
+        Rcpp::Rcout << "eps_temp:    " << std::flush << eps_temp[j] << std::endl;
+  }
+  
+  
+  for(j=0;j<l2;j++){
+
+    eps_temp2[j]=eps_temp[j];
+  }    
+    
+
+    testval=0.01/TV[0];
+  
+    
+    for(j=0;j<l2;j++){
+      
+    if(testval<1){        eps_temp2[j]=testval*eps_temp2[j];}
+  
+    }    
+    
+    KL_Est=KL_Norm_apprx(
+      _["y"]=y,
+      _["x"]=x,
+      _["P"]=P,
+      _["Pstar"]=Pstar,
+      _["ystar"]=ystar,
+      _["Ppost"]=Ppost,
+      _["mu_sim"]=mu_sim,
+      _["family"]=family,
+      _["link"]=link,
+      _["eps_in"]=eps_temp2
+    );
+  
+  KL_out=asMat(KL_Est[11]);
+  TV=asMat(KL_Est[10]);
+  TV2(0,0)=TV[0];
+  TV2.print("Total Variation distance - Step 2:");
+    
+    for(j=0;j<l2;j++){
+      
+      Rcpp::Rcout << "eps_temp2:    " << std::flush << eps_temp2[j] << std::endl;
+    }
+    
+    
+    
+            
+    
+    Rcpp::NumericVector xbtemp(l2);
+    arma::colvec xbtemp2(xbtemp.begin(),l2,false);  
+
+//    void set_Pout(const arma::vec& b2,const NumericVector& y, 
+//                  const arma::mat& alpha2,
+//                  const int& l1,const arma::mat& P2, const arma::mat& x2,
+//                  const NumericVector& wt,const NumericVector& xbtemp,arma::colvec& xbtemp2,
+//                  arma::mat& xrow2,
+//                  arma::mat& Pout2,
+//                  std::string family="binomial",
+//                  std::string link="logit"
+//    )    
+  
+    NumericMatrix Ptemp(clone(P));
+    arma::mat Ptemp2(Ptemp.begin(), Ptemp.nrow(), Ptemp.ncol(), false);
+    
+    Ptemp2=0*Ptemp2;
+    
+    // x2 not currently used in x2 function
+    
+    Set_PD(b2,y,alpha2,l2,Ptemp2,x2,wt,xbtemp,xbtemp2,PD2,family,link);
+    
+
+    NumericVector wtD(l2);
+    arma::vec wtD2(wtD.begin(), l2);
+    
+    for(j=0;j<l2;j++){
+      wtD2(j)=PD2(j,j)/(PD2(j,j)+P2(0,0));
+    }
+    
+
+    NumericMatrix PD_B=clone(PD);    
+    arma::mat PD_B2(PD_B.begin(), PD_B.nrow(), PD_B.ncol(), false);
+    
+    NumericVector perturb(l2);
+    arma::vec perturb2(perturb.begin(), l2);
+    
+    NumericVector wtD_B(l2);
+    arma::vec wtD_B2(wtD_B.begin(), l2);
+    
+    for(j=0;j<l2;j++){
+//      perturb2(j)=0.2135*P2(0,0)/PD2(j,j);  // Will need improved way of selecting this
+// This should use eps_temp2 (temporarily use eps_temp)
+
+      PD_B2(j,j)=eps_temp[j]*PD2(j,j);  
+      
+//      PD_B2(j,j)=eps_temp2[j]*PD2(j,j);  
+
+//      PD_B2(j,j)=PD2(j,j);  
+      // Modified formula
+      
+      //      PD_B2(j,j)=0.3*(P2(0,0)+PD2(j,j));  
+      
+            wtD_B2(j)=PD_B2(j,j)/(PD_B2(j,j)+P2(0,0));
+    }
+    
+    
+            
+//    perturb2.print("perturbation Constants");
+    PD2.print("PD2:Interim - New C Function");
+    PD_B2.print("PD_B2:Interim - New C Function");
+    wtD2.print("wtD2:Data weight at posterior mode");
+    wtD_B2.print("wtD_B2:Data weight at posterior mode");
+    
     //  Calculate Initial Constants for Convergence rate calculations
 
     NumericMatrix P_rand(l2,l2);
     P_rand.fill_diag(P(0,0));
+    
 
+    // Temporary - Hard code PD matrix
+    
+      
     Rcpp::Rcout << " " << std::endl;
     Rcpp::Rcout << "############  Deriving Initial Constants for Convergence Bounds (assuming symmetry) ############" << std::endl;
     Rcpp::Rcout << " " << std::endl;
 
+    
 List beta_stars=set_beta_const(x2,offset2,mu_star2,
 1,y,xtemp,mutemp,P,offset2,wt,
 dispersion,famfunc,f1,f2,f3,betatemp,x,mu,P_0,offset3,wt3,
@@ -3070,10 +3513,13 @@ arma::vec beta_star2=beta_stars(1);
     Rcpp::Rcout.precision(5);
 
     
-    List nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_star2,mu_star2,beta_star,beta_star2,epsilon_converge);
+    List nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_star2,mu_star2,beta_star,beta_star2,epsilon_converge,PD_B);
 
 
-    NumericVector temp3=nstar_lambda_star(0);
+  //  nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_0,mu_star2,b_star,b_star2,epsilon_converge,PD);
+    
+    
+        NumericVector temp3=nstar_lambda_star(0);
     double nstar=temp3(0);
 
     
@@ -3133,10 +3579,19 @@ arma::vec beta_star2=beta_stars(1);
     Rcpp::Rcout << "Total Iterations:    " << std::flush << nstar4 << std::endl;
     
 
-    NumericMatrix betaout(nstar4,l2);
-    NumericMatrix alphaout(nstar4,l1);
-    NumericMatrix betastarout(1000,l2);
-    NumericVector LL(nstar4);
+    
+//    NumericMatrix betaout(nstar4,l2);
+    
+    NumericMatrix betaout(nstar3,l2);
+    
+    
+//    NumericMatrix alphaout(nstar4,l1);
+
+    NumericMatrix alphaout(nstar3,l1);
+    
+
+        //    NumericMatrix betastarout(1000,l2);
+//    NumericVector LL(nstar4);
     NumericVector LL2(nstar3);
 
   
@@ -3199,8 +3654,10 @@ arma::vec beta_star2=beta_stars(1);
 
             temp=out1(0);
             betatemp(j,0)=temp(0);
-           betaout(i,j)=temp(0);
-           
+
+            if(i>(nstar2-1)){    
+            betaout(i-nstar2-1,j)=temp(0);
+            }
         //   Note: Index to which temp 2 should be set depends on what 
         //  index LL has
            
@@ -3222,15 +3679,24 @@ arma::vec beta_star2=beta_stars(1);
     alphatemp=out2(0);    
     arma::vec alphatemp2(alphatemp.begin(), l1, false);
     
-    for(j=0;j<l1;j++) {alphaout(i,j)=alphatemp(j);}
+    if(i>nstar2-1){
+    
+    for(j=0;j<l1;j++) {alphaout(i-nstar2-1,j)=alphatemp(j);}
 
+    }
       mutemp2=x2*alphatemp2;
     
     
     }
 
-NumericMatrix alphaout2 = alphaout( Range(nstar2,nstar4-1),Range(0,l1-1));
-NumericMatrix betaout2= betaout(Range(nstar2,nstar4-1),Range(0,l2-1));
+  
+//NumericMatrix alphaout2 = alphaout( Range(nstar2,nstar4-1),Range(0,l1-1));
+    NumericMatrix alphaout2 = alphaout( Range(0,nstar3-1),Range(0,l1-1));
+
+//    NumericMatrix betaout2= betaout(Range(nstar2,nstar4-1),Range(0,l2-1));
+    NumericMatrix betaout2= betaout(Range(0,nstar3-1),Range(0,l2-1));
+    
+  
   
 //  NumericMatrix betaout(nstar4,l2);
   
@@ -3255,6 +3721,15 @@ dispersion,famfunc,f1,f2,f3,betatemp,x,mu,P_0,offset3,wt3,
 family=family,link=link,
 Gridtype=Gridtype);
 
+
+//beta_stars=set_beta_const(x2,offset2,mu_star2,
+//                          1,y,xtemp,mutemp,P,offset2,wt,
+//                          dispersion,famfunc,f1,f2,f3,betatemp,x,mu,P_0,offset3,wt3,
+//                          family=family,link=link,
+//                          Gridtype=Gridtype);
+
+
+
 arma::vec b_star=beta_stars(0);
 arma::vec b_star2=beta_stars(1);
 
@@ -3265,7 +3740,7 @@ Rcpp::Rcout << " " << std::endl;
 Rcpp::Rcout << "############  Revised Constants for Convergence Bounds (Controlling for asymmetry) ############" << std::endl;
 
 
-nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_0,mu_star2,b_star,b_star2,epsilon_converge);
+nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_0,mu_star2,b_star,b_star2,epsilon_converge,PD_B);
 
     temp3=nstar_lambda_star(0);
 double nstarb=temp3(0);
@@ -3282,6 +3757,7 @@ if(nstar<nstarb){
 Rcpp::Rcout << "An additional " << std::flush << nstarb-nstar << std::flush  <<" iterations required:" <<  std::endl;
 }
 
+Rcpp::Rcout << "Need to add code to run additional iterations and better way of handling storage of burnin iterations:" <<  std::endl;
 
 Rcpp::List Prior=Rcpp::List::create(Rcpp::Named("mean")=mu,
 Rcpp::Named("Precision")=P_0);
@@ -3290,6 +3766,7 @@ Rcpp::Named("Precision")=P_0);
 Rcpp::List Out=Rcpp::List::create(Rcpp::Named("coefficients")=alphaout2,
 Rcpp::Named("randcoefficients")=betaout2,
 Rcpp::Named("PostMode")=mu_0,
+Rcpp::Named("randPostMode")=b2,
 Rcpp::Named("Prior")=Prior,
 Rcpp::Named("iters")=1,
 Rcpp::Named("famfunc")=famfunc,
