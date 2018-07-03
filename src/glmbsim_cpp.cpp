@@ -8,21 +8,21 @@ using namespace Rcpp;
 // Function declarations
 
 NumericVector dbinom_glmb( NumericVector x, NumericVector N, NumericVector means, int lg);
-NumericVector  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
-NumericVector  f2_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
-NumericVector  f2_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
-arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
-arma::mat  f3_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
-arma::mat  f3_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
+NumericVector  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar=0);
+NumericVector  f2_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar=0);
+NumericVector  f2_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar=0);
+arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar=0);
+arma::mat  f3_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar=0);
+arma::mat  f3_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar=0);
 
 
 NumericVector dpois_glmb( NumericVector x, NumericVector means, int lg);
-NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
-arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
+NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0);
+arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0);
 
 NumericVector dgamma_glmb( NumericVector x, NumericVector shape, NumericVector scale, int lg);
-NumericVector  f2_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
-arma::mat  f3_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
+NumericVector  f2_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0);
+arma::mat  f3_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0);
 
 void Set_Grid_C2(Rcpp::NumericMatrix GIndex,  Rcpp::NumericMatrix cbars, 
 Rcpp::NumericMatrix Lint,
@@ -73,7 +73,41 @@ double ctrnorm_cpp(double lgrt,double lglt,double mu,double sigma){
 }
 
 // [[Rcpp::export]]
-Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterVector   link)
+
+void progress_bar2(double x, double N)
+{
+  // how wide you want the progress meter to be
+  int totaldotz=40;
+  double fraction = x / N;
+  // part of the progressmeter that's already "full"
+  int dotz = round(fraction * totaldotz);
+  
+  Rcpp::Rcout.precision(3);
+  Rcout << "\r                                                                 " << std::flush ;
+  Rcout << "\r" << std::flush ;
+  Rcout << std::fixed << fraction*100 << std::flush ;
+  Rcout << "% [" << std::flush ;
+  int ii=0;
+  for ( ; ii < dotz;ii++) {
+    Rcout << "=" << std::flush ;
+  }
+  // remaining part (spaces)
+  for ( ; ii < totaldotz;ii++) {
+    Rcout << " " << std::flush ;
+  }
+  // and back to line begin 
+  
+  Rcout << "]" << std::flush ;
+  
+  // and back to line begin 
+  
+  Rcout << "\r" << std::flush ;
+  
+}
+
+
+// [[Rcpp::export]]
+Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
 {
   RNGScope scope;
   int l1 = mu.nrow();
@@ -110,10 +144,17 @@ Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,N
   arma::mat btemp2(btemp.begin(),l1,1,false); 
   NumericVector testll(1);
 
+  if(progbar==1){
+  Rcpp::Rcout << "Starting Simulation:" << std::endl;  };
     for(int i=0;i<n;i++){
       
-    Rcpp::checkUserInterrupt();
-
+      Rcpp::checkUserInterrupt();
+      if(progbar==1){
+        progress_bar2(i, n-1);
+      if(i==n-1) {Rcpp::Rcout << "" << std::endl;}
+      }
+      
+      
     a1=0;
     draws(i)=1;
     while(a1==0){
@@ -262,6 +303,8 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
   
   for(i=0;i<l1;i++){
     
+    
+    
     if(Gridtype==1){
             if((1+a_2[i])<=(2/sqrt(M_PI))){ 
               Temp2=G1(1,i);
@@ -327,49 +370,69 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
     arma::mat cbars2(cbars.begin(), l2, l1, false); 
 
 
-
     if( family=="binomial" && link=="logit"){
-    NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt);  
-    cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt);
+    Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,1);  
+    Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,1);
     }
     if(family=="binomial"  && link=="probit"){
-    NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt);  
-    cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt,1);
     }
     if(family=="binomial"   && link=="cloglog"){
-    NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt);  
-    cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      
+    cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt,1);
     }
 
     if(family=="quasibinomial"  && link=="logit"){
-    NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt);  
-    cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,1);
     }
     if(family=="quasibinomial" && link=="probit"){
-    NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt);  
-    cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt,1);
     }
     if(family=="quasibinomial" && link=="cloglog"){
-    NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt);  
-    cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt,1);
     }
 
     if(family=="poisson" ){
-    NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt);  
-    cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt,1);
     }
     
     if(family=="quasipoisson" ){
-    NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt);  
-    cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt,1);
     }
 
     if(family=="Gamma" ){
-    NegLL=f2_gamma(G4,y, x, mu, P, alpha, wt);  
-    cbars2=f3_gamma(G4,y, x,mu,P,alpha,wt);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_gamma(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      cbars2=f3_gamma(G4,y, x,mu,P,alpha,wt,1);
     }
 
-
+    Rcpp::Rcout << "Finished Log-posterior evaluations:" << std::endl;
+    
+    
     Set_Grid_C2(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
 
     setlogP_C2(logP,NegLL,cbars,G3,LLconst);
@@ -1488,12 +1551,54 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     
 //  return(funclist);
 
+// Runs into "Error: initial value in 'vmmin' is not finite error 
+//Rcpp::stop("Reached before optfun");
+
+//arma::vec parin2(parin.begin(), l1, false);
+
+
+//parin2.print("parameter starting value");
+//    b2.print("b2 inside rglmb");
+
+
+// Add check to ensure parin avoids error 
+//arma::vec y2(y.begin(), l2, false);
+
+//y2.print("y input");
+//x2.print("x inout");
+//alpha2.print ("alpha input");
+//wt3.print ("wt input");
+
+//  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
+//NumericVector test0=f1(parin, y,x,alpha,wt2);
+//NumericVector test02=f1(mu, y,x,alpha,wt2);
+
+//arma::vec test0_0(test0.begin(), 1, false);
+//arma::vec test02_0(test02.begin(), 1, false);
+
+
+//test0_0.print("Log_Likelihood at starting value");
+
+//test0_0.print("Log_Likelihood at starting value");
+//test02_0.print("Log_likelihood at mu");
+
+//  NumericVector test=f2(parin, y,x,mu1,P,alpha,wt2);
+//  NumericVector test2=f2(mu, y,x,mu1,P,alpha,wt2);
+//  arma::vec test_0(test.begin(), 1, false);
+//  arma::vec test2_0(test2.begin(), 1, false);
+  
+//  test_0.print("Log_Posterior at starting value");
+//  test2_0.print("Log_Posterior at mu");
+//  Rcpp::stop("Stop Before optimization");
+  
+  
     List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,
     _["x"]=x,
     _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
 
- 
-
+    
+//    Rcpp::stop("Optimization Finished");
+    
     NumericMatrix b2a=asMat(opt[0]);
     arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
 
@@ -1509,7 +1614,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::mat A1_b(A1.begin(), l1, l1, false); 
     arma::vec mu_0(mu.begin(), l1, false);
 
-//    A1_b.print("A1_b inside rglmb");
+//    mu_0.print("mu_0 inside rglmb");
 
     arma::vec eigval_1;
     arma::mat eigvec_1;
@@ -1530,7 +1635,10 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::mat x3=x2*L2Inv;
     arma::mat P3=trans(L2Inv)*P2*L2Inv;
 
-//   Find diagonal matrix that has "smaller" precision than prior  
+//    b3.print("b3 inside rglmb");
+    
+    
+    //   Find diagonal matrix that has "smaller" precision than prior  
 //   Follows Definition 3, and procedure on p. 1150 in Nygren 
 //   Puts model into standard form 
 
@@ -1555,6 +1663,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 		}
 
 
+//    P4.print("P4 inside rglmb");
+    
     int check2=0;
     double scale2=scale;
     arma::mat epsilon_temp=P3Diag;   
@@ -1577,6 +1687,9 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
       
   	}    
 
+//    P4_temp.print("P4_temp inside rglmb");
+    
+    
     arma::mat ident=arma::mat (l1,l1,arma::fill::eye);
     arma::mat A3=ident-epsilon;	
     
@@ -1603,7 +1716,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::mat L3Inv(L3Inv_1.begin(), L3Inv_1.nrow(), L3Inv_1.ncol(), false);
     
 
-
+//    b4.print("b4 inside rglmb");
+    
     arma::mat L3= arma::sqrt(D2)*trans(eigvec_2);
     L3Inv=eigvec_2*sqrt(inv_sympd(D2));
     b4=L3*b3; 
@@ -1615,6 +1729,12 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector b5=asVec(b4_1);
     Rcpp::List Envelope;
 
+    Rcpp::Rcout << "Starting Envelope Creation:" << std::endl;
+    
+    
+//       Rcpp::stop("Starting Envelope Creation");
+    
+    
     if(n==1){
     Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
     P5_1,alpha,wt2,family,link,Gridtype, n,false);
@@ -1624,6 +1744,10 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     }
     
 
+    Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
+    
+    
+    
     Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,Envelope,family,link);
 
     NumericMatrix sim2=sim[0];
@@ -2850,36 +2974,6 @@ NumericMatrix PD){
 }
 
 
-void progress_bar2(double x, double N)
-{
-    // how wide you want the progress meter to be
-    int totaldotz=40;
-    double fraction = x / N;
-    // part of the progressmeter that's already "full"
-    int dotz = round(fraction * totaldotz);
-
-    Rcpp::Rcout.precision(3);
-    Rcout << "\r                                                                 " << std::flush ;
-    Rcout << "\r" << std::flush ;
-    Rcout << std::fixed << fraction*100 << std::flush ;
-    Rcout << "% [" << std::flush ;
-    int ii=0;
-    for ( ; ii < dotz;ii++) {
-    Rcout << "=" << std::flush ;
-    }
-    // remaining part (spaces)
-    for ( ; ii < totaldotz;ii++) {
-    Rcout << " " << std::flush ;
-    }
-    // and back to line begin 
-
-    Rcout << "]" << std::flush ;
-
-    // and back to line begin 
-
-    Rcout << "\r" << std::flush ;
-  
-}
 
 
 
@@ -2927,7 +3021,8 @@ NumericVector wt3,
 
     Rcpp::checkUserInterrupt();
 
-
+    progress_bar2(0, 999);
+    
   if(i==0) {    Rcpp::Rcout << "Running simulation for betastar:" << std::endl;}
 
     progress_bar2(i, 999);
@@ -2981,7 +3076,8 @@ Rcpp::Rcout.precision(5);
 
     Rcpp::checkUserInterrupt();
 
-
+    progress_bar2(0, 999);
+    
   if(i==0) {    Rcpp::Rcout << "Running simulation for betastar2:" << std::endl;}
 
     progress_bar2(i, 999);

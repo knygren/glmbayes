@@ -190,10 +190,22 @@ rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=
 #    print(wt)
 #    print(dispersion2)
 #    print(mu)
+
     
+#    stop("'P' is not positive definite")
     
+# old functioncall
+    
+#    outlist<-glmbsim_NGauss_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,famfunc=famfunc,f1=f1,f2=f2,f3=f3,
+#    start=mu,family=family$family,link=family$link)
+
+# new functioncall - Use input for start
+
+#    return(mu)
+#    return(start)
+            
     outlist<-glmbsim_NGauss_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,famfunc=famfunc,f1=f1,f2=f2,f3=f3,
-    start=mu,family=family$family,link=family$link)
+                                start=start,family=family$family,link=family$link)
     
   }
   

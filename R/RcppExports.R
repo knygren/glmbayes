@@ -13,48 +13,48 @@ f1_binomial_logit <- function(b, y, x, alpha, wt) {
     .Call('glmbayes_f1_binomial_logit', PACKAGE = 'glmbayes', b, y, x, alpha, wt)
 }
 
-f2_binomial_logit <- function(b, y, x, mu, P, alpha, wt) {
-    .Call('glmbayes_f2_binomial_logit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt)
+f2_binomial_logit <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
+    .Call('glmbayes_f2_binomial_logit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
-f3_binomial_logit <- function(b, y, x, mu, P, alpha, wt) {
-    .Call('glmbayes_f3_binomial_logit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt)
+f3_binomial_logit <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
+    .Call('glmbayes_f3_binomial_logit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
 f1_binomial_probit <- function(b, y, x, alpha, wt) {
     .Call('glmbayes_f1_binomial_probit', PACKAGE = 'glmbayes', b, y, x, alpha, wt)
 }
 
-f2_binomial_probit <- function(b, y, x, mu, P, alpha, wt) {
-    .Call('glmbayes_f2_binomial_probit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt)
+f2_binomial_probit <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
+    .Call('glmbayes_f2_binomial_probit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
-f3_binomial_probit <- function(b, y, x, mu, P, alpha, wt) {
-    .Call('glmbayes_f3_binomial_probit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt)
+f3_binomial_probit <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
+    .Call('glmbayes_f3_binomial_probit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
 f1_binomial_cloglog <- function(b, y, x, alpha, wt) {
     .Call('glmbayes_f1_binomial_cloglog', PACKAGE = 'glmbayes', b, y, x, alpha, wt)
 }
 
-f2_binomial_cloglog <- function(b, y, x, mu, P, alpha, wt) {
-    .Call('glmbayes_f2_binomial_cloglog', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt)
+f2_binomial_cloglog <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
+    .Call('glmbayes_f2_binomial_cloglog', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
-f3_binomial_cloglog <- function(b, y, x, mu, P, alpha, wt) {
-    .Call('glmbayes_f3_binomial_cloglog', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt)
+f3_binomial_cloglog <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
+    .Call('glmbayes_f3_binomial_cloglog', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
 f1_gamma <- function(b, y, x, alpha, wt) {
     .Call('glmbayes_f1_gamma', PACKAGE = 'glmbayes', b, y, x, alpha, wt)
 }
 
-f2_gamma <- function(b, y, x, mu, P, alpha, wt) {
-    .Call('glmbayes_f2_gamma', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt)
+f2_gamma <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
+    .Call('glmbayes_f2_gamma', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
-f3_gamma <- function(b, y, x, mu, P, alpha, wt) {
-    .Call('glmbayes_f3_gamma', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt)
+f3_gamma <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
+    .Call('glmbayes_f3_gamma', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
 f1_gaussian <- function(b, y, x, alpha, wt) {
@@ -73,16 +73,20 @@ f1_poisson <- function(b, y, x, alpha, wt) {
     .Call('glmbayes_f1_poisson', PACKAGE = 'glmbayes', b, y, x, alpha, wt)
 }
 
-f2_poisson <- function(b, y, x, mu, P, alpha, wt) {
-    .Call('glmbayes_f2_poisson', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt)
+f2_poisson <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
+    .Call('glmbayes_f2_poisson', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
-f3_poisson <- function(b, y, x, mu, P, alpha, wt) {
-    .Call('glmbayes_f3_poisson', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt)
+f3_poisson <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
+    .Call('glmbayes_f3_poisson', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
-glmbsim_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link) {
-    .Call('glmbayes_glmbsim_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, family, link)
+progress_bar2 <- function(x, N) {
+    invisible(.Call('glmbayes_progress_bar2', PACKAGE = 'glmbayes', x, N))
+}
+
+glmbsim_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar = 1L) {
+    .Call('glmbayes_glmbsim_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
 }
 
 glmbenvelope_c <- function(bStar, A, y, x, mu, P, alpha, wt, family = "binomial", link = "logit", Gridtype = 2L, n = 1L, sortgrid = FALSE) {

@@ -5,6 +5,9 @@
 
 using namespace Rcpp;
 
+void progress_bar2(double x, double N);
+
+
 NumericVector dpois_glmb( NumericVector x, NumericVector means, int lg){
     int n = x.size() ;
     NumericVector res(n) ;
@@ -69,7 +72,7 @@ NumericVector  f1_poisson(NumericMatrix b,NumericVector y,NumericMatrix x,Numeri
 
 
 // [[Rcpp::export]]
-NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
+NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  
     // Get dimensions of x - Note: should match dimensions of
@@ -108,6 +111,14 @@ NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,Numer
 
 
     for(int i=0;i<m1;i++){
+      Rcpp::checkUserInterrupt();
+      
+      if(progbar==1){ 
+        progress_bar2(i, m1-1);
+        if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
+      };  
+      
+      
     b2temp=b(Range(0,l2-1),Range(i,i));
     arma::mat b2(b2temp.begin(), l2, 1, false); 
     arma::mat P2(P.begin(), l2, l2, false); 
@@ -135,7 +146,7 @@ NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,Numer
 
 
 // [[Rcpp::export]]
-arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
+arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  
     // Get dimensions of x - Note: should match dimensions of
@@ -188,7 +199,14 @@ arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMa
     //arma::mat outtempb2(outtempb.begin(),1,l2,false);
     
     for(int i=0;i<m1;i++){
-    b2temp=b(Range(0,l2-1),Range(i,i));
+      Rcpp::checkUserInterrupt();
+      if(progbar==1){ 
+        progress_bar2(i, m1-1);
+        if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
+      };  
+      
+      
+          b2temp=b(Range(0,l2-1),Range(i,i));
     arma::mat b2(b2temp.begin(), l2, 1, false); 
     
     NumericMatrix::Column outtemp=out(_,i);

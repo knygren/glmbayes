@@ -5,6 +5,10 @@
 
 using namespace Rcpp;
 
+
+void progress_bar2(double x, double N);
+
+
 NumericVector dbinom_glmb( NumericVector x, NumericVector N, NumericVector means, int lg){
     int n = x.size() ;
     NumericVector res(n) ;
@@ -70,7 +74,7 @@ NumericVector  f1_binomial_logit(NumericMatrix b,NumericVector y,NumericMatrix x
 
 
 // [[Rcpp::export]]
-NumericVector  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
+NumericVector  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  
     // Get dimensions of x - Note: should match dimensions of
@@ -109,6 +113,12 @@ NumericVector  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix 
 
 
     for(int i=0;i<m1;i++){
+      Rcpp::checkUserInterrupt();
+      if(progbar==1){ 
+        progress_bar2(i, m1-1);
+        if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
+      };  
+      
     b2temp=b(Range(0,l2-1),Range(i,i));
     arma::mat b2(b2temp.begin(), l2, 1, false); 
     arma::mat P2(P.begin(), l2, l2, false); 
@@ -138,7 +148,7 @@ NumericVector  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix 
 
 
 // [[Rcpp::export]]
-arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
+arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  
     // Get dimensions of x - Note: should match dimensions of
@@ -191,6 +201,13 @@ arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,Nu
     //arma::mat outtempb2(outtempb.begin(),1,l2,false);
     
     for(int i=0;i<m1;i++){
+      Rcpp::checkUserInterrupt();
+      
+    if(progbar==1){ 
+    progress_bar2(i, m1-1);
+    if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
+    };  
+      
     b2temp=b(Range(0,l2-1),Range(i,i));
     arma::mat b2(b2temp.begin(), l2, 1, false); 
     
@@ -276,7 +293,7 @@ NumericVector  f1_binomial_probit(NumericMatrix b,NumericVector y,NumericMatrix 
 
 
 // [[Rcpp::export]]
-NumericVector  f2_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
+NumericVector  f2_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  
     // Get dimensions of x - Note: should match dimensions of
@@ -315,6 +332,14 @@ NumericVector  f2_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix
 
 
     for(int i=0;i<m1;i++){
+      Rcpp::checkUserInterrupt();
+      if(progbar==1){ 
+        progress_bar2(i, m1-1);
+        if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
+      };  
+      
+      
+      
     b2temp=b(Range(0,l2-1),Range(i,i));
     arma::mat b2(b2temp.begin(), l2, 1, false); 
     arma::mat P2(P.begin(), l2, l2, false); 
@@ -341,7 +366,7 @@ NumericVector  f2_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix
 
 
 // [[Rcpp::export]]
-arma::mat  f3_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
+arma::mat  f3_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  
     // Get dimensions of x - Note: should match dimensions of
@@ -397,6 +422,14 @@ arma::mat  f3_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,N
     //arma::mat outtempb2(outtempb.begin(),1,l2,false);
     
     for(int i=0;i<m1;i++){
+      Rcpp::checkUserInterrupt();
+      
+      if(progbar==1){ 
+        progress_bar2(i, m1-1);
+        if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
+      };  
+      
+      
     b2temp=b(Range(0,l2-1),Range(i,i));
     arma::mat b2(b2temp.begin(), l2, 1, false); 
     
@@ -484,7 +517,7 @@ NumericVector  f1_binomial_cloglog(NumericMatrix b,NumericVector y,NumericMatrix
 
 
 // [[Rcpp::export]]
-NumericVector  f2_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
+NumericVector  f2_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  
     // Get dimensions of x - Note: should match dimensions of
@@ -523,6 +556,14 @@ NumericVector  f2_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatri
 
 
     for(int i=0;i<m1;i++){
+      Rcpp::checkUserInterrupt();
+      
+      if(progbar==1){ 
+        progress_bar2(i, m1-1);
+        if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
+      };  
+      
+      
     b2temp=b(Range(0,l2-1),Range(i,i));
     arma::mat b2(b2temp.begin(), l2, 1, false); 
     arma::mat P2(P.begin(), l2, l2, false); 
@@ -551,7 +592,7 @@ NumericVector  f2_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatri
 
 
 // [[Rcpp::export]]
-arma::mat  f3_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
+arma::mat  f3_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  
     // Get dimensions of x - Note: should match dimensions of
@@ -607,6 +648,14 @@ arma::mat  f3_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,
     //arma::mat outtempb2(outtempb.begin(),1,l2,false);
     
     for(int i=0;i<m1;i++){
+      Rcpp::checkUserInterrupt();
+      
+      if(progbar==1){ 
+        progress_bar2(i, m1-1);
+        if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
+      };  
+      
+      
     b2temp=b(Range(0,l2-1),Range(i,i));
     arma::mat b2(b2temp.begin(), l2, 1, false); 
     
