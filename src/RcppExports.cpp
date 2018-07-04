@@ -154,6 +154,25 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// f4_binomial_probit
+arma::mat f4_binomial_probit(NumericMatrix b, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, NumericVector NegLL, int progbar);
+RcppExport SEXP glmbayes_f4_binomial_probit(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP NegLLSEXP, SEXP progbarSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericMatrix >::type b(bSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type NegLL(NegLLSEXP);
+    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
+    __result = Rcpp::wrap(f4_binomial_probit(b, y, x, mu, P, alpha, wt, NegLL, progbar));
+    return __result;
+END_RCPP
+}
 // f1_binomial_cloglog
 NumericVector f1_binomial_cloglog(NumericMatrix b, NumericVector y, NumericMatrix x, NumericVector alpha, NumericVector wt);
 RcppExport SEXP glmbayes_f1_binomial_cloglog(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP alphaSEXP, SEXP wtSEXP) {
@@ -205,6 +224,25 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// f4_binomial_cloglog
+arma::mat f4_binomial_cloglog(NumericMatrix b, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, NumericVector NegLL, int progbar);
+RcppExport SEXP glmbayes_f4_binomial_cloglog(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP NegLLSEXP, SEXP progbarSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericMatrix >::type b(bSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type NegLL(NegLLSEXP);
+    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
+    __result = Rcpp::wrap(f4_binomial_cloglog(b, y, x, mu, P, alpha, wt, NegLL, progbar));
+    return __result;
+END_RCPP
+}
 // f1_gamma
 NumericVector f1_gamma(NumericMatrix b, NumericVector y, NumericMatrix x, NumericVector alpha, NumericVector wt);
 RcppExport SEXP glmbayes_f1_gamma(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP alphaSEXP, SEXP wtSEXP) {
@@ -253,6 +291,25 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
     Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
     __result = Rcpp::wrap(f3_gamma(b, y, x, mu, P, alpha, wt, progbar));
+    return __result;
+END_RCPP
+}
+// f4_gamma
+arma::mat f4_gamma(NumericMatrix b, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, NumericVector NegLL, int progbar);
+RcppExport SEXP glmbayes_f4_gamma(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP NegLLSEXP, SEXP progbarSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericMatrix >::type b(bSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type NegLL(NegLLSEXP);
+    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
+    __result = Rcpp::wrap(f4_gamma(b, y, x, mu, P, alpha, wt, NegLL, progbar));
     return __result;
 END_RCPP
 }
@@ -353,6 +410,25 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
     Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
     __result = Rcpp::wrap(f3_poisson(b, y, x, mu, P, alpha, wt, progbar));
+    return __result;
+END_RCPP
+}
+// f4_poisson
+arma::mat f4_poisson(NumericMatrix b, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, NumericVector NegLL, int progbar);
+RcppExport SEXP glmbayes_f4_poisson(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP NegLLSEXP, SEXP progbarSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericMatrix >::type b(bSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type NegLL(NegLLSEXP);
+    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
+    __result = Rcpp::wrap(f4_poisson(b, y, x, mu, P, alpha, wt, NegLL, progbar));
     return __result;
 END_RCPP
 }

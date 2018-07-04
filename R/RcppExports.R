@@ -37,6 +37,10 @@ f3_binomial_probit <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
     .Call('glmbayes_f3_binomial_probit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
+f4_binomial_probit <- function(b, y, x, mu, P, alpha, wt, NegLL, progbar = 0L) {
+    .Call('glmbayes_f4_binomial_probit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, NegLL, progbar)
+}
+
 f1_binomial_cloglog <- function(b, y, x, alpha, wt) {
     .Call('glmbayes_f1_binomial_cloglog', PACKAGE = 'glmbayes', b, y, x, alpha, wt)
 }
@@ -49,6 +53,10 @@ f3_binomial_cloglog <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
     .Call('glmbayes_f3_binomial_cloglog', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
+f4_binomial_cloglog <- function(b, y, x, mu, P, alpha, wt, NegLL, progbar = 0L) {
+    .Call('glmbayes_f4_binomial_cloglog', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, NegLL, progbar)
+}
+
 f1_gamma <- function(b, y, x, alpha, wt) {
     .Call('glmbayes_f1_gamma', PACKAGE = 'glmbayes', b, y, x, alpha, wt)
 }
@@ -59,6 +67,10 @@ f2_gamma <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
 
 f3_gamma <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
     .Call('glmbayes_f3_gamma', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
+}
+
+f4_gamma <- function(b, y, x, mu, P, alpha, wt, NegLL, progbar = 0L) {
+    .Call('glmbayes_f4_gamma', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, NegLL, progbar)
 }
 
 f1_gaussian <- function(b, y, x, alpha, wt) {
@@ -83,6 +95,10 @@ f2_poisson <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
 
 f3_poisson <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
     .Call('glmbayes_f3_poisson', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
+}
+
+f4_poisson <- function(b, y, x, mu, P, alpha, wt, NegLL, progbar = 0L) {
+    .Call('glmbayes_f4_poisson', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, NegLL, progbar)
 }
 
 progress_bar2 <- function(x, N) {

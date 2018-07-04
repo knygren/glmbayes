@@ -15,16 +15,21 @@ arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,Nu
 arma::mat  f3_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar=0);
 arma::mat  f3_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar=0);
 arma::mat  f4_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL, int progbar=0);
+arma::mat  f4_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL, int progbar=0);
+arma::mat  f4_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL, int progbar=0);
 
 
 NumericVector dpois_glmb( NumericVector x, NumericVector means, int lg);
 NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0);
 arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0);
+arma::mat  f4_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL, int progbar=0);
+  
 
 NumericVector dgamma_glmb( NumericVector x, NumericVector shape, NumericVector scale, int lg);
 NumericVector  f2_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0);
 arma::mat  f3_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0);
-
+arma::mat  f4_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL,int progbar=0);
+  
 void Set_Grid_C2(Rcpp::NumericMatrix GIndex,  Rcpp::NumericMatrix cbars, 
 Rcpp::NumericMatrix Lint,
 Rcpp::NumericMatrix Down,
@@ -223,18 +228,18 @@ Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,N
       testll=f2_gamma(btemp,y, x,mu,P,alpha,wt);
       }
 
-
       test=LLconst(J(i))+testtemp(0,0)-log(U2)-testll(0);
 
       if(test>=0) a1=1;
 	    if(test<0) draws(i)=draws(i)+1;
 
-      
       }
     
     
     }
 
+    
+    
 //return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("J")=J,Rcpp::Named("PLSD")=PLSD,Rcpp::Named("famout")=family);
 return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws);
 
@@ -379,57 +384,64 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
 //    cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,1);
     }
     if(family=="binomial"  && link=="probit"){
-      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-      NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt,1);  
-      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-      cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt,1);
+      cbars2=f4_binomial_probit(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+//      NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt,1);  
+//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+//      cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt,1);
     }
     if(family=="binomial"   && link=="cloglog"){
-      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-      NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt,1);  
-      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-      
-    cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt,1);
+      cbars2=f4_binomial_cloglog(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+//      NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt,1);  
+//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+//    cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt,1);
     }
 
     if(family=="quasibinomial"  && link=="logit"){
-      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-      NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,1);  
-      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-      cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,1);
+      cbars2=f4_binomial_logit(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+//      NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,1);  
+//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+//      cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,1);
     }
     if(family=="quasibinomial" && link=="probit"){
-      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-      NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt,1);  
-      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-      cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt,1);
+            cbars2=f4_binomial_probit(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+//      NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt,1);  
+//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+//      cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt,1);
     }
     if(family=="quasibinomial" && link=="cloglog"){
-      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-      NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt,1);  
-      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-      cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt,1);
+            cbars2=f4_binomial_cloglog(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+//      NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt,1);  
+//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+//      cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt,1);
     }
 
     if(family=="poisson" ){
-      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-      NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt,1);  
-      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-      cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt,1);
+      cbars2=f4_poisson(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+//      NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt,1);  
+//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+//      cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt,1);
     }
     
     if(family=="quasipoisson" ){
-      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-      NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt,1);  
-      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-      cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt,1);
+            cbars2=f4_poisson(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+//      NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt,1);  
+//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+//      cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt,1);
     }
 
     if(family=="Gamma" ){
-      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-      NegLL=f2_gamma(G4,y, x, mu, P, alpha, wt,1);  
-      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-      cbars2=f3_gamma(G4,y, x,mu,P,alpha,wt,1);
+            cbars2=f4_gamma(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+//      NegLL=f2_gamma(G4,y, x, mu, P, alpha, wt,1);  
+//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+//      cbars2=f3_gamma(G4,y, x,mu,P,alpha,wt,1);
     }
 
     Rcpp::Rcout << "Finished Log-posterior evaluations:" << std::endl;
