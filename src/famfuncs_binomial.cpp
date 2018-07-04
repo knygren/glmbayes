@@ -239,6 +239,107 @@ arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,Nu
     return trans(out2);      
 }
 
+
+// [[Rcpp::export]]
+arma::mat    f4_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL, int progbar=0)
+{
+  
+  // Get dimensions of x - Note: should match dimensions of
+  //  y, b, alpha, and wt (may add error checking)
+  
+  // May want to add method for dealing with alpha and wt when 
+  // constants instead of vectors
+  
+  int l1 = x.nrow(), l2 = x.ncol();
+  int m1 = b.ncol();
+  
+  //    int lalpha=alpha.nrow();
+  //    int lwt=wt.nrow();
+  
+  Rcpp::NumericMatrix b2temp(l2,1);
+  
+  arma::mat y2(y.begin(), l1, 1, false);
+  arma::mat x2(x.begin(), l1, l2, false); 
+  arma::mat alpha2(alpha.begin(), l1, 1, false); 
+  
+  Rcpp::NumericVector xb(l1);
+  arma::colvec xb2(xb.begin(),l1,false); // Reuse memory - update both below
+
+  
+  NumericMatrix Ptemp(l1,l1);  
+  
+  for(int i=0;i<l1;i++){
+    Ptemp(i,i)=wt(i); 
+  }  
+  
+  // Moving Loop inside the function is key for speed
+  
+  NumericVector yy(l1);
+  //  NumericVector res(m1);
+  NumericMatrix bmu(l2,1);
+  NumericMatrix out(l2,m1);
+  
+  
+  arma::mat mu2(mu.begin(), l2, 1, false); 
+  arma::mat bmu2(bmu.begin(), l2, 1, false); 
+  arma::mat P2(P.begin(), l2, l2, false); 
+  arma::mat Ptemp2(Ptemp.begin(), l1, l1, false);
+  arma::mat out2(out.begin(), l2, m1, false);
+  
+  NumericMatrix::Column outtemp=out(_,0);
+  //NumericMatrix::Row outtempb=out(0,_);
+  
+  arma::mat outtemp2(outtemp.begin(),1,l2,false);
+  //arma::mat outtempb2(outtempb.begin(),1,l2,false);
+  
+  double res1;
+  
+  for(int i=0;i<m1;i++){
+    Rcpp::checkUserInterrupt();
+    
+    if(progbar==1){ 
+      progress_bar2(i, m1-1);
+      if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
+    };  
+    
+    b2temp=b(Range(0,l2-1),Range(i,i));
+    arma::mat b2(b2temp.begin(), l2, 1, false); 
+    arma::mat P2(P.begin(),l2,l2,false);
+    
+    NumericMatrix::Column outtemp=out(_,i);
+    arma::mat outtemp2(outtemp.begin(),1,l2,false);
+    
+    bmu2=b2-mu2;
+    
+    // First part is for log-prior
+    
+    res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+    
+    
+    xb2=exp(-alpha2- x2 * b2);
+    
+    for(int j=0;j<l1;j++){
+      xb(j)=1/(1+xb(j));  
+    }
+    
+    yy=-dbinom_glmb(y,wt,xb,true);
+    NegLL(i) =std::accumulate(yy.begin(), yy.end(), res1);
+    
+    for(int j=0;j<l1;j++){
+      xb(j)=(xb(j)-y(j))*wt(j);
+    }
+    
+    outtemp2= P2 * bmu2+x2.t() * xb2;
+  }
+  
+  // return  b;
+  
+  
+    return trans(out2);      
+}
+
+
+
 ///////////////////////// Probit Functions ///////////////////////////////////////
 
 // [[Rcpp::export]]

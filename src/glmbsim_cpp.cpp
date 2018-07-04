@@ -14,6 +14,7 @@ NumericVector  f2_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatri
 arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar=0);
 arma::mat  f3_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar=0);
 arma::mat  f3_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar=0);
+arma::mat  f4_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL, int progbar=0);
 
 
 NumericVector dpois_glmb( NumericVector x, NumericVector means, int lg);
@@ -371,10 +372,11 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
 
 
     if( family=="binomial" && link=="logit"){
-    Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-    NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,1);  
-    Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-    cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,1);
+      cbars2=f4_binomial_logit(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//    Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+//    NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,1);  
+//    Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+//    cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,1);
     }
     if(family=="binomial"  && link=="probit"){
       Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;

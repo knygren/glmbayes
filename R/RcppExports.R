@@ -21,6 +21,10 @@ f3_binomial_logit <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
     .Call('glmbayes_f3_binomial_logit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
+f4_binomial_logit <- function(b, y, x, mu, P, alpha, wt, NegLL, progbar = 0L) {
+    .Call('glmbayes_f4_binomial_logit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, NegLL, progbar)
+}
+
 f1_binomial_probit <- function(b, y, x, alpha, wt) {
     .Call('glmbayes_f1_binomial_probit', PACKAGE = 'glmbayes', b, y, x, alpha, wt)
 }
