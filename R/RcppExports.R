@@ -105,6 +105,10 @@ progress_bar2 <- function(x, N) {
     invisible(.Call('glmbayes_progress_bar2', PACKAGE = 'glmbayes', x, N))
 }
 
+csample_integer <- function(x, size, replace, prob = as.numeric( c())) {
+    .Call('glmbayes_csample_integer', PACKAGE = 'glmbayes', x, size, replace, prob)
+}
+
 glmbsim_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar = 1L) {
     .Call('glmbayes_glmbsim_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
 }

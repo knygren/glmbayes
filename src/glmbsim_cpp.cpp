@@ -3,6 +3,8 @@
 // we only include RcppArmadillo.h which pulls Rcpp.h in for us
 #include "RcppArmadillo.h"
 
+#include <RcppArmadilloExtensions/sample.h>
+
 using namespace Rcpp;
 
 // Function declarations
@@ -111,6 +113,14 @@ void progress_bar2(double x, double N)
   
 }
 
+// [[Rcpp::export]]
+IntegerVector csample_integer( IntegerVector x, int size, bool replace, 
+                               NumericVector prob = NumericVector::create()) {
+  RNGScope scope;
+  IntegerVector ret = RcppArmadillo::sample(x, size, replace, prob);
+  return ret;
+}
+
 
 // [[Rcpp::export]]
 Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
@@ -149,10 +159,55 @@ Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,N
   NumericMatrix btemp(l1,1);
   arma::mat btemp2(btemp.begin(),l1,1,false); 
   NumericVector testll(1);
+  
 
+  int m1=PLSD.size();
+  
+ // Rcpp::Function sample_int ("sample.int");
+
+ // Expected Iterations needed based on bound in paper if envelope of full size
+ 
+ double iter_est1=n*pow(2/sqrt(M_PI),l1); 
+ 
+ // Initialize set iterations to 20% higher 
+ 
+ double iter_est2=1.2* iter_est1;
+ double iter_est4=0;
+ double iter_est5=0;
+ 
+  // Converting Estimated number of iterations to integer values
+ 
+ int iter_est3 = (int) (iter_est2+0.5);
+
+ double avg_draw_est=0;
+ 
+ Rcpp::Rcout << "For tight envelope, expected number of draws required equals:" << std::endl << iter_est1 << std::endl;
+ Rcpp::Rcout << "Pre-generating candidates equaling a total of:" << std::endl << iter_est3 << std::endl;
+ 
+ //  36694
+ //15892
+  
+  IntegerVector Gindex(m1) ;
+  IntegerVector candlist(iter_est3) ;
+  
+  for(int i=0;i<m1;i++){Gindex[i]=i; }
+
+   candlist= RcppArmadillo::sample(Gindex,iter_est3, TRUE, PLSD);
+
+
+//  Rcpp::stop("Finished Call to sample.int");
+  
+  // Initiated cand_Counter to -1
+  
+  int cand_counter=-1;
+  
+  
   if(progbar==1){
   Rcpp::Rcout << "Starting Simulation:" << std::endl;  };
-    for(int i=0;i<n;i++){
+
+  
+  
+      for(int i=0;i<n;i++){
       
       Rcpp::checkUserInterrupt();
       if(progbar==1){
@@ -165,9 +220,66 @@ Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,N
     draws(i)=1;
     while(a1==0){
       
+      //   New envelope selection
+      
+      // Increment cand_counter
+      
+      cand_counter=cand_counter+1;
+
+      if (cand_counter==iter_est3)  {
+        // If candidate list is exhausted, generate additional candidates and reset cand_counter (can be made a bit more efficient by
+        //  limiting how many candidates to generate )
+        // May edidt out Rcpp:Rcout after QC is complete
+        Rcpp::Rcout << "" << std::endl;
+        Rcpp::Rcout << "Run Exceeds Intial estimate for required candidates - Generating additional Candidates:" << std::endl;
+        
+        candlist= RcppArmadillo::sample(Gindex,iter_est3, TRUE, PLSD);
+        cand_counter=0;
+      };
+      
+      if (cand_counter<iter_est3)  {
+        J(i)=candlist(cand_counter);
+      };
+      
+      // This part of code is not currentlt used - Some may be moved to first if statement 
+      
+      if (cand_counter==iter_est3)  {
+        avg_draw_est=sum(draws)/i;
+        iter_est4=1.2* (n-i)*avg_draw_est; 
+        
+        iter_est5=std::min(iter_est4,iter_est2);
+
+        //        Rcpp::stop("Run Exceeds Intial estimate for required candidates");
+        Rcpp::Rcout << "" << std::endl;
+        Rcpp::Rcout << "Run Exceeds Intial estimate for required candidates - Switching to old method:" << std::endl;
+        Rcpp::Rcout << "Average Number of Draws so far:" << std::endl << avg_draw_est << std::endl;
+        Rcpp::Rcout << "Estimated number of additional required draws equals:" << std::endl << (n-i)*avg_draw_est << std::endl;
+        Rcpp::Rcout << "Generating an additional number of draws equal to:" << std::endl << iter_est5 << std::endl;
+        Rcpp::Rcout << "" << std::endl;
+    
+      };
+      
+
+      /////////////////////////  Work to replace part determing part of envelope
+
+      //  Code inside this loop was part of older version of function
+      // Inefficient as generation from multinomial is slow
+      // Keeping for QC purposes - May remove once QC complete
+      
+      if (cand_counter>=iter_est3)  {
+      
+      // Generate random number to help determine which part of envelope to sample from 
+      
       U=R::runif(0.0, 1.0);
+      
+      // Initialize envelope variable J(i) to 0 and set flag for "correct" envelope (a2) to 0
       a2=0;
       J(i)=0;    
+      
+      // Search for correct envelope (can this be sped up) and set flag to 1 once found [this may be the most time consuming part]
+      // Update this to use Alias Algorithm
+      
+      
       while(a2==0){
         if(U<=PLSD(J(i))) a2=1;
           		if(U>PLSD(J(i))){ 
@@ -177,12 +289,21 @@ Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,N
 							}
         //a2=1; 
           }
+
+      /////////////////////// part of envelope selection ends here      
+      
+      };
+      
+      // Generate random draw from selected part of envelope 
+      
        for(int j=0;j<l1;j++){  
           
           out(i,j)=ctrnorm_cpp(logrt(J(i),j),loglt(J(i),j),-cbars(J(i),j),1.0);    
 
-          
         }
+       
+    // Check if candidate should be accepted 
+    
      outtemp=out(i,_);
      cbartemp=cbars(J(i),_);
      testtemp2=outtemp2 * trans(cbartemp2);
@@ -291,6 +412,7 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
   Rcpp::Function EnvSort("EnvelopeSort");
 
 
+  
   int i;  
   
   a_2=arma::diagvec(A2);

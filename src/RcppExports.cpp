@@ -443,6 +443,20 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// csample_integer
+IntegerVector csample_integer(IntegerVector x, int size, bool replace, NumericVector prob);
+RcppExport SEXP glmbayes_csample_integer(SEXP xSEXP, SEXP sizeSEXP, SEXP replaceSEXP, SEXP probSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< IntegerVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type size(sizeSEXP);
+    Rcpp::traits::input_parameter< bool >::type replace(replaceSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type prob(probSEXP);
+    __result = Rcpp::wrap(csample_integer(x, size, replace, prob));
+    return __result;
+END_RCPP
+}
 // glmbsim_cpp
 Rcpp::List glmbsim_cpp(int n, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, Function f2, Rcpp::List Envelope, Rcpp::CharacterVector family, Rcpp::CharacterVector link, int progbar);
 RcppExport SEXP glmbayes_glmbsim_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP f2SEXP, SEXP EnvelopeSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP progbarSEXP) {
