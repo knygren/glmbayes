@@ -105,16 +105,24 @@ progress_bar2 <- function(x, N) {
     invisible(.Call('glmbayes_progress_bar2', PACKAGE = 'glmbayes', x, N))
 }
 
-csample_integer <- function(x, size, replace, prob = as.numeric( c())) {
-    .Call('glmbayes_csample_integer', PACKAGE = 'glmbayes', x, size, replace, prob)
+Gindex_size <- function(l1, gridindex, a_2, Gridtype = 3L) {
+    .Call('glmbayes_Gindex_size', PACKAGE = 'glmbayes', l1, gridindex, a_2, Gridtype)
+}
+
+Gindex_row <- function(i, l1, gridindex, a_2, Gridtype = 3L) {
+    .Call('glmbayes_Gindex_row', PACKAGE = 'glmbayes', i, l1, gridindex, a_2, Gridtype)
 }
 
 glmbsim_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar = 1L) {
     .Call('glmbayes_glmbsim_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
 }
 
-glmbenvelope_c <- function(bStar, A, y, x, mu, P, alpha, wt, family = "binomial", link = "logit", Gridtype = 2L, n = 1L, sortgrid = FALSE) {
-    .Call('glmbayes_glmbenvelope_c', PACKAGE = 'glmbayes', bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid)
+glmbsim_cpp_Large_Dim <- function(n, y, x, mu, P, alpha, wt, f2, PLSD, family, link, gridindex, G1, a_2, bStar, Gridtype, progbar = 1L) {
+    .Call('glmbayes_glmbsim_cpp_Large_Dim', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, PLSD, family, link, gridindex, G1, a_2, bStar, Gridtype, progbar)
+}
+
+glmbenvelope_c <- function(bStar, A, y, x, mu, P, alpha, wt, gridindex, G1, Lint1, family = "binomial", link = "logit", Gridtype = 2L, n = 1L, sortgrid = FALSE) {
+    .Call('glmbayes_glmbenvelope_c', PACKAGE = 'glmbayes', bStar, A, y, x, mu, P, alpha, wt, gridindex, G1, Lint1, family, link, Gridtype, n, sortgrid)
 }
 
 optPostMode <- function(y, x, mu, P, alpha, wt, b, bstar, family = "binomial", link = "logit") {

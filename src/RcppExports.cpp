@@ -443,17 +443,32 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// csample_integer
-IntegerVector csample_integer(IntegerVector x, int size, bool replace, NumericVector prob);
-RcppExport SEXP glmbayes_csample_integer(SEXP xSEXP, SEXP sizeSEXP, SEXP replaceSEXP, SEXP probSEXP) {
+// Gindex_size
+int Gindex_size(int l1, NumericVector gridindex, arma::vec a_2, int Gridtype);
+RcppExport SEXP glmbayes_Gindex_size(SEXP l1SEXP, SEXP gridindexSEXP, SEXP a_2SEXP, SEXP GridtypeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< IntegerVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< int >::type size(sizeSEXP);
-    Rcpp::traits::input_parameter< bool >::type replace(replaceSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type prob(probSEXP);
-    __result = Rcpp::wrap(csample_integer(x, size, replace, prob));
+    Rcpp::traits::input_parameter< int >::type l1(l1SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type gridindex(gridindexSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type a_2(a_2SEXP);
+    Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
+    __result = Rcpp::wrap(Gindex_size(l1, gridindex, a_2, Gridtype));
+    return __result;
+END_RCPP
+}
+// Gindex_row
+NumericVector Gindex_row(int i, int l1, NumericVector gridindex, arma::vec a_2, int Gridtype);
+RcppExport SEXP glmbayes_Gindex_row(SEXP iSEXP, SEXP l1SEXP, SEXP gridindexSEXP, SEXP a_2SEXP, SEXP GridtypeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< int >::type i(iSEXP);
+    Rcpp::traits::input_parameter< int >::type l1(l1SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type gridindex(gridindexSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type a_2(a_2SEXP);
+    Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
+    __result = Rcpp::wrap(Gindex_row(i, l1, gridindex, a_2, Gridtype));
     return __result;
 END_RCPP
 }
@@ -479,9 +494,36 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// glmbsim_cpp_Large_Dim
+Rcpp::List glmbsim_cpp_Large_Dim(int n, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, Function f2, NumericVector PLSD, Rcpp::CharacterVector family, Rcpp::CharacterVector link, NumericVector gridindex, NumericMatrix G1, arma::vec a_2, NumericVector bStar, int Gridtype, int progbar);
+RcppExport SEXP glmbayes_glmbsim_cpp_Large_Dim(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP f2SEXP, SEXP PLSDSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP gridindexSEXP, SEXP G1SEXP, SEXP a_2SEXP, SEXP bStarSEXP, SEXP GridtypeSEXP, SEXP progbarSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< Function >::type f2(f2SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type PLSD(PLSDSEXP);
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type family(familySEXP);
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type link(linkSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type gridindex(gridindexSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type G1(G1SEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type a_2(a_2SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type bStar(bStarSEXP);
+    Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
+    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
+    __result = Rcpp::wrap(glmbsim_cpp_Large_Dim(n, y, x, mu, P, alpha, wt, f2, PLSD, family, link, gridindex, G1, a_2, bStar, Gridtype, progbar));
+    return __result;
+END_RCPP
+}
 // glmbenvelope_c
-List glmbenvelope_c(NumericVector bStar, NumericMatrix A, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, std::string family, std::string link, int Gridtype, int n, bool sortgrid);
-RcppExport SEXP glmbayes_glmbenvelope_c(SEXP bStarSEXP, SEXP ASEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP, SEXP nSEXP, SEXP sortgridSEXP) {
+List glmbenvelope_c(NumericVector bStar, NumericMatrix A, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, NumericVector& gridindex, NumericMatrix G1, NumericMatrix Lint1, std::string family, std::string link, int Gridtype, int n, bool sortgrid);
+RcppExport SEXP glmbayes_glmbenvelope_c(SEXP bStarSEXP, SEXP ASEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP gridindexSEXP, SEXP G1SEXP, SEXP Lint1SEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP, SEXP nSEXP, SEXP sortgridSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -493,12 +535,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< NumericVector& >::type gridindex(gridindexSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type G1(G1SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type Lint1(Lint1SEXP);
     Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
     Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
     Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
     Rcpp::traits::input_parameter< bool >::type sortgrid(sortgridSEXP);
-    __result = Rcpp::wrap(glmbenvelope_c(bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid));
+    __result = Rcpp::wrap(glmbenvelope_c(bStar, A, y, x, mu, P, alpha, wt, gridindex, G1, Lint1, family, link, Gridtype, n, sortgrid));
     return __result;
 END_RCPP
 }

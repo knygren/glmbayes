@@ -241,7 +241,8 @@ arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,Nu
 
 
 // [[Rcpp::export]]
-arma::mat    f4_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL, int progbar=0)
+arma::mat    f4_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,
+                               NumericVector wt, NumericVector NegLL, int progbar=0)
 {
   
   // Get dimensions of x - Note: should match dimensions of
