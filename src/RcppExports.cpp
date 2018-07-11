@@ -547,6 +547,32 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// glmbenvelope_c_Large_dim
+List glmbenvelope_c_Large_dim(NumericVector bStar, NumericMatrix A, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, NumericVector& gridindex, NumericMatrix G1, NumericMatrix Lint1, std::string family, std::string link, int Gridtype, int n, bool sortgrid);
+RcppExport SEXP glmbayes_glmbenvelope_c_Large_dim(SEXP bStarSEXP, SEXP ASEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP gridindexSEXP, SEXP G1SEXP, SEXP Lint1SEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP, SEXP nSEXP, SEXP sortgridSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector >::type bStar(bStarSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type A(ASEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< NumericVector& >::type gridindex(gridindexSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type G1(G1SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type Lint1(Lint1SEXP);
+    Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
+    Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
+    Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< bool >::type sortgrid(sortgridSEXP);
+    __result = Rcpp::wrap(glmbenvelope_c_Large_dim(bStar, A, y, x, mu, P, alpha, wt, gridindex, G1, Lint1, family, link, Gridtype, n, sortgrid));
+    return __result;
+END_RCPP
+}
 // optPostMode
 Rcpp::List optPostMode(NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P, NumericVector alpha, NumericVector wt, NumericVector b, NumericVector bstar, std::string family, std::string link);
 RcppExport SEXP glmbayes_optPostMode(SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP bSEXP, SEXP bstarSEXP, SEXP familySEXP, SEXP linkSEXP) {

@@ -134,6 +134,9 @@ int Gindex_size(int l1,NumericVector gridindex,arma::vec a_2, int Gridtype=3 ){
   }
   if(Gridtype==3){gridsize=pow(3,l1);}  
   if(Gridtype==4){gridsize=1;}
+  
+
+  
   return gridsize;
 }
 
@@ -858,11 +861,7 @@ Rcpp::List  glmbsim_cpp_Large_Dim(int n,NumericVector y,NumericMatrix x,NumericM
 }
 
 
-
-
-
 // [[Rcpp::export]]
-
 
 List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
       NumericVector y, 
@@ -1101,7 +1100,6 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
 //    }
 
     
-    
   return Rcpp::List::create(Rcpp::Named("GridIndex")=GIndex,
           Rcpp::Named("thetabars")=G3,
           Rcpp::Named("cbars")=cbars,
@@ -1114,8 +1112,323 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
           Rcpp::Named("a1")=a_1
           );
 
-  
 }
+
+
+// [[Rcpp::export]]
+
+List glmbenvelope_c_Large_dim(NumericVector bStar,NumericMatrix A,
+                    NumericVector y, 
+                    NumericMatrix x,
+                    NumericMatrix mu,
+                    NumericMatrix P,
+                    NumericVector alpha,
+                    NumericVector wt,
+                    NumericVector &gridindex,
+                    NumericMatrix G1,
+                    NumericMatrix Lint1,
+                    std::string family="binomial",
+                    std::string link="logit",
+                    int Gridtype=2, 
+                    int n=1,
+                    bool sortgrid=false
+){
+  
+  int l1 = A.nrow(), k = A.ncol();
+  arma::mat A2(A.begin(), l1, k, false);
+  arma::colvec bStar_2(bStar.begin(), bStar.size(), false);
+  
+  
+  NumericVector a_1(l1);
+  arma::vec a_2(a_1.begin(), a_1.size(), false);
+  
+  NumericVector xx_1(3, 1.0);
+  NumericVector xx_2=NumericVector::create(-1.0,0.0,1.0);
+  NumericVector yy_1(2, 1.0);
+  NumericVector yy_2=NumericVector::create(-0.5,0.5);
+  //  NumericMatrix G1(3,l1);
+  //  NumericMatrix Lint1(2,l1);
+  arma::mat G1b(G1.begin(), 3, l1, false);
+  arma::mat Lint(Lint1.begin(), 2, l1, false);
+  
+  arma::colvec xx_1b(xx_1.begin(), xx_1.size(), false);
+  arma::colvec xx_2b(xx_2.begin(), xx_2.size(), false);
+  arma::colvec yy_1b(yy_1.begin(), yy_1.size(), false);
+  arma::colvec yy_2b(yy_2.begin(), yy_2.size(), false);
+  List G2(a_1.size());
+  List GIndex1(a_1.size());
+  Rcpp::Function opGrid("optgrid");
+  Rcpp::Function expGrid("expand.grid");
+  Rcpp::Function asMat("as.matrix");
+  Rcpp::Function EnvSort("EnvelopeSort");
+  
+  
+  
+  int i;  
+  
+  a_2=arma::diagvec(A2);
+  arma::vec omega=(sqrt(2)-arma::exp(-1.20491-0.7321*sqrt(0.5+a_2)))/arma::sqrt(1+a_2);
+  G1b=xx_1b*arma::trans(bStar_2)+xx_2b*arma::trans(omega);
+  Lint=yy_1b*arma::trans(bStar_2)+yy_2b*arma::trans(omega);
+  
+  //  NumericVector gridindex(l1);
+  
+  if(Gridtype==2){
+    gridindex=opGrid(a_2,n);
+  }
+  
+  arma::vec gridindexb(gridindex.begin(),l1, false);
+  
+  
+  
+  
+  NumericVector Temp1=G1( _, 0);
+  double Temp2;
+  
+  for(i=0;i<l1;i++){
+    
+    if(Gridtype==1){
+      if((1+a_2[i])<=(2/sqrt(M_PI))){ 
+        Temp2=G1(1,i);
+        G2[i]=NumericVector::create(Temp2);
+        GIndex1[i]=NumericVector::create(4.0);
+      }
+      if((1+a_2[i])>(2/sqrt(M_PI))){
+        Temp1=G1(_,i);
+        G2[i]=NumericVector::create(Temp1(0),Temp1(1),Temp1(2));
+        GIndex1[i]=NumericVector::create(1.0,2.0,3.0);
+      }    
+    }  
+    if(Gridtype==2){
+      if(gridindex[i]==1){
+        Temp2=G1(1,i);
+        G2[i]=NumericVector::create(Temp2);
+        GIndex1[i]=NumericVector::create(4.0);
+      }
+      if(gridindex[i]==3){
+        Temp1=G1(_,i);
+        G2[i]=NumericVector::create(Temp1(0),Temp1(1),Temp1(2));
+        GIndex1[i]=NumericVector::create(1.0,2.0,3.0);
+      }
+    }
+    
+    if(Gridtype==3){
+      Temp1=G1(_,i);
+      G2[i]=NumericVector::create(Temp1(0),Temp1(1),Temp1(2));
+      GIndex1[i]=NumericVector::create(1.0,2.0,3.0);
+    }
+    
+    if(Gridtype==4){
+      Temp2=G1(1,i);
+      G2[i]=NumericVector::create(Temp2);
+      GIndex1[i]=NumericVector::create(4.0);
+    }
+    
+  }
+  
+  
+  int l2=Gindex_size( l1,gridindex, a_2,  Gridtype );
+  
+//  NumericMatrix G3=asMat(expGrid(G2));
+//  NumericMatrix GIndex=asMat(expGrid(GIndex1));
+///  NumericMatrix G4(G3.ncol(),G3.nrow());
+//  int l2=GIndex.nrow();
+  
+//  arma::mat G3b(G3.begin(), G3.nrow(), G3.ncol(), false);
+//  arma::mat G4b(G4.begin(), G4.nrow(), G4.ncol(), false);
+  
+//  G4b=trans(G3b);
+  
+//  NumericMatrix cbars(l2,l1);
+//  NumericMatrix Up(l2,l1);
+//  NumericMatrix Down(l2,l1);
+  NumericMatrix logP(l2,2);
+//  NumericMatrix logU(l2,l1);
+//  NumericMatrix loglt(l2,l1);
+//  NumericMatrix logrt(l2,l1);
+//  NumericMatrix logct(l2,l1);
+  
+  NumericMatrix LLconst(l2,1);
+//  NumericVector NegLL(l2);    
+//  arma::mat cbars2(cbars.begin(), l2, l1, false); 
+  
+  //    arma::vec NegLL2(NegLL.begin(),l2,false);
+  
+//  if( family=="binomial" && link=="logit"){
+//    cbars2=f4_binomial_logit(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//  }
+//  if(family=="binomial"  && link=="probit"){
+//    cbars2=f4_binomial_probit(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//  }
+//  if(family=="binomial"   && link=="cloglog"){
+//    cbars2=f4_binomial_cloglog(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//  }
+  
+//  if(family=="quasibinomial"  && link=="logit"){
+//    cbars2=f4_binomial_logit(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//  }
+//  if(family=="quasibinomial" && link=="probit"){
+//    cbars2=f4_binomial_probit(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//  }
+//  if(family=="quasibinomial" && link=="cloglog"){
+//    cbars2=f4_binomial_cloglog(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//  }
+  
+//  if(family=="poisson" ){
+//    cbars2=f4_poisson(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//  }
+  
+//  if(family=="quasipoisson" ){
+//    cbars2=f4_poisson(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//  }
+  
+//  if(family=="Gamma" ){
+//    cbars2=f4_gamma(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//  }
+  
+
+  
+//  Rcpp::Rcout << "Finished Log-posterior evaluations:" << std::endl;
+  
+  
+//  Set_Grid_C2(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
+  
+//  setlogP_C2(logP,NegLL,cbars,G3,LLconst);
+  
+  
+  // Add Loop to replicate above calculations using one-dimensional version of most of the above
+  
+  
+  NumericMatrix GIndex_new(1,l1);
+  NumericMatrix G4_new(l1,1);
+
+//  NumericMatrix Lint1(2,l1);
+  NumericMatrix Up_new(1,l1);
+  NumericMatrix Down_new(1,l1);
+  NumericMatrix logU_new(1,l1);
+  NumericMatrix loglt_new(1,l1);
+  NumericMatrix logrt_new(1,l1);
+  NumericMatrix logct_new(1,l1);
+  
+  NumericMatrix logP_new(1,2);
+  NumericMatrix LLconst_new(1,1);
+  NumericVector NegLL_new(1);    
+  NumericMatrix cbars_new(1,l1);
+  NumericMatrix G3_new(1,l1);
+  
+  
+  arma::mat cbars2_new(cbars_new.begin(), 1, l1, false); 
+
+  Rcpp::Rcout << "Entering loop for second envelope:" << std::endl;
+  
+    
+  for(int j=0;j<l2;j++){
+  
+  Rcpp::checkUserInterrupt();
+    
+    progress_bar2(j, l2-1);
+    if(i==l2-1) {Rcpp::Rcout << "" << std::endl;}
+    
+  // Copy inputs into new objects 
+//  Rcpp::Rcout << "Compare outputs for dimension" << std::endl << j << std::endl;
+
+  GIndex_new(0,_)=Gindex_row(j,l1,gridindex=gridindex,a_2=a_2,Gridtype=Gridtype);
+  
+  for(i=0;i<l1;i++){
+    if(GIndex_new(0,i)==1){G4_new(i,0)=G1(0,i);} 
+    if(GIndex_new(0,i)==2){G4_new(i,0)=G1(1,i);} 
+    if(GIndex_new(0,i)==3){G4_new(i,0)=G1(2,i);} 
+    if(GIndex_new(0,i)==4){G4_new(i,0)=G1(1,i);} 
+    
+  
+  if(GIndex_new(0,i)==1){G3_new(0,i)=G1(0,i);} 
+  if(GIndex_new(0,i)==2){G3_new(0,i)=G1(1,i);} 
+  if(GIndex_new(0,i)==3){G3_new(0,i)=G1(2,i);} 
+  if(GIndex_new(0,i)==4){G3_new(0,i)=G1(1,i);} 
+  }
+  
+  if( family=="binomial" && link=="logit"){
+    cbars2_new=f4_binomial_logit(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);      }
+  if(family=="binomial"  && link=="probit"){
+    cbars2_new=f4_binomial_probit(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
+    
+  }
+  if(family=="binomial"   && link=="cloglog"){
+    cbars2_new=f4_binomial_cloglog(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
+  }
+  
+  if(family=="quasibinomial"  && link=="logit"){
+    cbars2_new=f4_binomial_logit(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
+  }
+  if(family=="quasibinomial" && link=="probit"){
+    cbars2_new=f4_binomial_probit(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
+  }
+  if(family=="quasibinomial" && link=="cloglog"){
+    cbars2_new=f4_binomial_cloglog(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
+  }
+  
+  if(family=="poisson" ){
+    cbars2_new=f4_poisson(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
+  }
+  
+  if(family=="quasipoisson" ){
+    cbars2_new=f4_poisson(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
+  }
+  
+  if(family=="Gamma" ){
+    cbars2_new=f4_gamma(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
+  }
+  
+  
+//  NegLL_new(0)=NegLL(j);
+//  cbars_new(0,_)=cbars(j,_);
+  
+  Set_Grid_C2(GIndex_new, cbars_new, Lint1,Down_new,Up_new,loglt_new,logrt_new,logct_new,logU_new,logP_new);
+  
+  
+    
+    
+//  logP_new(0,0)=logP(j,0);
+//Rcpp::Rcout << "G3 old" << std::endl << G3(j,1) << std::endl;
+//Rcpp::Rcout << "G3_new" << std::endl << G3_new(0,0) << std::endl;
+
+  
+  setlogP_C2(logP_new,NegLL_new,cbars_new,G3_new,LLconst_new);
+
+//      Rcpp::Rcout << "logP old_Dim0" << std::endl << logP(j,0) << std::endl;
+//      Rcpp::Rcout << "logP_new_Dim0" << std::endl << logP_new(0,0) << std::endl;
+//      Rcpp::Rcout << "logP old_Dim1" << std::endl << logP(j,1) << std::endl;
+//    Rcpp::Rcout << "logP_new_Dim1" << std::endl << logP_new(0,1) << std::endl;
+//    Rcpp::Rcout << "LLconst_old" << std::endl << LLconst(j,0) << std::endl;
+//    Rcpp::Rcout << "LLconst_new" << std::endl << LLconst_new(0,0) << std::endl;
+  
+  logP(j,0)=logP_new(0,0);
+    logP(j,1)=logP_new(0,1);
+  LLconst(j,0)=LLconst_new(0,0);
+ 
+  } 
+  
+  
+  NumericMatrix::Column logP2 = logP( _, 1);
+  
+  double  maxlogP=max(logP2);
+  
+  NumericVector PLSD=exp(logP2-maxlogP);
+  
+  double sumP=sum(PLSD);
+  
+  PLSD=PLSD/sumP;
+  
+  
+  //    if(sortgrid==true){
+  //    Rcpp::List outlist=EnvSort(l1,l2,GIndex,G3,cbars,logU,logrt,loglt,logP,LLconst,PLSD,a_1);
+  //      return(outlist);
+  //    }
+  
+  return Rcpp::List::create(Rcpp::Named("PLSD")=PLSD  );
+}
+
+
 
 
 double Initialize_bstar(const NumericVector& y, arma::mat& x2,
@@ -2160,6 +2473,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
     Rcpp::Function asMat("as.matrix");
     Rcpp::Function asVec("as.vector");
+    Rcpp::Function opGrid("optgrid");
+    
     int l1=x.ncol();
     int l2=x.nrow();
 
@@ -2323,15 +2638,35 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::vec a_2(a_1.begin(), a_1.size(), false);
     a_2=arma::diagvec(A2);
     
-    Rcpp::Rcout << "Starting Envelope Creation:" << std::endl;
     
     
 //       Rcpp::stop("Starting Envelope Creation");
     
     
     NumericMatrix Lint1(2,l1);
+
+    if(Gridtype==2){
+      gridindex=opGrid(a_2,n);
+      
+    }
     
-    if(n==1){
+    
+    
+    int l3=Gindex_size( l1,gridindex, a_2,  Gridtype );
+    double l4=log(l3)/log(3);
+
+    Rcpp::List sim;
+    
+    Rcpp::Rcout << "Number of Variables in model" << std::endl << l1 << std::endl;
+    Rcpp::Rcout << "Gridtype" << std::endl << Gridtype << std::endl;
+    Rcpp::Rcout << "Dimensions for Grid" << std::endl << l4 << std::endl;
+    
+// Old method fails to allocate memory for dimension >=16    
+        
+    if(l4<16){    
+      Rcpp::Rcout << "Starting Envelope Creation - Low Dimensional Version:" << std::endl;
+      
+          if(n==1){
       //  Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1, P5_1,alpha,wt2,family,link,Gridtype, n,false);
       Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,gridindex, G1,Lint1,family,link,Gridtype, n,false);
       
@@ -2342,23 +2677,51 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
       
     }
     
-  
-        
 
     Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
     
+    Rcpp::Rcout << "Running Simulation:" << std::endl;
     
-    Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,Envelope,family,link);
+     sim=glmbsim_cpp(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,Envelope,family,link);
+
+    }
+    
+    
+    
+    // Adding inclusion and return of G1 in call to glmbenvelop_c      
+
+    if(l4>15){    
+      
+    Rcpp::Rcout << "Starting Envelope Creation - High Dimensional Version:" << std::endl;
+    
+        
+    if(n==1){
+      //  Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1, P5_1,alpha,wt2,family,link,Gridtype, n,false);
+      Envelope=glmbenvelope_c_Large_dim(b5, A4_1,y, x4_1,mu4_1,
+                              P5_1,alpha,wt2,gridindex ,G1,Lint1, family,link,Gridtype, n,false);
+      
+    }
+    if(n>1){
+      //    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,family,link,Gridtype, n,true);
+      Envelope=glmbenvelope_c_Large_dim(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,gridindex ,G1,Lint1, family,link,Gridtype, n,true);
+      
+    }
+    
+    
+    Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
     
     
     // Adding Call to glmbsim_cpp_Large
     
-//   Rcpp::List sim=glmbsim_cpp_Large_dim(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,Envelope,family, gridindex, G1,  a_2, Gridtype);
 
-//    NumericVector PLSD=Envelope["PLSD"];
-//    sim=glmbsim_cpp_Large_Dim(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,PLSD,family, link,gridindex, G1,  a_2, b5, Gridtype);
+    NumericVector PLSD=Envelope["PLSD"];
+    //Rcpp::List sim =glmbsim_cpp_Large_Dim(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,PLSD,family, link,gridindex, G1,  a_2, b5, Gridtype);
+    sim =glmbsim_cpp_Large_Dim(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,PLSD,family, link,gridindex, G1,  a_2, b5, Gridtype);
     
-
+    }
+    
+    
+    
     NumericMatrix sim2=sim[0];
     arma::mat sim2b(sim2.begin(), sim2.nrow(), sim2.ncol(), false);
     NumericMatrix out(l1,n);

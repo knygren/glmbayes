@@ -125,6 +125,10 @@ glmbenvelope_c <- function(bStar, A, y, x, mu, P, alpha, wt, gridindex, G1, Lint
     .Call('glmbayes_glmbenvelope_c', PACKAGE = 'glmbayes', bStar, A, y, x, mu, P, alpha, wt, gridindex, G1, Lint1, family, link, Gridtype, n, sortgrid)
 }
 
+glmbenvelope_c_Large_dim <- function(bStar, A, y, x, mu, P, alpha, wt, gridindex, G1, Lint1, family = "binomial", link = "logit", Gridtype = 2L, n = 1L, sortgrid = FALSE) {
+    .Call('glmbayes_glmbenvelope_c_Large_dim', PACKAGE = 'glmbayes', bStar, A, y, x, mu, P, alpha, wt, gridindex, G1, Lint1, family, link, Gridtype, n, sortgrid)
+}
+
 optPostMode <- function(y, x, mu, P, alpha, wt, b, bstar, family = "binomial", link = "logit") {
     .Call('glmbayes_optPostMode', PACKAGE = 'glmbayes', y, x, mu, P, alpha, wt, b, bstar, family, link)
 }
