@@ -310,7 +310,14 @@ arma::mat    f4_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,
     NumericMatrix::Column outtemp=out(_,i);
     arma::mat outtemp2(outtemp.begin(),1,l2,false);
     
-    bmu2=b2-mu2;
+    bmu2=b2-mu2;  // This part may be possible to eliminate or at least do in parallel
+    
+    
+    mu2.print("value for mu inside binomial function");
+    // Should be possible to ensure mu is null vector to save this step
+    
+    //Rcpp::Rcout << "Average Number of Draws so far:" << std::endl << avg_draw_est << std::endl;
+    
     
     // First part is for log-prior
     
