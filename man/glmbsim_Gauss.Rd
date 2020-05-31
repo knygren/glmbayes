@@ -15,7 +15,7 @@ family,link, Gridtype)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{n}{
-A matrix with coefficients from the rglmb function
+  number of draws to generate from posterior density.
 }
   \item{y}{
 a vector of observations of length m
@@ -24,53 +24,54 @@ a vector of observations of length m
 a design matrix of dimension m*p
 }
   \item{mu}{
-an offset parameter or vector
+a vector giving the prior means of the variables.
 }
   \item{P}{
-A function used to calculate the negative log-likelihood
+a positive-definite symmetric matrix specifying the prior precision matrix of the variables.
 }
   \item{offset2}{
-A function used to calculate the deviance
+this can be used to specify an a priori known component to be included in the linear predictor during
+ fitting. This should be NULL or a numeric vector of length equal to the number of cases.
 }
   \item{wt}{
-a vector of weights
+vector of weights to be used in the fitting process. 
 }
   \item{dispersion}{
 dispersion parameter
 }
 
   \item{famfunc}{
-dispersion parameter
+family function
 }
   \item{f1}{
-dispersion parameter
+f1 function (negative log-likelihood)
 }
   \item{f2}{
-dispersion parameter
+f2 function (negative log-posterior)
 }
   \item{f3}{
-dispersion parameter
+f3 function (gradient vector)
 }
   \item{start}{
-dispersion parameter
-}
+an optional argument providing starting values for the posterior mode optimization.}
 
 \item{family}{
-dispersion parameter
+family
 }
 
 \item{link}{
-dispersion parameter
+link function
 }
 
 \item{Gridtype}{
-dispersion parameter
+an optional argument specifying the method used to determine number of likelihood subgradient 
+densities used to construct the enveloping function.
 }
 
 
 }
 \details{
-Calculates DIC and Deviance Information
+Simulates from the Gaussian regression function
 }
 \value{
 A list with the following components

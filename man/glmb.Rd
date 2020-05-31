@@ -18,8 +18,8 @@ contrasts = NULL,...)
 }
 \arguments{
   \item{n}{
-number of draws to generate from posterior density. If length(n) > 1, the length is taken 
-to be the number required.}
+number of draws to generate from posterior density. If length(n) > 1, the length is taken to be the number required.
+}
   \item{formula}{
 an object of class formula (or one that can be coerced to that class): a symbolic 
 description of the model to be fitted. The details of model specification are given under 
