@@ -70,14 +70,14 @@ Simulates from Non-Gaussian regression functions
 }
 \value{
 A list with the following components
-\item{coefficients}{A n*1 matrix with the deviance for each draw}
-\item{PostMode}{Mean for negative 2 times negative log-likelihood}
-\item{Prior}{Negative 2 times log-likelihood evaluated at mean parameter}
-\item{iters}{Effective number of parameters}
-\item{famfunc}{DIC statistic}
-\item{Envelope}{DIC statistic}
-\item{dispersion}{DIC statistic}
-\item{loglike}{DIC statistic}
+\item{coefficients}{an n by length(mu) matrix with one sample in each row}
+\item{PostMode}{a vector of length(mu) with the estimated posterior mode coefficients}
+\item{Prior}{A list with two components. The first being the prior mean vector and the second the prior precision matrix}
+\item{iters}{an n by 1 matrix giving the number of candidates generated before acceptance for each sample.}
+\item{famfunc}{an object of class famfunc}
+\item{Envelope}{an object of class envelope}
+\item{dispersion}{the dispersion parameter used in the model}
+\item{loglike}{an n by 1 matrix containing the negative loglikelihood for each sample.}
 
 
 }
