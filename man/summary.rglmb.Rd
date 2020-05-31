@@ -45,47 +45,42 @@ Kjell Nygren
 \code{\link{rglmb}}, \code{\link{glmb}}, \code{\link{summary.glmb}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
 
-## The function is currently defined as
-function (object, ...) 
-{
-    n <- length(object$coefficients[, 1])
-    l1 <- length(object$PostMode)
-    percentiles <- matrix(0, nrow = l1, ncol = 7)
-    se <- sqrt(diag(var(object$coefficients)))
-    mc <- se/n
-    Priorwt <- (se/sqrt(diag(solve(object$Prior$Precision))))^2
-    priorrank <- matrix(0, nrow = l1, ncol = 1)
-    pval1 <- matrix(0, nrow = l1, ncol = 1)
-    pval2 <- matrix(0, nrow = l1, ncol = 1)
-    for (i in 1:l1) {
-        percentiles[i, ] <- quantile(object$coefficients[, i], 
-            probs = c(0.01, 0.025, 0.05, 0.5, 0.95, 0.975, 0.99))
-        test <- append(object$coefficients[, i], object$Prior$mean[i])
-        test2 <- rank(test)
-        priorrank[i, 1] <- test2[n + 1]
-        pval1[i, 1] <- priorrank[i, 1]/(n + 1)
-        pval2[i, 1] <- min(pval1[i, 1], 1 - pval1[i, 1])
-    }
-    Tab1 <- cbind(`Prior Mean` = object$Prior$mean, Prior.sd = 
-    as.numeric(sqrt(diag(solve(object$Prior$Precision)))), 
-        Approx.Prior.wt = Priorwt)
-    TAB <- cbind(Post.Mode = as.numeric(object$PostMode), Post.Mean = colMeans(coef(object)), 
-        Post.Sd = se, `MC Error` = as.numeric(mc), `Pr(tail)` = as.numeric(pval2))
-    TAB2 <- cbind(`1.0\%` = percentiles[, 1], `2.5\%` = percentiles[, 
-        2], `5.0\%` = percentiles[, 3], Median = as.numeric(percentiles[, 
-        4]), `95.0\%` = percentiles[, 5], `97.5\%` = as.numeric(percentiles[, 
-        6]), `99.0\%` = as.numeric(percentiles[, 7]))
-    rownames(Tab1) <- rownames(TAB)
-    rownames(TAB2) <- rownames(TAB)
-    res <- list(call = object$call, n = object$n, coefficients1 = Tab1, 
-        coefficients = TAB, Percentiles = TAB2, n = object$n)
-    class(res) <- "summary.rglmb"
-    res
-  }
+data(carinsca)
+carinsca$Merit <- ordered(carinsca$Merit)
+carinsca$Class <- factor(carinsca$Class)
+options(contrasts=c("contr.treatment","contr.treatment"))
+attach(carinsca)
+
+
+out <- glm(Cost/Claims~Merit+Class,family=Gamma(link="log"),weights=Claims,x=TRUE)
+summary(out)
+
+V_Out=summary(out)$cov.scaled  
+P_Data=solve(V_Out)
+
+Like_std=summary(out)$coefficients[,2]
+
+y1<-out$y
+x1<-out$x
+b1<-out$coefficients
+wt1<-out$prior.weights
+scale<-0.1275 # SAS estimate
+
+dispersion<-1/scale
+wt2<-wt1/dispersion
+alpha1<-rep(0,length(y1))
+
+mu<-matrix(0,8)
+P<-0.1*solve(diag(Like_std*Like_std))
+mu[1,1]=-1.1
+
+out2<-rglmb(n=1000,out$y,out$x,mu=mu,P=P,wt=out$prior.weights,dispersion=
+dispersion,family=Gamma(link="log"),offset2=rep(0,20),start=out$coefficients,
+Gridtype = 3) 
+
+summary.rglmb(out2)
+
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -52,53 +52,22 @@ Kjell Nygren
 \seealso{
 \code{\link{glmb}}, \code{\link{rglmb}}, \code{\link{summary.rglmb}}}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+## Dobson (1990) Page 93: Randomized Controlled Trial :
+counts <- c(18,17,15,20,10,20,25,13,12)
+outcome <- gl(3,1,9)
+treatment <- gl(3,3)
+print(d.AD <- data.frame(treatment, outcome, counts))
 
-## The function is currently defined as
-function (object, ...) 
-{
-    mres <- colMeans(residuals(object))
-    l1 <- length(object$coef.means)
-    n <- length(object$coefficients[, 1])
-    percentiles <- matrix(0, nrow = l1, ncol = 7)
-    se <- sqrt(diag(var(object$coefficients)))
-    mc <- se/object$n
-    mc <- se/n
-    priorrank <- matrix(0, nrow = l1, ncol = 1)
-    pval1 <- matrix(0, nrow = l1, ncol = 1)
-    pval2 <- matrix(0, nrow = l1, ncol = 1)
-    for (i in 1:l1) {
-        percentiles[i, ] <- quantile(object$coefficients[, i], 
-            probs = c(0.01, 0.025, 0.05, 0.5, 0.95, 0.975, 0.99))
-        test <- append(object$coefficients[, i], object$Prior$mean[i])
-        test2 <- rank(test)
-        priorrank[i, 1] <- test2[n + 1]
-        priorrank[i, 1] <- test2[n + 1]
-        pval1[i, 1] <- priorrank[i, 1]/(n + 1)
-        pval2[i, 1] <- min(pval1[i, 1], 1 - pval1[i, 1])
-    }
-    glmsummary <- summary(object$glm)
-    se1 <- sqrt(diag(glmsummary$cov.scaled))
-    Tab1 <- cbind(`Prior Mean` = object$Prior$mean, 
-    Prior.sd = as.numeric(sqrt(diag(object$Prior$Variance))), 
-        `Max Like.` = as.numeric(object$glm$coefficients), Like.sd = se1)
-    TAB <- cbind(Post.Mode = as.numeric(object$coef.mode), 
-    Post.Mean = object$coef.means, 
-        Post.Sd = se, `MC Error` = as.numeric(mc), `Pr(tail)` = as.numeric(pval2))
-    TAB2 <- cbind(`1.0\%` = percentiles[, 1], `2.5\%` = percentiles[, 
-        2], `5.0\%` = percentiles[, 3], Median = as.numeric(percentiles[, 
-        4]), `95.0\%` = percentiles[, 5], `97.5\%` = as.numeric(percentiles[, 
-        6]), `99.0\%` = as.numeric(percentiles[, 7]))
-    rownames(TAB2) <- rownames(TAB)
-    res <- list(call = object$call, n = n, residuals = mres, 
-        coefficients1 = Tab1, coefficients = TAB, Percentiles = TAB2, 
-        pD = object$pD, deviance = object$deviance, DIC = object$DIC, 
-        iters = mean(object$iters))
-    class(res) <- "summary.glmb"
-    res
-  }
+n<-1000
+mysd<-1
+
+mu<-matrix(0,5)
+V0<-((mysd)^2)*diag(5)
+
+glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),mu=mu,Sigma=V0,Gridtype=1)
+
+summary.glmb(glmb.D93)
+
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
