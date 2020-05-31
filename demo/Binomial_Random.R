@@ -11,9 +11,56 @@ extract   <-c(0,0,1,0,1,1,0,1,1,0,1,0,1,1,0,1,0,1,0,0,1)
 
 out<-glm(cbind(germinated, seedcount-germinated) ~ seedtype+extract+seedtype*extract,family=binomial(logit), x=TRUE)
 
+out$y
+
+
 out
+summary(out)
+
 
 y<-out$y
+x<-out$x
+b1<-out$coefficients
+
+Xb=x%*%b1
+
+p<-exp(Xb)/(1+exp(Xb))
+q<-1-p
+p_q<-p*q
+p_q
+p_q2<-diag(as.vector(p_q))
+p_q2
+
+t(x)%*%p_q2%*%x
+
+mu<-matrix(0,4)
+
+wt_0<-0.9
+m_0=exp(log(wt_0/(1-wt_0)))
+V0<-solve(m_0*t(x)%*%p_q2%*%x)
+
+V0
+sqrt(diag(V0))
+
+n<-2
+pbar<-mean(germinated/seedcount)
+
+mubar1=log(pbar/(1-pbar))
+mu[1,1]=log(pbar/(1-pbar))
+mu=b1
+
+
+out<-glm(cbind(germinated, seedcount-germinated) ~ seedtype+extract+seedtype*extract,family=binomial(logit), x=TRUE)
+
+#out2<-glmb(n=n,cbind(germinated, seedcount-germinated) ~ seedtype+extract+seedtype*extract, family=binomial(logit),
+#           mu=mu,Sigma=V0,Gridtype=3)
+
+
+#summary(out2)
+
+
+cbind(germinated, seedcount-germinated)
+
 
 #epsilon<-0.1
 
@@ -98,9 +145,9 @@ epsilon1*exp(-gammastar_Lower)
 ################################### Logit #################
 
  
-qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
-              nu=NULL,V=NULL,family=binomial(logit),offset2=alpha1,start=mu,Gridtype=3,
-              epsilon_converge=0.01)
+#qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
+#              nu=NULL,V=NULL,family=binomial(logit),offset2=alpha1,start=mu,Gridtype=3,
+#              epsilon_converge=0.01)
 
 
 
@@ -237,11 +284,11 @@ epsilon1*exp(-gammastar_Lower)
 ## beta_Constant ends up much larger second time around
 
 
-start.timeE<-Sys.time()
+#start.timeE<-Sys.time()
 
-qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
-                nu=NULL,V=NULL,family=binomial(probit),offset2=alpha1,start=mu,Gridtype=3,
-                epsilon_converge=0.01)
+#qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
+#                nu=NULL,V=NULL,family=binomial(probit),offset2=alpha1,start=mu,Gridtype=3,
+#                epsilon_converge=0.01)
 
 end.timeE<-Sys.time()
 

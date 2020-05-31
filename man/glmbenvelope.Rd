@@ -9,9 +9,8 @@ Constructs Enveloping function for simulation
 Constructs Enveloping function for simulation
 }
 \usage{
-%glmbenvelope(bStar, A, f2, f3,f5,f6, y, x, mu, P, alpha, wt = 1, Gridtype = 3, n %= 1)
-
-glmbenvelope_c(bStar, A, y, x, mu, P, alpha, wt, family = "binomial", link = "logit", Gridtype = 2, n = 1, sortgrid = FALSE)
+glmbenvelope_c(bStar,A,y,x,mu,P,alpha,wt,family="binomial",link = "logit", 
+Gridtype=2,n = 1, sortgrid = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

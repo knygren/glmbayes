@@ -12,3 +12,4 @@ Imports:
 LinkingTo: Rcpp, RcppArmadillo
 Suggests:
     MASS
+RoxygenNote: 7.1.0

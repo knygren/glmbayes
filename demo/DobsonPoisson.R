@@ -1,162 +1,57 @@
 rm(list = ls())
 
+# Gridtype=1 --> Optimize
+# Gridtype=2 --> Use formula to set size?
+# Gridtype=3 --> Full size for Grid
+# Gridtype=3 --> unidimensional
+
+#Unclear if poor performance because coefficients for two variables essentially zero - Try Alternative
+#Problem seems to be primarily if prior means are too far from data --> Leads to prior as "outlier"
+
 ## Dobson (1990) Page 93: Randomized Controlled Trial :
 counts <- c(18,17,15,20,10,20,25,13,12)
 outcome <- gl(3,1,9)
 treatment <- gl(3,3)
 print(d.AD <- data.frame(treatment, outcome, counts))
 
-n<-1000
-mysd<-1
-
-mu<-matrix(0,5)
-
-
-V0<-((mysd)^2)*diag(5)
 
 glm.D93 <- glm(counts ~ outcome + treatment, family = poisson(),x=TRUE)
 
-glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),mu=mu,Sigma=V0,Gridtype=1)
-
 summary(glm.D93)
 
-summary(glmb.D93)
-
-
-#interupts(10000000000)
-
-
-y<-glm.D93$y
-x<-glm.D93$x
-b1<-glm.D93$coefficients
-wt1<-glm.D93$prior.weights
-dispersion<-1
-wt2<-wt1/dispersion
-alpha1<-rep(0,length(y))
+n<-1000
 mu<-matrix(0,5)
+X<-glm.D93$x
+Xmu=glm.D93$x%*%glm.D93$coefficients
+explambda=diag(as.vector(exp(Xmu)))
 
-mu[1]<-log(mean(counts))
+# Use approximately conjugate prior for mu with 10% weight on prior
 
-1/var(log(counts))
+wt_0<-0.1
+m_0=exp(log(wt_0/(1-wt_0)))
+V0<-solve(m_0*t(X)%*%explambda%*%X)
 
-P<-12   # Determines beta constant (Smaller values shrinks it  which helps convergence)
-P<-12   # Determines beta constant (Smaller values shrinks it  which helps convergence)
-
-#P<-1
-y
-
-
-
-P<-1.0*P
-
-pwt<-0.2
-
-m0<-pwt/(1-pwt)
-
-#m0<-1.5
-
-m0/(1+m0) # Approximate prior weight
-
-P*t(x)%*%x
-P_0<-as.matrix(m0*P*t(x)%*%x)
-
-P_0
-log(counts)
-
-library(mnormt)
-
-qc1<-rglmb_rand(n=1000,y=y,x=x,mu=mu,P_0=P_0,P=P,wt=wt2,dispersion=dispersion,
-                nu=NULL,V=NULL,family=poisson(log),offset2=alpha1,start=mu,Gridtype=3,
-                epsilon_converge=0.01)
+diag(sqrt(diag(V0)))
+V0
+sqrt(diag(V0))
 
 
+Like_std=summary(glm.D93)$coefficients[,2]
+D93_Prior_Error_Checks=Prior_Likelihood_Check(mu,
+sqrt(diag(V0)),glm.D93$coefficients,Like_std)
+
+D93_Prior_Error_Checks
 
 
-summary(qc1)
+mu[1,1]=0+4*sqrt(diag(V0)[1])
+mu[1,1]=0+15*Like_std[1]
+mu[1,1]=log(mean(counts))
+mu
 
-summary(qc1$randcoefficients)
+D93_Prior_Error_Checks=Prior_Likelihood_Check(mu,
+sqrt(diag(V0)),glm.D93$coefficients,Like_std)
 
-
-library(coda)
-
-mcmcout<-mcmc(qc1$coefficients)
-plot(mcmcout)
-
-effectiveSize(mcmcout)
-autocorr.plot(mcmcout)
-
-
-mcmcout2<-mcmc(qc1$randcoefficients)
-plot(mcmcout2)
-
-
-
-effectiveSize(mcmcout2)
-autocorr.plot(mcmcout2)
-
-
-
-XTPX<-t(x)%*%(P*diag(9))%*%x
-
-eigdecomp<-eigen(XTPX)
-
-eigdecomp
-values<-eigdecomp$values
-vectors<-eigdecomp$vectors
-
-values
-vectors
-
-values^(-0.5) * t(vectors)
-
-
-2*qc1$loglike
-
-glmb.D93$Dbar
-
-
-logLik(glm.D93)
-logLik(glmb.D93)
-
-logLik.glmb
-
-
-
-#############################################################################
-y=as.vector(18)
-x=as.matrix(1)
-mu=as.vector(0)
-P=as.matrix(1)
-wt=as.vector(1)
-
-
-
-check<-rglmb(n = 1000, y, x, mu, P, wt = wt, dispersion=NULL,nu=NULL,
-      V=NULL,family = poisson(), offset2 = rep(0, 1), start = NULL, Gridtype = 2)
-
-summary(check)
-
-famfunc<-glmbfamfunc(poisson(log))
-f1<-famfunc$f1
-f2<-famfunc$f2
-f3<-famfunc$f3
-f5<-famfunc$f5
-f6<-famfunc$f6
-
-glmbsim_NGauss_cpp(1,as.vector(t(y)),as.matrix(x),mu,as.matrix(P),as.vector(rep(0,1)),wt,dispersion,
-                    famfunc,f1,f2,f3,mu,family="poisson",link="log",Gridtype=2)
-
-glmbsim_NGauss2_cpp(1,as.vector(t(y)),as.matrix(x),mu,as.matrix(P),as.vector(rep(0,1)),wt,dispersion,
-                   famfunc,f1,f2,f3,mu,family="poisson",link="log",Gridtype=2)
-
-check<-rglmb(n = 1, y, x, mu, P, wt = wt, dispersion=NULL,nu=NULL,
-             V=NULL,family = poisson(), offset2 = rep(0, 1), start = log(18), Gridtype = 2)
-
-
-summary(check)
-
-check[1]
-
-rglmb
+#glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),mu=mu,Sigma=V0,Gridtype=3)
+#summary(glmb.D93)
 
 

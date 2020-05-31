@@ -81,9 +81,11 @@ function (object, ...)
     }
     glmsummary <- summary(object$glm)
     se1 <- sqrt(diag(glmsummary$cov.scaled))
-    Tab1 <- cbind(`Prior Mean` = object$Prior$mean, Prior.sd = as.numeric(sqrt(diag(object$Prior$Variance))), 
+    Tab1 <- cbind(`Prior Mean` = object$Prior$mean, 
+    Prior.sd = as.numeric(sqrt(diag(object$Prior$Variance))), 
         `Max Like.` = as.numeric(object$glm$coefficients), Like.sd = se1)
-    TAB <- cbind(Post.Mode = as.numeric(object$coef.mode), Post.Mean = object$coef.means, 
+    TAB <- cbind(Post.Mode = as.numeric(object$coef.mode), 
+    Post.Mean = object$coef.means, 
         Post.Sd = se, `MC Error` = as.numeric(mc), `Pr(tail)` = as.numeric(pval2))
     TAB2 <- cbind(`1.0\%` = percentiles[, 1], `2.5\%` = percentiles[, 
         2], `5.0\%` = percentiles[, 3], Median = as.numeric(percentiles[, 

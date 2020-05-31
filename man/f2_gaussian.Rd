@@ -15,11 +15,11 @@ Negative Log-Posterior Functions
 }
 \usage{
 f2_gaussian(b, y, x, mu, P, alpha, wt)
-f2_poisson(b, y, x, mu, P, alpha, wt)
-f2_binomial_logit(b, y, x, mu, P, alpha, wt)
-f2_binomial_probit(b, y, x, mu, P, alpha, wt)
-f2_binomial_cloglog(b, y, x, mu, P, alpha, wt)
-f2_gamma(b, y, x, mu, P, alpha, wt)
+f2_poisson(b, y, x, mu, P, alpha, wt,progbar)
+f2_binomial_logit(b, y, x, mu, P, alpha, wt,progbar)
+f2_binomial_probit(b, y, x, mu, P, alpha, wt,progbar)
+f2_binomial_cloglog(b, y, x, mu, P, alpha, wt,progbar)
+f2_gamma(b, y, x, mu, P, alpha, wt,progbar)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -42,12 +42,17 @@ A vector with offsets
   \item{wt}{
 A vector of weights
 }
+
+\item{progbar}{
+A dummy for indicating whether a progress-bar should be displayed during the call
+}
+
 }
 \details{
 Negative Log-Posterior Functions
 }
 \value{
-A vector where each elements represents the negative log-posterior for
+A vector where each element represents the negative log-posterior for
 the corresponding vector of coefficients
 }
 \references{

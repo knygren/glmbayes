@@ -95,46 +95,61 @@ Written by Kjell Nygren.
 \code{\link{glm}}, \code{\link{glmb}}, \code{\link{rglmbdisp}}, \code{\link{summary.rglmb}}
 }
 \examples{
+
 data(carinsca)
 carinsca$Merit <- ordered(carinsca$Merit)
 carinsca$Class <- factor(carinsca$Class)
 options(contrasts=c("contr.treatment","contr.treatment"))
 attach(carinsca)
 out <- glm(Claims/Insured~Merit+Class,family="poisson")
-
 summary(out,cor=FALSE)
+
+wt1<-out$prior.weights
+scale<-0.1275 # SAS estimate
+
+dispersion<-1/scale
 
 out <- glm(Cost/Claims~Merit+Class,family=Gamma(link="log"),weights=Claims,x=TRUE)
 summary(out)
 
+V_Out=summary(out)$cov.scaled  
+P_Data=solve(V_Out)
+
+Like_std=summary(out)$coefficients[,2]
 
 y1<-out$y
 x1<-out$x
 b1<-out$coefficients
 wt1<-out$prior.weights
 scale<-0.1275 # SAS estimate
+
+## Should the above model be re-run with dispersion to get correct estimate 
+## for the Precision matrix?
+
 dispersion<-1/scale
 wt2<-wt1/dispersion
 alpha1<-rep(0,length(y1))
 
-
 mu<-matrix(0,8)
-P<-10*diag(8)
+P<-0.1*solve(diag(Like_std*Like_std))
+V0<-solve(P)
 
+Prior_Error_Checks=Prior_Likelihood_Check(mu,sqrt(diag(V0)),out$coefficients,Like_std)
 
-#glmb(n=n,counts ~ outcome + treatment, family = poisson(),mu=mu##,Sigma=V0,Gridtype=1)
+mu
+out$coefficients
 
-out2<-rglmb(n = 1000, out$y, out$x, mu=mu, P=P, wt = out$prior.weights, dispersion = dispersion, family = Gamma(link="log"), 
-            offset2 = rep(0, 20), start = out$coefficients, Gridtype = 2) 
+mu[1,1]=-1.1
+
+Prior_Error_Checks=Prior_Likelihood_Check(mu,sqrt(diag(V0)),out$coefficients,Like_std)
+Prior_Error_Checks
+
+out2<-rglmb(n = 1000, out$y, out$x, mu=mu, P=P, wt = out$prior.weights, dispersion = dispersion,
+  family = Gamma(link="log"), offset2 = rep(0, 20), start = out$coefficients, Gridtype = 3) 
+
 summary(out2)
 
-
-
-
-
-#outb <- glmb(n=1000,Cost/Claims~Merit+Class,family=Gamma(link="log"),
-#mu=mu,Sigma=diag(8),dispersion=dispersion, weights=Claims,x=TRUE,Gridtype=2)}
-
+}
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

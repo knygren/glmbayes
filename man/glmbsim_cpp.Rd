@@ -8,7 +8,7 @@ Simulates from the posterior density of a model in standard form
 Simulates from the posterior density of a model in standard form
 }
 \usage{
-glmbsim_cpp(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link)
+glmbsim_cpp(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link,progbar)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -43,6 +43,8 @@ family used for simulation
 }
   \item{link}{
 link function used for simulation}
+  \item{progbar}{dummy for flagging if a progressbar should be produced during the call}
+
 }
 \details{
 Simulates from the posterior density of a model in standard form

@@ -70,7 +70,8 @@ function (object, ...)
         pval1[i, 1] <- priorrank[i, 1]/(n + 1)
         pval2[i, 1] <- min(pval1[i, 1], 1 - pval1[i, 1])
     }
-    Tab1 <- cbind(`Prior Mean` = object$Prior$mean, Prior.sd = as.numeric(sqrt(diag(solve(object$Prior$Precision)))), 
+    Tab1 <- cbind(`Prior Mean` = object$Prior$mean, Prior.sd = 
+    as.numeric(sqrt(diag(solve(object$Prior$Precision)))), 
         Approx.Prior.wt = Priorwt)
     TAB <- cbind(Post.Mode = as.numeric(object$PostMode), Post.Mean = colMeans(coef(object)), 
         Post.Sd = se, `MC Error` = as.numeric(mc), `Pr(tail)` = as.numeric(pval2))

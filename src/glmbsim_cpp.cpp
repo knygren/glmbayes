@@ -3,8 +3,6 @@
 // we only include RcppArmadillo.h which pulls Rcpp.h in for us
 #include "RcppArmadillo.h"
 
-#include <RcppArmadilloExtensions/sample.h>
-
 using namespace Rcpp;
 
 // Function declarations
@@ -16,22 +14,17 @@ NumericVector  f2_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatri
 arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar=0);
 arma::mat  f3_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar=0);
 arma::mat  f3_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar=0);
-arma::mat  f4_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL, int progbar=0);
-arma::mat  f4_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL, int progbar=0);
-arma::mat  f4_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL, int progbar=0);
-
+void  f4_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL, NumericMatrix cbars, int progbar=0);
+  
 
 NumericVector dpois_glmb( NumericVector x, NumericVector means, int lg);
 NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0);
 arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0);
-arma::mat  f4_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL, int progbar=0);
-  
 
 NumericVector dgamma_glmb( NumericVector x, NumericVector shape, NumericVector scale, int lg);
 NumericVector  f2_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0);
 arma::mat  f3_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0);
-arma::mat  f4_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL,int progbar=0);
-  
+
 void Set_Grid_C2(Rcpp::NumericMatrix GIndex,  Rcpp::NumericMatrix cbars, 
 Rcpp::NumericMatrix Lint,
 Rcpp::NumericMatrix Down,
@@ -80,7 +73,6 @@ double ctrnorm_cpp(double lgrt,double lglt,double mu,double sigma){
 
 }
 
-// [[Rcpp::export]]
 
 void progress_bar2(double x, double N)
 {
@@ -112,118 +104,6 @@ void progress_bar2(double x, double N)
   Rcout << "\r" << std::flush ;
   
 }
-
-
-// [[Rcpp::export]]
-
-int Gindex_size(int l1,NumericVector gridindex,arma::vec a_2, int Gridtype=3 ){
-  
-  int gridsize=1;
-  
-  if(Gridtype==1){
-    for(int j=0;j<l1;j++){
-      if((1+a_2[j])>(2/sqrt(M_PI))){
-        gridsize=gridsize*3;
-      } }
-  }  
-  if(Gridtype==2){
-    for(int j=0;j<l1;j++){
-      if(gridindex[j]==3){
-        gridsize=gridsize*3;
-      } }
-  }
-  if(Gridtype==3){gridsize=pow(3,l1);}  
-  if(Gridtype==4){gridsize=1;}
-  
-
-  
-  return gridsize;
-}
-
-// [[Rcpp::export]]
-
-NumericVector Gindex_row(int i,int l1,NumericVector gridindex,arma::vec a_2, int Gridtype=3    ){
-  
-  NumericVector Gindex_out(l1);
-  double div_index=1;
-  double div_value=0;
-  int int_div_value;
-  double int_div_value2;
-  int temp;
-  double temp2;
-  double i2=(double) i;
-  
-  arma::vec gridindexb(gridindex.begin(),l1,false); 
-  
-
-  if(Gridtype==1){  
-    
-    for(int j=0;j<l1;j++){
-      if((1+a_2[j])<=(2/sqrt(M_PI))){
-        Gindex_out[j]=4; 
-        
-      }
-      if((1+a_2[j])>(2/sqrt(M_PI))){
-        div_index=3*div_index;
-        div_value= i2/div_index;
-        int_div_value=(int) div_value;
-        int_div_value2 =(double) int_div_value;
-        temp=(int) (3*(div_value-int_div_value2)+0.000001);
-        temp2=(double) temp+1;
-        Gindex_out[j]=temp2; 
-        
-      }
-    }
-    
-  }
-  
-  if(Gridtype==2){  
-    
-    for(int j=0;j<l1;j++){
-      if(gridindex[j]==1){
-        Gindex_out[j]=4; 
-      }
-      if(gridindex[j]==3){
-        div_index=3*div_index;
-        div_value= i2/div_index;
-        int_div_value=(int) div_value;
-        int_div_value2 =(double) int_div_value;
-        temp=(int) (3*(div_value-int_div_value2)+0.000001);
-        temp2=(double) temp+1;
-        Gindex_out[j]=temp2; 
-      }      
-      
-    }
-  }
-  
-  if(Gridtype==3){  
-    for(int j=0;j<l1;j++){
-      
-      div_index=3*div_index;
-      
-      div_value= i2/div_index;
-      
-      int_div_value=(int) div_value;
-      int_div_value2 =(double) int_div_value;
-      temp=(int) (3*(div_value-int_div_value2)+0.000001);
-      temp2=(double) temp+1;
-      Gindex_out[j]=temp2; 
-    }
-  }
-  
-  
-  if(Gridtype==4){  
-    for(int j=0;j<l1;j++){
-      Gindex_out[j]=4;
-    }
-  }
-  
-  arma::vec Gindex_outb(Gindex_out.begin(),l1,false); 
-  
-
-  return(Gindex_out);
-}
-
 
 
 // [[Rcpp::export]]
@@ -263,127 +143,25 @@ Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,N
   NumericMatrix btemp(l1,1);
   arma::mat btemp2(btemp.begin(),l1,1,false); 
   NumericVector testll(1);
-  
 
-  int m1=PLSD.size();
-  
- // Rcpp::Function sample_int ("sample.int");
-
- // Expected Iterations needed based on bound in paper if envelope of full size
- 
- double iter_est1=n*pow(2/sqrt(M_PI),l1); 
- 
- // Initialize set iterations to 20% higher 
- 
- double iter_est2=1.2* iter_est1;
- double iter_est4=0;
- double iter_est5=0;
- 
-  // Converting Estimated number of iterations to integer values
- 
- int iter_est3 = (int) (iter_est2+0.5);
-
- double avg_draw_est=0;
- 
- Rcpp::Rcout << "For tight envelope, expected number of draws required equals:" << std::endl << iter_est1 << std::endl;
- Rcpp::Rcout << "Pre-generating candidates equaling a total of:" << std::endl << iter_est3 << std::endl;
- 
- //  36694
- //15892
-  
-  IntegerVector Gindex(m1) ;
-  IntegerVector candlist(iter_est3) ;
-  
-  for(int i=0;i<m1;i++){Gindex[i]=i; }
-
-   candlist= RcppArmadillo::sample(Gindex,iter_est3, TRUE, PLSD);
-
-
-//  Rcpp::stop("Finished Call to sample.int");
-  
-  // Initiated cand_Counter to -1
-  
-  int cand_counter=-1;
-  
-  
   if(progbar==1){
   Rcpp::Rcout << "Starting Simulation:" << std::endl;  };
-
-  
-  
-      for(int i=0;i<n;i++){
+    for(int i=0;i<n;i++){
       
       Rcpp::checkUserInterrupt();
-      if(progbar==1){
+     // if(progbar==1){
         progress_bar2(i, n-1);
       if(i==n-1) {Rcpp::Rcout << "" << std::endl;}
-      }
+      //}
       
       
     a1=0;
     draws(i)=1;
     while(a1==0){
       
-      //   New envelope selection
-      
-      // Increment cand_counter
-      
-      cand_counter=cand_counter+1;
-
-      if (cand_counter==iter_est3)  {
-        // If candidate list is exhausted, generate additional candidates and reset cand_counter (can be made a bit more efficient by
-        //  limiting how many candidates to generate )
-        // May edidt out Rcpp:Rcout after QC is complete
-        Rcpp::Rcout << "" << std::endl;
-        Rcpp::Rcout << "Run Exceeds Intial estimate for required candidates - Generating additional Candidates:" << std::endl;
-        
-        candlist= RcppArmadillo::sample(Gindex,iter_est3, TRUE, PLSD);
-        cand_counter=0;
-      };
-      
-      if (cand_counter<iter_est3)  {
-        J(i)=candlist(cand_counter);
-      };
-      
-      // This part of code is not currentlt used - Some may be moved to first if statement 
-      
-      if (cand_counter==iter_est3)  {
-        avg_draw_est=sum(draws)/i;
-        iter_est4=1.2* (n-i)*avg_draw_est; 
-        
-        iter_est5=std::min(iter_est4,iter_est2);
-
-        //        Rcpp::stop("Run Exceeds Intial estimate for required candidates");
-        Rcpp::Rcout << "" << std::endl;
-        Rcpp::Rcout << "Run Exceeds Intial estimate for required candidates - Switching to old method:" << std::endl;
-        Rcpp::Rcout << "Average Number of Draws so far:" << std::endl << avg_draw_est << std::endl;
-        Rcpp::Rcout << "Estimated number of additional required draws equals:" << std::endl << (n-i)*avg_draw_est << std::endl;
-        Rcpp::Rcout << "Generating an additional number of draws equal to:" << std::endl << iter_est5 << std::endl;
-        Rcpp::Rcout << "" << std::endl;
-    
-      };
-      
-
-      /////////////////////////  Work to replace part determing part of envelope
-
-      //  Code inside this loop was part of older version of function
-      // Inefficient as generation from multinomial is slow
-      // Keeping for QC purposes - May remove once QC complete
-      
-      if (cand_counter>=iter_est3)  {
-      
-      // Generate random number to help determine which part of envelope to sample from 
-      
       U=R::runif(0.0, 1.0);
-      
-      // Initialize envelope variable J(i) to 0 and set flag for "correct" envelope (a2) to 0
       a2=0;
       J(i)=0;    
-      
-      // Search for correct envelope (can this be sped up) and set flag to 1 once found [this may be the most time consuming part]
-      // Update this to use Alias Algorithm
-      
-      
       while(a2==0){
         if(U<=PLSD(J(i))) a2=1;
           		if(U>PLSD(J(i))){ 
@@ -393,21 +171,12 @@ Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,N
 							}
         //a2=1; 
           }
-
-      /////////////////////// part of envelope selection ends here      
-      
-      };
-      
-      // Generate random draw from selected part of envelope 
-      
        for(int j=0;j<l1;j++){  
           
           out(i,j)=ctrnorm_cpp(logrt(J(i),j),loglt(J(i),j),-cbars(J(i),j),1.0);    
 
+          
         }
-       
-    // Check if candidate should be accepted 
-    
      outtemp=out(i,_);
      cbartemp=cbars(J(i),_);
      testtemp2=outtemp2 * trans(cbartemp2);
@@ -453,18 +222,18 @@ Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,N
       testll=f2_gamma(btemp,y, x,mu,P,alpha,wt);
       }
 
+
       test=LLconst(J(i))+testtemp(0,0)-log(U2)-testll(0);
 
       if(test>=0) a1=1;
 	    if(test<0) draws(i)=draws(i)+1;
 
+      
       }
     
     
     }
 
-    
-    
 //return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("J")=J,Rcpp::Named("PLSD")=PLSD,Rcpp::Named("famout")=family);
 return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws);
 
@@ -473,396 +242,6 @@ return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws);
 // [[Rcpp::export]]
 
 
-Rcpp::List  glmbsim_cpp_Large_Dim(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,
-                                  NumericVector wt,Function f2,NumericVector PLSD  ,Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, 
-                                  NumericVector gridindex, NumericMatrix G1, arma::vec a_2, NumericVector bStar, int Gridtype, int progbar=1 )
-{
-  RNGScope scope;
-  int l1 = mu.nrow();
-  //  int l2=pow(3,l1);
-  
-  std::string family2 = Rcpp::as<std::string>(family);
-  std::string link2 = Rcpp::as<std::string>(link);  
-  
-  
-  NumericVector J(n);
-  NumericVector draws(n);
-  NumericMatrix out(n,l1);
-  double a1=0;
-  double a2=0;
-  double U=0;
-  double test=0;
-  double U2=0;
-  
-  //out(0,0)=1;
-
-  NumericMatrix cbars_new(1,l1);
-  
-    
-//  NumericVector PLSD=Envelope["PLSD"];
-//  NumericMatrix loglt=Envelope["loglt"];
-//  NumericMatrix logrt=Envelope["logrt"];
-//  NumericMatrix cbars=Envelope["cbars"];
-//  NumericVector LLconst=Envelope["LLconst"]; 
-  
-  NumericVector outtemp=out(0,_);
-  arma::rowvec outtemp2(outtemp.begin(),l1,false);
-  
-  // Modified to use new cbars
-  NumericVector cbartemp=cbars_new(0,_);
-//    NumericVector cbartemp=cbars(0,_);
-  arma::rowvec cbartemp2(cbartemp.begin(),l1,false);
-  NumericMatrix testtemp(1,1);
-  arma::mat testtemp2(testtemp.begin(),1,1,false);
-  NumericMatrix btemp(l1,1);
-  arma::mat btemp2(btemp.begin(),l1,1,false); 
-  NumericVector testll(1);
-  
-  
-  int m1=PLSD.size();
-  
-  // Rcpp::Function sample_int ("sample.int");
-  
-  // Expected Iterations needed based on bound in paper if envelope of full size
-  
-  double iter_est1=n*pow(2/sqrt(M_PI),l1); 
-  
-  // Initialize set iterations to 20% higher 
-  
-  double iter_est2=1.2* iter_est1;
-  double iter_est4=0;
-  double iter_est5=0;
-  
-  // Converting Estimated number of iterations to integer values
-  
-  int iter_est3 = (int) (iter_est2+0.5);
-  
-  double avg_draw_est=0;
-  
-  Rcpp::Rcout << "For tight envelope, expected number of draws required equals:" << std::endl << iter_est1 << std::endl;
-  Rcpp::Rcout << "Pre-generating candidates equaling a total of:" << std::endl << iter_est3 << std::endl;
-  
-  //  36694
-  //15892
-  
-  IntegerVector Gindex(m1) ;
-  IntegerVector candlist(iter_est3) ;
-  int j=0;
-  
-  for(int i=0;i<m1;i++){Gindex[i]=i; }
-  
-  candlist= RcppArmadillo::sample(Gindex,iter_est3, TRUE, PLSD);
-  
-  
-  //  Rcpp::stop("Finished Call to sample.int");
-  
-  // Initiated cand_Counter to -1
-  
-  int cand_counter=-1;
-  
-  
-  if(progbar==1){
-    Rcpp::Rcout << "Starting Simulation:" << std::endl;  };
-  
-  //  New Matrices for large dimensions. For consistency with lower dimensional functions, the 
-  //  matrices should correspond to what would be generate by 1-dimensional grids. There appears to be a need to pre-compute G1 here as it is not 
-  //  only computed inside envelope funtion
-  
-  NumericMatrix GIndex_new(1,l1);
-  NumericMatrix G4_new(l1,1);
-  NumericMatrix G3_new(1,l1);
-  
- NumericMatrix Lint1(2,l1);
- NumericMatrix Up_new(1,l1);
- NumericMatrix Down_new(1,l1);
- NumericMatrix logP_new(1,2);
- NumericMatrix logU_new(1,l1);
- NumericMatrix loglt_new(1,l1);
- NumericMatrix logrt_new(1,l1);
- NumericMatrix logct_new(1,l1);
- 
- NumericMatrix LLconst_new(1,1);
- NumericVector NegLL_new(1);    
- arma::mat cbars2_new(cbars_new.begin(), 1, l1, false); 
- 
- arma::mat GIndex_newb(GIndex_new.begin(), 1, l1, false); 
- arma::mat G1b(G1.begin(), 3, l1, false);
- arma::mat G4_newb(G4_new.begin(), l1, 1, false); 
- arma::mat Lint(Lint1.begin(), 2, l1, false);
- 
- // Need to compute other vectors/matrices first before Lint
- 
- NumericVector yy_1(2, 1.0);
- NumericVector yy_2=NumericVector::create(-0.5,0.5);
- arma::vec omega=(sqrt(2)-arma::exp(-1.20491-0.7321*sqrt(0.5+a_2)))/arma::sqrt(1+a_2);
- 
- arma::colvec yy_1b(yy_1.begin(), yy_1.size(), false);
- arma::colvec yy_2b(yy_2.begin(), yy_2.size(), false);
- arma::colvec bStar_2(bStar.begin(), bStar.size(), false);
- 
- 
- Lint=yy_1b*arma::trans(bStar_2)+yy_2b*arma::trans(omega);
- 
- 
-  
-  for(int i=0;i<n;i++){
-    
-    Rcpp::checkUserInterrupt();
-    if(progbar==1){
-      progress_bar2(i, n-1);
-      if(i==n-1) {Rcpp::Rcout << "" << std::endl;}
-    }
-    
-    
-    a1=0;
-    draws(i)=1;
-    while(a1==0){
-      
-      //   New envelope selection
-      
-      // Increment cand_counter
-      
-      cand_counter=cand_counter+1;
-      
-      if (cand_counter==iter_est3)  {
-        // If candidate list is exhausted, generate additional candidates and reset cand_counter (can be made a bit more efficient by
-        //  limiting how many candidates to generate )
-        // May edidt out Rcpp:Rcout after QC is complete
-        Rcpp::Rcout << "" << std::endl;
-        Rcpp::Rcout << "Run Exceeds Intial estimate for required candidates - Generating additional Candidates:" << std::endl;
-        
-        candlist= RcppArmadillo::sample(Gindex,iter_est3, TRUE, PLSD);
-        cand_counter=0;
-      };
-      
-      if (cand_counter<iter_est3)  {
-        J(i)=candlist(cand_counter);
-      };
-      
-      // This part of code is not currentlt used - Some may be moved to first if statement 
-      
-      if (cand_counter==iter_est3)  {
-        avg_draw_est=sum(draws)/i;
-        iter_est4=1.2* (n-i)*avg_draw_est; 
-        
-        iter_est5=std::min(iter_est4,iter_est2);
-        
-        //        Rcpp::stop("Run Exceeds Intial estimate for required candidates");
-        Rcpp::Rcout << "" << std::endl;
-        Rcpp::Rcout << "Run Exceeds Intial estimate for required candidates - Switching to old method:" << std::endl;
-        Rcpp::Rcout << "Average Number of Draws so far:" << std::endl << avg_draw_est << std::endl;
-        Rcpp::Rcout << "Estimated number of additional required draws equals:" << std::endl << (n-i)*avg_draw_est << std::endl;
-        Rcpp::Rcout << "Generating an additional number of draws equal to:" << std::endl << iter_est5 << std::endl;
-        Rcpp::Rcout << "" << std::endl;
-        
-      };
-      
-      
-      /////////////////////////  Work to replace part determing part of envelope
-      
-      //  Code inside this loop was part of older version of function
-      // Inefficient as generation from multinomial is slow
-      // Keeping for QC purposes - May remove once QC complete
-      
-      if (cand_counter>=iter_est3)  {
-        
-        // Generate random number to help determine which part of envelope to sample from 
-        
-        U=R::runif(0.0, 1.0);
-        
-        // Initialize envelope variable J(i) to 0 and set flag for "correct" envelope (a2) to 0
-        a2=0;
-        J(i)=0;    
-        
-        // Search for correct envelope (can this be sped up) and set flag to 1 once found [this may be the most time consuming part]
-        // Update this to use Alias Algorithm
-        
-        
-        while(a2==0){
-          if(U<=PLSD(J(i))) a2=1;
-          if(U>PLSD(J(i))){ 
-            U=U-PLSD(J(i));
-            J(i)=J(i)+1;
-            
-          }
-          //a2=1; 
-        }
-        
-        /////////////////////// part of envelope selection ends here      
-        
-      };
-      
-      
-      
-      // Generate random draw from selected part of envelope 
-      // Note: May want to explore replacing with method re-generating logrt, loglt, cbars on the fly
-      //  (i) Find Gindex row (already wrote function for this)
-      // (ii) Set G4 columns
-      // (iii) Calculate cbars and negLL at that point using 
-      // (iv)  
-      
-      
-
-      
-      GIndex_new(0,_)=Gindex_row(J(i),l1,gridindex=gridindex,a_2=a_2,Gridtype=Gridtype);
-      
-      // Temporarily code G3_new and G4_new separately - Wasteful but part of legacy code
-      
-      for(j=0;j<l1;j++){
-        if(GIndex_new(0,j)==1){G4_new(j,0)=G1(0,j);} 
-        if(GIndex_new(0,j)==2){G4_new(j,0)=G1(1,j);} 
-        if(GIndex_new(0,j)==3){G4_new(j,0)=G1(2,j);} 
-        if(GIndex_new(0,j)==4){G4_new(j,0)=G1(1,j);} 
-  
-        if(GIndex_new(0,j)==1){G3_new(0,j)=G1(0,j);} 
-        if(GIndex_new(0,j)==2){G3_new(0,j)=G1(1,j);} 
-        if(GIndex_new(0,j)==3){G3_new(0,j)=G1(2,j);} 
-        if(GIndex_new(0,j)==4){G3_new(0,j)=G1(1,j);} 
-      }
-
-//      arma::vec NegLL_New2(NegLL_new.begin(),1);
-
-      // Set Cbars and LL for current point in grid only
-      
-      if( family2=="binomial" && link2=="logit"){
-        cbars2_new=f4_binomial_logit(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);      }
-      if(family2=="binomial"  && link2=="probit"){
-        cbars2_new=f4_binomial_probit(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
-       
-      }
-      if(family2=="binomial"   && link2=="cloglog"){
-        cbars2_new=f4_binomial_cloglog(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
-         }
-      
-      if(family2=="quasibinomial"  && link2=="logit"){
-        cbars2_new=f4_binomial_logit(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
-       }
-      if(family2=="quasibinomial" && link2=="probit"){
-        cbars2_new=f4_binomial_probit(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
-       }
-      if(family2=="quasibinomial" && link2=="cloglog"){
-        cbars2_new=f4_binomial_cloglog(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
-         }
-      
-      if(family2=="poisson" ){
-        cbars2_new=f4_poisson(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
-       }
-      
-      if(family2=="quasipoisson" ){
-        cbars2_new=f4_poisson(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
-       }
-      
-      if(family2=="Gamma" ){
-        cbars2_new=f4_gamma(G4_new,y, x,mu,P,alpha,wt,NegLL_new,0);
-       }
-      
-
-//      NegLL_New2.print("Neg_LL New constant for envelope selected");
-      
-      
-        Set_Grid_C2(GIndex_new, cbars_new, Lint1,Down_new,Up_new,loglt_new,logrt_new,logct_new,logU_new,logP_new);
-      
-        setlogP_C2(logP_new,NegLL_new,cbars_new,G3_new,LLconst_new);
-      
-//      Set_Grid_C2(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
-      
-//      Rcpp::Rcout << "Printing new and old inputs to ctrnom_cpp:" << std::endl ;
-      
-      for(int j=0;j<l1;j++){  
-
-//        Rcpp::Rcout << "Dimension" << std::endl << j << std::endl;
-//        Rcpp::Rcout << "Oldlogrt" << std::endl << logrt(J(i),j) << std::endl;
-//        Rcpp::Rcout << "newlogrt" << std::endl << logrt_new(0,j) << std::endl;
-//        Rcpp::Rcout << "Oldloglt" << std::endl << loglt(J(i),j) << std::endl;
-//        Rcpp::Rcout << "newloglt" << std::endl << loglt_new(0,j) << std::endl;
-//        Rcpp::Rcout << "Oldcbars" << std::endl << cbars(J(i),j) << std::endl;
-//        Rcpp::Rcout << "newcbars" << std::endl << cbars_new(0,j) << std::endl;
-        
-        // Replacing call to use new version of inputs
-        out(i,j)=ctrnorm_cpp(logrt_new(0,j),loglt_new(0,j),-cbars_new(0,j),1.0);    
-//        out(i,j)=ctrnorm_cpp(logrt(J(i),j),loglt(J(i),j),-cbars(J(i),j),1.0);    
-        
-      }
-      
-      // Check if candidate should be accepted 
-      
-      outtemp=out(i,_);
-      
-      // Changing to cbars_new
-      
-      cbartemp=cbars_new(0,_);
-  //    cbartemp=cbars(J(i),_);
-      testtemp2=outtemp2 * trans(cbartemp2);
-      U2=R::runif(0.0, 1.0);
-      btemp2=trans(outtemp2);    
-      
-      // Need to modify to call correct f2 function based on family and link
-      
-      
-      if(family2=="binomial"){
-        if(link2=="logit"){  
-          testll=f2_binomial_logit(btemp,y, x,mu,P,alpha,wt);
-        }
-        if(link2=="probit"){  
-          testll=f2_binomial_probit(btemp,y, x,mu,P,alpha,wt);
-        }
-        if(link2=="cloglog"){  
-          testll=f2_binomial_cloglog(btemp,y, x,mu,P,alpha,wt);
-        }
-      }
-      
-      if(family2=="quasibinomial"){
-        if(link2=="logit"){  
-          testll=f2_binomial_logit(btemp,y, x,mu,P,alpha,wt);
-        }
-        if(link2=="probit"){  
-          testll=f2_binomial_probit(btemp,y, x,mu,P,alpha,wt);
-        }
-        if(link2=="cloglog"){  
-          testll=f2_binomial_cloglog(btemp,y, x,mu,P,alpha,wt);
-        }
-      }
-      
-      
-      if(family2=="poisson"){  
-        testll=f2_poisson(btemp,y, x,mu,P,alpha,wt);
-      }
-      if(family2=="quasipoisson"){  
-        testll=f2_poisson(btemp,y, x,mu,P,alpha,wt);
-      }
-      
-      if(family2=="Gamma"){  
-        testll=f2_gamma(btemp,y, x,mu,P,alpha,wt);
-      }
-      
-
-//            Rcpp::Rcout << "Printing new and old components used in test:" << std::endl ;
-//             Rcpp::Rcout << "LLconst" << std::endl << LLconst(J(i)) << std::endl;
-//             Rcpp::Rcout << "LLconst_new" << std::endl << LLconst_new(0,0) << std::endl;
-
-      // Replacing with new version of LLconst
-  
-      test=LLconst_new(0,0)+testtemp(0,0)-log(U2)-testll(0);
-//      test=LLconst(J(i))+testtemp(0,0)-log(U2)-testll(0);
-      
-      if(test>=0) a1=1;
-      if(test<0) draws(i)=draws(i)+1;
-      
-    }
-    
-    
-  }
-  
-  
-  
-  //return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("J")=J,Rcpp::Named("PLSD")=PLSD,Rcpp::Named("famout")=family);
-  return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws);
-  
-}
-
-
-// [[Rcpp::export]]
-
 List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
       NumericVector y, 
       NumericMatrix x,
@@ -870,9 +249,6 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
       NumericMatrix P,
       NumericVector alpha,
       NumericVector wt,
-      NumericVector &gridindex,
-      NumericMatrix G1,
-      NumericMatrix Lint1,
       std::string family="binomial",
       std::string link="logit",
       int Gridtype=2, 
@@ -892,8 +268,8 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
   NumericVector xx_2=NumericVector::create(-1.0,0.0,1.0);
   NumericVector yy_1(2, 1.0);
   NumericVector yy_2=NumericVector::create(-0.5,0.5);
-//  NumericMatrix G1(3,l1);
-//  NumericMatrix Lint1(2,l1);
+  NumericMatrix G1(3,l1);
+  NumericMatrix Lint1(2,l1);
   arma::mat G1b(G1.begin(), 3, l1, false);
   arma::mat Lint(Lint1.begin(), 2, l1, false);
 
@@ -909,7 +285,6 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
   Rcpp::Function EnvSort("EnvelopeSort");
 
 
-  
   int i;  
   
   a_2=arma::diagvec(A2);
@@ -917,17 +292,12 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
   G1b=xx_1b*arma::trans(bStar_2)+xx_2b*arma::trans(omega);
   Lint=yy_1b*arma::trans(bStar_2)+yy_2b*arma::trans(omega);
   
-//  NumericVector gridindex(l1);
+  NumericVector gridindex(l1);
   
   if(Gridtype==2){
   gridindex=opGrid(a_2,n);
   }
 
-  arma::vec gridindexb(gridindex.begin(),l1, false);
-  
-
-  
-  
   NumericVector Temp1=G1( _, 0);
   double Temp2;
   
@@ -999,79 +369,86 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
     NumericVector NegLL(l2);    
     arma::mat cbars2(cbars.begin(), l2, l1, false); 
 
-//    arma::vec NegLL2(NegLL.begin(),l2,false);
+    // Note: NegLL_2 only added to allow for QC printing of results 
+    
+    arma::colvec NegLL_2(NegLL.begin(), NegLL.size(), false);
+    
 
+    Rcpp::Rcout << "Gridtype is :" << std::endl << Gridtype << std::endl;
+    Rcpp::Rcout << "l1 is :" << std::endl << l1 << std::endl;
+    Rcpp::Rcout << "l2 is :" << std::endl << l2 << std::endl;
+    
     if( family=="binomial" && link=="logit"){
-      cbars2=f4_binomial_logit(G4,y, x,mu,P,alpha,wt,NegLL,1);
+//      Rcpp::Rcout << "Finding Values of Log-posteriors and Gradients - New function:" << std::endl;
+      
+//    f4_binomial_logit(G4,y, x,mu,P,alpha,wt,NegLL,cbars,1);
+//    cbars2.print("Value of cbars2 after f4_binomial_logit");  
+      
+//    NegLL_2.print("Value of NegLL_2 after f4_binomial_logit");  
+      
 //    Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-//    NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,1);  
-//    Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-//    cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,1);
+    NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,1);  
+//    NegLL_2.print("Value of NegLL_2 after f2_binomial_logit");  
+    
+    
+//        Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,1);
+    cbars2.print("Value of cbars2 after f3_binomial_logit");  
     }
     if(family=="binomial"  && link=="probit"){
-      cbars2=f4_binomial_probit(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-//      NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt,1);  
-//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-//      cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt,1);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt,1);
     }
     if(family=="binomial"   && link=="cloglog"){
-      cbars2=f4_binomial_cloglog(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-//      NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt,1);  
-//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-//    cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt,1);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      
+    cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt,1);
     }
 
     if(family=="quasibinomial"  && link=="logit"){
-      cbars2=f4_binomial_logit(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-//      NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,1);  
-//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-//      cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,1);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,1);
     }
     if(family=="quasibinomial" && link=="probit"){
-            cbars2=f4_binomial_probit(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-//      NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt,1);  
-//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-//      cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt,1);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt,1);
     }
     if(family=="quasibinomial" && link=="cloglog"){
-            cbars2=f4_binomial_cloglog(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-//      NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt,1);  
-//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-//      cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt,1);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt,1);
     }
 
     if(family=="poisson" ){
-      cbars2=f4_poisson(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-//      NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt,1);  
-//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-//      cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt,1);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt,1);
     }
     
     if(family=="quasipoisson" ){
-            cbars2=f4_poisson(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-//      NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt,1);  
-//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-//      cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt,1);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt,1);
     }
 
     if(family=="Gamma" ){
-            cbars2=f4_gamma(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
-//      NegLL=f2_gamma(G4,y, x, mu, P, alpha, wt,1);  
-//      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-//      cbars2=f3_gamma(G4,y, x,mu,P,alpha,wt,1);
+      Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+      NegLL=f2_gamma(G4,y, x, mu, P, alpha, wt,1);  
+      Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+      cbars2=f3_gamma(G4,y, x,mu,P,alpha,wt,1);
     }
 
-//    NegLL2.print("NegLL after call to log-posterior");
-    
-    
     Rcpp::Rcout << "Finished Log-posterior evaluations:" << std::endl;
     
     
@@ -1090,16 +467,16 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
 
     PLSD=PLSD/sumP;
 
-
-//    if(sortgrid==true){
-
-//    Rcpp::List outlist=EnvSort(l1,l2,GIndex,G3,cbars,logU,logrt,loglt,logP,LLconst,PLSD,a_1);
-      
-//      return(outlist);
-
-//    }
-
     
+    if(sortgrid==true){
+
+    Rcpp::List outlist=EnvSort(l1,l2,GIndex,G3,cbars,logU,logrt,loglt,logP,LLconst,PLSD,a_1);
+      
+      return(outlist);
+
+    }
+
+
   return Rcpp::List::create(Rcpp::Named("GridIndex")=GIndex,
           Rcpp::Named("thetabars")=G3,
           Rcpp::Named("cbars")=cbars,
@@ -1112,509 +489,8 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
           Rcpp::Named("a1")=a_1
           );
 
+  
 }
-
-
-// [[Rcpp::export]]
-
-List glmbenvelope_c_Large_dim(NumericVector bStar,NumericMatrix A,
-                    NumericVector y, 
-                    NumericMatrix x,
-                    NumericMatrix mu,
-                    NumericMatrix P,
-                    NumericVector alpha,
-                    NumericVector wt,
-                    NumericVector &gridindex,
-                    NumericMatrix G1,
-                    NumericMatrix Lint1,
-                    std::string family="binomial",
-                    std::string link="logit",
-                    int Gridtype=2, 
-                    int n=1,
-                    bool sortgrid=false
-){
-  
-  int l1 = A.nrow(), k = A.ncol();
-  arma::mat A2(A.begin(), l1, k, false);
-  arma::colvec bStar_2(bStar.begin(), bStar.size(), false);
-  
-  
-  NumericVector a_1(l1);
-  arma::vec a_2(a_1.begin(), a_1.size(), false);
-  
-  NumericVector xx_1(3, 1.0);
-  NumericVector xx_2=NumericVector::create(-1.0,0.0,1.0);
-  NumericVector yy_1(2, 1.0);
-  NumericVector yy_2=NumericVector::create(-0.5,0.5);
-  //  NumericMatrix G1(3,l1);
-  //  NumericMatrix Lint1(2,l1);
-  arma::mat G1b(G1.begin(), 3, l1, false);
-  arma::mat Lint(Lint1.begin(), 2, l1, false);
-  
-  arma::colvec xx_1b(xx_1.begin(), xx_1.size(), false);
-  arma::colvec xx_2b(xx_2.begin(), xx_2.size(), false);
-  arma::colvec yy_1b(yy_1.begin(), yy_1.size(), false);
-  arma::colvec yy_2b(yy_2.begin(), yy_2.size(), false);
-  List G2(a_1.size());
-  List GIndex1(a_1.size());
-  Rcpp::Function opGrid("optgrid");
-  Rcpp::Function expGrid("expand.grid");
-  Rcpp::Function asMat("as.matrix");
-  Rcpp::Function EnvSort("EnvelopeSort");
-  
-  
-  
-  int i;  
-  
-  a_2=arma::diagvec(A2);
-  arma::vec omega=(sqrt(2)-arma::exp(-1.20491-0.7321*sqrt(0.5+a_2)))/arma::sqrt(1+a_2);
-  G1b=xx_1b*arma::trans(bStar_2)+xx_2b*arma::trans(omega);
-  Lint=yy_1b*arma::trans(bStar_2)+yy_2b*arma::trans(omega);
-  
-  //  NumericVector gridindex(l1);
-  
-  if(Gridtype==2){
-    gridindex=opGrid(a_2,n);
-  }
-  
-  arma::vec gridindexb(gridindex.begin(),l1, false);
-  
-  
-  
-  
-  NumericVector Temp1=G1( _, 0);
-  double Temp2;
-  
-//  for(i=0;i<l1;i++){
-    
-//  }
-  
-  int l2=Gindex_size( l1,gridindex, a_2,  Gridtype );
-  
-//  NumericMatrix G3=asMat(expGrid(G2));
-//  NumericMatrix GIndex=asMat(expGrid(GIndex1));
-///  NumericMatrix G4(G3.ncol(),G3.nrow());
-//  int l2=GIndex.nrow();
-  
-//  arma::mat G3b(G3.begin(), G3.nrow(), G3.ncol(), false);
-//  arma::mat G4b(G4.begin(), G4.nrow(), G4.ncol(), false);
-  
-//  G4b=trans(G3b);
-  
-//  NumericMatrix cbars(l2,l1);
-//  NumericMatrix Up(l2,l1);
-//  NumericMatrix Down(l2,l1);
-  NumericMatrix logP(l2,2);
-//  NumericMatrix logU(l2,l1);
-//  NumericMatrix loglt(l2,l1);
-//  NumericMatrix logrt(l2,l1);
-//  NumericMatrix logct(l2,l1);
-  
-//  NumericVector NegLL(l2);    
-//  arma::mat cbars2(cbars.begin(), l2, l1, false); 
-  
-  //    arma::vec NegLL2(NegLL.begin(),l2,false);
-  
-//  if( family=="binomial" && link=="logit"){
-//    cbars2=f4_binomial_logit(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//  }
-//  if(family=="binomial"  && link=="probit"){
-//    cbars2=f4_binomial_probit(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//  }
-//  if(family=="binomial"   && link=="cloglog"){
-//    cbars2=f4_binomial_cloglog(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//  }
-  
-//  if(family=="quasibinomial"  && link=="logit"){
-//    cbars2=f4_binomial_logit(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//  }
-//  if(family=="quasibinomial" && link=="probit"){
-//    cbars2=f4_binomial_probit(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//  }
-//  if(family=="quasibinomial" && link=="cloglog"){
-//    cbars2=f4_binomial_cloglog(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//  }
-  
-//  if(family=="poisson" ){
-//    cbars2=f4_poisson(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//  }
-  
-//  if(family=="quasipoisson" ){
-//    cbars2=f4_poisson(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//  }
-  
-//  if(family=="Gamma" ){
-//    cbars2=f4_gamma(G4,y, x,mu,P,alpha,wt,NegLL,1);
-//  }
-  
-
-  
-//  Rcpp::Rcout << "Finished Log-posterior evaluations:" << std::endl;
-  
-  
-//  Set_Grid_C2(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
-  
-//  setlogP_C2(logP,NegLL,cbars,G3,LLconst);
-  
-  
-  // Add Loop to replicate above calculations using one-dimensional version of most of the above
-  
-  
-  NumericMatrix GIndex_new(1,l1);
-  NumericMatrix G4_new(l1,1);
-
-  
-  
-//  NumericMatrix Lint1(2,l1);
-  NumericMatrix Up_new(1,l1);
-  NumericMatrix Down_new(1,l1);
-  NumericMatrix logU_new(1,l1);
-  NumericMatrix loglt_new(1,l1);
-  NumericMatrix logrt_new(1,l1);
-  NumericMatrix logct_new(1,l1);
-  
-  NumericMatrix logP_new(1,2);
-  NumericMatrix LLconst_new(1,1);
-  NumericVector NegLL_new(1);    
-  NumericMatrix cbars_new(1,l1);
-  NumericMatrix G3_new(1,l1);
-  
-  
-  arma::mat cbars2_new(cbars_new.begin(), 1, l1, false); 
-
-  Rcpp::Rcout << "Entering loop for second envelope:" << std::endl;
-  
-  int l3=Gindex_size( l1,gridindex, a_2,  Gridtype );
-
-  double l4=log(l3)/log(3);
-int l5=Gindex_size( 15,gridindex, a_2,  Gridtype );
-
-  int gridsize=1;
-  i=0;
-  int threshold=0;
-  while(gridsize<l5){
-
-      if(Gridtype==1){
-        if((1+a_2[i])<=(2/sqrt(M_PI))){ 
-          Temp2=G1(1,i);
-          G2[i]=NumericVector::create(Temp2);
-          GIndex1[i]=NumericVector::create(4.0);
-          //  gridsize=gridsize*3;
-          threshold=i+1;
-        }
-        if((1+a_2[i])>(2/sqrt(M_PI))){
-          Temp1=G1(_,i);
-          G2[i]=NumericVector::create(Temp1(0),Temp1(1),Temp1(2));
-          GIndex1[i]=NumericVector::create(1.0,2.0,3.0);
-          gridsize=gridsize*3;
-          threshold=i+1;
-        }    
-        i=i+1;
-      }  
-    
-    
-    if(Gridtype==2){
-      if(gridindex[i]==1){
-        Temp2=G1(1,i);
-        G2[i]=NumericVector::create(Temp2);
-        GIndex1[i]=NumericVector::create(4.0);
-      //  gridsize=gridsize*3;
-        threshold=i+1;
-      }
-      if(gridindex[i]==3){
-        Temp1=G1(_,i);
-        G2[i]=NumericVector::create(Temp1(0),Temp1(1),Temp1(2));
-        GIndex1[i]=NumericVector::create(1.0,2.0,3.0);
-        gridsize=gridsize*3;
-        threshold=i+1;
-      }
-      i=i+1;
-    }
-    
-    
-    
-    if(Gridtype==3){
-      Temp1=G1(_,i);
-      G2[i]=NumericVector::create(Temp1(0),Temp1(1),Temp1(2));
-      GIndex1[i]=NumericVector::create(1.0,2.0,3.0);
-      gridsize=gridsize*3;
-      threshold=i+1;
-      i=i+1;
-    }
-
-      if(Gridtype==4){
-        Temp2=G1(1,i);
-        G2[i]=NumericVector::create(Temp2);
-        GIndex1[i]=NumericVector::create(4.0);
-        //gridsize=gridsize*3;
-        threshold=i+1;
-        i=i+1;
-      }
-    
-        
-  }
-
-  Rcpp::Rcout << "Threshold evaluates to" << std::endl << threshold << std::endl;
-  
-    
-  while(i <l1){
-
-    if(Gridtype==1){
-      if((1+a_2[i])<=(2/sqrt(M_PI))){ 
-        Temp2=G1(1,i);
-        G2[i]=NumericVector::create(Temp2);
-        GIndex1[i]=NumericVector::create(4.0);
-        //  gridsize=gridsize*3;
-//        threshold=i+1;
-      }
-      if((1+a_2[i])>(2/sqrt(M_PI))){
-        Temp1=G1(_,i);
-        G2[i]=NumericVector::create(Temp1(0));
-        GIndex1[i]=NumericVector::create(1.0);
-//        gridsize=gridsize*3;
-//        threshold=i+1;
-      }    
-      i=i+1;
-    }  
-    
-    if(Gridtype==2){
-      if(gridindex[i]==1){
-        Temp2=G1(1,i);
-        G2[i]=NumericVector::create(Temp2);
-        GIndex1[i]=NumericVector::create(4.0);
-      }
-      if(gridindex[i]==3){
-        Temp1=G1(_,i);
-        G2[i]=NumericVector::create(Temp1(0));
-        GIndex1[i]=NumericVector::create(1.0);
-      }
-      i=i+1;
-    }
-
-        
-    if(Gridtype==3){
-      Temp1=G1(_,i);
-      G2[i]=NumericVector::create(Temp1(0));
-      GIndex1[i]=NumericVector::create(1.0);
-      i=i+1;
-    }
-
-    
-    
-    
-    if(Gridtype==4){
-      Temp2=G1(1,i);
-      G2[i]=NumericVector::create(Temp2);
-      GIndex1[i]=NumericVector::create(4.0);
-      //gridsize=gridsize*3;
-      threshold=i+1;
-      i=i+1;
-    }
-    
-    
-  }
-  
-    // Try Expanding Grid using new coding method
-
-//  NumericMatrix GIndex(l5,l1);
-//  NumericMatrix G3(l5,l1);
-  
-    
-        NumericMatrix G3=asMat(expGrid(G2));
-    Rcpp::Rcout << "G3 allocated" << std::endl ;
-  NumericMatrix GIndex=asMat(expGrid(GIndex1));
-    Rcpp::Rcout << "Gindex allocated" << std::endl ;
-  
-
-      
-  
-    
-  //  if(Gridtype==1){
-  //    if((1+a_2[i])<=(2/sqrt(M_PI))){ 
-  //      Temp2=G1(1,i);
-  //      G2[i]=NumericVector::create(Temp2);
-  //      GIndex1[i]=NumericVector::create(4.0);
-  //    }
-  //    if((1+a_2[i])>(2/sqrt(M_PI))){
-  //      Temp1=G1(_,i);
-  //      G2[i]=NumericVector::create(Temp1(0),Temp1(1),Temp1(2));
-  //      GIndex1[i]=NumericVector::create(1.0,2.0,3.0);
-  //    }    
-  //  }  
-  //  if(Gridtype==2){
-  //    if(gridindex[i]==1){
-  //      Temp2=G1(1,i);
-  //      G2[i]=NumericVector::create(Temp2);
-  //      GIndex1[i]=NumericVector::create(4.0);
-  //    }
-  //    if(gridindex[i]==3){
-  //      Temp1=G1(_,i);
-  //      G2[i]=NumericVector::create(Temp1(0),Temp1(1),Temp1(2));
-  //      GIndex1[i]=NumericVector::create(1.0,2.0,3.0);
-  //    }
-  //  }
-    
-  //  if(Gridtype==3){
-  //    Temp1=G1(_,i);
-  //    G2[i]=NumericVector::create(Temp1(0),Temp1(1),Temp1(2));
-  //    GIndex1[i]=NumericVector::create(1.0,2.0,3.0);
-  //  }
-    
-  //  if(Gridtype==4){
-  //    Temp2=G1(1,i);
-  //    G2[i]=NumericVector::create(Temp2);
-  //    GIndex1[i]=NumericVector::create(4.0);
-  //  }
-    
-  //}
-  
-    
-    
-  double l6=l3/l5;
-  
-  Rcpp::Rcout << "Dimensions for Grid" << std::endl << l4 << std::endl;
-  Rcpp::Rcout << "Length of external loop" << std::endl << l6 << std::endl;
-  Rcpp::Rcout << "Length of internal loop" << std::endl << l5 << std::endl;
-  
-  //  Bring Back allocation for matrices used for envelope construction but limit to max feasible
-  
-  NumericMatrix G4(l1,l5);
-  Rcpp::Rcout << "G4 allocated" << std::endl ;
-  NumericMatrix cbars(l5,l1);
-  arma::mat cbars2(cbars.begin(), l5, l1, false); 
-
-  
-  arma::mat G3b(G3.begin(), G3.nrow(), G3.ncol(), false);
-  arma::mat G4b(G4.begin(), G4.nrow(), G4.ncol(), false);
-  
-  G4b=trans(G3b);
-  
-    
-  Rcpp::Rcout << "cbars allocated" << std::endl ;
-  NumericVector NegLL(l5);
-    Rcpp::Rcout << "NegLL allocated" << std::endl ;
-    NumericMatrix Up(l5,l1);
-    NumericMatrix Down(l5,l1);
-    NumericMatrix logU(l5,l1);
-    NumericMatrix loglt(l5,l1);
-    NumericMatrix logrt(l5,l1);
-    NumericMatrix logct(l5,l1);
-    NumericMatrix logP_v2(l5,2);
-    NumericMatrix LLconst(l5,1);
-
-    NumericMatrix::Column logP_v2_column1 = logP_v2(_, 0);
-    NumericMatrix::Column logP_v2_column2 = logP_v2(_, 1);
-
-    arma::vec LogP_v2_column1_1(logP_v2_column1.begin(),l5);
-    arma::vec LogP_v2_column2_1(logP_v2_column2.begin(),l5);
-    
-      
-        
-    //logP_v2
-    
-    Rcpp::Rcout << "Remaining Required Matrices allocated" << std::endl ;
-
-    Rcpp::Rcout << "Starting Full Construction - multivariate method" << std::endl ;
-    
-    for(int j1=0;j1<l6;j1++){
-      Rcpp::Rcout << "Construction for External Loop Iteration" << std::endl << j1 << std::endl;
-
-      // Get row associated with first row in next part of grid
-      
-      GIndex_new(0,_)=Gindex_row(j1*l5,l1,gridindex=gridindex,a_2=a_2,Gridtype=Gridtype);
-      
-      // Compare to first row stored in GIndex and update GIndex & G3 if different
-      for(int j2=threshold;j2<l1;j2++){
-        if(GIndex_new(0,j2)>GIndex(0,j2)){
-          GIndex( _, j2)=GIndex( _, j2)+(GIndex_new(0,j2)-GIndex(0,j2));
-        G3( _, j2)=G3( _, j2)+(G3_new(0,j2)-G3(0,j2));}
-      
-        
-        if(GIndex_new(0,j2)<GIndex(0,j2)){
-          GIndex( _, j2)=GIndex( _, j2)-(GIndex_new(0,j2)-GIndex(0,j2));
-        G3( _, j2)=G3( _, j2)+(G3_new(0,j2)-G3(0,j2));}
-        }
-      
-      G4b=trans(G3b);
-      
-        // Update cbars and Neg_LL    
-            
-            if( family=="binomial" && link=="logit"){
-              cbars2=f4_binomial_logit(G4,y, x,mu,P,alpha,wt,NegLL,1);      }
-            if(family=="binomial"  && link=="probit"){
-              cbars2=f4_binomial_probit(G4,y, x,mu,P,alpha,wt,NegLL,1);
-              
-            }
-            if(family=="binomial"   && link=="cloglog"){
-              cbars2=f4_binomial_cloglog(G4,y, x,mu,P,alpha,wt,NegLL,1);
-            }
-            
-            if(family=="quasibinomial"  && link=="logit"){
-              cbars2=f4_binomial_logit(G4,y, x,mu,P,alpha,wt,NegLL,1);
-            }
-            if(family=="quasibinomial" && link=="probit"){
-              cbars2=f4_binomial_probit(G4,y, x,mu,P,alpha,wt,NegLL,1);
-            }
-            if(family=="quasibinomial" && link=="cloglog"){
-              cbars2=f4_binomial_cloglog(G4,y, x,mu,P,alpha,wt,NegLL,1);
-            }
-            
-            if(family=="poisson" ){
-              cbars2=f4_poisson(G4,y, x,mu,P,alpha,wt,NegLL,1);
-            }
-            
-            if(family=="quasipoisson" ){
-              cbars2=f4_poisson(G4,y, x,mu,P,alpha,wt,NegLL,1);
-            }
-            
-            if(family=="Gamma" ){
-              cbars2=f4_gamma(G4,y, x,mu,P,alpha,wt,NegLL,1);
-            }
-            
-
-      Rcpp::Rcout << "Entering Set_Grid_C2" << std::endl ;
-            
-    Set_Grid_C2(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP_v2);
-            
-    Rcpp::Rcout << "Entering SetlogP_C2" << std::endl ;
-            
-    setlogP_C2(logP_v2,NegLL,cbars,G3,LLconst);
-            
-//    logP(range(j1*l5,j1+1)*l5-1),0)= logP_v2(_,0); 
-    
-    NumericMatrix::Column logP_column1 = logP(_, 0);
-    NumericMatrix::Column logP_column2 = logP(_, 1);
-    
-    arma::vec LogP_column1_1(logP_column1.begin()+j1*l5,l5);
-    arma::vec LogP_column2_1(logP_column2.begin()+j1*l5,l5);
-
-    LogP_column1_1=LogP_v2_column1_1;
-    LogP_column2_1=LogP_v2_column2_1;
-
-   }
-    
-    
-    
-  NumericMatrix::Column logP2 = logP( _, 1);
-  
-  double  maxlogP=max(logP2);
-  
-  NumericVector PLSD=exp(logP2-maxlogP);
-  
-  double sumP=sum(PLSD);
-  
-  PLSD=PLSD/sumP;
-  
-  
-  //    if(sortgrid==true){
-  //    Rcpp::List outlist=EnvSort(l1,l2,GIndex,G3,cbars,logU,logrt,loglt,logP,LLconst,PLSD,a_1);
-  //      return(outlist);
-  //    }
-  
-  return Rcpp::List::create(Rcpp::Named("PLSD")=PLSD  );
-}
-
-
 
 
 double Initialize_bstar(const NumericVector& y, arma::mat& x2,
@@ -2463,7 +1339,6 @@ std::string family="binomial",
 
 }
 
-// [[Rcpp::export]]
 
 Rcpp::List optPostMode(NumericVector y,NumericMatrix x,
 NumericVector mu,NumericMatrix P, NumericVector alpha,
@@ -2659,8 +1534,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
     Rcpp::Function asMat("as.matrix");
     Rcpp::Function asVec("as.vector");
-    Rcpp::Function opGrid("optgrid");
-    
     int l1=x.ncol();
     int l2=x.nrow();
 
@@ -2691,17 +1564,63 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector mu1=mu-mu;
     Rcpp::Function optfun("optim");
   
+//  Rcpp::List funclist=Rcpp::List::create(Rcpp::Named("f2")=f2,
+//  Rcpp::Named("f3")=f3);  
+    
+//  return(funclist);
 
+// Runs into "Error: initial value in 'vmmin' is not finite error 
+//Rcpp::stop("Reached before optfun");
+
+//arma::vec parin2(parin.begin(), l1, false);
+
+
+//parin2.print("parameter starting value");
+//    b2.print("b2 inside rglmb");
+
+
+// Add check to ensure parin avoids error 
+//arma::vec y2(y.begin(), l2, false);
+
+//y2.print("y input");
+//x2.print("x inout");
+//alpha2.print ("alpha input");
+//wt3.print ("wt input");
+
+//  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
+//NumericVector test0=f1(parin, y,x,alpha,wt2);
+//NumericVector test02=f1(mu, y,x,alpha,wt2);
+
+//arma::vec test0_0(test0.begin(), 1, false);
+//arma::vec test02_0(test02.begin(), 1, false);
+
+
+//test0_0.print("Log_Likelihood at starting value");
+
+//test0_0.print("Log_Likelihood at starting value");
+//test02_0.print("Log_likelihood at mu");
+
+//  NumericVector test=f2(parin, y,x,mu1,P,alpha,wt2);
+//  NumericVector test2=f2(mu, y,x,mu1,P,alpha,wt2);
+//  arma::vec test_0(test.begin(), 1, false);
+//  arma::vec test2_0(test2.begin(), 1, false);
+  
+//  test_0.print("Log_Posterior at starting value");
+//  test2_0.print("Log_Posterior at mu");
+//  Rcpp::stop("Stop Before optimization");
+  
   
     List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,
     _["x"]=x,
     _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
 
     
-
+//    Rcpp::stop("Optimization Finished");
+    
     NumericMatrix b2a=asMat(opt[0]);
     arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
 
+//    b2.print("b2 inside rglmb");
 
     NumericVector min1=opt[1];
     int conver1=opt[3];
@@ -2712,6 +1631,9 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     
     arma::mat A1_b(A1.begin(), l1, l1, false); 
     arma::vec mu_0(mu.begin(), l1, false);
+
+//    mu_0.print("mu_0 inside rglmb");
+
     arma::vec eigval_1;
     arma::mat eigvec_1;
 
@@ -2731,7 +1653,9 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::mat x3=x2*L2Inv;
     arma::mat P3=trans(L2Inv)*P2*L2Inv;
 
-
+//    b3.print("b3 inside rglmb");
+    
+    
     //   Find diagonal matrix that has "smaller" precision than prior  
 //   Follows Definition 3, and procedure on p. 1150 in Nygren 
 //   Puts model into standard form 
@@ -2757,6 +1681,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 		}
 
 
+//    P4.print("P4 inside rglmb");
+    
     int check2=0;
     double scale2=scale;
     arma::mat epsilon_temp=P3Diag;   
@@ -2769,6 +1695,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 		P4_temp=P3-epsilon_temp;
     eig_sym(eigval_2, eigvec_2, P4_temp);
     eigval_temp=arma::min(eigval_2);
+//		eStemp <- eigen(P4_temp, symmetric = TRUE)
+//    		evtemp <- min(eStemp$values)
     if(eigval_temp>0){
   					epsilon=epsilon_temp;
 						P4=P4_temp;	
@@ -2777,7 +1705,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
       
   	}    
 
-
+//    P4_temp.print("P4_temp inside rglmb");
+    
     
     arma::mat ident=arma::mat (l1,l1,arma::fill::eye);
     arma::mat A3=ident-epsilon;	
@@ -2804,6 +1733,9 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::mat P6Temp(P6Temp_1.begin(), P6Temp_1.nrow(), P6Temp_1.ncol(), false);
     arma::mat L3Inv(L3Inv_1.begin(), L3Inv_1.nrow(), L3Inv_1.ncol(), false);
     
+
+//    b4.print("b4 inside rglmb");
+    
     arma::mat L3= arma::sqrt(D2)*trans(eigvec_2);
     L3Inv=eigvec_2*sqrt(inv_sympd(D2));
     b4=L3*b3; 
@@ -2815,99 +1747,24 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector b5=asVec(b4_1);
     Rcpp::List Envelope;
 
-    
-    NumericMatrix G1(3,l1);
-    NumericVector gridindex(l1);
-    int k = A4_1.ncol();
-    arma::mat A2(A4_1.begin(), l1, k, false);
-    NumericVector a_1(l1);
-    arma::vec a_2(a_1.begin(), a_1.size(), false);
-    a_2=arma::diagvec(A2);
-    
+    Rcpp::Rcout << "Starting Envelope Creation:" << std::endl;
     
     
 //       Rcpp::stop("Starting Envelope Creation");
     
     
-    NumericMatrix Lint1(2,l1);
-
-    if(Gridtype==2){
-      gridindex=opGrid(a_2,n);
-      
-    }
-    
-    
-    
-    int l3=Gindex_size( l1,gridindex, a_2,  Gridtype );
-    double l4=log(l3)/log(3);
-
-    Rcpp::List sim;
-    
-    Rcpp::Rcout << "Number of Variables in model" << std::endl << l1 << std::endl;
-    Rcpp::Rcout << "Gridtype" << std::endl << Gridtype << std::endl;
-    Rcpp::Rcout << "Dimensions for Grid" << std::endl << l4 << std::endl;
-    
-// Old method fails to allocate memory for dimension >=16    
-        
-    if(l4<16){    
-      Rcpp::Rcout << "Starting Envelope Creation - Low Dimensional Version:" << std::endl;
-      
-          if(n==1){
-      //  Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1, P5_1,alpha,wt2,family,link,Gridtype, n,false);
-      Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,gridindex, G1,Lint1,family,link,Gridtype, n,false);
-      
-    }
-    if(n>1){
-      //    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,family,link,Gridtype, n,true);
-      Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,gridindex, G1,Lint1, family,link,Gridtype, n,true);
-      
-    }
-    
-
-    Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
-    
-    Rcpp::Rcout << "Running Simulation:" << std::endl;
-    
-     sim=glmbsim_cpp(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,Envelope,family,link);
-
-    }
-    
-    
-    
-    // Adding inclusion and return of G1 in call to glmbenvelop_c      
-
-    if(l4>15){    
-      
-    Rcpp::Rcout << "Starting Envelope Creation - High Dimensional Version:" << std::endl;
-    
-        
     if(n==1){
-      //  Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1, P5_1,alpha,wt2,family,link,Gridtype, n,false);
-      Envelope=glmbenvelope_c_Large_dim(b5, A4_1,y, x4_1,mu4_1,
-                              P5_1,alpha,wt2,gridindex ,G1,Lint1, family,link,Gridtype, n,false);
-      
+    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
+    P5_1,alpha,wt2,family,link,Gridtype, n,false);
     }
     if(n>1){
-      //    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,family,link,Gridtype, n,true);
-      Envelope=glmbenvelope_c_Large_dim(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,gridindex ,G1,Lint1, family,link,Gridtype, n,true);
-      
+    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,family,link,Gridtype, n,true);
     }
-    
     
     Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
     
-    
-    // Adding Call to glmbsim_cpp_Large
-    
+    Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,Envelope,family,link);
 
-    NumericVector PLSD=Envelope["PLSD"];
-    //Rcpp::List sim =glmbsim_cpp_Large_Dim(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,PLSD,family, link,gridindex, G1,  a_2, b5, Gridtype);
-    sim =glmbsim_cpp_Large_Dim(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,PLSD,family, link,gridindex, G1,  a_2, b5, Gridtype);
-    
-    }
-    
-    
-    
     NumericMatrix sim2=sim[0];
     arma::mat sim2b(sim2.begin(), sim2.nrow(), sim2.ncol(), false);
     NumericMatrix out(l1,n);
@@ -3042,7 +1899,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
 
 
-// [[Rcpp::export]]
+// // [[Rcpp::export]]
 
 Rcpp::List glmbsim_NGauss2_cpp(int n,NumericVector y,NumericMatrix x, 
 NumericVector mu,NumericMatrix P,NumericVector offset2,NumericVector wt,
@@ -3087,8 +1944,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericMatrix b2a(l1);
     NumericVector parin2(clone(parin));
     
-    
-
       
     if(family=="binomial" && link=="logit"){bstar=log(y/(1-y))-alpha;}  
     if(family=="quasibinomial" && link=="logit"){bstar=log(y/(1-y))-alpha;}  
@@ -3222,34 +2077,16 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector b5=asVec(b4_1);
     Rcpp::List Envelope;
 
-
-      NumericMatrix G1(3,l1);
-      NumericVector gridindex(l1);
-      int k = A4_1.ncol();
-      arma::mat A2(A4_1.begin(), l1, k, false);
-      NumericVector a_1(l1);
-      arma::vec a_2(a_1.begin(), a_1.size(), false);
-      a_2=arma::diagvec(A2);
-      
-      
-      NumericMatrix Lint1(2,l1);
-      
-    // Adding inclusion and return of G1 in call to glmbenvelop_c      
-
+    
+    
     if(n==1){
-      //  Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1, P5_1,alpha,wt2,family,link,Gridtype, n,false);
-      Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
-                              P5_1,alpha,wt2,gridindex ,G1,Lint1, family,link,Gridtype, n,false);
-      
+    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
+    P5_1,alpha,wt2,family,link,Gridtype, n,false);
     }
     if(n>1){
-      //    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,family,link,Gridtype, n,true);
-      Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,gridindex ,G1,Lint1, family,link,Gridtype, n,true);
-      
+    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,family,link,Gridtype, n,true);
     }
-    
 
-    
 
     Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,Envelope,family,link);
 
@@ -4402,657 +3239,6 @@ void Set_PD(const arma::vec& b2,const NumericVector& y,
 
 
 
-// [[Rcpp::export]]
-
-Rcpp::List rglmb_rand_cpp(int n,NumericVector y,NumericMatrix x, 
-NumericVector mu,NumericMatrix P_0,NumericMatrix P,
-NumericVector offset2,NumericVector wt,double dispersion,Rcpp::List
-famfunc, Function f1,Function f2,Function f3,NumericVector start,NumericMatrix PD,
-      std::string family="binomial",
-      std::string link="logit",
-      int Gridtype=2,      
-      double epsilon_converge=0.01
-                            ) {
-  Rcpp::Function asMat("as.matrix");
-  Rcpp::Function asVec("as.vector");
-  Rcpp::Function asDob("as.double");
-//  Rcpp::Function set_lambda("set_nstar");
-
-  unsigned int l1=x.ncol();
-  unsigned int l2=x.nrow();
-  unsigned int i;
-  unsigned int j;
-  int k;
-  double dispersion2;
-  NumericVector alpha(l2);
-
-  NumericMatrix mutemp(l2,1);   
-  NumericMatrix xtemp(1,1); 
-  std::fill(xtemp.begin(), xtemp.end(), 1);
-  
-  arma::mat x2(x.begin(), x.nrow(), x.ncol(), false);
-  arma::vec alpha2(alpha.begin(),l2,false);  
-  arma::vec offset2b(offset2.begin(),l2,false);  
-  arma::vec start2(start.begin(),l1,false);
-  arma::mat mutemp2(mutemp.begin(), mutemp.nrow(), mutemp.ncol(), false);     
-  
-  mutemp2=x2*start2;
-  
-  NumericMatrix betatemp(l2,1);
-  NumericVector alphatemp(l1);
-  NumericVector offset3(l2);
-  NumericVector wt3(l2);
-  NumericVector temp(1);
-  NumericVector temp2(1);
-  NumericMatrix Ptilde=clone(P);
-  Ptilde(0,0)=2*P(0,0);
-
-  Rcpp::List out1;
-  Rcpp::List out2;
-  std::fill(wt3.begin(), wt3.end(), 1);
-
-  if(family=="poisson"||family=="binomial") dispersion2=1;
-  else dispersion2=dispersion;
-  
-    NumericVector  wt2=wt/dispersion2;
-
-    NumericVector parin(1);
-    NumericVector mu1=mu-mu;
-    Rcpp::Function optfun("optim");
-    arma::vec y2(y.begin(),l2, false);
-    
-    
-//    arma::vec ystar=log(y2/(1-y2));
-    NumericVector qc1(l2);
-    arma::vec qc(qc1.begin(),l2,false);
-    
-//    ystar.print("ystar:");
-
-    NumericVector low(l2);
-    NumericVector high(l2);
-    arma::vec low2(low.begin(),l2, false);
-    arma::vec high2(high.begin(),l2, false);
-
-    List opt;
-    NumericVector b2a(1);
-    NumericVector b2b(l2);
-
-    arma::vec b2(b2b.begin(), l2, false);
-    arma::mat P_0b(P_0.begin(), P_0.nrow(), P_0.ncol(), false);
-    arma::mat P2(P.begin(), P.nrow(), P.ncol(), false);
-    arma::vec mu2(mu.begin(), l1);
-
-
-//    NumericMatrix LL(nstar4,0);
-
-//    NumericMatrix betaout(n,l2);
-//    NumericMatrix alphaout(n,l1);
-
-
-// Find posterior mode 
-
-    arma::mat P_Post=P2(0,0)*x2.t()*x2+P_0b;
-    arma::mat Var_Post=inv_sympd(P_Post);    
-    arma::vec mu_star2=Var_Post*(P2(0,0)*x2.t()*b2+P_0b*mu2);    
-      
-  for(k=0;k<10;k++){
-
-  for(j=0;j<l2;j++){
-
-    opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=asVec(y[j]),
-    _["x"]=xtemp,_["mu"]=asMat(mutemp[j]),_["P"]=P,_["alpha"]=asVec(alpha[j]),
-    _["wt"]=asVec(wt2[j]),_["method"]="BFGS",
-        _["hessian"]=true);
-
-    b2a=asVec(opt[0]);
-    b2(j)=b2a(0);  
-
-  }
-
-  mu_star2=Var_Post*(P2(0,0)*x2.t()*b2+P_0b*mu2);
-  mutemp2=x2*mu_star2;
-
-  }
-  
-    arma::mat PD2(PD.begin(), PD.nrow(), PD.ncol(), false);
-    arma::vec wtb(wt.begin(),l2, false);
-
-
-//    PD2.print("PD2:Into C Function");
-
-    Rcpp::Function rand_Norm_apprx("rand_Norm_apprx");
-//    Rcpp::Function test_rand_Norm_apprx("test_rand_Norm_apprx");
-    Rcpp::Function rmnorm("rmnorm");
-    Rcpp::Function rnorm("rnorm");
-    Rcpp::Function KL_Norm_apprx("KL_Norm_apprx");
-
-    Rcpp::List Famin=Rcpp::List::create(Rcpp::Named("family")=family,
-                                      Rcpp::Named("link")=link);  
-    
-    
-    List normsim;
-
-    normsim=rand_Norm_apprx(
-      _["n"]=1000
-    ,  _["y"]=asVec(y)
-      ,      _["x"]=x
-    ,
-    _["P_0"]=P_0
-      ,
-      _["P"]=P,
-      _["mustar"]=mu_star2
-      ,      _["bstar"]=b2
-      ,_["alpha1"]=alpha
-      ,_["family"]=family
-      ,_["link"]=link
-);
-
-    
-    NumericMatrix mu_sim=asMat(normsim[0]);
-    NumericMatrix beta_sim=asMat(normsim[1]);
-    NumericMatrix Pstar=asMat(normsim[2]);
-    NumericVector ystar=asVec(normsim[3]);
-    NumericMatrix Ppost=asMat(normsim[4]);
-    
-
-    arma::mat mu_sim2(mu_sim.begin(), mu_sim.nrow(), mu_sim.ncol(), false);
-    arma::mat beta_sim2(beta_sim.begin(), beta_sim.nrow(), beta_sim.ncol(), false);
-    arma::mat Pstar2(Pstar.begin(), Pstar.nrow(), Pstar.ncol(), false);
-    arma::mat Ppost2(Ppost.begin(), Ppost.nrow(), Ppost.ncol(), false);
-    arma::vec ystar2(ystar.begin(), l2);
-
-
-//      mu_sim2.print("mu_sim:Output:");
-//      beta_sim2.print("beta_Sim:Output:");
-      
-
-    NumericMatrix eps_in(l2,1);
-    NumericMatrix eps_temp(l2,1);
-    NumericMatrix eps_temp2(l2,1);
-    
-    std::fill(eps_in.begin(), eps_in.end(), 1);
-    std::fill(eps_temp.begin(), eps_temp.end(), 1);
-    std::fill(eps_temp2.begin(), eps_temp2.end(), 1);
-    
-//    NumericMatrix eps_in
-            
-//            KL_Norm_apprx<-function(y,x,P,Pstar,ystar,Ppost,mu_sim,family,eps_in)        
-
-    List KL_Est;
-
-    
-    KL_Est=KL_Norm_apprx(
-      _["y"]=y,
-      _["x"]=x,
-      _["P"]=P,
-      _["Pstar"]=Pstar,
-      _["ystar"]=ystar,
-      _["Ppost"]=Ppost,
-      _["mu_sim"]=mu_sim,
-      _["family"]=family,
-      _["link"]=link,
-      _["eps_in"]=eps_in
-    );
-  
-
-  NumericMatrix TV=asMat(KL_Est[10]);
-  arma::mat TV2(TV.begin(), TV.nrow(), TV.ncol(), false);
-
-  
-  NumericMatrix KL_out=asMat(KL_Est[11]);
-  arma::mat KL_out2(KL_out.begin(), KL_out.nrow(), KL_out.ncol(), false);
-  
-  TV2.print("Approximate Total Variation Distance for Normal Approximation:");
-  
-  double testval=1;
-  double testval1=1;
-  
-  
-  for(i=0;i<10;i++){
-  
-  for(j=0;j<l2;j++){
-    
-    testval1=sqrt(0.5*KL_out[j]);
-
-//    Rcpp::Rcout << "testval:    " << std::flush << testval1 << std::endl;
-//    Rcpp::Rcout << "testval:    " << std::flush << eps_temp[j] << std::endl;
-    
-//      testval=0.01/sqrt(0.5*KL_out2(0,j));
-     testval=0.01/testval1;
-     
-     if(testval<1){        eps_temp[j]=testval*eps_temp[j];}
-
-     
-  }
-  
-  
-      KL_Est=KL_Norm_apprx(
-          _["y"]=y,
-          _["x"]=x,
-          _["P"]=P,
-          _["Pstar"]=Pstar,
-          _["ystar"]=ystar,
-          _["Ppost"]=Ppost,
-          _["mu_sim"]=mu_sim,
-          _["family"]=family,
-          _["link"]=link,
-          _["eps_in"]=eps_temp
-                );
-      
-        KL_out=asMat(KL_Est[11]);
-        TV=asMat(KL_Est[10]);
-        TV2(0,0)=TV[0];
-        
-  }
-  
-  TV2.print("Total Variation Distance at Upper bounds:");
-  for(j=0;j<l2;j++){
-    
-        Rcpp::Rcout << "eps_temp:    " << std::flush << eps_temp[j] << std::endl;
-  }
-  
-  
-  for(j=0;j<l2;j++){
-
-    eps_temp2[j]=eps_temp[j];
-  }    
-    
-
-    testval=0.01/TV[0];
-  
-    
-    for(j=0;j<l2;j++){
-      
-    if(testval<1){        eps_temp2[j]=testval*eps_temp2[j];}
-  
-    }    
-    
-    KL_Est=KL_Norm_apprx(
-      _["y"]=y,
-      _["x"]=x,
-      _["P"]=P,
-      _["Pstar"]=Pstar,
-      _["ystar"]=ystar,
-      _["Ppost"]=Ppost,
-      _["mu_sim"]=mu_sim,
-      _["family"]=family,
-      _["link"]=link,
-      _["eps_in"]=eps_temp2
-    );
-  
-  KL_out=asMat(KL_Est[11]);
-  TV=asMat(KL_Est[10]);
-  TV2(0,0)=TV[0];
-  TV2.print("Total Variation distance - Step 2:");
-    
-    for(j=0;j<l2;j++){
-      
-      Rcpp::Rcout << "eps_temp2:    " << std::flush << eps_temp2[j] << std::endl;
-    }
-    
-    
-    
-            
-    
-    Rcpp::NumericVector xbtemp(l2);
-    arma::colvec xbtemp2(xbtemp.begin(),l2,false);  
-
-//    void set_Pout(const arma::vec& b2,const NumericVector& y, 
-//                  const arma::mat& alpha2,
-//                  const int& l1,const arma::mat& P2, const arma::mat& x2,
-//                  const NumericVector& wt,const NumericVector& xbtemp,arma::colvec& xbtemp2,
-//                  arma::mat& xrow2,
-//                  arma::mat& Pout2,
-//                  std::string family="binomial",
-//                  std::string link="logit"
-//    )    
-  
-    NumericMatrix Ptemp(clone(P));
-    arma::mat Ptemp2(Ptemp.begin(), Ptemp.nrow(), Ptemp.ncol(), false);
-    
-    Ptemp2=0*Ptemp2;
-    
-    // x2 not currently used in x2 function
-    
-    Set_PD(b2,y,alpha2,l2,Ptemp2,x2,wt,xbtemp,xbtemp2,PD2,family,link);
-    
-
-    NumericVector wtD(l2);
-    arma::vec wtD2(wtD.begin(), l2);
-    
-    for(j=0;j<l2;j++){
-      wtD2(j)=PD2(j,j)/(PD2(j,j)+P2(0,0));
-    }
-    
-
-    NumericMatrix PD_B=clone(PD);    
-    arma::mat PD_B2(PD_B.begin(), PD_B.nrow(), PD_B.ncol(), false);
-    
-    NumericVector perturb(l2);
-    arma::vec perturb2(perturb.begin(), l2);
-    
-    NumericVector wtD_B(l2);
-    arma::vec wtD_B2(wtD_B.begin(), l2);
-    
-    for(j=0;j<l2;j++){
-//      perturb2(j)=0.2135*P2(0,0)/PD2(j,j);  // Will need improved way of selecting this
-// This should use eps_temp2 (temporarily use eps_temp)
-
-      PD_B2(j,j)=eps_temp[j]*PD2(j,j);  
-      
-//      PD_B2(j,j)=eps_temp2[j]*PD2(j,j);  
-
-//      PD_B2(j,j)=PD2(j,j);  
-      // Modified formula
-      
-      //      PD_B2(j,j)=0.3*(P2(0,0)+PD2(j,j));  
-      
-            wtD_B2(j)=PD_B2(j,j)/(PD_B2(j,j)+P2(0,0));
-    }
-    
-    
-            
-//    perturb2.print("perturbation Constants");
-    PD2.print("PD2:Interim - New C Function");
-    PD_B2.print("PD_B2:Interim - New C Function");
-    wtD2.print("wtD2:Data weight at posterior mode");
-    wtD_B2.print("wtD_B2:Data weight at posterior mode");
-    
-    //  Calculate Initial Constants for Convergence rate calculations
-
-    NumericMatrix P_rand(l2,l2);
-    P_rand.fill_diag(P(0,0));
-    
-
-    // Temporary - Hard code PD matrix
-    
-      
-    Rcpp::Rcout << " " << std::endl;
-    Rcpp::Rcout << "############  Deriving Initial Constants for Convergence Bounds (assuming symmetry) ############" << std::endl;
-    Rcpp::Rcout << " " << std::endl;
-
-    
-List beta_stars=set_beta_const(x2,offset2,mu_star2,
-1,y,xtemp,mutemp,P,offset2,wt,
-dispersion,famfunc,f1,f2,f3,betatemp,x,mu,P_0,offset3,wt3,
-family=family,link=link,
-Gridtype=Gridtype);
-
-arma::vec beta_star=beta_stars(0);
-arma::vec beta_star2=beta_stars(1);
-
-    Rcpp::Rcout << " " << std::endl;
-    Rcpp::Rcout << "############  Initial Constants for Convergence Bounds (assuming symmetry) ############" << std::endl;
-
-    Rcpp::Rcout.precision(5);
-
-    
-    List nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_star2,mu_star2,beta_star,beta_star2,epsilon_converge,PD_B);
-
-
-  //  nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_0,mu_star2,b_star,b_star2,epsilon_converge,PD);
-    
-    
-        NumericVector temp3=nstar_lambda_star(0);
-    double nstar=temp3(0);
-
-    
-    
-    if (nstar-1>LLONG_MAX){
-      Rcpp::stop("Number of Required Burn-in Iterations Exceeds Integer Long Long Limitations");
-      
-    } 
-    
-    
-    temp3=nstar_lambda_star(1);
-    
-  
-    double tau=temp3(0);
-  
-    Rcpp::List simconstants=nstar_lambda_star(2);
-  
-    
-    double uppern;
-    uppern=nstar+n*tau+1;
-    
-
-    unsigned long long int nstar2 = nstar+0.5;    
-    unsigned long long int nstar3=n*tau+0.5;    
-    unsigned long long int nstar4=nstar2+nstar3;
-
-//    long long int nstar4=nstar+n*tau+1;
-    
-    
-//    Rcpp::Rcout << "LLONG_MAX:         " << std::flush << LLONG_MAX << std::endl;
-//    Rcpp::Rcout << "ULONG_MAX:         " << std::flush << ULONG_MAX << std::endl;
-    
-    
-    if (uppern>LLONG_MAX){
-      Rcpp::stop("Number of Total Iterations Exceeds Integer Long Long Limitations");
-      
-    } 
-    
-    unsigned long long int Ulong_Max2;
-    Ulong_Max2=2*ULONG_MAX;
-    
-    if (nstar4>Ulong_Max2){
-      Rcpp::stop("Number of Total Iterations Exceeds Integer Limitations");
-      
-    } 
-    
-    
-    
-//    Rcpp::Rcout << "nstar:         " << std::flush << nstar << std::endl;
-    
-    Rcpp::Rcout.precision(5);
-
-    Rcpp::Rcout << "############ Initial Estimate of Number of Required iterations  #######################" << std::endl;
-    Rcpp::Rcout << "" << std::endl;
-    Rcpp::Rcout << "Burn-in iterations:         " << std::flush << nstar2 << std::endl;
-    Rcpp::Rcout << "Post Burn-in iterations:    " << std::flush << nstar3 << std::endl;
-    Rcpp::Rcout << "Total Iterations:    " << std::flush << nstar4 << std::endl;
-    
-
-    
-//    NumericMatrix betaout(nstar4,l2);
-    
-    NumericMatrix betaout(nstar3,l2);
-    
-    
-//    NumericMatrix alphaout(nstar4,l1);
-
-    NumericMatrix alphaout(nstar3,l1);
-    
-
-        //    NumericMatrix betastarout(1000,l2);
-//    NumericVector LL(nstar4);
-    NumericVector LL2(nstar3);
-
-  
-    
-  for(i=0;i<nstar4;i++){
-
-    Rcpp::checkUserInterrupt();
-
-
-  if(i==0) {
-    Rcpp::Rcout << "Running burnin simulation:" << std::endl;}
-  
- 
-
-  if(i<nstar2) {  
-    progress_bar2(i, nstar2-1);}
-  
-  
-  if(i==nstar2) {Rcpp::Rcout << "" << std::endl
-  << "Running main simulation:" << std::endl;}
-  if(i>(nstar2-1)) {  progress_bar2(i-nstar2, nstar4-nstar2);
-  }
-  if(i==nstar4-1) {Rcpp::Rcout << "" << std::endl;}
-
-
-
-    alpha2=mutemp2+offset2b;
-    
-
-  for(j=0;j<l2;j++){
-
-      if(i==0){  parin=  asVec(0);}
-      if(i>0){parin=asVec(betatemp(j-1,0)-mutemp(j,0));}
-
-    if(i==0){   
-        out1=glmbsim_NGauss2_cpp(1,asVec(y[j]),xtemp,
-                                 asMat(mutemp[j]),P,
-                                 asVec(offset2[j]),
-                                 asVec(wt[j]),
-                                 dispersion,
-                                 famfunc,f1,f2,f3,
-                                 asMat(mutemp[j]),
-                                 family=family,
-                                 link=link,
-                                 Gridtype=Gridtype);
-                                 }
-    if(i>0){   
-        out1=glmbsim_NGauss2_cpp(1,asVec(y[j]),xtemp,
-                                 asMat(mutemp[j]),P,
-                                 asVec(offset2[j]),
-                                 asVec(wt[j]),
-                                 dispersion,
-                                 famfunc,f1,f2,f3,asMat(betatemp(j-1,0)),
-                                 family=family,
-                                 link=link,
-                                 Gridtype=Gridtype);
-                                 }
-
-
-
-            temp=out1(0);
-            betatemp(j,0)=temp(0);
-
-            if(i>(nstar2-1)){    
-            betaout(i-nstar2-1,j)=temp(0);
-            }
-        //   Note: Index to which temp 2 should be set depends on what 
-        //  index LL has
-           
-        temp2=out1(1);
-//        LL(i)=LL(i)+temp2(0);
-        if(i>(nstar2-1)) LL2(i-nstar2)=LL2(i-nstar2)+temp2(0); 
-//    Rcpp::Rcout << "Setting LL" << std::endl << LL(i,0) << std::endl;
-        
-      }
-
-    // Should edit famfunc passed here....
-
-    out2=glmbsim_Gauss_cpp(1,betatemp,x,
-                        mu,P_0,offset3
-                        ,wt3,
-                        1/P(0,0),
-                        famfunc,f1,f2,f3,
-                        mu);   
-    alphatemp=out2(0);    
-    arma::vec alphatemp2(alphatemp.begin(), l1, false);
-    
-    if(i>nstar2-1){
-    
-    for(j=0;j<l1;j++) {alphaout(i-nstar2-1,j)=alphatemp(j);}
-
-    }
-      mutemp2=x2*alphatemp2;
-    
-    
-    }
-
-  
-//NumericMatrix alphaout2 = alphaout( Range(nstar2,nstar4-1),Range(0,l1-1));
-    NumericMatrix alphaout2 = alphaout( Range(0,nstar3-1),Range(0,l1-1));
-
-//    NumericMatrix betaout2= betaout(Range(nstar2,nstar4-1),Range(0,l2-1));
-    NumericMatrix betaout2= betaout(Range(0,nstar3-1),Range(0,l2-1));
-    
-  
-  
-//  NumericMatrix betaout(nstar4,l2);
-  
-  
-    
-Rcpp::Rcout << " " << std::endl;
-Rcpp::Rcout << "############  Confirming convergence... ############" << std::endl;
-Rcpp::Rcout << " " << std::endl;
-
-// Calculate mustar
-
-arma::vec mu_0=mu_star2;
-NumericVector b3(l2);
-arma::vec mu_star3(b3.begin(), l1);
-
-
-for(i=0;i<l1;i++){mu_star2(i)=mean(alphaout2(_,i));}
-
-beta_stars=set_beta_const(x2,offset2,mu_star2,
-1,y,xtemp,mutemp,P,offset2,wt,
-dispersion,famfunc,f1,f2,f3,betatemp,x,mu,P_0,offset3,wt3,
-family=family,link=link,
-Gridtype=Gridtype);
-
-
-//beta_stars=set_beta_const(x2,offset2,mu_star2,
-//                          1,y,xtemp,mutemp,P,offset2,wt,
-//                          dispersion,famfunc,f1,f2,f3,betatemp,x,mu,P_0,offset3,wt3,
-//                          family=family,link=link,
-//                          Gridtype=Gridtype);
-
-
-
-arma::vec b_star=beta_stars(0);
-arma::vec b_star2=beta_stars(1);
-
-
-Rcpp::Rcout.precision(5);
-
-Rcpp::Rcout << " " << std::endl;
-Rcpp::Rcout << "############  Revised Constants for Convergence Bounds (Controlling for asymmetry) ############" << std::endl;
-
-
-nstar_lambda_star=set_nstar(x, P_rand,P_0,mu_0,mu_star2,b_star,b_star2,epsilon_converge,PD_B);
-
-    temp3=nstar_lambda_star(0);
-double nstarb=temp3(0);
-
-    Rcpp::Rcout << "Old nstar:         " << std::flush << nstar << std::endl;
-    Rcpp::Rcout << "New nstar:         " << std::flush << nstarb << std::endl;
-
-if(nstar>=nstarb){
-Rcpp::Rcout << "No additional iterations required:" <<  std::endl;
-
-}
-
-if(nstar<nstarb){
-Rcpp::Rcout << "An additional " << std::flush << nstarb-nstar << std::flush  <<" iterations required:" <<  std::endl;
-}
-
-Rcpp::Rcout << "Need to add code to run additional iterations and better way of handling storage of burnin iterations:" <<  std::endl;
-
-Rcpp::List Prior=Rcpp::List::create(Rcpp::Named("mean")=mu,
-Rcpp::Named("Precision")=P_0);
-
-
-Rcpp::List Out=Rcpp::List::create(Rcpp::Named("coefficients")=alphaout2,
-Rcpp::Named("randcoefficients")=betaout2,
-Rcpp::Named("PostMode")=mu_0,
-Rcpp::Named("randPostMode")=b2,
-Rcpp::Named("Prior")=Prior,
-Rcpp::Named("iters")=1,
-Rcpp::Named("famfunc")=famfunc,
-Rcpp::Named("dispersion")=dispersion,
-Rcpp::Named("loglike")=LL2,
-Rcpp::Named("simconstants")=simconstants
-);  
-  
-  
-return(Out  ) ; 
-  
-}
 
 
 

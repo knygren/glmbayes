@@ -11,10 +11,10 @@
 a description of the error distribution, and a multivariate normal prior.
 }
 \usage{
-glmb(n, formula, family = binomial, dispersion=NULL, mu, Sigma, nu=NULL,V=NULL, Gridtype = 1, 
-data, weights, subset2, na.action, start = NULL, etastart, mustart, offset, 
-control = list(...), model = TRUE, method = "glm.fit", 
-x = FALSE, y = TRUE, contrasts = NULL, ...)
+glmb(n,formula,family=binomial,dispersion=NULL,mu,Sigma,nu=NULL,V=NULL,
+Gridtype=1,data,weights,subset2,na.action,start=NULL,etastart,mustart,
+offset,control=list(...),model=TRUE,method="glm.fit",x=FALSE,y =TRUE,
+contrasts = NULL,...)
 }
 \arguments{
   \item{n}{
@@ -165,19 +165,27 @@ V1[1,1]<-100
 V1[2,2]<-1
 
 glm.out1<-glm(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit), data=menarche)
-glmb.out1<-glmb(n=n,cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),mu=mu,Sigma=V1,Gridtype=1, data=menarche)
+
+# temporarily edit out as it seems slow (adding back in - may need
+#to adjust prior)
+
+glmb.out1<-glmb(n=n,cbind(Menarche, Total-Menarche) ~ Age,family
+=binomial(logit),mu=mu,Sigma=V1,Gridtype=1, data=menarche)
 
 summary(glm.out1)
 summary(glmb.out1)
 
 glm.out2<-glm(cbind(Menarche,Total-Menarche)~Age,family=binomial(probit), data=menarche)
-glmb.out2<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age,family=binomial(probit),mu=mu,Sigma=V1,Gridtype=1,data=menarche)
+glmb.out2<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age,family=binomial(probit),mu=mu,
+Sigma=V1,Gridtype=1,data=menarche)
 
 summary(glm.out2)
 summary(glmb.out2)
 
-glm.out3 <-glm(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(cloglog), data=menarche)
-glmb.out3<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age,family=binomial(cloglog),mu=mu,Sigma=V1,Gridtype=1,data=menarche)
+glm.out3 <-glm(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(cloglog),
+data=menarche)
+glmb.out3<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age,family=binomial(cloglog),
+mu=mu,Sigma=V1,Gridtype=1,data=menarche)
 
 summary(glm.out3)
 summary(glmb.out3)

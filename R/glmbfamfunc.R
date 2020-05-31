@@ -331,9 +331,6 @@ if(family$family=="Gamma" && family$link=="log")
 }
 
 
-
-
-
 glmbfamfunc.default<-function(family)
 {
 
