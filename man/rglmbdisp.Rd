@@ -1,6 +1,7 @@
 \name{rglmbdisp}
 \alias{rglmbdisp}
 \alias{rglmbdisp.default}
+\alias{print.rglmbdisp}
 
 \title{
 Produces iid samples for the conditional density associated with the posterior dispersion.
@@ -85,23 +86,17 @@ out <- glm(Cost/Claims~Merit+Class,family=Gamma(link="log"),weights=Claims,x=TRU
 summary(out)
 
 
-#out$coefficients
 ###  Dispersion Model  ######################
 
 a0<-0.01
 m0<-0.01
-b<-colMeans(out2$coefficients)
 b<-out$coefficients
 
 out3<-rglmbdisp(n=10000,y=out$y,x=out$x,b=b,alpha= rep(0, length(out$y))
 ,wt=out$prior.weights,shape=m0,rate=a0,family=Gamma(link=log))
+summary(out3)
 
-### Need to create a class for rglmbdisp so that print and summary produces
-### more meaningful outputs 
-
-summary(out3$coefficients)
-
-### Development Code may have attempts at calculating the DIC (not sure aout rglmbdisp)
+### Development Code may have attempts at calculating the DIC (not sure about rglmbdisp)
 
 
 }

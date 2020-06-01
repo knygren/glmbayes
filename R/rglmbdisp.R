@@ -81,6 +81,10 @@ if(family$family=="Gamma")
   test<-matrix(0,n)
   a<-matrix(0,n)
   
+  ## Implements rejection sampling for dispersion (likelihood subgradient approach)
+  ## Likely should have a short paper with this derivation
+  ## Not sure if approach extends to other densities besides gamma
+  
   for(i in 1:n)
   {
     while(a[i]==0){
@@ -95,7 +99,7 @@ if(family$family=="Gamma")
   
 }
   
-  outlist=list(coefficients=out)
+  outlist=list(coefficients=out,Prior=list(shape=shape,rate=rate))
 
   outlist$call<-match.call()
   
@@ -105,5 +109,65 @@ if(family$family=="Gamma")
 
 }
 
+
+print.rglmbdisp<-function (x, digits = max(3, getOption("digits") - 3), ...) 
+{
+  
+  cat("\nCall:  ", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  if (length(coef(x))) {
+    cat("Simulated Coefficients")
+    cat(":\n")
+    print.default(format(x$coefficients, digits = digits), 
+                  print.gap = 2, quote = FALSE)
+  }
+  else cat("No coefficients\n\n")
+}
+
+summary.rglmbdisp<-function(object,...){
+  
+  n<-length(object$coefficients)  
+  percentiles<-matrix(0,nrow=1,ncol=7)
+  se<-sqrt(diag(var(object$coefficients)))
+  mc<-se/n
+  Priorwt<-(se/(sqrt(object$Prior$shape)/object$Prior$rate))^2
+    percentiles[1,]<-quantile(object$coefficients,probs=c(0.01,0.025,0.05,0.5,0.95,0.975,0.99))
+    test<-append(object$coefficients,object$Prior$shape/object$Prior$rate)
+    test2<-rank(test)
+    priorrank<-test2[n+1]
+   pval1<-priorrank/(n+1)
+  pval2<-min(pval1,1-pval1)
+    
+
+  Tab1<-cbind("Prior.Mean"=object$Prior$shape/object$Prior$rate,"Prior.Sd"=sqrt(object$Prior$shape)/object$Prior$rate
+              ,"Approx.Prior.wt"=Priorwt
+              )
+  TAB<-cbind(
+    #"Post.Mode"=as.numeric(object$PostMode),
+    "Post.Mean"=mean(coef(object)),
+    "Post.Sd"=se,
+    "MC Error"=as.numeric(mc)
+    ,"Pr(tail)"=as.numeric(pval2)
+    )
+  TAB2<-cbind("1.0%"=percentiles[,1],"2.5%"=percentiles[,2],"5.0%"=percentiles[,3],Median=as.numeric(percentiles[,4]),"95.0%"=percentiles[,5],"97.5%"=as.numeric(percentiles[,6]),"99.0%"=as.numeric(percentiles[,7]))
+  
+rownames(TAB)=c("dispersion")
+rownames(Tab1)=c("dispersion")
+rownames(TAB2)=c("dispersion")
+
+  res<-list(call=object$call,
+            n=n,
+            coefficients1=Tab1,
+            coefficients=TAB,
+            Percentiles=TAB2
+            )
+  
+  # Reuse summary.rglmb class
+  
+  class(res)<-"summary.rglmb"
+  
+  res
+  
+}
 
 
