@@ -1,4 +1,8 @@
-rglmbdisp<-function(n,y,x,b,alpha=0,wt=1,shape,rate,family=gaussian()){
+rglmbdisp<-function(n,y,x,b,alpha=0,wt=1,shape,rate,family=gaussian()) UseMethod("rglmbdisp")
+
+rglmbdisp.default<-function(n,y,x,b,alpha=0,wt=1,shape,rate,family=gaussian()){
+
+  call <- match.call()
   
   if (is.character(family)) 
     family <- get(family, mode = "function", envir = parent.frame())
@@ -89,9 +93,17 @@ if(family$family=="Gamma")
   
   out<-1/out
   
-  }
+}
+  
+  outlist=list(coefficients=out)
 
+  outlist$call<-match.call()
+  
+  class(outlist)<-c(outlist$class,"rglmbdisp")
 
-  return(out)
+  return(outlist)
 
 }
+
+
+

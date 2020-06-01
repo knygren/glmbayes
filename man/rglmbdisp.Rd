@@ -1,5 +1,7 @@
 \name{rglmbdisp}
 \alias{rglmbdisp}
+\alias{rglmbdisp.default}
+
 \title{
 Produces iid samples for the conditional density associated with the posterior dispersion.
 }
@@ -97,7 +99,7 @@ out3<-rglmbdisp(n=10000,y=out$y,x=out$x,b=b,alpha= rep(0, length(out$y))
 ### Need to create a class for rglmbdisp so that print and summary produces
 ### more meaningful outputs 
 
-summary(out3)
+summary(out3$coefficients)
 
 ### Development Code may have attempts at calculating the DIC (not sure aout rglmbdisp)
 
