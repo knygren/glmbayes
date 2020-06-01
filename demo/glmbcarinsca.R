@@ -1,109 +1,58 @@
 
-
 data(carinsca)
 carinsca$Merit <- ordered(carinsca$Merit)
 carinsca$Class <- factor(carinsca$Class)
 options(contrasts=c("contr.treatment","contr.treatment"))
 attach(carinsca)
 out <- glm(Claims/Insured~Merit+Class,family="poisson")
+summary(out,cor=FALSE)
 
-summary(out,cor=F)
+wt1<-out$prior.weights
+scale<-0.1275 # SAS estimate
 
+dispersion<-1/scale
 
 out <- glm(Cost/Claims~Merit+Class,family=Gamma(link="log"),weights=Claims,x=TRUE)
-outsum<-summary(out)
+summary(out)
 
-sqrt(diag(outsum$cov.unscaled))
-sqrt(diag(outsum$cov.scaled))
+V_Out=summary(out)$cov.scaled  
+P_Data=solve(V_Out)
+
+Like_std=summary(out)$coefficients[,2]
 
 y1<-out$y
 x1<-out$x
 b1<-out$coefficients
 wt1<-out$prior.weights
+scale<-0.1275 # SAS estimate
 
+## Should the above model be re-run with dispersion to get correct estimate 
+## for the Precision matrix?
+
+dispersion<-1/scale
+wt2<-wt1/dispersion
 alpha1<-rep(0,length(y1))
 
-
 mu<-matrix(0,8)
-P<-10*diag(8)
+P<-0.1*solve(diag(Like_std*Like_std))
+V0<-solve(P)
 
+Prior_Error_Checks=Prior_Likelihood_Check(mu,sqrt(diag(V0)),out$coefficients,Like_std)
 
-scale<-0.1275 # SAS estimate
-dispersion<-1/scale
+mu
+out$coefficients
 
+mu[1,1]=-1.1
 
+Prior_Error_Checks=Prior_Likelihood_Check(mu,sqrt(diag(V0)),out$coefficients,Like_std)
+Prior_Error_Checks
 
-glm(Cost/Claims~Merit+Class,family=Gamma(link="log"),weights=Claims)
-
-
-start.time<-Sys.time()
-
-outb <- glmb(n=1000,Cost/Claims~Merit+Class,family=Gamma(link="log"),
-             mu=mu,Sigma=0.1*diag(8),dispersion=dispersion, weights=Claims,x=TRUE,Gridtype=2)
-end.time<-Sys.time()
-time.taken<-end.time-start.time
-print("Time for full simulation")
-print(time.taken)
-
-
-summary(outb)
-
-# Get family functions
-
-f1<-outb$famfunc$f1
-f2<-outb$famfunc$f2
-
-f1(b=b1,y=y1,x=x1,alpha=alpha1,wt=wt1)
-
-b2<-matrix(b1,nrow=8,ncol=1)
-f1_gamma(b=b2,y=y1,x=x1,alpha=alpha1,wt=wt1)
-
-
-l2<-3^8
-NegLL1<-matrix(0,nrow=l2,ncol=1)
-b2<-matrix(b1,nrow=8,ncol=3^8)
-b2[,1:10]
-
-start.time<-Sys.time()
-
-for(j in 1:l2){
-NegLL1[j]<-f2(b=b2[,j],y=y1,x=x1,mu=mu,P=P,alpha=alpha1,wt=wt1)
-}
-
-end.time<-Sys.time()
-end.time-start.time
-
-
-
-
-start.time<-Sys.time()
-
-NegLL2<-f2_gamma(b=b2,y=y1,x=x1,mu=mu,P=P,alpha=alpha1,wt=wt1)
-end.time<-Sys.time()
-end.time-start.time
-
-NegLL1[1:10]
-
-NegLL2[1:10]
-
-
-
-as.matrix(y1)
-as.matrix(alpha1)
-as.matrix(wt1)
-
-
-
-
-objects()
-
-
-out2<-rglmb(n = 1000, out$y, out$x, mu=mu, P=P, wt = out$prior.weights, dispersion = dispersion, family = Gamma(link="log"), 
-            offset2 = rep(0, 20), start = out$coefficients, Gridtype = 2) 
+out2<-rglmb(n = 1000, out$y, out$x, mu=mu, P=P, wt = out$prior.weights, dispersion = dispersion,
+            family = Gamma(link="log"), offset2 = rep(0, 20), start = out$coefficients, Gridtype = 3) 
 
 summary(out2)
 
-
+###  Dispersion Model  ######################
 
 a0<-0.01
 m0<-0.01
@@ -111,39 +60,13 @@ b<-colMeans(out2$coefficients)
 
 out3<-rglmbdisp(n=10000,y=out$y,x=out$x,b=b,alpha= rep(0, length(out$y)),wt=out$prior.weights,shape=m0,rate=a0,family=Gamma(link=log))
 
+### Need to create a class for rglmbdisp so that print and summary produces
+### more meaningful outputs 
+
 summary(out3)
 
-f1<-out2$famfunc$f1
+### Development Code may have attempts at calculating the DIC (not sure aout rglmbdisp)
 
-
-f4<-out2$famfunc$f4
-
-
-# OpenBugs appears to use precision to calculate DIC
-
-wt2<-out$prior.weights*mean(1/out3)
-
-
-Dthetabar<-2*f1(b,y=out$y,x=out$x,alpha=rep(0,20),wt=wt2)
-
-Dthetabar
-
-Devtemp<-matrix(0,10)
-
-for(j in 1:10000)
-{
-  wttemp<-out$prior.weights/out3[j]
-  Devtemp[j]<-2*f1(b,y=out$y,x=out$x,alpha=rep(0,20),wt=wttemp)
-}
-
-Devtemp[1:10]
-
-Dbar<-mean(Devtemp)
-
-pD<-Dbar-Dthetabar
-pD
-DIC<-pD+Dbar
-DIC
 
 ######  Joint Estimation - Two -Block Gibbs Sampler ###
 
@@ -153,12 +76,11 @@ x1<-out$x
 b1<-out$coefficients
 wt1<-out$prior.weights
 
-alpha1<-rep(0,length(y1))
+### This part likely not used 
 
-
-mu<-matrix(0,8)
-P<-10*diag(8)
-
+#alpha1<-rep(0,length(y1)) 
+#mu<-matrix(0,8)
+#P<-10*diag(8)
 
 scale<-0.1275 # SAS estimate
 dispersion<-1/scale
@@ -199,8 +121,5 @@ time.taken<-end.time-start.time
 print("Time for loop")
 print(time.taken)
 
-
-
 mean(outdisp[40:100,1])
-
 colMeans(outbetas[40:100,])

@@ -65,22 +65,43 @@ Kjell Nygren
 \code{\link{glmb}}, \code{\link{rglmb}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
 
-## The function is currently defined as
-function (n, y, x, b, alpha = 0, shape, rate) 
-{
-    n1 <- length(y)
-    y1 <- as.matrix(y) - alpha
-    xb <- x \%*\% b
-    res <- y1 - xb
-    SS <- res * res
-    a1 <- shape + n1/2
-    b1 <- rate + sum(SS)/2
-    1/rgamma(n, shape = a1, rate = b1)
-  }
+data(carinsca)
+carinsca$Merit <- ordered(carinsca$Merit)
+carinsca$Class <- factor(carinsca$Class)
+options(contrasts=c("contr.treatment","contr.treatment"))
+attach(carinsca)
+out <- glm(Claims/Insured~Merit+Class,family="poisson")
+summary(out,cor=FALSE)
+
+wt1<-out$prior.weights
+scale<-0.1275 # SAS estimate
+
+dispersion<-1/scale
+
+out <- glm(Cost/Claims~Merit+Class,family=Gamma(link="log"),weights=Claims,x=TRUE)
+summary(out)
+
+
+#out$coefficients
+###  Dispersion Model  ######################
+
+a0<-0.01
+m0<-0.01
+b<-colMeans(out2$coefficients)
+b<-out$coefficients
+
+out3<-rglmbdisp(n=10000,y=out$y,x=out$x,b=b,alpha= rep(0, length(out$y))
+,wt=out$prior.weights,shape=m0,rate=a0,family=Gamma(link=log))
+
+### Need to create a class for rglmbdisp so that print and summary produces
+### more meaningful outputs 
+
+summary(out3)
+
+### Development Code may have attempts at calculating the DIC (not sure aout rglmbdisp)
+
+
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

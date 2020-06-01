@@ -1,9 +1,8 @@
-rm(list = ls())
 
 # Gridtype=1 --> Optimize
 # Gridtype=2 --> Use formula to set size?
 # Gridtype=3 --> Full size for Grid
-# Gridtype=3 --> unidimensional
+# Gridtype=4 --> unidimensional (?)
 
 #Unclear if poor performance because coefficients for two variables essentially zero - Try Alternative
 #Problem seems to be primarily if prior means are too far from data --> Leads to prior as "outlier"
@@ -16,7 +15,6 @@ print(d.AD <- data.frame(treatment, outcome, counts))
 
 
 glm.D93 <- glm(counts ~ outcome + treatment, family = poisson(),x=TRUE)
-
 summary(glm.D93)
 
 n<-1000
@@ -25,16 +23,11 @@ X<-glm.D93$x
 Xmu=glm.D93$x%*%glm.D93$coefficients
 explambda=diag(as.vector(exp(Xmu)))
 
-# Use approximately conjugate prior for mu with 10% weight on prior
+# Use approximately conjugate prior for V0 with 10% weight on prior
 
 wt_0<-0.1
 m_0=exp(log(wt_0/(1-wt_0)))
 V0<-solve(m_0*t(X)%*%explambda%*%X)
-
-diag(sqrt(diag(V0)))
-V0
-sqrt(diag(V0))
-
 
 Like_std=summary(glm.D93)$coefficients[,2]
 D93_Prior_Error_Checks=Prior_Likelihood_Check(mu,
@@ -42,16 +35,14 @@ sqrt(diag(V0)),glm.D93$coefficients,Like_std)
 
 D93_Prior_Error_Checks
 
-
-mu[1,1]=0+4*sqrt(diag(V0)[1])
-mu[1,1]=0+15*Like_std[1]
+#mu[1,1]=0+4*sqrt(diag(V0)[1])
+#mu[1,1]=0+15*Like_std[1]
 mu[1,1]=log(mean(counts))
-mu
 
 D93_Prior_Error_Checks=Prior_Likelihood_Check(mu,
 sqrt(diag(V0)),glm.D93$coefficients,Like_std)
 
-#glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),mu=mu,Sigma=V0,Gridtype=3)
-#summary(glmb.D93)
+glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),mu=mu,Sigma=V0,Gridtype=3)
+summary(glmb.D93)
 
-
+# Approximate number of candidates per iid sample 16.367
