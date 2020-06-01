@@ -374,9 +374,9 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
     arma::colvec NegLL_2(NegLL.begin(), NegLL.size(), false);
     
 
-    Rcpp::Rcout << "Gridtype is :" << std::endl << Gridtype << std::endl;
-    Rcpp::Rcout << "l1 is :" << std::endl << l1 << std::endl;
-    Rcpp::Rcout << "l2 is :" << std::endl << l2 << std::endl;
+    Rcpp::Rcout << "Gridtype is :"  << Gridtype << std::endl;
+    Rcpp::Rcout << "Number of Variables in model are :"  << l1 << std::endl;
+    Rcpp::Rcout << "Number of points in Grid are :"  << l2 << std::endl;
     
     if( family=="binomial" && link=="logit"){
 //      Rcpp::Rcout << "Finding Values of Log-posteriors and Gradients - New function:" << std::endl;
@@ -393,7 +393,6 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
     
 //        Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
     cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,1);
-    cbars2.print("Value of cbars2 after f3_binomial_logit");  
     }
     if(family=="binomial"  && link=="probit"){
       Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
