@@ -128,7 +128,7 @@ summary.rglmbdisp<-function(object,...){
   
   n<-length(object$coefficients)  
   percentiles<-matrix(0,nrow=1,ncol=7)
-  se<-sqrt(diag(var(object$coefficients)))
+  se<-sqrt(var(object$coefficients))
   mc<-se/n
   Priorwt<-(se/(sqrt(object$Prior$shape)/object$Prior$rate))^2
     percentiles[1,]<-quantile(object$coefficients,probs=c(0.01,0.025,0.05,0.5,0.95,0.975,0.99))

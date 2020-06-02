@@ -6,37 +6,171 @@ group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
 weight <- c(ctl, trt)
 lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
 
+lm_summary=summary(lm.D9)
+
+lm_summary
+lm.D9$coefficients
+lm_summary$sigma
+
+
 n<-1000
 y<-lm.D9$y
-x<-lm.D9$x
+x<-as.matrix(lm.D9$x)
+
+
 mu<-c(0,0)
-P<-0.001*diag(2)
+P<-0.1*diag(2)
+
+#solve(P)
 x
-shape<-0.001
-rate<-0.001
+b=lm.D9$coefficients
+b_old=lm.D9$coefficients
 
-n<-11000
-dispout<-matrix(0,n)
-bout<-matrix(0,nrow=n,ncol=length(mu))
+v0=lm_summary$sigma
+Prior_Sd=(0.1*sqrt(v0))^2
 
-#initialize b
+v0/Prior_SD=shape/sqrt(shape)=sqrt(shape)
+shape=(v0/Prior_Sd)^2
+rate=shape/v0
+shape
+rate
 
-b<-as.matrix(mu)
+dispout<-rglmbdisp(n=n,y,x,b,alpha= rep(0, length(y)),shape=shape,rate=rate,family=gaussian())
+summary(dispout)
+
+dispout$coefficients
+class(dispout$coefficients)
+
+
+n
+y
+x
+mu
+P
+dispout
+b
+
+
+### This part works now
+
+wt=1
+wt2=0*c(1:length(y))+wt
+
+
+outtemp<-rglmb(n = 1000, y, x, mu, P, wt = wt2, dispersion=dispout$coefficient[1],family = gaussian(), offset2 = rep(0, length(y)), start = b, Gridtype = 3)
+outtemp<-rglmb(n = 1000, y, x, mu, P, wt = 1, dispersion=dispout$coefficient[1],family = gaussian(), offset2 = rep(0, length(y)), start = b, Gridtype = 3)
+
+summary(outtemp)
+
+
+help(rglmb)
+
 
 # RUn Two-Block Gibbs Sampler
+n=100
+
+dispout=0*c(1:n)
+bout=matrix(0,nrow=n,ncol=length(mu))
+
+## Edited start
 
 
 
-for(i in 1:11000){
 
-dispout[i]<-rglmbdisp(1,y,x,b,alpha= rep(0, length(y)),shape,rate,family=gaussian())
+help(rglmb)
+help(rglmbdisp)
 
-outtemp<-rglmb(n = 1, y, x, mu, P, wt = 1, dispersion=dispout[i],family = gaussian(), offset2 = rep(0, length(y)), start = NULL, Gridtype = 2)
+## Seems to be triggered only some way into simulation - need to backtrack and then add
+## error check to catch this earlier
+
+# error:  chol(): decomposition failed
+
+rep(0,n)
+diag(diag(length(y)))
+
+n=1000
+
+rlm1<-function(n,y,x,mu,P,shape,rate,alpha,start,burnin=100){
+
+dispout=rep(0,n)
+bout=matrix(0,nrow=n,ncol=length(mu))
+
+for(i in 1:burnin){
+  
+  out=rglmbdisp(1,y,x,start,alpha= rep(0, length(y)),shape=shape,rate=rate,family=gaussian())
+  dispout[i]<-out$coefficient
+  outtemp<-rglmb(n = 1, y, x, mu, P, wt = 1, dispersion=dispout[i],family = gaussian(), offset2 = rep(0, length(y)), start = start, Gridtype = 3)
+  
+  bout[i,]<-outtemp$coefficients
+  b<-t(as.matrix(outtemp$coefficients))
+  
+}
+
+  
+for(i in 1:n){
+
+out=rglmbdisp(1,y,x,start,alpha= rep(0, length(y)),shape=shape,rate=rate,family=gaussian())
+dispout[i]<-out$coefficient
+outtemp<-rglmb(n = 1, y, x, mu, P, wt = 1, dispersion=dispout[i],family = gaussian(), offset2 = rep(0, length(y)), start = start, Gridtype = 3)
 
 bout[i,]<-outtemp$coefficients
 b<-t(as.matrix(outtemp$coefficients))
 
+      }
+
+outlist1=list(coefficients=dispout,Prior=list(shape=shape,rate=rate))
+outlist1$call<-match.call()
+
+class(outlist1)<-c(outlist1$class,"rglmbdisp")
+
+return(list(bout=bout,dispout=outlist1))
 }
+
+
+temp=rlm1(n,y,x,mu,P,shape,rate,alpha,start=b_old,burnin=100)  
+summary(temp$dispout)
+summary(temp$bout)
+
+
+
+
+
+
+
+
+outlist=list(coefficients=dispout,Prior=list(shape=shape,rate=rate))
+outlist$call=
+
+
+summary(bout)
+summary(dispout)
+
+
+
+i=1
+out=rglmbdisp(1,y,x,b,alpha= rep(0, length(y)),shape=shape,rate=rate,family=gaussian())
+dispout[i]<-out$coefficients
+outtemp<-rglmb(n = 1, y, x, mu, P, wt = 1, dispersion=dispout[i],family = gaussian(), offset2 = rep(0, length(y)), start = b_old, Gridtype = 3)
+bout[i,]<-outtemp$coefficients
+b<-t(as.matrix(outtemp$coefficients))
+
+i=2
+out=rglmbdisp(1,y,x,b,alpha= rep(0, length(y)),shape=shape,rate=rate,family=gaussian())
+dispout[i]<-out$coefficients
+outtemp<-rglmb(n = 1, y, x, mu, P, wt = 1, dispersion=dispout[i],family = gaussian(), offset2 = rep(0, length(y)), start = b_old, Gridtype = 3)
+bout[i,]<-outtemp$coefficients
+b<-t(as.matrix(outtemp$coefficients))
+
+
+i=3
+out=rglmbdisp(1,y,x,b,alpha= rep(0, length(y)),shape=shape,rate=rate,family=gaussian())
+dispout[i]<-out$coefficients
+outtemp<-rglmb(n = 1, y, x, mu, P, wt = 1, dispersion=dispout[i],family = gaussian(), offset2 = rep(0, length(y)), start = b_old, Gridtype = 3)
+bout[i,]<-outtemp$coefficients
+b<-t(as.matrix(outtemp$coefficients))
+
+
+dispout
 
 alpha<-rep(0, length(y))
 mu1<-exp(alpha+x%*%b)

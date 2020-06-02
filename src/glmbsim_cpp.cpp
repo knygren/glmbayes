@@ -1535,7 +1535,24 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     Rcpp::Function asVec("as.vector");
     int l1=x.ncol();
     int l2=x.nrow();
-
+    
+    int l1b=mu.length();
+    int l1c=P.ncol();
+    int l1d=P.nrow();
+    
+    if(l1b!=l1) Rcpp::stop("Number of rows in mu not consistent with number of columns in matrix x");;
+    if(l1c!=l1) Rcpp::stop("Number of columns in matrix P not consistent with number of columns in matrix x");;
+    if(l1d!=l1) Rcpp::stop("Number of rows in matrix P not consistent with number of columns in matrix x");;
+    
+    int l2b=y.length();
+    int l2c=offset2.length();
+    int l2d=wt.length();
+    
+    if(l2b!=l2) Rcpp::stop("Number of rows in y not consistent with number of rows in matrix x");;
+    if(l2c!=l2) Rcpp::stop("Number of rows in offset2 vector not consistent with number of rows in matrix x");;
+    if(l2d!=l2) Rcpp::stop("Number of rows in wt vector not consistent with number of rows in matrix x");;
+    
+    
     double dispersion2;
     NumericVector alpha(l2);
     NumericMatrix mu2a=asMat(mu);
@@ -1808,6 +1825,12 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
       int Gridtype=2      
 ) {
 
+    // add checks to make sure that dimensions are consistent
+    // (i) number of rows in y, offset2, and wt2 should equal rows of x
+    // (ii) number of rows in mu should equal number of columns in x
+    // (iii) number of rows and columns in P should equal number of columns in x
+    
+      
     // Need to check combination of weighting and offset working properly
 
     Rcpp::Function asMat("as.matrix");
@@ -1815,6 +1838,22 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     int l1=x.ncol();
     int l2=x.nrow();
 
+    int l1b=mu.length();
+    int l1c=P.ncol();
+    int l1d=P.nrow();
+    
+    if(l1b!=l1) Rcpp::stop("Number of rows in mu not consistent with number of columns in matrix x");;
+    if(l1c!=l1) Rcpp::stop("Number of columns in matrix P not consistent with number of columns in matrix x");;
+    if(l1d!=l1) Rcpp::stop("Number of rows in matrix P not consistent with number of columns in matrix x");;
+    
+    int l2b=y.length();
+    int l2c=offset2.length();
+    int l2d=wt.length();
+    
+    if(l2b!=l2) Rcpp::stop("Number of rows in y not consistent with number of rows in matrix x");;
+    if(l2c!=l2) Rcpp::stop("Number of rows in offset2 vector not consistent with number of rows in matrix x");;
+    if(l2d!=l2) Rcpp::stop("Number of rows in wt vector not consistent with number of rows in matrix x");;
+    
     double dispersion2=dispersion;
 //    NumericVector alpha(l2);
     NumericMatrix mu2a=asMat(mu);
@@ -1848,18 +1887,23 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
         NumericVector z1(l2+l1);
         arma::vec z(z1.begin(),l2+l1,false);
 
-    
         for(i=0;i<l2;i++){
           x2b(i,_) =x2b(i,_)*sqrt(wt2[i]);
           y1(i)=y1(i)*sqrt(wt2[i]);
           }        
-          
-        arma::mat RA=arma::chol(P2);
 
+
+        arma::mat RA=arma::chol(P2);
+        
         W.rows(0,l2-1)=x2bb;
         W.rows(l2,l2+l1-1)=RA;
         z.rows(0,l2-1)=y2b;
         z.rows(l2,l1+l2-1)=RA*mu2;
+        
+        // WTW apparently take on very large values
+        
+        arma::mat WTW=trans(W)*W;
+
         arma::mat IR=arma::inv(trimatu(chol(trans(W)*W)));
         arma::mat b2=(IR*trans(IR))*(trans(W)*z);
     
@@ -1914,6 +1958,23 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     int l1=x.ncol();
     int l2=x.nrow();
 
+    int l1b=mu.length();
+    int l1c=P.ncol();
+    int l1d=P.nrow();
+    
+    if(l1b!=l1) Rcpp::stop("Number of rows in mu not consistent with number of columns in matrix x");;
+    if(l1c!=l1) Rcpp::stop("Number of columns in matrix P not consistent with number of columns in matrix x");;
+    if(l1d!=l1) Rcpp::stop("Number of rows in matrix P not consistent with number of columns in matrix x");;
+    
+    int l2b=y.length();
+    int l2c=offset2.length();
+    int l2d=wt.length();
+    
+    if(l2b!=l2) Rcpp::stop("Number of rows in y not consistent with number of rows in matrix x");;
+    if(l2c!=l2) Rcpp::stop("Number of rows in offset2 vector not consistent with number of rows in matrix x");;
+    if(l2d!=l2) Rcpp::stop("Number of rows in wt vector not consistent with number of rows in matrix x");;
+    
+    
     double dispersion2;
     NumericVector alpha(l2);
     NumericMatrix mu2a=asMat(mu);
@@ -1966,9 +2027,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     
     arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
     arma::mat A1_b(A1.begin(), l1, l1, false); 
-
-
-
 
     if(conver1>0){Rcpp::stop("Posterior Optimization failed");}
 

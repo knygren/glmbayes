@@ -73,9 +73,7 @@ printCoefmat(x$Percentiles,digits=4)
 rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=2
 )
 {
-  
-  
-  
+
   if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
        is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
   
@@ -97,7 +95,16 @@ rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=
   if (!all(dim(P) == c(nvars2, nvars2))) 
     stop("incompatible dimensions")
   if(!isSymmetric(P))stop("matrix P must be symmetric")
-  tol<- 1e-06 # Link this to Magnitude of P	
+
+  if(length(wt)==1) wt=rep(wt,nobs)
+  nobs2=NROW(wt)
+  nobs3=NROW(x)
+  nobs4=NROW(offset2)
+  if(nobs2!=nobs) stop("weighting vector must have same number of elements as y")
+  if(nobs3!=nobs) stop("matrix X must have same number of rows as y")
+  if(nobs4!=nobs) stop("offset vector must have same number of rows as y")
+  
+    tol<- 1e-06 # Link this to Magnitude of P	
   eS <- eigen(P, symmetric = TRUE,only.values = FALSE)
   ev <- eS$values
   if (!all(ev >= -tol * abs(ev[1L]))) 
@@ -147,18 +154,18 @@ rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=
   if(family$family=="poisson"||family$family=="binomial")dispersion2<-1
   else dispersion2<-dispersion
 
-
-  
   if(family$family=="gaussian"){
     dispersion2=dispersion
     if(is.null(dispersion)){dispersion2=0}
     if(dispersion2>0){
+
+      ## Try correcting wt here 
+      
       outlist<-glmbsim_Gauss_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)
     }
 
     else{
          
-      
          sim<-rmultireg(n=n,Y=matrix((y-offset2)*sqrt(wt),nrow=length(y)),X=x*sqrt(wt),Bbar=mu,A=P,nu=nu,V=V)
          draws<-matrix(1,n)
          LL<-matrix(1,n)
@@ -180,16 +187,7 @@ rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=
     
     
   else{
- #   dispersion2=dispersion
     if(is.null(dispersion)){dispersion2=1}
- #   print(y)
-#    print(x)
-#    print(mu)
-#    print(P)
-#    print(offset2)
-#    print(wt)
-#    print(dispersion2)
-#    print(mu)
 
     
 #    stop("'P' is not positive definite")

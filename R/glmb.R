@@ -93,7 +93,6 @@ glmb.default<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,nu
     wtin<-fit$prior.weights	
 
 
-
 sim<-rglmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,dispersion=dispersion,nu=nu,V=V,offset2=offset,family=family,
            start=b,Gridtype=Gridtype)
 
