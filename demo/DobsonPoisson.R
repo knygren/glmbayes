@@ -45,4 +45,4 @@ sqrt(diag(V0)),glm.D93$coefficients,Like_std)
 glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),mu=mu,Sigma=V0,Gridtype=3)
 summary(glmb.D93)
 
-# Approximate number of candidates per iid sample 16.367
+# Approximate number of candidates per iid sample 1.714

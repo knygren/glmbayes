@@ -266,12 +266,20 @@ Rcpp::NumericMatrix logP){
   
   int l1=GIndex.ncol();
   int l2=GIndex.nrow();
-   
-   
-  // This might be the problem. - cbars here appear to be all zeros..
+  double g1;
+  double g2;
+    
+  Rcpp::NumericMatrix lgct1(l2,l1);
+  Rcpp::NumericMatrix lgct2(l2,l1);
+  Rcpp::NumericMatrix lgct3(l2,l1);
+  Rcpp::NumericMatrix lgct4(l2,l1);
   
-  Rcpp::Rcout << "Lint inside Set_Grid_C2 :" << std::endl << Lint << std::endl;
-  Rcpp::Rcout << "cbars inside Set_Grid_C2 :" << std::endl << cbars << std::endl;
+  
+  // This might be the problem. - cbars here appear to be all zeros..
+  // Corrected cbars issue 06/03/20
+  
+//  Rcpp::Rcout << "Lint inside Set_Grid_C2 :" << std::endl << Lint << std::endl;
+//  Rcpp::Rcout << "cbars inside Set_Grid_C2 :" << std::endl << cbars << std::endl;
    
 
   // Main Function Code
@@ -308,14 +316,45 @@ Rcpp::NumericMatrix logP){
   lglt(_,i) = pnorm(Up(_,i),0.0,1.0,true,true);
   lgrt(_,i) = pnorm(Down(_,i),0.0,1.0,false,true);
   lgct(_,i) = pnorm(Up(_,i),0.0,1.0)-pnorm(Down(_,i),0.0,1.0); 
+  
+  // Use loop and if statements here
+  // These calculations seem to yield same values as lgct above
+  // when lgct is correct - should be safer version when differences 
+  // between Up and Down are small
+    
+   lgct1(_,i)=pnorm(Up(_,i),0.0,1.0)*
+     (1-exp(pnorm(Down(_,i),0.0,1.0,true,true)-pnorm(Up(_,i),0.0,1.0,true,true)));
+   
+   lgct2(_,i)=pnorm(Down(_,i),0.0,1.0,false)*
+     (1-exp(pnorm(Up(_,i),0.0,1.0,false,true)-pnorm(Down(_,i),0.0,1.0,false,true)));
+  
+  // Replace old lgct calculation with results from lgct3 
+  // Keep redundant part for now to allow for testing of impact/further changes
+  
+  for(int j=0;j<l2;j++) {
+    g1=-Down(j,i);
+    g2=Up(j,i);
+    if(g1>=g2) lgct3(j,i)=lgct1(j,i);
+    if(g2>g1) lgct3(j,i)=lgct2(j,i);
+    lgct4(j,i)=lgct3(j,i)-lgct(j,i);
+    lgct(j,i)=lgct3(j,i);
+    
+  }
+  
+//     -pnorm(Down(_,i),0.0,1.0); 
+//     exp(pnorm(q=a,mean=mu,sd=sigma,log.p=TRUE)-pnorm(q=b2,mean=mu,sd=sigma,log.p=TRUE)))
+  
   }
 
-  Rcpp::Rcout << "Up:" << std::endl << Up << std::endl;
-  Rcpp::Rcout << "Down:" << std::endl << Down << std::endl;
-  Rcpp::Rcout << "lglt:" << std::endl << lglt << std::endl;
-  Rcpp::Rcout << "lgrt:" << std::endl << lgrt << std::endl;
-  Rcpp::Rcout << "lgct:" << std::endl << lgct << std::endl;
+//  Rcpp::Rcout << "Up:" << std::endl << Up << std::endl;
+//  Rcpp::Rcout << "Down:" << std::endl << Down << std::endl;
+//  Rcpp::Rcout << "lglt:" << std::endl << lglt << std::endl;
+//  Rcpp::Rcout << "lgrt:" << std::endl << lgrt << std::endl;
+//  Rcpp::Rcout << "lgct:" << std::endl << lgct << std::endl;
+//  Rcpp::Rcout << "lgct3:" << std::endl << lgct3 << std::endl;
+//  Rcpp::Rcout << "lgct3-lgct:" << std::endl << lgct4 << std::endl;
   
+    
   
 // Loop through i and j
 
@@ -342,8 +381,8 @@ Rcpp::NumericMatrix logP){
   }
 }}
 
-  Rcpp::Rcout << "lct:" << std::endl << lgct << std::endl;
-  Rcpp::Rcout << "logU:" << std::endl << logU << std::endl;
+//  Rcpp::Rcout << "lct:" << std::endl << lgct << std::endl;
+//  Rcpp::Rcout << "logU:" << std::endl << logU << std::endl;
   
    
  

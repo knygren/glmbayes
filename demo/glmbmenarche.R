@@ -54,12 +54,10 @@ Menarche_Prior_Error_Checks
 glmb.out1<-glmb(n=n,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu,Sigma=V1,Gridtype=1, data=menarche)
 summary(glmb.out1)
 
-# ~28.205 candidates per iid sample 
+# ~1.261 candidates per iid sample 
 
 
 #################################################### Probit Model ############################################
-
-# Need to improve the prior specification here 
 
 mu<-matrix(0,nrow=2,ncol=1)
 mu[2,1]=2*(0.9-0.5)/3 ## Implied Slope at age 13 should be 0.5*mu[1,1]*(0.9-0.5)/3 
@@ -85,7 +83,7 @@ Menarche_Prior_Error_Checks=Prior_Likelihood_Check(mu,sqrt(diag(V1)),glm.out2$co
 glmb.out2<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age2,family=binomial(probit),mu=mu,Sigma=V1,Gridtype=1,data=menarche)
 summary(glmb.out2)
 
-# ~18.621 candidates per iid sampl
+# ~1.251 candidates per iid sample
 
 
 #################################################### Clog_Log Model ############################################
@@ -115,5 +113,5 @@ Menarche_Prior_Error_Checks=Prior_Likelihood_Check(mu,sqrt(diag(V1)),glm.out3$co
 glmb.out3<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age2,family=binomial(cloglog),mu=mu,Sigma=V1,Gridtype=1,data=menarche)
 summary(glmb.out3)
 
-# Candidates per iid samples ~ 46.17
+# Candidates per iid samples ~ 1.255
 

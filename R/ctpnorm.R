@@ -1,6 +1,6 @@
 ctpnorm<-function(a=-Inf,b=Inf,mu=0,sigma=1,log.p=TRUE,Diff=FALSE){
 
-if(is.vector(a)==FALSE||is.vector(a)==FALSE){stop("Arguments a and b must be vectors")}
+if(is.vector(a)==FALSE||is.vector(b)==FALSE){stop("Arguments a and b must be vectors")}
 if(is.numeric(a)==FALSE||is.numeric(b)==FALSE||is.numeric(mu)==FALSE||is.numeric(sigma)==FALSE){stop("Non-numeric argument to mathematical function")}
 if(is.logical(log.p)==FALSE||is.logical(Diff)==FALSE){stop("Arguments log.P and Diff must be logical")}
 if(length(a)!=length(b)){stop("a and b must be equal length vectors")}
@@ -15,6 +15,9 @@ output<-0*c(1:length(a))
 
 for(i in 1:length(a)){
 
+# Diff == True means that second argument is a difference
+# This is useful when the difference between a and b is small  
+  
 if(Diff==FALSE){
 b2<-b[i]
 if(length(a)>1){Diff2<-b[i]-a[i]}

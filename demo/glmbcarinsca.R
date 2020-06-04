@@ -52,6 +52,10 @@ out2<-rglmb(n = 1000, out$y, out$x, mu=mu, P=P, wt = out$prior.weights, dispersi
 
 summary(out2)
 
+mean(out2$iters)
+
+## ~ 2.381 candidates per iid sample [Consistent with theory]
+
 ###  Dispersion Model  ######################
 
 a0<-0.01
@@ -64,6 +68,9 @@ out3<-rglmbdisp(n=10000,y=out$y,x=out$x,b=b,alpha= rep(0, length(out$y)),wt=out$
 ### more meaningful outputs 
 
 summary(out3)
+
+
+############################   Examples not complete yet ##############
 
 ### Development Code may have attempts at calculating the DIC (not sure aout rglmbdisp)
 

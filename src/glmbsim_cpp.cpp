@@ -288,11 +288,18 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
 
 
   int i;  
-  
+
+//  bStar_2.print("bstar part of Grid calculation");
+    
   a_2=arma::diagvec(A2);
   arma::vec omega=(sqrt(2)-arma::exp(-1.20491-0.7321*sqrt(0.5+a_2)))/arma::sqrt(1+a_2);
   G1b=xx_1b*arma::trans(bStar_2)+xx_2b*arma::trans(omega);
   Lint=yy_1b*arma::trans(bStar_2)+yy_2b*arma::trans(omega);
+  
+  // Second row in G1b here is the posterior mode
+  
+//  G1b.print("G1b part of Grid calculation"); 
+//  Lint.print("Lint b part of Grid calculation");
   
   
   
@@ -358,6 +365,8 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
     arma::mat G3b(G3.begin(), G3.nrow(), G3.ncol(), false);
     arma::mat G4b(G4.begin(), G4.nrow(), G4.ncol(), false);
 
+//    G3b.print("expanded Grid - Should have info from G1b");
+    
     G4b=trans(G3b);
 
     NumericMatrix cbars(l2,l1);
@@ -378,11 +387,13 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
     
     arma::colvec NegLL_2(NegLL.begin(), NegLL.size(), false);
     
-    G4b.print("tangent points");
+//    G4b.print("tangent points");
 
     Rcpp::Rcout << "Gridtype is :"  << Gridtype << std::endl;
     Rcpp::Rcout << "Number of Variables in model are :"  << l1 << std::endl;
     Rcpp::Rcout << "Number of points in Grid are :"  << l2 << std::endl;
+
+//    Rcpp::Rcout << "mu passed to LL and Gradient Functions:" << std::flush << mu << std::endl;
     
     if( family=="binomial" && link=="logit"){
 //      Rcpp::Rcout << "Finding Values of Log-posteriors and Gradients - New function:" << std::endl;
@@ -458,8 +469,8 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
 
     // 
     
-    cbars2.print("cbars2 out of Gradient Valuations");
-    Rcpp::Rcout << "Negative Log-likelihood at tangents:" << std::endl << NegLL << std::endl;
+//    cbars2.print("cbars2 out of Gradient Valuations");
+//    Rcpp::Rcout << "Negative Log-likelihood at tangents:" << std::endl << NegLL << std::endl;
     
     Rcpp::Rcout << "Finished Log-posterior evaluations:" << std::endl;
     
@@ -471,7 +482,7 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
     
     // why aren't cbars being passed correctly?
     
-    Rcpp::Rcout << "cbars being passed to Set_Grid_C2 :" << std::endl << cbars << std::endl;
+//    Rcpp::Rcout << "cbars being passed to Set_Grid_C2 :" << std::endl << cbars << std::endl;
     
     
     Set_Grid_C2(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
@@ -485,8 +496,8 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
     
 //    logP.print("logP matrix - before and after setlogP_C2");
     
-    Rcpp::Rcout << "logP - before and after setlogP_C2 :" << std::endl << logP << std::endl;
-    Rcpp::Rcout << "LLconst - after setlogP_C2 :" << std::endl << LLconst << std::endl;
+//    Rcpp::Rcout << "logP - before and after setlogP_C2 :" << std::endl << logP << std::endl;
+//    Rcpp::Rcout << "LLconst - after setlogP_C2 :" << std::endl << LLconst << std::endl;
     
     double  maxlogP=max(logP2);
   
@@ -496,7 +507,7 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
 
     PLSD=PLSD/sumP;
 
-    Rcpp::Rcout << "PLSD Vector - probabilities:" << std::endl << PLSD << std::endl;
+//    Rcpp::Rcout << "PLSD Vector - probabilities:" << std::endl << PLSD << std::endl;
     
     if(sortgrid==true){
 
@@ -1612,12 +1623,16 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector mu1=mu-mu;       // new prior means are zero
     Rcpp::Function optfun("optim");
   
+    arma::vec mu1b(mu1.begin(),l2,false);
+  
+    
     // Step 1: Runs posterior optimization with log-posterior function and gradient functions
       
     List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,
     _["x"]=x,
     _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
 
+    
     
 //    Rcpp::stop("Optimization Finished"); // Useful comment if need to QC
     
@@ -1626,7 +1641,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericMatrix b2a=asMat(opt[0]);  // optimized value
     arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
 
-//    b2.print("Standardized Posterior mode inside glmbsim_NGauss");  // Useful comment if need to QC
+//    b2.print("b2 Posterior mode from optimization");  // Useful comment if need to QC
 
     NumericVector min1=opt[1]; // Not clear this is used - should be minimum
     int conver1=opt[3]; // check on convergence
@@ -1670,11 +1685,14 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     // outout variables used in latter step
     
     arma::mat b3=L2*b2;   
-    arma::mat mu3=L2*mu2;
+    arma::mat mu3=L2*mu2; // These are needed but will not be used to pass 
+  //  arma::mat mu3=L2*mu1b; // Corrected - mu1b is zero vector
+    
     arma::mat x3=x2*L2Inv;
     arma::mat P3=trans(L2Inv)*P2*L2Inv;
 
-//    b3.print("b3 inside rglmb");
+//    b3.print("b3 after first transformation");
+//    mu3.print("mu3 after first transformation");
     
     
     //   Find diagonal matrix that has "smaller" precision than prior  
@@ -1698,8 +1716,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     // gradient (and perhaps likelihood)
     // functions may not be accounting for prior factor properly
   
-    P3.print("Prior precision matrix prior to scaling");  
-    P3Diag.print("Diagonal of prior precision matrix prior to scaling");  
+//    P3.print("Prior precision matrix prior to scaling");  
+//    P3Diag.print("Diagonal of prior precision matrix prior to scaling");  
     
     while(check==0){
     	epsilon=scale*P3Diag;  // scaled version of diagonal matrix
@@ -1713,52 +1731,72 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
       eigval_temp=arma::min(eigval_2);
       if(eigval_temp>0){check=1;
       
-      Rcpp::Rcout << "scale after step1 " << std::flush << scale << std::endl;
-      P4.print("P4 after step 1");  
-      epsilon.print("epsilon after step 1");  
+//      Rcpp::Rcout << "scale after step1 " << std::flush << scale << std::endl;
+//      P4.print("P4 after step 1");  
+//      epsilon.print("epsilon after step 1");  
       }
       else{scale=scale/2;}
 		}
 
 
 //    P4.print("P4 inside rglmb");
-    
-    int check2=0;
-    double scale2=scale;
-    arma::mat epsilon_temp=P3Diag;   
-    arma::mat P4_temp=P3Diag;   
+  
+     // Edit second scaling out for now (may not do any good)   
+     
+//    int check2=0;
+//    double scale2=scale;
+//    arma::mat epsilon_temp=P3Diag;   
+//    arma::mat P4_temp=P3Diag;   
 
-    while(check2==0){
+//    while(check2==0){
     
     // Change this temporarily to be increments of (1/100)
+    // Change this back to see if it produces better results
+    // Too much weight on the prior in simulation appears problematic
+    // May be better to even avoid this step all together
+    // Modify later
+    // temporarily do away with this adjustment
     
 //    scale=scale+(scale2/10);
-      scale=scale+(scale2/100);
-      
-		epsilon_temp=scale*P3Diag;
-		P4_temp=P3-epsilon_temp;
-    eig_sym(eigval_2, eigvec_2, P4_temp);
-    eigval_temp=arma::min(eigval_2);
-//		eStemp <- eigen(P4_temp, symmetric = TRUE)
-//    		evtemp <- min(eStemp$values)
-    if(eigval_temp>0){
-  					epsilon=epsilon_temp;
-						P4=P4_temp;	
-						}		
-		else{check2=1;
+
+//  		epsilon_temp=scale*P3Diag;
+//  		P4_temp=P3-epsilon_temp;
+//      eig_sym(eigval_2, eigvec_2, P4_temp);
+//    eigval_temp=arma::min(eigval_2);
+//    if(eigval_temp>0){
+//  					epsilon=epsilon_temp;
+//						P4=P4_temp;	
+//						}		
+    
+//		else{
+//		  check2=1;
 		  
 		  // May be that P4 needs to be updated here -added 06/03-2020 - may remove again
 
-		  P4=P3-epsilon;		  		  
+//		  P4=P3-epsilon;		  		  
 		  //
-		  Rcpp::Rcout << "scale after step2 " << std::flush << scale << std::endl;
-		  P4.print("P4 after step 2");  
-		  epsilon.print("epsilon after step 2");  
 		  
-		  }
-      
-  	}    
+//		  Rcpp::Rcout << "scale after step2 " << std::flush << scale << std::endl;
+//		  P4.print("P4 after step 2");  
+//		  epsilon.print("epsilon after step 2");  
+		  
+//		  }
 
+		// temporarily move this outside
+	//	P4=P3-epsilon;		  		  
+		
+		      
+//  	}    
+    
+    // Temporary manual setting of scale to figure out best approach
+    //
+    
+    // This would be adjusted weight on prior if prior had 100% weight
+    
+//    scale=0.5;     
+//    epsilon=scale*P3Diag;
+//    P4=P3-epsilon;		  		  
+    
 //    P4_temp.print("P4_temp inside rglmb");
     
     
@@ -1798,14 +1836,19 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     A4=trans(L3Inv)*A3*L3Inv;  // Should be transformed data precision matrix
     P5=trans(L3Inv)*P4*L3Inv;  // Should be precision matrix without epsilon
     P6Temp=P5+ident;           // Should be precision matrix for posterior
-    NumericVector b5=asVec(b4_1);
+    NumericVector b5=asVec(b4_1); // Maybe this causes error?
     Rcpp::List Envelope;
 
+    
+//      b4.print("b4 -last transformation");
+//      mu4.print("mu4 -last transformation");
+      
+    
 //    P5.print("P5 prior to envelope construction");  
 //    Rcpp::Rcout << "P5_1:" << std::flush << P5_1 << std::endl;
-    b4.print("Posterior Mode for transformed model");
-    P6Temp.print("P6Temp - Actual Prior precision for transformed model");  
-    A4.print("A4 - Modified Data Precision for transformed model");  
+//    b4.print("Posterior Mode for transformed model");
+//    P6Temp.print("P6Temp - Actual Prior precision for transformed model");  
+//    A4.print("A4 - Modified Data Precision for transformed model");  
     
     
     Rcpp::Rcout << "Starting Envelope Creation:" << std::endl;
@@ -1816,13 +1859,27 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     // Check if glmbenvelope_c and glmbenvelope produce consistent results
     // Not sure why these calls are separate - maybe because development was gradual
     
+    // mu seems to not be correct - may be source of errors ///
+
+    NumericMatrix mu5_1=0*mu4_1; // Does this modify mu4_1?
+    
+//    Rcpp::Rcout << "b5 passed to envelope:" << std::flush << b5 << std::endl;
+//    Rcpp::Rcout << "mu passed to envelope function:" << std::flush << mu4_1 << std::endl;
+//    Rcpp::Rcout << "mu passed to envelope function modified:" << std::flush << mu5_1 << std::endl;
+//    Rcpp::Rcout << "alpha passed to envelope function:" << std::flush << alpha << std::endl;
+    
+
     if(n==1){
-    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
-    P5_1,alpha,wt2,family,link,Gridtype, n,false);
+    //Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
+    //P5_1,alpha,wt2,family,link,Gridtype, n,false);
+      Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu5_1,
+                              P5_1,alpha,wt2,family,link,Gridtype, n,false);
     }
     if(n>1){
-    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
-    P5_1,alpha,wt2,family,link,Gridtype, n,true);
+    //Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
+    //P5_1,alpha,wt2,family,link,Gridtype, n,true);
+      Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu5_1,
+                              P5_1,alpha,wt2,family,link,Gridtype, n,true);
     }
     
     Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
