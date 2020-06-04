@@ -77,8 +77,6 @@ LLconst<-matrix(0,nrow=l2,ncol=1)
 
 
 cbars<-f6(b=t(G3),y=y,x=x,mu=mu,P=P,alpha=alpha,wt=wt)
-
-
 NegLL<-f5(b=t(G3),y=y,x=x,mu=mu,P=P,alpha=alpha,wt=wt)
 
 

@@ -47,13 +47,9 @@ rownames(TAB2)<-rownames(TAB)
 res<-list(call=object$call,n=n,coefficients1=Tab1,coefficients=TAB,Percentiles=TAB2)
 
 class(res)<-"summary.rglmb"
-
 res
 
 }
-
-
-
 
 print.summary.rglmb<-function(x,...){
 cat("Call\n")
@@ -159,8 +155,6 @@ rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=
     if(is.null(dispersion)){dispersion2=0}
     if(dispersion2>0){
 
-      ## Try correcting wt here 
-      
       outlist<-glmbsim_Gauss_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)
     }
 
@@ -183,27 +177,11 @@ rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=
     
   }
     
-    
-    
-    
   else{
     if(is.null(dispersion)){dispersion2=1}
-
     
-#    stop("'P' is not positive definite")
-    
-# old functioncall
-    
-#    outlist<-glmbsim_NGauss_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,famfunc=famfunc,f1=f1,f2=f2,f3=f3,
-#    start=mu,family=family$family,link=family$link)
-
-# new functioncall - Use input for start
-
-#    return(mu)
-#    return(start)
-            
     outlist<-glmbsim_NGauss_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,famfunc=famfunc,f1=f1,f2=f2,f3=f3,
-                                start=start,family=family$family,link=family$link,Gridtype=Gridtype)
+    start=start,family=family$family,link=family$link,Gridtype=Gridtype)
     
   }
   

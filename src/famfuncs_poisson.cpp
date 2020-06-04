@@ -2,10 +2,13 @@
 
 // we only include RcppArmadillo.h which pulls Rcpp.h in for us
 #include "RcppArmadillo.h"
-
 using namespace Rcpp;
-
 void progress_bar2(double x, double N);
+
+
+// f1 is negative log-likelihood
+// f2 is negative log-posterior
+// f3 is gradient for log-posterior
 
 
 NumericVector dpois_glmb( NumericVector x, NumericVector means, int lg){
@@ -15,6 +18,7 @@ NumericVector dpois_glmb( NumericVector x, NumericVector means, int lg){
     for( int i=0; i<n; i++) res[i] = R::dpois( x[i], means[i], lg ) ;
     return res ;
 }
+
 
 
 

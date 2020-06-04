@@ -107,7 +107,9 @@ void progress_bar2(double x, double N)
 
 
 // [[Rcpp::export]]
-Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
+Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,
+NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,
+Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
 {
   RNGScope scope;
   int l1 = mu.nrow();
@@ -292,6 +294,8 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
   G1b=xx_1b*arma::trans(bStar_2)+xx_2b*arma::trans(omega);
   Lint=yy_1b*arma::trans(bStar_2)+yy_2b*arma::trans(omega);
   
+  
+  
   NumericVector gridindex(l1);
   
   if(Gridtype==2){
@@ -368,11 +372,13 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
     NumericMatrix LLconst(l2,1);
     NumericVector NegLL(l2);    
     arma::mat cbars2(cbars.begin(), l2, l1, false); 
-
+    arma::mat cbars3(cbars.begin(), l2, l1, false); 
+    
     // Note: NegLL_2 only added to allow for QC printing of results 
     
     arma::colvec NegLL_2(NegLL.begin(), NegLL.size(), false);
     
+    G4b.print("tangent points");
 
     Rcpp::Rcout << "Gridtype is :"  << Gridtype << std::endl;
     Rcpp::Rcout << "Number of Variables in model are :"  << l1 << std::endl;
@@ -392,6 +398,8 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
     
     
 //        Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+
+    // This might point cbars2 to a different part of memory so cbars does not get updated
     cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,1);
     }
     if(family=="binomial"  && link=="probit"){
@@ -448,16 +456,38 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
       cbars2=f3_gamma(G4,y, x,mu,P,alpha,wt,1);
     }
 
+    // 
+    
+    cbars2.print("cbars2 out of Gradient Valuations");
+    Rcpp::Rcout << "Negative Log-likelihood at tangents:" << std::endl << NegLL << std::endl;
+    
     Rcpp::Rcout << "Finished Log-posterior evaluations:" << std::endl;
+    
+    // Do a temporary correction here cbars3 should point to correct memory
+    // See if this sets cbars
+    
+    
+    cbars3=cbars2;
+    
+    // why aren't cbars being passed correctly?
+    
+    Rcpp::Rcout << "cbars being passed to Set_Grid_C2 :" << std::endl << cbars << std::endl;
     
     
     Set_Grid_C2(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
 
+    // Earlier version of this did not pass LLconst --> Did not carry it along
+    // 
+    
     setlogP_C2(logP,NegLL,cbars,G3,LLconst);
 
-
     NumericMatrix::Column logP2 = logP( _, 1);
-
+    
+//    logP.print("logP matrix - before and after setlogP_C2");
+    
+    Rcpp::Rcout << "logP - before and after setlogP_C2 :" << std::endl << logP << std::endl;
+    Rcpp::Rcout << "LLconst - after setlogP_C2 :" << std::endl << LLconst << std::endl;
+    
     double  maxlogP=max(logP2);
   
     NumericVector PLSD=exp(logP2-maxlogP);
@@ -466,6 +496,7 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
 
     PLSD=PLSD/sumP;
 
+    Rcpp::Rcout << "PLSD Vector - probabilities:" << std::endl << PLSD << std::endl;
     
     if(sortgrid==true){
 
@@ -1567,104 +1598,78 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
     if(family=="poisson"||family=="binomial")dispersion2=1;
 	  else dispersion2=dispersion;
-  
-    NumericVector  wt2=wt/dispersion2;
+
+	  int i;  // This can be likely be shifted towards top of function
+	 
+
+    NumericVector  wt2=wt/dispersion2; // Adjusts weight for dispersion
     arma::vec wt3(wt2.begin(), x.nrow());
-    
-    alpha2=x2*mu2+offset2b;
 
-    int i;
-
+    // Shifts mean and offset to alpha --> Modified offset - Set inputs for optimization
     
-    NumericVector parin=start-mu;
-    NumericVector mu1=mu-mu;
+    alpha2=x2*mu2+offset2b; 
+    NumericVector parin=start-mu;  // Starting value for optimization is now start - mu
+    NumericVector mu1=mu-mu;       // new prior means are zero
     Rcpp::Function optfun("optim");
   
-//  Rcpp::List funclist=Rcpp::List::create(Rcpp::Named("f2")=f2,
-//  Rcpp::Named("f3")=f3);  
-    
-//  return(funclist);
-
-// Runs into "Error: initial value in 'vmmin' is not finite error 
-//Rcpp::stop("Reached before optfun");
-
-//arma::vec parin2(parin.begin(), l1, false);
-
-
-//parin2.print("parameter starting value");
-//    b2.print("b2 inside rglmb");
-
-
-// Add check to ensure parin avoids error 
-//arma::vec y2(y.begin(), l2, false);
-
-//y2.print("y input");
-//x2.print("x inout");
-//alpha2.print ("alpha input");
-//wt3.print ("wt input");
-
-//  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
-//NumericVector test0=f1(parin, y,x,alpha,wt2);
-//NumericVector test02=f1(mu, y,x,alpha,wt2);
-
-//arma::vec test0_0(test0.begin(), 1, false);
-//arma::vec test02_0(test02.begin(), 1, false);
-
-
-//test0_0.print("Log_Likelihood at starting value");
-
-//test0_0.print("Log_Likelihood at starting value");
-//test02_0.print("Log_likelihood at mu");
-
-//  NumericVector test=f2(parin, y,x,mu1,P,alpha,wt2);
-//  NumericVector test2=f2(mu, y,x,mu1,P,alpha,wt2);
-//  arma::vec test_0(test.begin(), 1, false);
-//  arma::vec test2_0(test2.begin(), 1, false);
-  
-//  test_0.print("Log_Posterior at starting value");
-//  test2_0.print("Log_Posterior at mu");
-//  Rcpp::stop("Stop Before optimization");
-  
-  
+    // Step 1: Runs posterior optimization with log-posterior function and gradient functions
+      
     List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,
     _["x"]=x,
     _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
 
     
-//    Rcpp::stop("Optimization Finished");
+//    Rcpp::stop("Optimization Finished"); // Useful comment if need to QC
     
-    NumericMatrix b2a=asMat(opt[0]);
+    // Place posterior mode in b2 (b2a)
+    
+    NumericMatrix b2a=asMat(opt[0]);  // optimized value
     arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
 
-//    b2.print("b2 inside rglmb");
+//    b2.print("Standardized Posterior mode inside glmbsim_NGauss");  // Useful comment if need to QC
 
-    NumericVector min1=opt[1];
-    int conver1=opt[3];
-    NumericMatrix A1=opt[5];
+    NumericVector min1=opt[1]; // Not clear this is used - should be minimum
+    int conver1=opt[3]; // check on convergence
+    
+    // Approximate hessian - Should consider replacing with Hessian based on 
+    // known Hessian formula (when available)
+    // This could be a source of error 
+    
+    NumericMatrix A1=opt[5]; 
 
+    // Return Error if Optimizaton failed
     
     if(conver1>0){Rcpp::stop("Posterior Optimization failed");}
     
-    arma::mat A1_b(A1.begin(), l1, l1, false); 
-    arma::vec mu_0(mu.begin(), l1, false);
+    
+    
+    arma::vec mu_0(mu.begin(), l1, false);  // Not sure where this is first used
 
 //    mu_0.print("mu_0 inside rglmb");
 
+    NumericMatrix L2Inv_1(l1, l1); // Can likely shift this towards top of function
+
+    // arma objects used to do eigenvalue decomposition
+    
+    arma::mat A1_b(A1.begin(), l1, l1, false); 
     arma::vec eigval_1;
     arma::mat eigvec_1;
-
-    eig_sym(eigval_1, eigvec_1, A1_b);
-
-    NumericMatrix L2Inv_1(l1, l1);
     arma::mat L2Inv(L2Inv_1.begin(), L2Inv_1.nrow(), L2Inv_1.ncol(), false);
+    
+    
 
+    // Step 2: Standardize Model 
 
     // Standardize Model to Have Diagonal Variance-Covariance Matrix at Posterior Mode
     
+    eig_sym(eigval_1, eigvec_1, A1_b);
     arma::mat D1=arma::diagmat(eigval_1);
     arma::mat L2= arma::sqrt(D1)*trans(eigvec_1);
-    L2Inv=eigvec_1*sqrt(inv_sympd(D1));
-    arma::mat b3=L2*b2; 
+    L2Inv=eigvec_1*sqrt(inv_sympd(D1));  // Also used to undo normalization later
+    
+    // outout variables used in latter step
+    
+    arma::mat b3=L2*b2;   
     arma::mat mu3=L2*mu2;
     arma::mat x3=x2*L2Inv;
     arma::mat P3=trans(L2Inv)*P2*L2Inv;
@@ -1677,7 +1682,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 //   Puts model into standard form 
 
 
-    arma::mat P3Diag=arma::diagmat(arma::diagvec(P3));
+    arma::mat P3Diag=arma::diagmat(arma::diagvec(P3));// diagonal part of P3
     arma::mat epsilon=P3Diag;
     arma::mat P4=P3Diag;   
     
@@ -1687,12 +1692,31 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::mat eigvec_2;
     double eigval_temp;
     
+    // Scales matrix - Add these temporary output to see 
+    // when problems occur - may be only occuring when 
+    // Prior matrix is scaled
+    // gradient (and perhaps likelihood)
+    // functions may not be accounting for prior factor properly
+  
+    P3.print("Prior precision matrix prior to scaling");  
+    P3Diag.print("Diagonal of prior precision matrix prior to scaling");  
+    
     while(check==0){
-    	epsilon=scale*P3Diag;
+    	epsilon=scale*P3Diag;  // scaled version of diagonal matrix
+  
+      // Checks if difference between Prior precision and diagonal matrix
+      // is positive definite
+      // is positive definite - to be added to likelihood 
+      
   		P4=P3-epsilon;				
       eig_sym(eigval_2, eigvec_2, P4);
       eigval_temp=arma::min(eigval_2);
-      if(eigval_temp>0){check=1;}
+      if(eigval_temp>0){check=1;
+      
+      Rcpp::Rcout << "scale after step1 " << std::flush << scale << std::endl;
+      P4.print("P4 after step 1");  
+      epsilon.print("epsilon after step 1");  
+      }
       else{scale=scale/2;}
 		}
 
@@ -1706,7 +1730,11 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
     while(check2==0){
     
-    scale=scale+(scale2/10);
+    // Change this temporarily to be increments of (1/100)
+    
+//    scale=scale+(scale2/10);
+      scale=scale+(scale2/100);
+      
 		epsilon_temp=scale*P3Diag;
 		P4_temp=P3-epsilon_temp;
     eig_sym(eigval_2, eigvec_2, P4_temp);
@@ -1717,7 +1745,17 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
   					epsilon=epsilon_temp;
 						P4=P4_temp;	
 						}		
-		else{check2=1;}
+		else{check2=1;
+		  
+		  // May be that P4 needs to be updated here -added 06/03-2020 - may remove again
+
+		  P4=P3-epsilon;		  		  
+		  //
+		  Rcpp::Rcout << "scale after step2 " << std::flush << scale << std::endl;
+		  P4.print("P4 after step 2");  
+		  epsilon.print("epsilon after step 2");  
+		  
+		  }
       
   	}    
 
@@ -1725,9 +1763,9 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     
     
     arma::mat ident=arma::mat (l1,l1,arma::fill::eye);
-    arma::mat A3=ident-epsilon;	
+    arma::mat A3=ident-epsilon;	// This should be a diagonal matrix and represents "data" precision in transformed model
     
-//   Put into Standard form
+//   Put into Standard form where prior is identity matrix
 
     eig_sym(eigval_2, eigvec_2, epsilon);
 
@@ -1757,41 +1795,62 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     b4=L3*b3; 
     mu4=L3*mu3; 
     x4=x3*L3Inv;
-    A4=trans(L3Inv)*A3*L3Inv;
-    P5=trans(L3Inv)*P4*L3Inv;
-    P6Temp=P5+ident;  
+    A4=trans(L3Inv)*A3*L3Inv;  // Should be transformed data precision matrix
+    P5=trans(L3Inv)*P4*L3Inv;  // Should be precision matrix without epsilon
+    P6Temp=P5+ident;           // Should be precision matrix for posterior
     NumericVector b5=asVec(b4_1);
     Rcpp::List Envelope;
 
+//    P5.print("P5 prior to envelope construction");  
+//    Rcpp::Rcout << "P5_1:" << std::flush << P5_1 << std::endl;
+    b4.print("Posterior Mode for transformed model");
+    P6Temp.print("P6Temp - Actual Prior precision for transformed model");  
+    A4.print("A4 - Modified Data Precision for transformed model");  
+    
+    
     Rcpp::Rcout << "Starting Envelope Creation:" << std::endl;
     
     
 //       Rcpp::stop("Starting Envelope Creation");
-    
+
+    // Check if glmbenvelope_c and glmbenvelope produce consistent results
+    // Not sure why these calls are separate - maybe because development was gradual
     
     if(n==1){
     Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
     P5_1,alpha,wt2,family,link,Gridtype, n,false);
     }
     if(n>1){
-    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,family,link,Gridtype, n,true);
+    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
+    P5_1,alpha,wt2,family,link,Gridtype, n,true);
     }
     
     Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
     
-    Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,Envelope,family,link);
+    Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu4_1,P5_1,alpha,wt2,
+                               f2,Envelope,family,link);
 
+    //  Post processing
+    
+    //  1) Undo-Standardization of Posterior Precision
+    //  2) Undo shifting of prior mean to offset
+    //  3) Calculate Log_likelihood (used in model diagnostics)
+
+    // These two can likely be shifted towards top of function to make code simpler
+    
+    NumericMatrix out(l1,n);   
+    NumericVector LL(n);   
+    
     NumericMatrix sim2=sim[0];
     arma::mat sim2b(sim2.begin(), sim2.nrow(), sim2.ncol(), false);
-    NumericMatrix out(l1,n);
     arma::mat out2(out.begin(), out.nrow(), out.ncol(), false);
     
-    out2=L2Inv*L3Inv*trans(sim2b);
-    NumericVector LL(n);
-    
+    out2=L2Inv*L3Inv*trans(sim2b); // reverse transformation
+
+  
     for(i=0;i<n;i++){
-    out(_,i)=out(_,i)+mu;
-      LL[i]=as<double>(f1(_["b"]=out(_,i),_["y"]=y,_["x"]=x,offset2,wt2));
+    out(_,i)=out(_,i)+mu;  // Add mean vector back 
+    LL[i]=as<double>(f1(_["b"]=out(_,i),_["y"]=y,_["x"]=x,offset2,wt2)); // Calculate log_likelihood
     }
     
 
@@ -1806,8 +1865,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
           Rcpp::Named("dispersion")=dispersion2,
           Rcpp::Named("loglike")=LL
           );  
-
-
 
     return(outlist);
 
@@ -2144,6 +2201,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,family,link,Gridtype, n,true);
     }
 
+    
 
     Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,Envelope,family,link);
 

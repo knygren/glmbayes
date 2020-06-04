@@ -59,6 +59,8 @@ Rcpp::List Set_Grid(Rcpp::NumericMatrix GIndex,  Rcpp::NumericMatrix cbars, Rcpp
   lgrt(_,i) = pnorm(Down(_,i),0.0,1.0,false,true);
   lgct(_,i) = pnorm(Up(_,i),0.0,1.0)-pnorm(Down(_,i),0.0,1.0); 
   }
+  
+  
   for(int j=0;j<l2;j++)
 {
   for(int i=0;i<l1;i++)
@@ -265,6 +267,12 @@ Rcpp::NumericMatrix logP){
   int l1=GIndex.ncol();
   int l2=GIndex.nrow();
    
+   
+  // This might be the problem. - cbars here appear to be all zeros..
+  
+  Rcpp::Rcout << "Lint inside Set_Grid_C2 :" << std::endl << Lint << std::endl;
+  Rcpp::Rcout << "cbars inside Set_Grid_C2 :" << std::endl << cbars << std::endl;
+   
 
   // Main Function Code
 
@@ -294,12 +302,23 @@ Rcpp::NumericMatrix logP){
 }
 }
   
+  // Should log_ctnorm be used here for improvement
   
   for(int i=0;i<l1;i++){
   lglt(_,i) = pnorm(Up(_,i),0.0,1.0,true,true);
   lgrt(_,i) = pnorm(Down(_,i),0.0,1.0,false,true);
   lgct(_,i) = pnorm(Up(_,i),0.0,1.0)-pnorm(Down(_,i),0.0,1.0); 
   }
+
+  Rcpp::Rcout << "Up:" << std::endl << Up << std::endl;
+  Rcpp::Rcout << "Down:" << std::endl << Down << std::endl;
+  Rcpp::Rcout << "lglt:" << std::endl << lglt << std::endl;
+  Rcpp::Rcout << "lgrt:" << std::endl << lgrt << std::endl;
+  Rcpp::Rcout << "lgct:" << std::endl << lgct << std::endl;
+  
+  
+// Loop through i and j
+
   for(int j=0;j<l2;j++)
 {
   for(int i=0;i<l1;i++)
@@ -309,7 +328,7 @@ Rcpp::NumericMatrix logP){
   logP(j,0)=logP(j,0)+logU(j,i);
   }
   if(GIndex(j,i)==2){
-  lgct(j,i)=log(lgct(j,i));
+  lgct(j,i)=log(lgct(j,i));   // log of lgct here 
   logU(j,i)=lgct(j,i);
   logP(j,0)=logP(j,0)+logU(j,i);
   }
@@ -322,7 +341,11 @@ Rcpp::NumericMatrix logP){
   logP(j,0)=logP(j,0)+logU(j,i);
   }
 }}
- 
+
+  Rcpp::Rcout << "lct:" << std::endl << lgct << std::endl;
+  Rcpp::Rcout << "logU:" << std::endl << logU << std::endl;
+  
+   
  
 }
 

@@ -56,9 +56,7 @@ rmultireg=
     #
     RA=chol(A)
     W=rbind(X,RA)
-    
-    
-    
+  
     Z=rbind(Ytemp,matrix(RA%*%Bbar,ncol=1)) ## Force dimension to 1
     
     #   note:  Y,X,A,Bbar must be matrices!
@@ -112,4 +110,5 @@ rmultireg=
     return(list(B=out1,Sigma=out2,BStar=Btilde))      
   
     
-    }
+  }
+
