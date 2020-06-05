@@ -1,6 +1,6 @@
 \name{rglmb}
 \alias{rglmb}
-\alias{rglmb.default}
+%\alias{rglmb.default}
 \alias{print.rglmb}
 \alias{rnorm_gamma_reg}
 
@@ -13,7 +13,7 @@ Producing iid samples for Bayesian Generalized Linear Models
 }
 \usage{
 rglmb(n = 1, y, x, mu, P, wt = 1, dispersion=NULL,nu=NULL,
-V=NULL,family = gaussian(), offset2 = rep(0, nobs), start = NULL, Gridtype = 2)
+V=NULL,family = gaussian(), offset2 = rep(0, nobs), start = NULL, Gridtype = 3)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

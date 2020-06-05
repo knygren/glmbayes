@@ -1,15 +1,19 @@
-glmb<-function(n,formula, family = binomial,dispersion=NULL,mu,Sigma,nu=NULL,V=NULL,Gridtype=1, data, weights, subset2, 
-    na.action, start = NULL, etastart, mustart, offset, control = list(...), 
-    model = TRUE, method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
-    ...) UseMethod("glmb")
+#glmb<-function(n,formula, family = binomial,dispersion=NULL,mu,Sigma,nu=NULL,V=NULL,Gridtype=1, data, weights, subset2, 
+#    na.action, start = NULL, etastart, mustart, offset, control = list(...), 
+#    model = TRUE, method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
+#    ...) UseMethod("glmb")
 
 
 
-glmb.default<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,nu=NULL,V=NULL,Gridtype=1, data, weights, subset2, 
-    na.action, start = NULL, etastart, mustart, offset, control = list(...), 
-    model = TRUE, method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
-    ...) 
-{
+#glmb.default<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,nu=NULL,V=NULL,Gridtype=1, data, weights, subset2, 
+#    na.action, start = NULL, etastart, mustart, offset, control = list(...), 
+#    model = TRUE, method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
+#    ...) 
+glmb<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,nu=NULL,V=NULL,Gridtype=1, data, weights, subset2, 
+                          na.action, start = NULL, etastart, mustart, offset, control = list(...), 
+                          model = TRUE, method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
+                          ...) 
+  {
    # Note, renamed subset argument to subset2 as it caused conflict with subset function
 
     call <- match.call()

@@ -1,6 +1,6 @@
 \name{rglmbdisp}
 \alias{rglmbdisp}
-\alias{rglmbdisp.default}
+%\alias{rglmbdisp.default}
 \alias{print.rglmbdisp}
 
 \title{

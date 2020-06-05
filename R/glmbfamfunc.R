@@ -1,5 +1,17 @@
+#glmbfamfunc<-function(family) UseMethod("glmbfamfunc")
 
-glmbfamfunc<-function(family) UseMethod("glmbfamfunc")
+#glmbfamfunc.default<-function(family)
+glmbfamfunc<-function(family)
+  {
+  
+  out<-glmbfamfuncset(family=family)
+  out$call<-match.call()
+  
+  class(out)<-"glmbfamfunc"
+  out
+}
+
+
 
 glmbfamfuncset<-function(family){
 
@@ -331,15 +343,6 @@ if(family$family=="Gamma" && family$link=="log")
 }
 
 
-glmbfamfunc.default<-function(family)
-{
-
-out<-glmbfamfuncset(family=family)
-out$call<-match.call()
-
-class(out)<-"glmbfamfunc"
-out
-}
 
 print.glmbfamfunc<-function(x,...)
 {

@@ -1,7 +1,8 @@
-rglmbdisp<-function(n,y,x,b,alpha=0,wt=1,shape,rate,family=gaussian()) UseMethod("rglmbdisp")
+#rglmbdisp<-function(n,y,x,b,alpha=0,wt=1,shape,rate,family=gaussian()) UseMethod("rglmbdisp")
 
-rglmbdisp.default<-function(n,y,x,b,alpha=0,wt=1,shape,rate,family=gaussian()){
-
+#rglmbdisp.default<-function(n,y,x,b,alpha=0,wt=1,shape,rate,family=gaussian()){
+rglmbdisp<-function(n,y,x,b,alpha=0,wt=1,shape,rate,family=gaussian()){
+    
   call <- match.call()
   
   if (is.character(family)) 

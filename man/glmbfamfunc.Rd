@@ -1,6 +1,6 @@
 \name{glmbfamfunc}
 \alias{glmbfamfunc}
-\alias{glmbfamfunc.default}
+%\alias{glmbfamfunc.default}
 \alias{glmbfamfuncset}
 \alias{print.glmbfamfunc}
 

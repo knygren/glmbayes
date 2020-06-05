@@ -2,7 +2,6 @@
 rnorm_gamma_reg<-function(n,y,x,mu,P,nu,V,offset2,wt){
 
 ## Should add dimension checks here  
-## Should do away with need for passing f1 since it is a known function
 ## Should move core part of rmultireg inside this code to avoid call
 
 famfunc=glmbfamfunc(gaussian())  

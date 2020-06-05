@@ -1,6 +1,6 @@
 \name{glmb}
 \alias{glmb}
-\alias{glmb.default}
+%\alias{glmb.default}
 \alias{print.glmb}
 \alias{extractAIC.glmb}
 \alias{logLik.glmb}
