@@ -1884,7 +1884,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     
     Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
     
-    Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu4_1,P5_1,alpha,wt2,
+    Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu5_1,P5_1,alpha,wt2,
                                f2,Envelope,family,link);
 
     //  Post processing
@@ -2248,19 +2248,20 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector b5=asVec(b4_1);
     Rcpp::List Envelope;
 
+    NumericMatrix mu5_1=0*mu4_1; // Does this modify mu4_1?
     
     
     if(n==1){
-    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
+    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu5_1,
     P5_1,alpha,wt2,family,link,Gridtype, n,false);
     }
     if(n>1){
-    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,P5_1,alpha,wt2,family,link,Gridtype, n,true);
+    Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu5_1,P5_1,alpha,wt2,family,link,Gridtype, n,true);
     }
 
     
 
-    Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu4_1,P5_1,alpha,wt2,f2,Envelope,family,link);
+    Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu5_1,P5_1,alpha,wt2,f2,Envelope,family,link);
 
 
     NumericMatrix sim2=sim[0];
