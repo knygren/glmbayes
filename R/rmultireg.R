@@ -39,7 +39,6 @@ rmultireg=
     k=ncol(X)
     l2=nrow(X)
     
-    return(list(l1=l1,l2=l2))
     if(l2!=l1) stop("Dimensions of X and Y are inconsistent")
     
     k1=dim(A)[1]

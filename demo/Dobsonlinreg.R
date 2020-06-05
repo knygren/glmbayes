@@ -45,3 +45,13 @@ wt2=0*c(1:length(y))+wt
 outtemp<-rglmb(n = 1000, y, x, mu, P, wt = wt2, dispersion=dispout$coefficient[1],family = gaussian(), offset2 = rep(0, length(y)), start = b, Gridtype = 3)
 summary(outtemp)
 
+alpha=rep(0,length(y))
+
+Y=matrix((y-alpha)*sqrt(wt),nrow=length(y))
+X=x*sqrt(wt)
+outtemp2<-rnorm_gamma_reg(n=1000,y,x,mu,P,nu=3,V=3,offset2=alpha,wt=wt2,f1=NULL,famfunc=NULL)
+
+summary(outtemp2)
+
+
+

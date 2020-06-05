@@ -2,6 +2,7 @@
 \alias{rglmb}
 \alias{rglmb.default}
 \alias{print.rglmb}
+\alias{rnorm_gamma_reg}
 
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{

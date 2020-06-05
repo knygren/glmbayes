@@ -1561,8 +1561,6 @@ NumericVector wt,NumericVector b,NumericVector bstar,std::string family="binomia
 
 
 
-
-
 // [[Rcpp::export]]
 
 Rcpp::List glmbsim_NGauss_cpp(int n,NumericVector y,NumericMatrix x, 
@@ -2258,8 +2256,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     if(n>1){
     Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu5_1,P5_1,alpha,wt2,family,link,Gridtype, n,true);
     }
-
-    
 
     Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu5_1,P5_1,alpha,wt2,f2,Envelope,family,link);
 
