@@ -57,8 +57,6 @@ NumericVector dbinom_glmb2( NumericVector x, NumericVector N, NumericVector mean
 
 NumericMatrix dbinom_glmb3( NumericMatrix x, NumericMatrix N, NumericMatrix means, int lg){
   
-  int i;
-  int j;
   int n1 = x.rows() ;
   int n2 = x.cols() ;
   NumericMatrix res =no_init(n1,n2) ;

@@ -6,6 +6,29 @@
 
 using namespace Rcpp;
 
+// glmbenvelope_c
+List glmbenvelope_c(NumericVector bStar, NumericMatrix A, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, std::string family, std::string link, int Gridtype, int n, bool sortgrid);
+RcppExport SEXP _glmbayes_glmbenvelope_c(SEXP bStarSEXP, SEXP ASEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP, SEXP nSEXP, SEXP sortgridSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type bStar(bStarSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type A(ASEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
+    Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
+    Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< bool >::type sortgrid(sortgridSEXP);
+    rcpp_result_gen = Rcpp::wrap(glmbenvelope_c(bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid));
+    return rcpp_result_gen;
+END_RCPP
+}
 // Set_Grid
 Rcpp::List Set_Grid(Rcpp::NumericMatrix GIndex, Rcpp::NumericMatrix cbars, Rcpp::NumericMatrix Lint);
 RcppExport SEXP _glmbayes_Set_Grid(SEXP GIndexSEXP, SEXP cbarsSEXP, SEXP LintSEXP) {
@@ -359,29 +382,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// glmbenvelope_c
-List glmbenvelope_c(NumericVector bStar, NumericMatrix A, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, std::string family, std::string link, int Gridtype, int n, bool sortgrid);
-RcppExport SEXP _glmbayes_glmbenvelope_c(SEXP bStarSEXP, SEXP ASEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP, SEXP nSEXP, SEXP sortgridSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type bStar(bStarSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type A(ASEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
-    Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
-    Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< bool >::type sortgrid(sortgridSEXP);
-    rcpp_result_gen = Rcpp::wrap(glmbenvelope_c(bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid));
-    return rcpp_result_gen;
-END_RCPP
-}
 // glmbsim_NGauss_cpp
 Rcpp::List glmbsim_NGauss_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P, NumericVector offset2, NumericVector wt, double dispersion, Rcpp::List famfunc, Function f1, Function f2, Function f3, NumericVector start, std::string family, std::string link, int Gridtype);
 RcppExport SEXP _glmbayes_glmbsim_NGauss_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP offset2SEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP famfuncSEXP, SEXP f1SEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP) {
@@ -436,6 +436,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_glmbayes_glmbenvelope_c", (DL_FUNC) &_glmbayes_glmbenvelope_c, 13},
     {"_glmbayes_Set_Grid", (DL_FUNC) &_glmbayes_Set_Grid, 3},
     {"_glmbayes_setlogP", (DL_FUNC) &_glmbayes_setlogP, 4},
     {"_glmbayes_f1_gamma", (DL_FUNC) &_glmbayes_f1_gamma, 5},
@@ -457,7 +458,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_f2_poisson", (DL_FUNC) &_glmbayes_f2_poisson, 8},
     {"_glmbayes_f3_poisson", (DL_FUNC) &_glmbayes_f3_poisson, 8},
     {"_glmbayes_glmbsim_cpp", (DL_FUNC) &_glmbayes_glmbsim_cpp, 12},
-    {"_glmbayes_glmbenvelope_c", (DL_FUNC) &_glmbayes_glmbenvelope_c, 13},
     {"_glmbayes_glmbsim_NGauss_cpp", (DL_FUNC) &_glmbayes_glmbsim_NGauss_cpp, 16},
     {"_glmbayes_glmbsim_Gauss_cpp", (DL_FUNC) &_glmbayes_glmbsim_Gauss_cpp, 16},
     {NULL, NULL, 0}
