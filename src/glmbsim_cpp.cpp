@@ -77,8 +77,8 @@ void progress_bar2(double x, double N)
   
 }
 
-
 // [[Rcpp::export]]
+
 Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,
 NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,
 Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
@@ -158,6 +158,7 @@ Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterV
      btemp2=trans(outtemp2);    
 
     // Need to modify to call correct f2 function based on family and link
+
 
     
       if(family2=="binomial"){
@@ -267,7 +268,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector  wt2=wt/dispersion2; // Adjusts weight for dispersion
     arma::vec wt3(wt2.begin(), x.nrow());
 
-    // Shifts mean and offset to alpha --> Modified offset - Set inputs for optimization
+    // Step 1: Shifts mean and offset to alpha --> Modified offset - Set inputs for optimization
+    // Transforme Model now has prior mean 0
     
     alpha2=x2*mu2+offset2b; 
     NumericVector parin=start-mu;  // Starting value for optimization is now start - mu
@@ -277,8 +279,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::vec mu1b(mu1.begin(),l2,false);
   
     
-    // Step 1: Runs posterior optimization with log-posterior function and gradient functions
-    // glmsim_NGauss seems to use a function for optimization (optPostMode)
+    // Step 2: Run posterior optimization with log-posterior function and gradient functions
+    // glmsim_NGauss2 seems to use a function for optimization (optPostMode)
       
     List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,
     _["x"]=x,
@@ -307,9 +309,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     // Return Error if Optimizaton failed
     
     if(conver1>0){Rcpp::stop("Posterior Optimization failed");}
-    
-    
-    
+  
     arma::vec mu_0(mu.begin(), l1, false);  // Not sure where this is first used
 
 //    mu_0.print("mu_0 inside rglmb");
@@ -539,6 +539,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu5_1,P5_1,alpha,wt2,
                                f2,Envelope,family,link);
 
+    
     //  Post processing
     
     //  1) Undo-Standardization of Posterior Precision

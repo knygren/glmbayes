@@ -97,58 +97,35 @@ Written by Kjell Nygren.
 }
 \examples{
 
-data(carinsca)
-carinsca$Merit <- ordered(carinsca$Merit)
-carinsca$Class <- factor(carinsca$Class)
-options(contrasts=c("contr.treatment","contr.treatment"))
-attach(carinsca)
-out <- glm(Claims/Insured~Merit+Class,family="poisson")
-summary(out,cor=FALSE)
+data(menarche)
 
-wt1<-out$prior.weights
-scale<-0.1275 # SAS estimate
+summary(menarche)
+plot(Menarche/Total ~ Age, data=menarche)
 
-dispersion<-1/scale
+Age2=menarche$Age-13
 
-out <- glm(Cost/Claims~Merit+Class,family=Gamma(link="log"),weights=Claims,x=TRUE)
+x<-matrix(as.numeric(1.0),nrow=length(Age2),ncol=2)
+x[,2]=Age2
+
+y=menarche$Menarche/menarche$Total
+wt=menarche$Total
+
+mu<-matrix(as.numeric(0.0),nrow=2,ncol=1)
+mu[2,1]=(log(0.9/0.1)-log(0.5/0.5))/3
+
+V1<-1*diag(as.numeric(2.0))
+
+# 2 standard deviations for prior estimate at age 13 between 0.1 and 0.9
+## Specifies uncertainty around the point estimates
+
+V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
+V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
+
+out<-rglmb(n = 1000, y=y, x=x, mu=mu, P=solve(V1), wt = wt, 
+family = binomial(logit), Gridtype = 3) 
 summary(out)
 
-V_Out=summary(out)$cov.scaled  
-P_Data=solve(V_Out)
-
-Like_std=summary(out)$coefficients[,2]
-
-y1<-out$y
-x1<-out$x
-b1<-out$coefficients
-wt1<-out$prior.weights
-scale<-0.1275 # SAS estimate
-
-## Should the above model be re-run with dispersion to get correct estimate 
-## for the Precision matrix?
-
-dispersion<-1/scale
-wt2<-wt1/dispersion
-alpha1<-rep(0,length(y1))
-
-mu<-matrix(0,8)
-P<-0.1*solve(diag(Like_std*Like_std))
-V0<-solve(P)
-
-Prior_Error_Checks=Prior_Likelihood_Check(mu,sqrt(diag(V0)),out$coefficients,Like_std)
-
-mu
-out$coefficients
-
-mu[1,1]=-1.1
-
-Prior_Error_Checks=Prior_Likelihood_Check(mu,sqrt(diag(V0)),out$coefficients,Like_std)
-Prior_Error_Checks
-
-out2<-rglmb(n = 1000, out$y, out$x, mu=mu, P=P, wt = out$prior.weights, dispersion = dispersion,
-  family = Gamma(link="log"), offset2 = rep(0, 20), start = out$coefficients, Gridtype = 3) 
-
-summary(out2)
+mean(out$iters)
 
 }
 

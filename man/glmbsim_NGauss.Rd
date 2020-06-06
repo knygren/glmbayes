@@ -94,30 +94,51 @@ Kjell Nygren
 \code{\link{glmb}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+data(menarche)
 
-## The function is currently defined as
-function (coefficients, y, x, f1, f4, wt = 1) 
-{
-    l1 <- length(coefficients[1, ])
-    l2 <- length(coefficients[, 1])
-    D <- matrix(0, nrow = l2, ncol = 1)
-    D2 <- matrix(0, nrow = l2, ncol = 1)
-    for (i in 1:l2) {
-        b <- as.vector(coefficients[i, ])
-        D[i, 1] <- f4(b = b, y = y, x = x, alpha = 0, wt = wt)
-        D2[i, 1] <- 2 * f1(b = b, y = y, x = x, alpha = 0, wt = wt)
-    }
-    Dbar <- mean(D2)
-    b <- colMeans(coefficients)
-    Dthetabar <- 2 * f1(b = b, y = y, x = x, alpha = 0, wt = wt)
-    pD <- Dbar - Dthetabar
-    DIC <- pD + Dbar
-    list(Deviance = D, Dbar = Dbar, Dthetabar = Dthetabar, pD = pD, 
-        DIC = DIC)
-  }
+summary(menarche)
+plot(Menarche/Total ~ Age, data=menarche)
+
+Age2=menarche$Age-13
+
+x<-matrix(as.numeric(1.0),nrow=length(Age2),ncol=2)
+x[,2]=Age2
+
+y=menarche$Menarche/menarche$Total
+wt=menarche$Total
+
+mu<-matrix(as.numeric(0.0),nrow=2,ncol=1)
+mu[2,1]=(log(0.9/0.1)-log(0.5/0.5))/3
+
+V1<-1*diag(as.numeric(2.0))
+
+# 2 standard deviations for prior estimate at age 13 between 0.1 and 0.9
+## Specifies uncertainty around the point estimates
+
+V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
+V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
+
+famfunc<-glmbfamfunc(binomial(logit))
+
+f1<-famfunc$f1
+f2<-famfunc$f2
+f3<-famfunc$f3
+f5<-famfunc$f5
+f6<-famfunc$f6
+
+dispersion2<-as.numeric(1.0)
+start <- mu
+offset2=rep(as.numeric(0.0),length(y))
+P=solve(V1)
+n=1000
+
+## Appears that the type for some of these arguments are important/problematic
+
+outlist<-glmbsim_NGauss_cpp(n=as.integer(n),y=as.vector(y),
+x=as.matrix(x),mu=as.vector(mu),P=as.matrix(P),
+offset2=as.vector(offset2),wt=as.vector(wt),dispersion=as.numeric(dispersion2),
+famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=as.vector(start),family="binomial",link="logit",
+Gridtype=as.integer(3))
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -3,7 +3,13 @@ data(carinsca)
 carinsca$Merit <- ordered(carinsca$Merit)
 carinsca$Class <- factor(carinsca$Class)
 options(contrasts=c("contr.treatment","contr.treatment"))
-attach(carinsca)
+
+Claims=carinsca$Claims
+Insured=carinsca$Insured
+Merit=carinsca$Merit
+Class=carinsca$Class
+Cost=carinsca$Cost
+
 out <- glm(Claims/Insured~Merit+Class,family="poisson")
 summary(out,cor=FALSE)
 
@@ -51,7 +57,6 @@ out2<-rglmb(n = 1000, out$y, out$x, mu=mu, P=P, wt = out$prior.weights, dispersi
             family = Gamma(link="log"), offset2 = rep(0, 20), start = out$coefficients, Gridtype = 3) 
 
 summary(out2)
-
 mean(out2$iters)
 
 ## ~ 2.381 candidates per iid sample [Consistent with theory]

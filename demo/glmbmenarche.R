@@ -1,4 +1,3 @@
-library(MASS)
 data(menarche)
 
 summary(menarche)
@@ -14,7 +13,6 @@ summary(glm.out1)
 # makes sense 
 
 Age2=menarche$Age-13
-
 
 n<-1000
 
