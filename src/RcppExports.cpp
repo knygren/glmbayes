@@ -360,6 +360,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// glmb_Standardize_Model
+Rcpp::List glmb_Standardize_Model(NumericVector y, NumericMatrix x, NumericMatrix P, NumericMatrix b2a, NumericMatrix A1);
+RcppExport SEXP _glmbayes_glmb_Standardize_Model(SEXP ySEXP, SEXP xSEXP, SEXP PSEXP, SEXP b2aSEXP, SEXP A1SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type b2a(b2aSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type A1(A1SEXP);
+    rcpp_result_gen = Rcpp::wrap(glmb_Standardize_Model(y, x, P, b2a, A1));
+    return rcpp_result_gen;
+END_RCPP
+}
 // glmbsim_cpp
 Rcpp::List glmbsim_cpp(int n, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, Function f2, Rcpp::List Envelope, Rcpp::CharacterVector family, Rcpp::CharacterVector link, int progbar);
 RcppExport SEXP _glmbayes_glmbsim_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP f2SEXP, SEXP EnvelopeSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP progbarSEXP) {
@@ -457,6 +472,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_f1_poisson", (DL_FUNC) &_glmbayes_f1_poisson, 5},
     {"_glmbayes_f2_poisson", (DL_FUNC) &_glmbayes_f2_poisson, 8},
     {"_glmbayes_f3_poisson", (DL_FUNC) &_glmbayes_f3_poisson, 8},
+    {"_glmbayes_glmb_Standardize_Model", (DL_FUNC) &_glmbayes_glmb_Standardize_Model, 5},
     {"_glmbayes_glmbsim_cpp", (DL_FUNC) &_glmbayes_glmbsim_cpp, 12},
     {"_glmbayes_glmbsim_NGauss_cpp", (DL_FUNC) &_glmbayes_glmbsim_NGauss_cpp, 16},
     {"_glmbayes_glmbsim_Gauss_cpp", (DL_FUNC) &_glmbayes_glmbsim_Gauss_cpp, 16},

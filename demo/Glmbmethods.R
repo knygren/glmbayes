@@ -19,8 +19,8 @@ V1<-1*diag(as.numeric(2.0))
 # 2 standard deviations for prior estimate at age 13 between 0.1 and 0.9
 ## Specifies uncertainty around the point estimates
 
-V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
-V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
+V1[1,1]<-(0.1*(log(0.9/0.1)-log(0.5/0.5))/2)^2 
+V1[2,2]=(0.1*mu[2,1]/2)^2  # Allows slope to be up to 1 times as large as point estimate 
 
 out<-rglmb(n = 1000, y=y, x=x, mu=mu, P=solve(V1), wt = wt, 
 family = binomial(logit), Gridtype = 3) 
@@ -48,6 +48,8 @@ offset2=as.vector(offset2),wt=as.vector(wt),dispersion=as.numeric(dispersion2),
 famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=as.vector(start),family="binomial",
 link="logit",Gridtype=as.integer(3))
 
+
+
 ### This allows use of the rglmb summary function 
 ### add interface for glmbsim_NGauss_cpp later
 
@@ -56,6 +58,10 @@ colnames(outlist$coefficients)<-colnames(x)
 class(outlist)<-c(outlist$class,"rglmb")
 summary(outlist)
 
+## This envelope seems fine
+
+Env1=outlist$Envelope
+Env1
 
 #####
 
@@ -85,29 +91,56 @@ opt_out=optim(parin,f2,f3,y=as.vector(y),x=as.matrix(x),mu=as.vector(mu),
 
 #opt_out
 b2=opt_out$par  ## Posterior mode for adjusted model
+b2
 b2+as.vector(mu)  # mode for actual model
 A1=opt_out$hessian # Approximate Precision at mode
+
+
+## Try new function here
+
+
 
 
 ########################   #################################
 
 # Find eigenvalues and standardize to model with ~ Identity precision at posterior mode
 
-A1_eigen=eigen(A1)
-D1=diag(A1_eigen$values)
-L2=sqrt(D1)%*%t(A1_eigen$vectors)
-L2Inv=A1_eigen$vectors%*%sqrt(solve(D1))
+## For consistency with C++ use exported eigenvalue/eigenvector function
+
+
+
+A1_eigen=glmb_eig_sym(A1)
+D1=diag(A1_eigen$eigval[,1])
+L2=sqrt(D1)%*%t(A1_eigen$eigvec)
+L2Inv=A1_eigen$eigvec%*%sqrt(solve(D1))
+
+
 
 ## Apply standardization
 
-b3=L2%*%b2   
+b3=L2%*%as.vector(b2)   
+#b3  ### Same numbes but ordered differently
+
+b2
+A1
+A1_eigen$eigval
+A1_eigen$eigvec
+D1
+b3
+
+
+
 mu3=L2%*%as.vector(mu2)
 
 x3=x2%*%L2Inv
-P3=t(L2Inv)%*%P2%*%L2Inv
+P3=L2Inv%*%P2%*%t(L2Inv)
 
 P3  # Standardized prior precision - "smaller" than identity matrix
+
 L2Inv%*%b3+as.vector(mu)
+
+
+
 
 #########################            ##########################
 
@@ -115,8 +148,6 @@ L2Inv%*%b3+as.vector(mu)
 
 ### For this demo, simply use epsilon=0.5*P3
 ### In C++ code, searches until valid values (multiplying by 0.5 multiple times if needed)
-
-
 
 P3Diag=diag(diag(P3))  #   diagonal part of P3
 epsilon=0.5*P3Diag
@@ -132,14 +163,22 @@ P4       ## Precision for Multivariate normal term added to log-likelihood
 
 A3=diag(length(mu))-epsilon
 
-A3_eigen=eigen(A3)
-D2=diag(A3_eigen$values)
-L3=sqrt(D2)%*%t(A3_eigen$vectors)
-L3Inv=A3_eigen$vectors%*%sqrt(solve(D2))
+
+A3_eigen=glmb_eig_sym(A3)
+D2=diag(A3_eigen$eigval[,1])
+L3=sqrt(D2)%*%t(A3_eigen$eigvec)
+L3Inv=A3_eigen$eigvec%*%sqrt(solve(D2))
+
+A3
+D2
+A3_eigen
+
 
 #arma::mat L3= arma::sqrt(D2)*trans(eigvec_2);
 #L3Inv=eigvec_2*sqrt(inv_sympd(D2));
 b4=L3%*%b3 
+b4
+
 mu4=L3%*%mu3 
 x4=x3%*%L3Inv
 A4=t(L3Inv)%*%A3%*%L3Inv #   Should be transformed data precision matrix
@@ -152,9 +191,17 @@ L3Inv%*%L2Inv%*%b4+as.vector(mu)  ## Check that posterior mode still is the same
 #NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, 
 #std::string family, std::string link, int Gridtype, int n, bool sortgrid
 
-Envelope=glmbenvelope_c(as.vector(b4), as.matrix(A4),y, as.matrix(x4),
+Env2=glmbenvelope_c(as.vector(b4), as.matrix(A4),y, as.matrix(x4),
       as.matrix(mu4,ncol=1),as.matrix(P5),as.vector(alpha),as.vector(wt2),
       family="binomial",link="logit",Gridtype=as.integer(3), n=as.integer(n),sortgrid=TRUE)
 
+
+### Hmmm - this envelope seems wrong  ####
+
+#Envelope
+#Env2=outlist$Envelope
+
+Env1$thetabars
+Env2$thetabars
 
 

@@ -79,6 +79,142 @@ void progress_bar2(double x, double N)
 
 // [[Rcpp::export]]
 
+Rcpp::List glmb_Standardize_Model(
+    NumericVector y, 
+    NumericMatrix x,   // Original design matrix (to be adjusted)
+    NumericMatrix P,   // Prior Precision Matrix (to be adjusted)
+    NumericMatrix b2a, // Posterior Mode from optimization (to be adjusted)
+    NumericMatrix A1  // Precision for Log-Posterior at posterior mode (to be adjusted)
+  ) {
+  
+  // Get dimensions for x matrix
+  
+  int l1=x.ncol();
+  int l2=x.nrow();
+
+  // Arma matrix versions of most inputs
+    
+  arma::mat x2(x.begin(), l2, l1, false);
+  arma::mat P2(P.begin(), P.nrow(), P.ncol(), false);
+  arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
+  arma::mat A1_b(A1.begin(), l1, l1, false); 
+  
+  // For now keep these name (legacy from older code inside glmbsim_NGauss
+  
+  NumericMatrix A4_1(l1, l1);  
+  NumericMatrix b4_1(l1,1);  // Maybe this can be set as vector to avoid the below conversi
+  NumericMatrix x4_1(l2, l1);
+  NumericMatrix mu4_1(l1,1);  
+  NumericMatrix P5_1(l1, l1);
+  NumericMatrix P6Temp_1(l1, l1);
+  NumericMatrix L2Inv_1(l1, l1); 
+  NumericMatrix L3Inv_1(l1, l1); 
+
+  double scale=1;
+  int check=0;
+  double eigval_temp;
+  
+  Rcpp::Function asVec("as.vector");
+
+  arma::mat L2Inv(L2Inv_1.begin(), L2Inv_1.nrow(), L2Inv_1.ncol(), false);
+  arma::mat L3Inv(L2Inv_1.begin(), L2Inv_1.nrow(), L2Inv_1.ncol(), false);
+  arma::mat b4(b4_1.begin(), b4_1.nrow(), b4_1.ncol(), false);
+//  arma::mat mu4(mu4_1.begin(), mu4_1.nrow(), mu4_1.ncol(), false);
+  arma::mat x4(x4_1.begin(), x4_1.nrow(), x4_1.ncol(), false);
+  arma::mat A4(A4_1.begin(), A4_1.nrow(), A4_1.ncol(), false);
+  arma::mat P5(P5_1.begin(), P5_1.nrow(), P5_1.ncol(), false);
+  arma::mat P6Temp(P6Temp_1.begin(), P6Temp_1.nrow(), P6Temp_1.ncol(), false);
+  arma::vec eigval_1;
+  arma::mat eigvec_1;
+  arma::vec eigval_2;
+  arma::mat eigvec_2;
+  arma::mat ident=arma::mat (l1,l1,arma::fill::eye);
+  
+// Standardize Model to Have Diagonal Variance-Covariance Matrix at Posterior Mode
+
+      eig_sym(eigval_1, eigvec_1, A1_b);
+      arma::mat D1=arma::diagmat(eigval_1);
+      arma::mat L2= arma::sqrt(D1)*trans(eigvec_1);
+      L2Inv=eigvec_1*sqrt(inv_sympd(D1));  // Also used to undo normalization later
+
+      // output variables used in latter step
+
+      arma::mat b3=L2*b2;   
+//      arma::mat mu3=L2*mu2; // These are needed but will not be used to pass 
+      //  arma::mat mu3=L2*mu1b; // Corrected - mu1b is zero vector
+
+      arma::mat x3=x2*L2Inv;
+      arma::mat P3=trans(L2Inv)*P2*L2Inv;
+
+      // Seup for loop that sets epsilon
+    
+      arma::mat P3Diag=arma::diagmat(arma::diagvec(P3));// diagonal part of P3
+      arma::mat epsilon=P3Diag;
+      arma::mat P4=P3Diag;   
+
+    // Find scaled matrix epsilon
+
+    while(check==0){
+      epsilon=scale*P3Diag;  // scaled version of diagonal matrix
+  
+      // Checks if difference between Prior precision and diagonal matrix
+      // is positive definite
+      // is positive definite - to be added to likelihood 
+  
+      P4=P3-epsilon;				
+      eig_sym(eigval_2, eigvec_2, P4);
+      eigval_temp=arma::min(eigval_2);
+      if(eigval_temp>0){check=1;
+    
+      //      Rcpp::Rcout << "scale after step1 " << std::flush << scale << std::endl;
+      //      P4.print("P4 after step 1");  
+      //      epsilon.print("epsilon after step 1");  
+      }
+      else{scale=scale/2;}
+    }
+
+      // Setup prior to Eigenvalue decomposition
+
+      arma::mat A3=ident-epsilon;	// This should be a diagonal matrix and represents "data" precision in transformed model
+      A3.print("matrix fed to second standardization");
+
+    //   Put into Standard form where prior is identity matrix
+
+    // Perform second eigenvalue decomposition
+
+    eig_sym(eigval_2, eigvec_2, epsilon);
+    arma::mat D2=arma::diagmat(eigval_2);
+    
+    // Apply second transformation
+
+    arma::mat L3= arma::sqrt(D2)*trans(eigvec_2);
+    L3Inv=eigvec_2*sqrt(inv_sympd(D2));
+    b4=L3*b3; 
+//    mu4=L3*mu3; 
+    x4=x3*L3Inv;
+    A4=trans(L3Inv)*A3*L3Inv;  // Should be transformed data precision matrix
+    P5=trans(L3Inv)*P4*L3Inv;  // Should be precision matrix without epsilon
+    P6Temp=P5+ident;           // Should be precision matrix for posterior (may not be used)
+
+    // "Oddball extra steps due to legacy code 
+    
+    NumericVector b5=asVec(b4_1); // Maybe this causes error?
+    NumericMatrix mu5_1=0*mu4_1; // Does this modify mu4_1? Set mu5_1 to 0 more efficiently
+    
+    return Rcpp::List::create(
+      Rcpp::Named("bstar2")=b5,       // Transformed posterior mode (untransposed also used)
+      Rcpp::Named("A")=A4_1,                 // Precision for Standardized data precision
+      Rcpp::Named("x2")=x4_1,                // Transformed Design matrix
+      Rcpp::Named("mu2")=mu5_1,               // Transformed prior mean (should really always be 0)
+      Rcpp::Named("P2")=P5_1,               // Precision matrix for Normal component shifted to Log-Likelihood
+      Rcpp::Named("L2Inv")=L2Inv,               // Precision matrix for Normal component shifted to Log-Likelihood
+      Rcpp::Named("L3Inv")=L3Inv               // Precision matrix for Normal component shifted to Log-Likelihood
+    );
+  
+}
+
+// [[Rcpp::export]]
+
 Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,
 NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,
 Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
@@ -306,6 +442,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     
     NumericMatrix A1=opt[5]; 
 
+
     // Return Error if Optimizaton failed
     
     if(conver1>0){Rcpp::stop("Posterior Optimization failed");}
@@ -324,7 +461,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::mat L2Inv(L2Inv_1.begin(), L2Inv_1.nrow(), L2Inv_1.ncol(), false);
     
     
-
+//    A1_b.print("A1 matrix");
+    
     // Step 2: Standardize Model 
 
     // Standardize Model to Have Diagonal Variance-Covariance Matrix at Posterior Mode
@@ -334,6 +472,10 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::mat L2= arma::sqrt(D1)*trans(eigvec_1);
     L2Inv=eigvec_1*sqrt(inv_sympd(D1));  // Also used to undo normalization later
     
+//    D1.print("D1 matrix");
+    
+//    eigval_1.print("Eigenvalues");
+    
     // outout variables used in latter step
     
     arma::mat b3=L2*b2;   
@@ -342,8 +484,10 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     
     arma::mat x3=x2*L2Inv;
     arma::mat P3=trans(L2Inv)*P2*L2Inv;
-
+//
 //    b3.print("b3 after first transformation");
+//    P3.print("P3 after first transformation");
+    
 //    mu3.print("mu3 after first transformation");
     
     
@@ -389,6 +533,9 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
       }
       else{scale=scale/2;}
 		}
+    
+    
+    
 
 
 //    P4.print("P4 inside rglmb");
@@ -455,14 +602,15 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::mat ident=arma::mat (l1,l1,arma::fill::eye);
     arma::mat A3=ident-epsilon;	// This should be a diagonal matrix and represents "data" precision in transformed model
     
+//    A3.print("matrix fed to second standardization");
+    
 //   Put into Standard form where prior is identity matrix
 
     eig_sym(eigval_2, eigvec_2, epsilon);
-
     arma::mat D2=arma::diagmat(eigval_2);
 
 
-    NumericMatrix b4_1(l1,1);
+    NumericMatrix b4_1(l1,1);  // Maybe this can be set as vector
     NumericMatrix mu4_1(l1,1);
     NumericMatrix x4_1(x.nrow(), x.ncol());
     NumericMatrix A4_1(l1, l1);
@@ -493,7 +641,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
     
 //      b4.print("b4 -last transformation");
-//      mu4.print("mu4 -last transformation");
+//      P4.print("P4 -last transformation");
+      //      mu4.print("mu4 -last transformation");
       
     
 //    P5.print("P5 prior to envelope construction");  
@@ -520,7 +669,13 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 //    Rcpp::Rcout << "mu passed to envelope function modified:" << std::flush << mu5_1 << std::endl;
 //    Rcpp::Rcout << "alpha passed to envelope function:" << std::flush << alpha << std::endl;
     
-
+    // Calls seem to be different because of setting for gridsort component!
+    // When doing samples of just 1, sorting grid is slow when running many samples,
+    // using a sorted grid is much faster
+    // Most applications where n=1 are likely to be Gibbs samplers
+    // There are likely to be few instances where someone runs a small 
+    // number of samples greater than 1
+        
     if(n==1){
     //Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
     //P5_1,alpha,wt2,family,link,Gridtype, n,false);
