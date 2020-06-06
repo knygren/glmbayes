@@ -45,8 +45,8 @@ n=1000
 outlist<-glmbsim_NGauss_cpp(n=as.integer(n),y=as.vector(y),
 x=as.matrix(x),mu=as.vector(mu),P=as.matrix(P),
 offset2=as.vector(offset2),wt=as.vector(wt),dispersion=as.numeric(dispersion2),
-famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=as.vector(start),family="binomial",link="logit",
-Gridtype=as.integer(3))
+famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=as.vector(start),family="binomial",
+link="logit",Gridtype=as.integer(3))
 
 ### This allows use of the rglmb summary function 
 ### add interface for glmbsim_NGauss_cpp later
@@ -130,7 +130,7 @@ P4       ## Precision for Multivariate normal term added to log-likelihood
 #########################  Transform model again so that 
 ###  modified prior is the Standard multivariate normal
 
-A3=diag(length(y))-epsilon
+A3=diag(length(mu))-epsilon
 
 A3_eigen=eigen(A3)
 D2=diag(A3_eigen$values)
@@ -144,9 +144,17 @@ mu4=L3%*%mu3
 x4=x3%*%L3Inv
 A4=t(L3Inv)%*%A3%*%L3Inv #   Should be transformed data precision matrix
 P5=t(L3Inv)%*%P4%*%L3Inv #   Should be precision matrix without epsilon
-P6Temp=P5+diag(length(y)) #  Should be precision matrix for posterior
+P6Temp=P5+diag(length(mu)) #  Should be precision matrix for posterior
 
-L3Inv%*%L2Inv%*%b3+as.vector(mu)
+L3Inv%*%L2Inv%*%b4+as.vector(mu)  ## Check that posterior mode still is the same
+
+#NumericVector bStar, NumericMatrix A, NumericVector y, NumericMatrix x, 
+#NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, 
+#std::string family, std::string link, int Gridtype, int n, bool sortgrid
+
+Envelope=glmbenvelope_c(as.vector(b4), as.matrix(A4),y, as.matrix(x4),
+      as.matrix(mu4,ncol=1),as.matrix(P5),as.vector(alpha),as.vector(wt2),
+      family="binomial",link="logit",Gridtype=as.integer(3), n=as.integer(n),sortgrid=TRUE)
 
 
 

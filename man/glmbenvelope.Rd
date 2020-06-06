@@ -84,142 +84,138 @@ Kjell Nygren
 \code{\link{rglmb}}, \code{\link{expand.grid}}, \code{\link{optgrid}}, \code{\link{Set_Grid}}, \code{\link{setlogP}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
 
-## The function is currently defined as
-function (bStar, A, f2, f3, y, x, mu, P, alpha, wt = 1, Gridtype = 3, 
-    n = 1) 
-{
-    a1 <- diag(A)
-    l1 <- length(a1)
-    omega <- as.matrix((sqrt(2) - exp(-1.20491 - 0.7321 * sqrt(0.5 + 
-        a1)))/sqrt(1 + a1))
-    G1 <- as.matrix(c(1, 1, 1)) \%*\% t(bStar) + as.matrix(c(-1, 
-        0, 1)) \%*\% t(omega)
-    Lint <- as.matrix(c(1, 1)) \%*\% t(bStar) + as.matrix(c(-0.5, 
-        0.5)) \%*\% t(omega)
-    G2 <- list()
-    GIndex1 <- list()
-    length(G2) <- l1
-    length(GIndex1) <- l1
-    if (Gridtype == 2) {
-        gridindex <- optgrid(a1, n = n)
-    }
-    for (i in 1:l1) {
-        if (Gridtype == 1) {
-            if ((1 + a1[i]) <= (2/sqrt(pi))) {
-                G2[i] <- list(G1[2, i])
-                GIndex1[i] <- 4
-            }
-            if ((1 + a1[i]) > (2/sqrt(pi))) {
-                G2[i] <- list(G1[, i])
-                GIndex1[i] <- list(c(1, 2, 3))
-            }
-        }
-        if (Gridtype == 2) {
-            if (gridindex[i] == 1) {
-                G2[i] <- list(G1[2, i])
-                GIndex1[i] <- 4
-            }
-            if (gridindex[i] == 3) {
-                G2[i] <- list(G1[, i])
-                GIndex1[i] <- list(c(1, 2, 3))
-            }
-        }
-        if (Gridtype == 3) {
-            G2[i] <- list(G1[, i])
-            GIndex1[i] <- list(c(1, 2, 3))
-        }
-        if (Gridtype == 4) {
-            G2[i] <- list(G1[2, i])
-            GIndex1[i] <- 4
-        }
-    }
-    G3 <- expand.grid(G2)
-    GIndex <- expand.grid(GIndex1)
-    l2 <- length(GIndex[, 1])
-    cbars <- matrix(0, nrow = l2, ncol = l1)
-    NegLL <- matrix(0, nrow = l2, ncol = 1)
-    Up <- matrix(0, nrow = l2, ncol = l1)
-    Down <- matrix(0, nrow = l2, ncol = l1)
-    logP <- matrix(0, nrow = l2, ncol = 2)
-    logU <- matrix(0, nrow = l2, ncol = l1)
-    loglt <- matrix(0, nrow = l2, ncol = l1)
-    logrt <- matrix(0, nrow = l2, ncol = l1)
-    PLSD <- matrix(0, nrow = l2, ncol = 1)
-    LLconst <- matrix(0, nrow = l2, ncol = 1)
-    for (j in 1:l2) {
-        cbars[j, 1:l1] <- t(f3(b = t(as.matrix(G3[j, 1:l1])), 
-            y = y, x = x, mu = mu, P = P, alpha = alpha, wt = wt))
-        NegLL[j] <- f2(b = t(as.matrix(G3[j, 1:l1])), y = y, 
-            x = x, mu = mu, P = P, alpha = alpha, wt = wt)
-        LLconst[j] <- -t(as.matrix(cbars[j, 1:l1])) \%*\% t(as.matrix(G3[j, 
-            1:l1])) + NegLL[j]
-        for (k in 1:l1) {
-            if (GIndex[j, k] == 1) {
-                Down[j, k] <- -Inf
-                Up[j, k] <- Lint[1, k] + cbars[j, k]
-                logrt[j, k] <- 0
-                loglt[j, k] <- pnorm(Up[j, k], log.p = TRUE)
-                logU[j, k] <- pnorm(Up[j, k], log.p = TRUE)
-                if (logU[j, k] == -Inf) {
-                  stop("Function pnorm returned -Inf")
-                }
-                logP[j, 1] <- logP[j, 1] + loglt[j, k]
-            }
-            if (GIndex[j, k] == 2) {
-                Down[j, k] <- Lint[1, k] + cbars[j, k]
-                Up[j, k] <- Lint[2, k] + cbars[j, k]
-                loglt[j, k] <- pnorm(Up[j, k], log.p = TRUE)
-                logrt[j, k] <- pnorm(Down[j, k], lower.tail = FALSE, 
-                  log.p = TRUE)
-                logU[j, k] <- ctpnorm(a = Down[j, k], b = Up[j, 
-                  k], log.p = TRUE)
-                logP[j, 1] <- logP[j, 1] + logU[j, k]
-            }
-            if (GIndex[j, k] == 3) {
-                Down[j, k] <- Lint[2, k] + cbars[j, k]
-                Up[j, k] <- Inf
-                logrt[j, k] <- pnorm(Down[j, k], lower.tail = FALSE, 
-                  log.p = TRUE)
-                loglt[j, k] <- 0
-                logU[j, k] <- pnorm(Down[j, k], lower.tail = FALSE, 
-                  log.p = TRUE)
-                if (logU[j, k] == -Inf) {
-                  stop("Function pnorm returned -Inf")
-                }
-                logP[j, 1] <- logP[j, 1] + logrt[j, k]
-            }
-            if (GIndex[j, k] == 4) {
-                Down[j, k] <- -Inf
-                Up[j, k] <- Inf
-                loglt[j, k] <- 0
-                logrt[j, k] <- 0
-                logU[j, k] <- 0
-                logP[j, 1] <- logP[j, 1] + logU[j, k]
-            }
-        }
-        logP[j, 2] <- logP[j, 1] - NegLL[j] + 0.5 * t(as.matrix(cbars[j, 
-            1:l1])) \%*\% as.matrix(cbars[j, 1:l1]) + as.matrix(G3[j, 
-            1:l1]) \%*\% as.matrix(cbars[j, 1:l1])
-    }
-    maxlogP <- max(logP[, 2])
-    PLSD <- exp(logP[, 2] - maxlogP)
-    sumP <- sum(PLSD)
-    PLSD <- PLSD/sumP
-    Envelope <- data.frame(GIndex = GIndex, G3 = G3, cbars = cbars, 
-        logU = logU, logrt = logrt, loglt = loglt, logP = logP[, 
-            1], LLconst = LLconst, PLSD = PLSD)
-    Envelope = Envelope[order(-Envelope$PLSD), ]
-    list(GridIndex = Envelope[1:l2, 1:l1], thetabars = Envelope[1:l2, 
-        (l1 + 1):(2 * l1)], cbars = Envelope[1:l2, (2 * l1 + 
-        1):(3 * l1)], logU = Envelope[1:l2, (3 * l1 + 1):(4 * 
-        l1)], logrt = Envelope[1:l2, (4 * l1 + 1):(5 * l1)], 
-        loglt = Envelope[1:l2, (5 * l1 + 1):(6 * l1)], LLconst = Envelope$LLconst, 
-        logP = Envelope$logP, PLSD = Envelope$PLSD, a1 = a1)
-  }
+data(menarche)
+
+summary(menarche)
+plot(Menarche/Total ~ Age, data=menarche)
+
+Age2=menarche$Age-13
+
+x<-matrix(as.numeric(1.0),nrow=length(Age2),ncol=2)
+x[,2]=Age2
+
+y=menarche$Menarche/menarche$Total
+wt=menarche$Total
+
+mu<-matrix(as.numeric(0.0),nrow=2,ncol=1)
+mu[2,1]=(log(0.9/0.1)-log(0.5/0.5))/3
+
+V1<-1*diag(as.numeric(2.0))
+
+# 2 standard deviations for prior estimate at age 13 between 0.1 and 0.9
+## Specifies uncertainty around the point estimates
+
+V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
+V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
+
+famfunc<-glmbfamfunc(binomial(logit))
+
+f1<-famfunc$f1
+f2<-famfunc$f2
+f3<-famfunc$f3
+f5<-famfunc$f5
+f6<-famfunc$f6
+
+dispersion2<-as.numeric(1.0)
+start <- mu
+offset2=rep(as.numeric(0.0),length(y))
+P=solve(V1)
+n=1000
+
+#####
+
+### Adjust weight for dispersion
+
+wt2=wt/dispersion2
+
+################################     #####################
+
+# Shift mean vector to offset so that adjusted model has 0 mean
+
+alpha=x\%*\%as.vector(mu)+offset2
+mu2=0*as.vector(mu)
+P2=P
+x2=x
+
+############################     ####################################
+
+#####  Optimization step to find posterior mode and associated Precision
+
+parin=start-mu
+
+opt_out=optim(parin,f2,f3,y=as.vector(y),x=as.matrix(x),mu=as.vector(mu),
+      P=as.matrix(P),alpha=as.vector(alpha),wt=as.vector(wt2),
+      method="BFGS",hessian=TRUE
+      )
+
+#opt_out
+b2=opt_out$par  ## Posterior mode for adjusted model
+b2+as.vector(mu)  # mode for actual model
+A1=opt_out$hessian # Approximate Precision at mode
+
+
+########################   #################################
+
+# Find eigenvalues and standardize to model with ~ Identity precision at posterior mode
+
+A1_eigen=eigen(A1)
+D1=diag(A1_eigen$values)
+L2=sqrt(D1)\%*\%t(A1_eigen$vectors)
+L2Inv=A1_eigen$vectors\%*\%sqrt(solve(D1))
+
+## Apply standardization
+
+b3=L2\%*\%b2   
+mu3=L2\%*\%as.vector(mu2)
+
+x3=x2\%*\%L2Inv
+P3=t(L2Inv)\%*\%P2\%*\%L2Inv
+
+P3  # Standardized prior precision - "smaller" than identity matrix
+L2Inv\%*\%b3+as.vector(mu)
+
+#########################            ##########################
+
+###  Find diagonal matrix epsilon so that P3-epsilon is still positive definite
+
+### For this demo, simply use epsilon=0.5*P3
+### In C++ code, searches until valid values (multiplying by 0.5 multiple times if needed)
+
+
+
+P3Diag=diag(diag(P3))  #   diagonal part of P3
+epsilon=0.5*P3Diag
+P4=P3-epsilon
+
+
+
+epsilon  ## Modified prior precision after P4 shifted to likelihood
+P4       ## Precision for Multivariate normal term added to log-likelihood
+
+#########################  Transform model again so that 
+###  modified prior is the Standard multivariate normal
+
+A3=diag(length(mu))-epsilon
+
+A3_eigen=eigen(A3)
+D2=diag(A3_eigen$values)
+L3=sqrt(D2)\%*\%t(A3_eigen$vectors)
+L3Inv=A3_eigen$vectors\%*\%sqrt(solve(D2))
+
+b4=L3\%*\%b3 
+mu4=L3\%*\%mu3 
+x4=x3\%*\%L3Inv
+A4=t(L3Inv)\%*\%A3\%*\%L3Inv #   Should be transformed data precision matrix
+P5=t(L3Inv)\%*\%P4\%*\%L3Inv #   Should be precision matrix without epsilon
+P6Temp=P5+diag(length(mu)) #  Should be precision matrix for posterior
+
+L3Inv\%*\%L2Inv\%*\%b4+as.vector(mu)  ## Check that posterior mode still is the same
+
+Envelope=glmbenvelope_c(as.vector(b4), as.matrix(A4),y, as.matrix(x4),
+      as.matrix(mu4,ncol=1),as.matrix(P5),as.vector(alpha),as.vector(wt2),
+      family="binomial",link="logit",Gridtype=as.integer(3), n=as.integer(n),sortgrid=TRUE)
+
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
