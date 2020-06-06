@@ -48,16 +48,31 @@ offset2=as.vector(offset2),wt=as.vector(wt),dispersion=as.numeric(dispersion2),
 famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=as.vector(start),family="binomial",link="logit",
 Gridtype=as.integer(3))
 
+### This allows use of the rglmb summary function 
+### add interface for glmbsim_NGauss_cpp later
+
+#outlist$call<-match.call()
+colnames(outlist$coefficients)<-colnames(x)
+class(outlist)<-c(outlist$class,"rglmb")
+summary(outlist)
+
+
 #####
 
 ### Adjust weight for dispersion
 
 wt2=wt/dispersion2
 
+################################     #####################
+
 # Shift mean vector to offset so that adjusted model has 0 mean
 
 alpha=x%*%as.vector(mu)+offset2
 mu2=0*as.vector(mu)
+P2=P
+x2=x
+
+############################     ####################################
 
 #####  Optimization step to find posterior mode and associated Precision
 
@@ -73,23 +88,65 @@ b2=opt_out$par  ## Posterior mode for adjusted model
 b2+as.vector(mu)  # mode for actual model
 A1=opt_out$hessian # Approximate Precision at mode
 
+
+########################   #################################
+
 # Find eigenvalues and standardize to model with ~ Identity precision at posterior mode
 
-A_eigen=eigen(A1)
-D1=diag(A_eigen$values)
-L2=sqrt(D1)%*%t(A_eigen$vectors)
-L2Inv=A_eigen$vectors%*%sqrt(solve(D1))
+A1_eigen=eigen(A1)
+D1=diag(A1_eigen$values)
+L2=sqrt(D1)%*%t(A1_eigen$vectors)
+L2Inv=A1_eigen$vectors%*%sqrt(solve(D1))
 
-## Apply transformation
+## Apply standardization
 
-#arma::mat b3=L2*b2;   
-#arma::mat mu3=L2*mu2; // These are needed but will not be used to pass 
+b3=L2%*%b2   
+mu3=L2%*%as.vector(mu2)
 
-#arma::mat x3=x2*L2Inv;
-#arma::mat P3=trans(L2Inv)*P2*L2Inv;
+x3=x2%*%L2Inv
+P3=t(L2Inv)%*%P2%*%L2Inv
+
+P3  # Standardized prior precision - "smaller" than identity matrix
+L2Inv%*%b3+as.vector(mu)
+
+#########################            ##########################
+
+###  Find diagonal matrix epsilon so that P3-epsilon is still positive definite
+
+### For this demo, simply use epsilon=0.5*P3
+### In C++ code, searches until valid values (multiplying by 0.5 multiple times if needed)
 
 
 
+P3Diag=diag(diag(P3))  #   diagonal part of P3
+epsilon=0.5*P3Diag
+P4=P3-epsilon
+
+
+
+epsilon  ## Modified prior precision after P4 shifted to likelihood
+P4       ## Precision for Multivariate normal term added to log-likelihood
+
+#########################  Transform model again so that 
+###  modified prior is the Standard multivariate normal
+
+A3=diag(length(y))-epsilon
+
+A3_eigen=eigen(A3)
+D2=diag(A3_eigen$values)
+L3=sqrt(D2)%*%t(A3_eigen$vectors)
+L3Inv=A3_eigen$vectors%*%sqrt(solve(D2))
+
+#arma::mat L3= arma::sqrt(D2)*trans(eigvec_2);
+#L3Inv=eigvec_2*sqrt(inv_sympd(D2));
+b4=L3%*%b3 
+mu4=L3%*%mu3 
+x4=x3%*%L3Inv
+A4=t(L3Inv)%*%A3%*%L3Inv #   Should be transformed data precision matrix
+P5=t(L3Inv)%*%P4%*%L3Inv #   Should be precision matrix without epsilon
+P6Temp=P5+diag(length(y)) #  Should be precision matrix for posterior
+
+L3Inv%*%L2Inv%*%b3+as.vector(mu)
 
 
 

@@ -139,6 +139,12 @@ x=as.matrix(x),mu=as.vector(mu),P=as.matrix(P),
 offset2=as.vector(offset2),wt=as.vector(wt),dispersion=as.numeric(dispersion2),
 famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=as.vector(start),family="binomial",link="logit",
 Gridtype=as.integer(3))
+
+colnames(outlist$coefficients)<-colnames(x)
+class(outlist)<-c(outlist$class,"rglmb")
+summary(outlist)
+
+
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
