@@ -83,7 +83,7 @@ Rcpp::List glmb_Standardize_Model(
     NumericVector y, 
     NumericMatrix x,   // Original design matrix (to be adjusted)
     NumericMatrix P,   // Prior Precision Matrix (to be adjusted)
-    NumericMatrix b2a, // Posterior Mode from optimization (to be adjusted)
+    NumericMatrix bstar, // Posterior Mode from optimization (to be adjusted)
     NumericMatrix A1  // Precision for Log-Posterior at posterior mode (to be adjusted)
   ) {
   
@@ -96,7 +96,7 @@ Rcpp::List glmb_Standardize_Model(
     
   arma::mat x2(x.begin(), l2, l1, false);
   arma::mat P2(P.begin(), P.nrow(), P.ncol(), false);
-  arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
+  arma::mat b2(bstar.begin(), bstar.nrow(), bstar.ncol(), false);
   arma::mat A1_b(A1.begin(), l1, l1, false); 
   
   // For now keep these name (legacy from older code inside glmbsim_NGauss
@@ -117,7 +117,7 @@ Rcpp::List glmb_Standardize_Model(
   Rcpp::Function asVec("as.vector");
 
   arma::mat L2Inv(L2Inv_1.begin(), L2Inv_1.nrow(), L2Inv_1.ncol(), false);
-  arma::mat L3Inv(L2Inv_1.begin(), L2Inv_1.nrow(), L2Inv_1.ncol(), false);
+  arma::mat L3Inv(L3Inv_1.begin(), L3Inv_1.nrow(), L3Inv_1.ncol(), false);
   arma::mat b4(b4_1.begin(), b4_1.nrow(), b4_1.ncol(), false);
 //  arma::mat mu4(mu4_1.begin(), mu4_1.nrow(), mu4_1.ncol(), false);
   arma::mat x4(x4_1.begin(), x4_1.nrow(), x4_1.ncol(), false);
@@ -176,7 +176,6 @@ Rcpp::List glmb_Standardize_Model(
       // Setup prior to Eigenvalue decomposition
 
       arma::mat A3=ident-epsilon;	// This should be a diagonal matrix and represents "data" precision in transformed model
-      A3.print("matrix fed to second standardization");
 
     //   Put into Standard form where prior is identity matrix
 
@@ -199,6 +198,7 @@ Rcpp::List glmb_Standardize_Model(
     // "Oddball extra steps due to legacy code 
     
     NumericVector b5=asVec(b4_1); // Maybe this causes error?
+    
     NumericMatrix mu5_1=0*mu4_1; // Does this modify mu4_1? Set mu5_1 to 0 more efficiently
     
     return Rcpp::List::create(
@@ -455,14 +455,14 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
     // arma objects used to do eigenvalue decomposition
     
-    arma::mat A1_b(A1.begin(), l1, l1, false); 
+    arma::mat A1_b(A1.begin(), l1, l1, false);
+    
+
     arma::vec eigval_1;
     arma::mat eigvec_1;
     arma::mat L2Inv(L2Inv_1.begin(), L2Inv_1.nrow(), L2Inv_1.ncol(), false);
-    
-    
-//    A1_b.print("A1 matrix");
-    
+
+
     // Step 2: Standardize Model 
 
     // Standardize Model to Have Diagonal Variance-Covariance Matrix at Posterior Mode
@@ -640,7 +640,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     Rcpp::List Envelope;
 
     
-//      b4.print("b4 -last transformation");
 //      P4.print("P4 -last transformation");
       //      mu4.print("mu4 -last transformation");
       
@@ -709,6 +708,10 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericMatrix sim2=sim[0];
     arma::mat sim2b(sim2.begin(), sim2.nrow(), sim2.ncol(), false);
     arma::mat out2(out.begin(), out.nrow(), out.ncol(), false);
+    
+    
+    L2Inv.print("L2Inv used in transformation inside glmbsim_NGauss");
+    L3Inv.print("L3Inv used in transformation inside glmbsim_NGauss");
     
     out2=L2Inv*L3Inv*trans(sim2b); // reverse transformation
 

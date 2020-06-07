@@ -56,12 +56,12 @@ link="logit",Gridtype=as.integer(3))
 #outlist$call<-match.call()
 colnames(outlist$coefficients)<-colnames(x)
 class(outlist)<-c(outlist$class,"rglmb")
-summary(outlist)
+#summary(outlist)
 
 ## This envelope seems fine
 
 Env1=outlist$Envelope
-Env1
+#Env1
 
 #####
 
@@ -82,126 +82,49 @@ x2=x
 
 #####  Optimization step to find posterior mode and associated Precision
 
+
+
 parin=start-mu
 
-opt_out=optim(parin,f2,f3,y=as.vector(y),x=as.matrix(x),mu=as.vector(mu),
+## Corrected this call - sent wrong mu (mu instead of mu2)
+opt_out=optim(parin,f2,f3,y=as.vector(y),x=as.matrix(x),mu=as.vector(mu2),
       P=as.matrix(P),alpha=as.vector(alpha),wt=as.vector(wt2),
       method="BFGS",hessian=TRUE
       )
 
 #opt_out
-b2=opt_out$par  ## Posterior mode for adjusted model
-b2
-b2+as.vector(mu)  # mode for actual model
+bstar=opt_out$par  ## Posterior mode for adjusted model
+bstar
+bstar+as.vector(mu)  # mode for actual model
 A1=opt_out$hessian # Approximate Precision at mode
 
 
 ## Try new function here
 
+Standard_Mod=glmb_Standardize_Model(y=as.vector(y), x=as.matrix(x),P=as.matrix(P),
+                       bstar=as.matrix(bstar,ncol=1), A1=as.matrix(A1))
 
 
 
-########################   #################################
+bstar2=Standard_Mod$bstar2  ## This matches
+A=Standard_Mod$A
+x2=Standard_Mod$x2
+mu2=Standard_Mod$mu2
+P2=Standard_Mod$P2
+L2Inv=Standard_Mod$L2Inv
+L3Inv=Standard_Mod$L3Inv
 
-# Find eigenvalues and standardize to model with ~ Identity precision at posterior mode
+## QC Check - These should match
 
-## For consistency with C++ use exported eigenvalue/eigenvector function
+L2Inv%*%L3Inv%*%as.matrix(bstar2,ncol=1)  
+bstar
 
+Env2=glmbenvelope_c(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
+    as.matrix(mu2,ncol=1),as.matrix(P2),as.vector(alpha),as.vector(wt2),
+    family="binomial",link="logit",Gridtype=as.integer(3), n=as.integer(n),sortgrid=TRUE)
 
+## These now seem to match
 
-A1_eigen=glmb_eig_sym(A1)
-D1=diag(A1_eigen$eigval[,1])
-L2=sqrt(D1)%*%t(A1_eigen$eigvec)
-L2Inv=A1_eigen$eigvec%*%sqrt(solve(D1))
-
-
-
-## Apply standardization
-
-b3=L2%*%as.vector(b2)   
-#b3  ### Same numbes but ordered differently
-
-b2
-A1
-A1_eigen$eigval
-A1_eigen$eigvec
-D1
-b3
-
-
-
-mu3=L2%*%as.vector(mu2)
-
-x3=x2%*%L2Inv
-P3=L2Inv%*%P2%*%t(L2Inv)
-
-P3  # Standardized prior precision - "smaller" than identity matrix
-
-L2Inv%*%b3+as.vector(mu)
-
-
-
-
-#########################            ##########################
-
-###  Find diagonal matrix epsilon so that P3-epsilon is still positive definite
-
-### For this demo, simply use epsilon=0.5*P3
-### In C++ code, searches until valid values (multiplying by 0.5 multiple times if needed)
-
-P3Diag=diag(diag(P3))  #   diagonal part of P3
-epsilon=0.5*P3Diag
-P4=P3-epsilon
-
-
-
-epsilon  ## Modified prior precision after P4 shifted to likelihood
-P4       ## Precision for Multivariate normal term added to log-likelihood
-
-#########################  Transform model again so that 
-###  modified prior is the Standard multivariate normal
-
-A3=diag(length(mu))-epsilon
-
-
-A3_eigen=glmb_eig_sym(A3)
-D2=diag(A3_eigen$eigval[,1])
-L3=sqrt(D2)%*%t(A3_eigen$eigvec)
-L3Inv=A3_eigen$eigvec%*%sqrt(solve(D2))
-
-A3
-D2
-A3_eigen
-
-
-#arma::mat L3= arma::sqrt(D2)*trans(eigvec_2);
-#L3Inv=eigvec_2*sqrt(inv_sympd(D2));
-b4=L3%*%b3 
-b4
-
-mu4=L3%*%mu3 
-x4=x3%*%L3Inv
-A4=t(L3Inv)%*%A3%*%L3Inv #   Should be transformed data precision matrix
-P5=t(L3Inv)%*%P4%*%L3Inv #   Should be precision matrix without epsilon
-P6Temp=P5+diag(length(mu)) #  Should be precision matrix for posterior
-
-L3Inv%*%L2Inv%*%b4+as.vector(mu)  ## Check that posterior mode still is the same
-
-#NumericVector bStar, NumericMatrix A, NumericVector y, NumericMatrix x, 
-#NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, 
-#std::string family, std::string link, int Gridtype, int n, bool sortgrid
-
-Env2=glmbenvelope_c(as.vector(b4), as.matrix(A4),y, as.matrix(x4),
-      as.matrix(mu4,ncol=1),as.matrix(P5),as.vector(alpha),as.vector(wt2),
-      family="binomial",link="logit",Gridtype=as.integer(3), n=as.integer(n),sortgrid=TRUE)
-
-
-### Hmmm - this envelope seems wrong  ####
-
-#Envelope
-#Env2=outlist$Envelope
-
-Env1$thetabars
-Env2$thetabars
-
+Env1
+Env2
 

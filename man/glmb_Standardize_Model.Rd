@@ -7,7 +7,7 @@ Standardize A Non-Gaussian Model}
 Standardizes a Non-Gaussian Model prior to Envelope Creation
 }
 \usage{
-glmb_Standardize_Model(y, x,P, b2a, A1)
+glmb_Standardize_Model(y, x,P, bstar, A1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -20,7 +20,7 @@ a design matrix of dimension m*p
   \item{P}{
 a positive-definite symmetric matrix specifying the prior precision matrix of the variables.
 }
-  \item{b2a}{a matrix containing the posterior mode from an optimization step
+  \item{bstar}{a matrix containing the posterior mode from an optimization step
 }
   \item{A1}{a matrix containing the posterior precision matrix at the posterior mode
 }

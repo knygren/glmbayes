@@ -85,8 +85,8 @@ f3_poisson <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
     .Call('_glmbayes_f3_poisson', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
-glmb_Standardize_Model <- function(y, x, P, b2a, A1) {
-    .Call('_glmbayes_glmb_Standardize_Model', PACKAGE = 'glmbayes', y, x, P, b2a, A1)
+glmb_Standardize_Model <- function(y, x, P, bstar, A1) {
+    .Call('_glmbayes_glmb_Standardize_Model', PACKAGE = 'glmbayes', y, x, P, bstar, A1)
 }
 
 glmbsim_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar = 1L) {

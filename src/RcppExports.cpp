@@ -361,17 +361,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // glmb_Standardize_Model
-Rcpp::List glmb_Standardize_Model(NumericVector y, NumericMatrix x, NumericMatrix P, NumericMatrix b2a, NumericMatrix A1);
-RcppExport SEXP _glmbayes_glmb_Standardize_Model(SEXP ySEXP, SEXP xSEXP, SEXP PSEXP, SEXP b2aSEXP, SEXP A1SEXP) {
+Rcpp::List glmb_Standardize_Model(NumericVector y, NumericMatrix x, NumericMatrix P, NumericMatrix bstar, NumericMatrix A1);
+RcppExport SEXP _glmbayes_glmb_Standardize_Model(SEXP ySEXP, SEXP xSEXP, SEXP PSEXP, SEXP bstarSEXP, SEXP A1SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type b2a(b2aSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type bstar(bstarSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type A1(A1SEXP);
-    rcpp_result_gen = Rcpp::wrap(glmb_Standardize_Model(y, x, P, b2a, A1));
+    rcpp_result_gen = Rcpp::wrap(glmb_Standardize_Model(y, x, P, bstar, A1));
     return rcpp_result_gen;
 END_RCPP
 }
