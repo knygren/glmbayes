@@ -54,6 +54,7 @@ Kjell Nygren
 \code{\link{glmb}}
 }
 \examples{
+
 data(menarche)
 
 summary(menarche)
@@ -76,7 +77,7 @@ V1<-1*diag(as.numeric(2.0))
 ## Specifies uncertainty around the point estimates
 
 V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
-V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
+V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 1 times as large as point estimate 
 
 famfunc<-glmbfamfunc(binomial(logit))
 
@@ -97,12 +98,66 @@ n=1000
 outlist<-glmbsim_NGauss_cpp(n=as.integer(n),y=as.vector(y),
 x=as.matrix(x),mu=as.vector(mu),P=as.matrix(P),
 offset2=as.vector(offset2),wt=as.vector(wt),dispersion=as.numeric(dispersion2),
-famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=as.vector(start),family="binomial",link="logit",
-Gridtype=as.integer(3))
+famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=as.vector(start),family="binomial",
+link="logit",Gridtype=as.integer(3))
 
+### This allows use of the rglmb summary function 
+### add interface for glmbsim_NGauss_cpp later
+
+#outlist$call<-match.call()
 colnames(outlist$coefficients)<-colnames(x)
 class(outlist)<-c(outlist$class,"rglmb")
-summary(outlist)
+#summary(outlist)
+Env1=outlist$Envelope
+
+
+###### Adjust weight for dispersion
+
+wt2=wt/dispersion2
+
+######################### Shift mean vector to offset so that adjusted model has 0 mean
+
+alpha=x\%*\%as.vector(mu)+offset2
+mu2=0*as.vector(mu)
+P2=P
+x2=x
+
+
+#####  Optimization step to find posterior mode and associated Precision
+
+parin=start-mu
+
+opt_out=optim(parin,f2,f3,y=as.vector(y),x=as.matrix(x),mu=as.vector(mu2),
+      P=as.matrix(P),alpha=as.vector(alpha),wt=as.vector(wt2),
+      method="BFGS",hessian=TRUE
+      )
+
+bstar=opt_out$par  ## Posterior mode for adjusted model
+bstar
+bstar+as.vector(mu)  # mode for actual model
+A1=opt_out$hessian # Approximate Precision at mode
+
+## Standardize Model
+
+Standard_Mod=glmb_Standardize_Model(y=as.vector(y), x=as.matrix(x),P=as.matrix(P),
+                       bstar=as.matrix(bstar,ncol=1), A1=as.matrix(A1))
+
+bstar2=Standard_Mod$bstar2  
+A=Standard_Mod$A
+x2=Standard_Mod$x2
+mu2=Standard_Mod$mu2
+P2=Standard_Mod$P2
+L2Inv=Standard_Mod$L2Inv
+L3Inv=Standard_Mod$L3Inv
+
+Env2=glmbenvelope_c(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
+    as.matrix(mu2,ncol=1),as.matrix(P2),as.vector(alpha),as.vector(wt2),
+    family="binomial",link="logit",Gridtype=as.integer(3), n=as.integer(n),sortgrid=TRUE)
+
+## These now seem to match
+
+Env1
+Env2
 
 
 }

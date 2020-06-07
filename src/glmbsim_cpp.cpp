@@ -710,9 +710,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::mat out2(out.begin(), out.nrow(), out.ncol(), false);
     
     
-    L2Inv.print("L2Inv used in transformation inside glmbsim_NGauss");
-    L3Inv.print("L3Inv used in transformation inside glmbsim_NGauss");
-    
     out2=L2Inv*L3Inv*trans(sim2b); // reverse transformation
 
   

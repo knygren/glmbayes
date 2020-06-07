@@ -107,7 +107,7 @@ V1<-1*diag(as.numeric(2.0))
 ## Specifies uncertainty around the point estimates
 
 V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
-V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
+V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 1 times as large as point estimate 
 
 famfunc<-glmbfamfunc(binomial(logit))
 
@@ -123,98 +123,72 @@ offset2=rep(as.numeric(0.0),length(y))
 P=solve(V1)
 n=1000
 
-#####
+## Appears that the type for some of these arguments are important/problematic
 
-### Adjust weight for dispersion
+outlist<-glmbsim_NGauss_cpp(n=as.integer(n),y=as.vector(y),
+x=as.matrix(x),mu=as.vector(mu),P=as.matrix(P),
+offset2=as.vector(offset2),wt=as.vector(wt),dispersion=as.numeric(dispersion2),
+famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=as.vector(start),family="binomial",
+link="logit",Gridtype=as.integer(3))
+
+### This allows use of the rglmb summary function 
+### add interface for glmbsim_NGauss_cpp later
+
+#outlist$call<-match.call()
+colnames(outlist$coefficients)<-colnames(x)
+class(outlist)<-c(outlist$class,"rglmb")
+#summary(outlist)
+Env1=outlist$Envelope
+
+
+###### Adjust weight for dispersion
 
 wt2=wt/dispersion2
 
-################################     #####################
-
-# Shift mean vector to offset so that adjusted model has 0 mean
+######################### Shift mean vector to offset so that adjusted model has 0 mean
 
 alpha=x\%*\%as.vector(mu)+offset2
 mu2=0*as.vector(mu)
 P2=P
 x2=x
 
-############################     ####################################
 
 #####  Optimization step to find posterior mode and associated Precision
 
 parin=start-mu
 
-opt_out=optim(parin,f2,f3,y=as.vector(y),x=as.matrix(x),mu=as.vector(mu),
+opt_out=optim(parin,f2,f3,y=as.vector(y),x=as.matrix(x),mu=as.vector(mu2),
       P=as.matrix(P),alpha=as.vector(alpha),wt=as.vector(wt2),
       method="BFGS",hessian=TRUE
       )
 
-#opt_out
-b2=opt_out$par  ## Posterior mode for adjusted model
-b2+as.vector(mu)  # mode for actual model
+bstar=opt_out$par  ## Posterior mode for adjusted model
+bstar
+bstar+as.vector(mu)  # mode for actual model
 A1=opt_out$hessian # Approximate Precision at mode
 
+## Standardize Model
 
-########################   #################################
+Standard_Mod=glmb_Standardize_Model(y=as.vector(y), x=as.matrix(x),P=as.matrix(P),
+                       bstar=as.matrix(bstar,ncol=1), A1=as.matrix(A1))
 
-# Find eigenvalues and standardize to model with ~ Identity precision at posterior mode
+bstar2=Standard_Mod$bstar2  
+A=Standard_Mod$A
+x2=Standard_Mod$x2
+mu2=Standard_Mod$mu2
+P2=Standard_Mod$P2
+L2Inv=Standard_Mod$L2Inv
+L3Inv=Standard_Mod$L3Inv
 
-A1_eigen=eigen(A1)
-D1=diag(A1_eigen$values)
-L2=sqrt(D1)\%*\%t(A1_eigen$vectors)
-L2Inv=A1_eigen$vectors\%*\%sqrt(solve(D1))
+Env2=glmbenvelope_c(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
+    as.matrix(mu2,ncol=1),as.matrix(P2),as.vector(alpha),as.vector(wt2),
+    family="binomial",link="logit",Gridtype=as.integer(3), n=as.integer(n),sortgrid=TRUE)
 
-## Apply standardization
+## These now seem to match
 
-b3=L2\%*\%b2   
-mu3=L2\%*\%as.vector(mu2)
+Env1
+Env2
 
-x3=x2\%*\%L2Inv
-P3=t(L2Inv)\%*\%P2\%*\%L2Inv
-
-P3  # Standardized prior precision - "smaller" than identity matrix
-L2Inv\%*\%b3+as.vector(mu)
-
-#########################            ##########################
-
-###  Find diagonal matrix epsilon so that P3-epsilon is still positive definite
-
-### For this demo, simply use epsilon=0.5*P3
-### In C++ code, searches until valid values (multiplying by 0.5 multiple times if needed)
-
-
-
-P3Diag=diag(diag(P3))  #   diagonal part of P3
-epsilon=0.5*P3Diag
-P4=P3-epsilon
-
-
-
-epsilon  ## Modified prior precision after P4 shifted to likelihood
-P4       ## Precision for Multivariate normal term added to log-likelihood
-
-#########################  Transform model again so that 
-###  modified prior is the Standard multivariate normal
-
-A3=diag(length(mu))-epsilon
-
-A3_eigen=eigen(A3)
-D2=diag(A3_eigen$values)
-L3=sqrt(D2)\%*\%t(A3_eigen$vectors)
-L3Inv=A3_eigen$vectors\%*\%sqrt(solve(D2))
-
-b4=L3\%*\%b3 
-mu4=L3\%*\%mu3 
-x4=x3\%*\%L3Inv
-A4=t(L3Inv)\%*\%A3\%*\%L3Inv #   Should be transformed data precision matrix
-P5=t(L3Inv)\%*\%P4\%*\%L3Inv #   Should be precision matrix without epsilon
-P6Temp=P5+diag(length(mu)) #  Should be precision matrix for posterior
-
-L3Inv\%*\%L2Inv\%*\%b4+as.vector(mu)  ## Check that posterior mode still is the same
-
-Envelope=glmbenvelope_c(as.vector(b4), as.matrix(A4),y, as.matrix(x4),
-      as.matrix(mu4,ncol=1),as.matrix(P5),as.vector(alpha),as.vector(wt2),
-      family="binomial",link="logit",Gridtype=as.integer(3), n=as.integer(n),sortgrid=TRUE)
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
