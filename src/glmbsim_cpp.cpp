@@ -429,7 +429,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     // Place posterior mode in b2 (b2a)
     
     NumericMatrix b2a=asMat(opt[0]);  // optimized value
-    arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
+//    arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
 
 //    b2.print("b2 Posterior mode from optimization");  // Useful comment if need to QC
 
@@ -447,30 +447,30 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     
     if(conver1>0){Rcpp::stop("Posterior Optimization failed");}
   
-    arma::vec mu_0(mu.begin(), l1, false);  // Not sure where this is first used
+//    arma::vec mu_0(mu.begin(), l1, false);  // Not sure where this is first used
 
 //    mu_0.print("mu_0 inside rglmb");
 
-    NumericMatrix L2Inv_1(l1, l1); // Can likely shift this towards top of function
+//    NumericMatrix L2Inv_1(l1, l1); // Can likely shift this towards top of function
 
     // arma objects used to do eigenvalue decomposition
     
-    arma::mat A1_b(A1.begin(), l1, l1, false);
+//    arma::mat A1_b(A1.begin(), l1, l1, false);
     
 
-    arma::vec eigval_1;
-    arma::mat eigvec_1;
-    arma::mat L2Inv(L2Inv_1.begin(), L2Inv_1.nrow(), L2Inv_1.ncol(), false);
+//    arma::vec eigval_1;
+//    arma::mat eigvec_1;
+//    arma::mat L2Inv(L2Inv_1.begin(), L2Inv_1.nrow(), L2Inv_1.ncol(), false);
 
 
     // Step 2: Standardize Model 
 
     // Standardize Model to Have Diagonal Variance-Covariance Matrix at Posterior Mode
     
-    eig_sym(eigval_1, eigvec_1, A1_b);
-    arma::mat D1=arma::diagmat(eigval_1);
-    arma::mat L2= arma::sqrt(D1)*trans(eigvec_1);
-    L2Inv=eigvec_1*sqrt(inv_sympd(D1));  // Also used to undo normalization later
+//    eig_sym(eigval_1, eigvec_1, A1_b);
+//    arma::mat D1=arma::diagmat(eigval_1);
+//    arma::mat L2= arma::sqrt(D1)*trans(eigvec_1);
+//    L2Inv=eigvec_1*sqrt(inv_sympd(D1));  // Also used to undo normalization later
     
 //    D1.print("D1 matrix");
     
@@ -478,12 +478,12 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     
     // outout variables used in latter step
     
-    arma::mat b3=L2*b2;   
-    arma::mat mu3=L2*mu2; // These are needed but will not be used to pass 
+//    arma::mat b3=L2*b2;   
+//    arma::mat mu3=L2*mu2; // These are needed but will not be used to pass 
   //  arma::mat mu3=L2*mu1b; // Corrected - mu1b is zero vector
     
-    arma::mat x3=x2*L2Inv;
-    arma::mat P3=trans(L2Inv)*P2*L2Inv;
+//    arma::mat x3=x2*L2Inv;
+//    arma::mat P3=trans(L2Inv)*P2*L2Inv;
 //
 //    b3.print("b3 after first transformation");
 //    P3.print("P3 after first transformation");
@@ -496,15 +496,15 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 //   Puts model into standard form 
 
 
-    arma::mat P3Diag=arma::diagmat(arma::diagvec(P3));// diagonal part of P3
-    arma::mat epsilon=P3Diag;
-    arma::mat P4=P3Diag;   
+//    arma::mat P3Diag=arma::diagmat(arma::diagvec(P3));// diagonal part of P3
+//    arma::mat epsilon=P3Diag;
+//    arma::mat P4=P3Diag;   
     
-    double scale=1;
-    int check=0;
-    arma::vec eigval_2;
-    arma::mat eigvec_2;
-    double eigval_temp;
+//    double scale=1;
+//    int check=0;
+//    arma::vec eigval_2;
+//    arma::mat eigvec_2;
+//    double eigval_temp;
     
     // Scales matrix - Add these temporary output to see 
     // when problems occur - may be only occuring when 
@@ -515,24 +515,24 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 //    P3.print("Prior precision matrix prior to scaling");  
 //    P3Diag.print("Diagonal of prior precision matrix prior to scaling");  
     
-    while(check==0){
-    	epsilon=scale*P3Diag;  // scaled version of diagonal matrix
+//    while(check==0){
+//    	epsilon=scale*P3Diag;  // scaled version of diagonal matrix
   
       // Checks if difference between Prior precision and diagonal matrix
       // is positive definite
       // is positive definite - to be added to likelihood 
       
-  		P4=P3-epsilon;				
-      eig_sym(eigval_2, eigvec_2, P4);
-      eigval_temp=arma::min(eigval_2);
-      if(eigval_temp>0){check=1;
+//  		P4=P3-epsilon;				
+//      eig_sym(eigval_2, eigvec_2, P4);
+//      eigval_temp=arma::min(eigval_2);
+//      if(eigval_temp>0){check=1;
       
 //      Rcpp::Rcout << "scale after step1 " << std::flush << scale << std::endl;
 //      P4.print("P4 after step 1");  
 //      epsilon.print("epsilon after step 1");  
-      }
-      else{scale=scale/2;}
-		}
+//      }
+//      else{scale=scale/2;}
+//		}
     
     
     
@@ -599,45 +599,46 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 //    P4_temp.print("P4_temp inside rglmb");
     
     
-    arma::mat ident=arma::mat (l1,l1,arma::fill::eye);
-    arma::mat A3=ident-epsilon;	// This should be a diagonal matrix and represents "data" precision in transformed model
+//    arma::mat ident=arma::mat (l1,l1,arma::fill::eye);
+//    arma::mat A3=ident-epsilon;	// This should be a diagonal matrix and represents "data" precision in transformed model
     
 //    A3.print("matrix fed to second standardization");
     
 //   Put into Standard form where prior is identity matrix
 
-    eig_sym(eigval_2, eigvec_2, epsilon);
-    arma::mat D2=arma::diagmat(eigval_2);
+//    eig_sym(eigval_2, eigvec_2, epsilon);
+//    arma::mat D2=arma::diagmat(eigval_2);
 
 
-    NumericMatrix b4_1(l1,1);  // Maybe this can be set as vector
-    NumericMatrix mu4_1(l1,1);
-    NumericMatrix x4_1(x.nrow(), x.ncol());
-    NumericMatrix A4_1(l1, l1);
-    NumericMatrix P5_1(l1, l1);
-    NumericMatrix P6Temp_1(l1, l1);
-    NumericMatrix L3Inv_1(l1, l1);
-    arma::mat b4(b4_1.begin(), b4_1.nrow(), b4_1.ncol(), false);
-    arma::mat mu4(mu4_1.begin(), mu4_1.nrow(), mu4_1.ncol(), false);
-    arma::mat x4(x4_1.begin(), x4_1.nrow(), x4_1.ncol(), false);
-    arma::mat A4(A4_1.begin(), A4_1.nrow(), A4_1.ncol(), false);
-    arma::mat P5(P5_1.begin(), P5_1.nrow(), P5_1.ncol(), false);
-    arma::mat P6Temp(P6Temp_1.begin(), P6Temp_1.nrow(), P6Temp_1.ncol(), false);
-    arma::mat L3Inv(L3Inv_1.begin(), L3Inv_1.nrow(), L3Inv_1.ncol(), false);
+//    NumericMatrix b4_1(l1,1);  // Maybe this can be set as vector
+//    NumericMatrix mu4_1(l1,1);
+//    NumericMatrix x4_1(x.nrow(), x.ncol());
+//    NumericMatrix A4_1(l1, l1);
+//    NumericMatrix P5_1(l1, l1);
+//    NumericMatrix P6Temp_1(l1, l1);
+//    NumericMatrix L3Inv_1(l1, l1);
+//    arma::mat b4(b4_1.begin(), b4_1.nrow(), b4_1.ncol(), false);
+//    arma::mat mu4(mu4_1.begin(), mu4_1.nrow(), mu4_1.ncol(), false);
+//    arma::mat x4(x4_1.begin(), x4_1.nrow(), x4_1.ncol(), false);
+//    arma::mat A4(A4_1.begin(), A4_1.nrow(), A4_1.ncol(), false);
+//    arma::mat P5(P5_1.begin(), P5_1.nrow(), P5_1.ncol(), false);
+//    arma::mat P6Temp(P6Temp_1.begin(), P6Temp_1.nrow(), P6Temp_1.ncol(), false);
+//    arma::mat L3Inv(L3Inv_1.begin(), L3Inv_1.nrow(), L3Inv_1.ncol(), false);
     
 
 //    b4.print("b4 inside rglmb");
     
-    arma::mat L3= arma::sqrt(D2)*trans(eigvec_2);
-    L3Inv=eigvec_2*sqrt(inv_sympd(D2));
-    b4=L3*b3; 
-    mu4=L3*mu3; 
-    x4=x3*L3Inv;
-    A4=trans(L3Inv)*A3*L3Inv;  // Should be transformed data precision matrix
-    P5=trans(L3Inv)*P4*L3Inv;  // Should be precision matrix without epsilon
-    P6Temp=P5+ident;           // Should be precision matrix for posterior
-    NumericVector b5=asVec(b4_1); // Maybe this causes error?
-    Rcpp::List Envelope;
+//    arma::mat L3= arma::sqrt(D2)*trans(eigvec_2);
+//    L3Inv=eigvec_2*sqrt(inv_sympd(D2));
+//    b4=L3*b3; 
+//    mu4=L3*mu3; 
+//    x4=x3*L3Inv;
+//    A4=trans(L3Inv)*A3*L3Inv;  // Should be transformed data precision matrix
+//    P5=trans(L3Inv)*P4*L3Inv;  // Should be precision matrix without epsilon
+//    P6Temp=P5+ident;           // Should be precision matrix for posterior
+//    NumericVector b5=asVec(b4_1); // Maybe this causes error?
+
+    
 
     
 //      P4.print("P4 -last transformation");
@@ -651,8 +652,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 //    A4.print("A4 - Modified Data Precision for transformed model");  
     
     
-    Rcpp::Rcout << "Starting Envelope Creation:" << std::endl;
-    
     
 //       Rcpp::stop("Starting Envelope Creation");
 
@@ -661,13 +660,11 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     
     // mu seems to not be correct - may be source of errors ///
 
-    NumericMatrix mu5_1=0*mu4_1; // Does this modify mu4_1?
+//    NumericMatrix mu5_1=0*mu4_1; // Does this modify mu4_1?
     
-//    Rcpp::Rcout << "b5 passed to envelope:" << std::flush << b5 << std::endl;
-//    Rcpp::Rcout << "mu passed to envelope function:" << std::flush << mu4_1 << std::endl;
-//    Rcpp::Rcout << "mu passed to envelope function modified:" << std::flush << mu5_1 << std::endl;
-//    Rcpp::Rcout << "alpha passed to envelope function:" << std::flush << alpha << std::endl;
-   
+   // Standardize the model 
+
+   Rcpp::Rcout << "Standardizing the model:" << std::endl;
    
    Rcpp::List Standard_Mod=glmb_Standardize_Model(
        y, 
@@ -677,14 +674,9 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
        A1  // Precision for Log-Posterior at posterior mode (to be adjusted)
    );
 
-//   Rcpp::Named("bstar2")=b5,       // Transformed posterior mode (untransposed also used)
-//     Rcpp::Named("A")=A4_1,                 // Precision for Standardized data precision
-//     Rcpp::Named("x2")=x4_1,                // Transformed Design matrix
-//     Rcpp::Named("mu2")=mu5_1,               // Transformed prior mean (should really always be 0)
-//     Rcpp::Named("P2")=P5_1,               // Precision matrix for Normal component shifted to Log-Likelihood
-//     Rcpp::Named("L2Inv")=L2Inv,               // Precision matrix for Normal component shifted to Log-Likelihood
-//     Rcpp::Named("L3Inv")=L3Inv               // Precision matrix for Normal component shifted to Log-Likelihood
-     
+    // Get output from call to glmb_Standardize_Model (not sure if they really need to be allocated)     
+   // Advantage of allocating may be due to clarity of code in below
+
      NumericVector bstar2_temp=Standard_Mod[0];
      NumericMatrix A_temp=Standard_Mod[1];
      NumericMatrix x2_temp=Standard_Mod[2];
@@ -699,28 +691,26 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     // Most applications where n=1 are likely to be Gibbs samplers
     // There are likely to be few instances where someone runs a small 
     // number of samples greater than 1
+
+    Rcpp::Rcout << "Starting Envelope Creation:" << std::endl;
+
+    Rcpp::List Envelope; // Can move this towards top of the function
+    
         
     if(n==1){
-      //Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu5_1,
-      //                        P5_1,alpha,wt2,family,link,Gridtype, n,false);
-
       Envelope=glmbenvelope_c(bstar2_temp, A_temp,y, x2_temp,mu2_temp,
                               P2_temp,alpha,wt2,family,link,Gridtype, n,false);
-      
           }
-    if(n>1){
-      //Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu5_1,
-      //                        P5_1,alpha,wt2,family,link,Gridtype, n,true);
-      Envelope=glmbenvelope_c(bstar2_temp, A_temp,y, x2_temp,mu2_temp,
-                              P2_temp,alpha,wt2,family,link,Gridtype, n,false);
     
+    if(n>1){
+      Envelope=glmbenvelope_c(bstar2_temp, A_temp,y, x2_temp,mu2_temp,
+                              P2_temp,alpha,wt2,family,link,Gridtype, n,true);
           }
     
     Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
-    
-//    Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu5_1,P5_1,alpha,wt2,
-//                               f2,Envelope,family,link);
 
+    // Run simulation 
+    
     Rcpp::List sim=glmbsim_cpp(n,y,x2_temp,mu2_temp,P2_temp,alpha,wt2,
                                f2,Envelope,family,link);
     
@@ -737,13 +727,16 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     NumericVector LL(n);   
     
     NumericMatrix sim2=sim[0];
+
+    // Arma matrices pointing to matrices above 
+    
     arma::mat sim2b(sim2.begin(), sim2.nrow(), sim2.ncol(), false);
     arma::mat out2(out.begin(), out.nrow(), out.ncol(), false);
     
-    
-//    out2=L2Inv*L3Inv*trans(sim2b); // reverse transformation
     out2=L2Inv_temp*L3Inv_temp*trans(sim2b); // reverse transformation
-    
+
+    // Add mean back in and compute LL (for post processing)
+    // Can add option to not compute LL
   
     for(i=0;i<n;i++){
     out(_,i)=out(_,i)+mu;  // Add mean vector back 
