@@ -128,10 +128,3 @@ for(i in 1:n){
 summary(t(out))
 mean(sim$draws)
 
-
-
-
-
-
-
-

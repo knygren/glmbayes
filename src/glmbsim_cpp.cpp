@@ -667,7 +667,32 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 //    Rcpp::Rcout << "mu passed to envelope function:" << std::flush << mu4_1 << std::endl;
 //    Rcpp::Rcout << "mu passed to envelope function modified:" << std::flush << mu5_1 << std::endl;
 //    Rcpp::Rcout << "alpha passed to envelope function:" << std::flush << alpha << std::endl;
-    
+   
+   
+   Rcpp::List Standard_Mod=glmb_Standardize_Model(
+       y, 
+       x,   // Original design matrix (to be adjusted)
+       P,   // Prior Precision Matrix (to be adjusted)
+       b2a, // Posterior Mode from optimization (to be adjusted)
+       A1  // Precision for Log-Posterior at posterior mode (to be adjusted)
+   );
+
+//   Rcpp::Named("bstar2")=b5,       // Transformed posterior mode (untransposed also used)
+//     Rcpp::Named("A")=A4_1,                 // Precision for Standardized data precision
+//     Rcpp::Named("x2")=x4_1,                // Transformed Design matrix
+//     Rcpp::Named("mu2")=mu5_1,               // Transformed prior mean (should really always be 0)
+//     Rcpp::Named("P2")=P5_1,               // Precision matrix for Normal component shifted to Log-Likelihood
+//     Rcpp::Named("L2Inv")=L2Inv,               // Precision matrix for Normal component shifted to Log-Likelihood
+//     Rcpp::Named("L3Inv")=L3Inv               // Precision matrix for Normal component shifted to Log-Likelihood
+     
+     NumericVector bstar2_temp=Standard_Mod[0];
+     NumericMatrix A_temp=Standard_Mod[1];
+     NumericMatrix x2_temp=Standard_Mod[2];
+     NumericMatrix mu2_temp=Standard_Mod[3];
+     NumericMatrix P2_temp=Standard_Mod[4];
+     arma::mat L2Inv_temp=Standard_Mod[5];
+     arma::mat L3Inv_temp=Standard_Mod[6];
+
     // Calls seem to be different because of setting for gridsort component!
     // When doing samples of just 1, sorting grid is slow when running many samples,
     // using a sorted grid is much faster
@@ -676,17 +701,20 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     // number of samples greater than 1
         
     if(n==1){
-    //Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
-    //P5_1,alpha,wt2,family,link,Gridtype, n,false);
-      Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu5_1,
-                              P5_1,alpha,wt2,family,link,Gridtype, n,false);
-    }
+      //Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu5_1,
+      //                        P5_1,alpha,wt2,family,link,Gridtype, n,false);
+
+      Envelope=glmbenvelope_c(bstar2_temp, A_temp,y, x2_temp,mu2_temp,
+                              P2_temp,alpha,wt2,family,link,Gridtype, n,false);
+      
+          }
     if(n>1){
-    //Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu4_1,
-    //P5_1,alpha,wt2,family,link,Gridtype, n,true);
-      Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu5_1,
-                              P5_1,alpha,wt2,family,link,Gridtype, n,true);
-    }
+      //Envelope=glmbenvelope_c(b5, A4_1,y, x4_1,mu5_1,
+      //                        P5_1,alpha,wt2,family,link,Gridtype, n,true);
+      Envelope=glmbenvelope_c(bstar2_temp, A_temp,y, x2_temp,mu2_temp,
+                              P2_temp,alpha,wt2,family,link,Gridtype, n,false);
+    
+          }
     
     Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
     
@@ -710,8 +738,9 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::mat out2(out.begin(), out.nrow(), out.ncol(), false);
     
     
-    out2=L2Inv*L3Inv*trans(sim2b); // reverse transformation
-
+//    out2=L2Inv*L3Inv*trans(sim2b); // reverse transformation
+    out2=L2Inv_temp*L3Inv_temp*trans(sim2b); // reverse transformation
+    
   
     for(i=0;i<n;i++){
     out(_,i)=out(_,i)+mu;  // Add mean vector back 
