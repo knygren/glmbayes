@@ -718,10 +718,13 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     
     Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
     
-    Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu5_1,P5_1,alpha,wt2,
-                               f2,Envelope,family,link);
+//    Rcpp::List sim=glmbsim_cpp(n,y,x4_1,mu5_1,P5_1,alpha,wt2,
+//                               f2,Envelope,family,link);
 
+    Rcpp::List sim=glmbsim_cpp(n,y,x2_temp,mu2_temp,P2_temp,alpha,wt2,
+                               f2,Envelope,family,link);
     
+        
     //  Post processing
     
     //  1) Undo-Standardization of Posterior Precision
