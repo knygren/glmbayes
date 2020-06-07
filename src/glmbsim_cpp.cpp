@@ -386,7 +386,10 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     double dispersion2;
     NumericVector alpha(l2);
     NumericMatrix mu2a=asMat(mu);
-
+    NumericMatrix out(l1,n);   
+    NumericVector LL(n);   
+    
+    
     arma::mat x2(x.begin(), l2, l1, false);
     arma::vec alpha2(alpha.begin(),l2,false);  
     arma::vec offset2b(offset2.begin(),l2,false);  
@@ -400,7 +403,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
 	  int i;  // This can be likely be shifted towards top of function
 	 
-
     NumericVector  wt2=wt/dispersion2; // Adjusts weight for dispersion
     arma::vec wt3(wt2.begin(), x.nrow());
 
@@ -414,7 +416,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
   
     arma::vec mu1b(mu1.begin(),l2,false);
   
-    
     // Step 2: Run posterior optimization with log-posterior function and gradient functions
     // glmsim_NGauss2 seems to use a function for optimization (optPostMode)
       
@@ -422,17 +423,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     _["x"]=x,
     _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
 
-    
-    
-//    Rcpp::stop("Optimization Finished"); // Useful comment if need to QC
-    
-    // Place posterior mode in b2 (b2a)
-    
+  
     NumericMatrix b2a=asMat(opt[0]);  // optimized value
-//    arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
-
-//    b2.print("b2 Posterior mode from optimization");  // Useful comment if need to QC
-
     NumericVector min1=opt[1]; // Not clear this is used - should be minimum
     int conver1=opt[3]; // check on convergence
     
@@ -442,226 +434,10 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     
     NumericMatrix A1=opt[5]; 
 
-
     // Return Error if Optimizaton failed
     
     if(conver1>0){Rcpp::stop("Posterior Optimization failed");}
   
-//    arma::vec mu_0(mu.begin(), l1, false);  // Not sure where this is first used
-
-//    mu_0.print("mu_0 inside rglmb");
-
-//    NumericMatrix L2Inv_1(l1, l1); // Can likely shift this towards top of function
-
-    // arma objects used to do eigenvalue decomposition
-    
-//    arma::mat A1_b(A1.begin(), l1, l1, false);
-    
-
-//    arma::vec eigval_1;
-//    arma::mat eigvec_1;
-//    arma::mat L2Inv(L2Inv_1.begin(), L2Inv_1.nrow(), L2Inv_1.ncol(), false);
-
-
-    // Step 2: Standardize Model 
-
-    // Standardize Model to Have Diagonal Variance-Covariance Matrix at Posterior Mode
-    
-//    eig_sym(eigval_1, eigvec_1, A1_b);
-//    arma::mat D1=arma::diagmat(eigval_1);
-//    arma::mat L2= arma::sqrt(D1)*trans(eigvec_1);
-//    L2Inv=eigvec_1*sqrt(inv_sympd(D1));  // Also used to undo normalization later
-    
-//    D1.print("D1 matrix");
-    
-//    eigval_1.print("Eigenvalues");
-    
-    // outout variables used in latter step
-    
-//    arma::mat b3=L2*b2;   
-//    arma::mat mu3=L2*mu2; // These are needed but will not be used to pass 
-  //  arma::mat mu3=L2*mu1b; // Corrected - mu1b is zero vector
-    
-//    arma::mat x3=x2*L2Inv;
-//    arma::mat P3=trans(L2Inv)*P2*L2Inv;
-//
-//    b3.print("b3 after first transformation");
-//    P3.print("P3 after first transformation");
-    
-//    mu3.print("mu3 after first transformation");
-    
-    
-    //   Find diagonal matrix that has "smaller" precision than prior  
-//   Follows Definition 3, and procedure on p. 1150 in Nygren 
-//   Puts model into standard form 
-
-
-//    arma::mat P3Diag=arma::diagmat(arma::diagvec(P3));// diagonal part of P3
-//    arma::mat epsilon=P3Diag;
-//    arma::mat P4=P3Diag;   
-    
-//    double scale=1;
-//    int check=0;
-//    arma::vec eigval_2;
-//    arma::mat eigvec_2;
-//    double eigval_temp;
-    
-    // Scales matrix - Add these temporary output to see 
-    // when problems occur - may be only occuring when 
-    // Prior matrix is scaled
-    // gradient (and perhaps likelihood)
-    // functions may not be accounting for prior factor properly
-  
-//    P3.print("Prior precision matrix prior to scaling");  
-//    P3Diag.print("Diagonal of prior precision matrix prior to scaling");  
-    
-//    while(check==0){
-//    	epsilon=scale*P3Diag;  // scaled version of diagonal matrix
-  
-      // Checks if difference between Prior precision and diagonal matrix
-      // is positive definite
-      // is positive definite - to be added to likelihood 
-      
-//  		P4=P3-epsilon;				
-//      eig_sym(eigval_2, eigvec_2, P4);
-//      eigval_temp=arma::min(eigval_2);
-//      if(eigval_temp>0){check=1;
-      
-//      Rcpp::Rcout << "scale after step1 " << std::flush << scale << std::endl;
-//      P4.print("P4 after step 1");  
-//      epsilon.print("epsilon after step 1");  
-//      }
-//      else{scale=scale/2;}
-//		}
-    
-    
-    
-
-
-//    P4.print("P4 inside rglmb");
-  
-     // Edit second scaling out for now (may not do any good)   
-     
-//    int check2=0;
-//    double scale2=scale;
-//    arma::mat epsilon_temp=P3Diag;   
-//    arma::mat P4_temp=P3Diag;   
-
-//    while(check2==0){
-    
-    // Change this temporarily to be increments of (1/100)
-    // Change this back to see if it produces better results
-    // Too much weight on the prior in simulation appears problematic
-    // May be better to even avoid this step all together
-    // Modify later
-    // temporarily do away with this adjustment
-    
-//    scale=scale+(scale2/10);
-
-//  		epsilon_temp=scale*P3Diag;
-//  		P4_temp=P3-epsilon_temp;
-//      eig_sym(eigval_2, eigvec_2, P4_temp);
-//    eigval_temp=arma::min(eigval_2);
-//    if(eigval_temp>0){
-//  					epsilon=epsilon_temp;
-//						P4=P4_temp;	
-//						}		
-    
-//		else{
-//		  check2=1;
-		  
-		  // May be that P4 needs to be updated here -added 06/03-2020 - may remove again
-
-//		  P4=P3-epsilon;		  		  
-		  //
-		  
-//		  Rcpp::Rcout << "scale after step2 " << std::flush << scale << std::endl;
-//		  P4.print("P4 after step 2");  
-//		  epsilon.print("epsilon after step 2");  
-		  
-//		  }
-
-		// temporarily move this outside
-	//	P4=P3-epsilon;		  		  
-		
-		      
-//  	}    
-    
-    // Temporary manual setting of scale to figure out best approach
-    //
-    
-    // This would be adjusted weight on prior if prior had 100% weight
-    
-//    scale=0.5;     
-//    epsilon=scale*P3Diag;
-//    P4=P3-epsilon;		  		  
-    
-//    P4_temp.print("P4_temp inside rglmb");
-    
-    
-//    arma::mat ident=arma::mat (l1,l1,arma::fill::eye);
-//    arma::mat A3=ident-epsilon;	// This should be a diagonal matrix and represents "data" precision in transformed model
-    
-//    A3.print("matrix fed to second standardization");
-    
-//   Put into Standard form where prior is identity matrix
-
-//    eig_sym(eigval_2, eigvec_2, epsilon);
-//    arma::mat D2=arma::diagmat(eigval_2);
-
-
-//    NumericMatrix b4_1(l1,1);  // Maybe this can be set as vector
-//    NumericMatrix mu4_1(l1,1);
-//    NumericMatrix x4_1(x.nrow(), x.ncol());
-//    NumericMatrix A4_1(l1, l1);
-//    NumericMatrix P5_1(l1, l1);
-//    NumericMatrix P6Temp_1(l1, l1);
-//    NumericMatrix L3Inv_1(l1, l1);
-//    arma::mat b4(b4_1.begin(), b4_1.nrow(), b4_1.ncol(), false);
-//    arma::mat mu4(mu4_1.begin(), mu4_1.nrow(), mu4_1.ncol(), false);
-//    arma::mat x4(x4_1.begin(), x4_1.nrow(), x4_1.ncol(), false);
-//    arma::mat A4(A4_1.begin(), A4_1.nrow(), A4_1.ncol(), false);
-//    arma::mat P5(P5_1.begin(), P5_1.nrow(), P5_1.ncol(), false);
-//    arma::mat P6Temp(P6Temp_1.begin(), P6Temp_1.nrow(), P6Temp_1.ncol(), false);
-//    arma::mat L3Inv(L3Inv_1.begin(), L3Inv_1.nrow(), L3Inv_1.ncol(), false);
-    
-
-//    b4.print("b4 inside rglmb");
-    
-//    arma::mat L3= arma::sqrt(D2)*trans(eigvec_2);
-//    L3Inv=eigvec_2*sqrt(inv_sympd(D2));
-//    b4=L3*b3; 
-//    mu4=L3*mu3; 
-//    x4=x3*L3Inv;
-//    A4=trans(L3Inv)*A3*L3Inv;  // Should be transformed data precision matrix
-//    P5=trans(L3Inv)*P4*L3Inv;  // Should be precision matrix without epsilon
-//    P6Temp=P5+ident;           // Should be precision matrix for posterior
-//    NumericVector b5=asVec(b4_1); // Maybe this causes error?
-
-    
-
-    
-//      P4.print("P4 -last transformation");
-      //      mu4.print("mu4 -last transformation");
-      
-    
-//    P5.print("P5 prior to envelope construction");  
-//    Rcpp::Rcout << "P5_1:" << std::flush << P5_1 << std::endl;
-//    b4.print("Posterior Mode for transformed model");
-//    P6Temp.print("P6Temp - Actual Prior precision for transformed model");  
-//    A4.print("A4 - Modified Data Precision for transformed model");  
-    
-    
-    
-//       Rcpp::stop("Starting Envelope Creation");
-
-    // Check if glmbenvelope_c and glmbenvelope produce consistent results
-    // Not sure why these calls are separate - maybe because development was gradual
-    
-    // mu seems to not be correct - may be source of errors ///
-
-//    NumericMatrix mu5_1=0*mu4_1; // Does this modify mu4_1?
-    
    // Standardize the model 
 
    Rcpp::Rcout << "Standardizing the model:" << std::endl;
@@ -722,9 +498,6 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     //  3) Calculate Log_likelihood (used in model diagnostics)
 
     // These two can likely be shifted towards top of function to make code simpler
-    
-    NumericMatrix out(l1,n);   
-    NumericVector LL(n);   
     
     NumericMatrix sim2=sim[0];
 
