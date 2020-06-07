@@ -150,7 +150,6 @@ NumericVector  f1_binomial_logit(NumericMatrix b,NumericVector y,NumericMatrix x
 
 
 
-// [[Rcpp::export]]
 NumericVector  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  
@@ -371,7 +370,6 @@ NumericVector  f1_binomial_probit(NumericMatrix b,NumericVector y,NumericMatrix 
 
 
 
-// [[Rcpp::export]]
 NumericVector  f2_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  
@@ -596,7 +594,6 @@ NumericVector  f1_binomial_cloglog(NumericMatrix b,NumericVector y,NumericMatrix
 
 
 
-// [[Rcpp::export]]
 NumericVector  f2_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  

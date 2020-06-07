@@ -81,7 +81,6 @@ NumericVector  f1_gamma(NumericMatrix b,NumericVector y,NumericMatrix x,NumericV
 
 
 
-// [[Rcpp::export]]
 NumericVector  f2_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  

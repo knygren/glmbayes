@@ -51,8 +51,8 @@ if(family$family=="gaussian")
 				}
 
   # Edit This
-	f5<-f2_gaussian
-	f6<-f3_gaussian
+#	f5<-f2_gaussian
+#	f6<-f3_gaussian
 	
 	f7<-function(b,y,x,mu,P,alpha=0,wt=1){
 	  l2<-length(y)
@@ -95,8 +95,8 @@ if(family$family=="poisson"||family$family=="quasipoisson")
 	f4<-function(b,y,x,alpha=0,wt=1,dispersion=1){
 		dispersion*(2*f1(b,y,x,alpha,wt)+2*sum(dpois(y, y,log=TRUE)*wt))
 				}
-  f5<-f2_poisson
-  f6<-f3_poisson
+#  f5<-f2_poisson
+#  f6<-f3_poisson
   
   f7<-function(b,y,x,mu,P,alpha=0,wt=1){
     l2<-length(y)
@@ -135,8 +135,8 @@ if(family$family %in%  c("binomial","quasibinomial") && family$link=="logit")
 	f4<-function(b,y,x,alpha=0,wt=1,dispersion=1){
 		dispersion*(2*f1(b,y,x,alpha,wt)+2*sum(dbinom(round(wt*y),round(wt),y,log=TRUE)))
 		}
-  f5<-f2_binomial_logit
-  f6<-f3_binomial_logit
+#  f5<-f2_binomial_logit
+#  f6<-f3_binomial_logit
 
   
   f7<-function(b,y,x,mu,P,alpha=0,wt=1){
@@ -187,8 +187,8 @@ if(family$family %in%  c("binomial","quasibinomial") && family$link=="probit")
 	f4<-function(b,y,x,alpha=0,wt=1,dispersion=1){
 		dispersion*(2*f1(b,y,x,alpha,wt)+2*sum(dbinom(round(wt*y),round(wt),y,log=TRUE)))
 		}
-  f5<-f2_binomial_probit
-  f6<-f3_binomial_probit
+#  f5<-f2_binomial_probit
+#  f6<-f3_binomial_probit
 
   
   ##########  This should be replaced!
@@ -244,8 +244,8 @@ if(family$family %in%  c("binomial","quasibinomial") && family$link=="cloglog")
 	f4<-function(b,y,x,alpha=0,wt=1,dispersion=1){
 		dispersion*(2*f1(b,y,x,alpha,wt)+2*sum(dbinom(round(wt*y),round(wt),y,log=TRUE)))
 		}
-  f5<-f2_binomial_cloglog
-  f6<-f3_binomial_cloglog
+#  f5<-f2_binomial_cloglog
+#  f6<-f3_binomial_cloglog
 
   ##########  This should be replaced!
   
@@ -305,8 +305,8 @@ if(family$family=="Gamma" && family$link=="log")
 
 		}
 
-  f5<-f2_gamma
-  f6<-f3_gamma
+#  f5<-f2_gamma
+#  f6<-f3_gamma
 
   ##########  This should be replaced!
   
@@ -338,7 +338,10 @@ if(family$family=="Gamma" && family$link=="log")
 
 	}	
 
-	list(f1=f1,f2=f2,f3=f3,f4=f4,f5=f5,f6=f6,f7=f7)
+	list(f1=f1,f2=f2,f3=f3,f4=f4,
+	     #f5=f5,
+	     #f6=f6,
+	     f7=f7)
 	
 }
 

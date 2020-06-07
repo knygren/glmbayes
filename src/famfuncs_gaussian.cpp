@@ -68,7 +68,6 @@ NumericVector  f1_gaussian(NumericMatrix b,NumericVector y,NumericMatrix x,Numer
 
 
 
-// [[Rcpp::export]]
 NumericVector  f2_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericMatrix alpha,NumericVector wt)
 {
  

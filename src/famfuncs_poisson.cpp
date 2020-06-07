@@ -71,7 +71,6 @@ NumericVector  f1_poisson(NumericMatrix b,NumericVector y,NumericMatrix x,Numeri
 
 
 
-// [[Rcpp::export]]
 NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  

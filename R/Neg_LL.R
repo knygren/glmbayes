@@ -40,8 +40,8 @@ Neg_LL<-function(b, y, x, alpha, wt,family){
       f1<-famfunc$f1
       f2<-famfunc$f2
       f3<-famfunc$f3
-      f5<-famfunc$f5
-      f6<-famfunc$f6
+#      f5<-famfunc$f5
+#      f6<-famfunc$f6
     }
     else{
       stop(gettextf("link \"%s\" not available for selected family; available links are %s", 

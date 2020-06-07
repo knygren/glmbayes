@@ -13,48 +13,24 @@ setlogP <- function(logP, NegLL, cbars, G3) {
     .Call('_glmbayes_setlogP', PACKAGE = 'glmbayes', logP, NegLL, cbars, G3)
 }
 
-f2_gamma <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
-    .Call('_glmbayes_f2_gamma', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
-}
-
 f3_gamma <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
     .Call('_glmbayes_f3_gamma', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
-}
-
-f2_binomial_logit <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
-    .Call('_glmbayes_f2_binomial_logit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
 f3_binomial_logit <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
     .Call('_glmbayes_f3_binomial_logit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
-f2_binomial_probit <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
-    .Call('_glmbayes_f2_binomial_probit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
-}
-
 f3_binomial_probit <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
     .Call('_glmbayes_f3_binomial_probit', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
-}
-
-f2_binomial_cloglog <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
-    .Call('_glmbayes_f2_binomial_cloglog', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
 f3_binomial_cloglog <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
     .Call('_glmbayes_f3_binomial_cloglog', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
-f2_gaussian <- function(b, y, x, mu, P, alpha, wt) {
-    .Call('_glmbayes_f2_gaussian', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt)
-}
-
 f3_gaussian <- function(b, y, x, mu, P, alpha, wt) {
     .Call('_glmbayes_f3_gaussian', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt)
-}
-
-f2_poisson <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
-    .Call('_glmbayes_f2_poisson', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt, progbar)
 }
 
 f3_poisson <- function(b, y, x, mu, P, alpha, wt, progbar = 0L) {
