@@ -1,5 +1,38 @@
 
-rnorm_gamma_reg<-function(n,y,x,mu,P,nu,V,offset2,wt){
+rnorm_gamma_reg<-function(n,y,x,mu,P,nu,V,offset2=NULL,wt=1){
+
+if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
+is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
+  
+  x <- as.matrix(x)
+  mu<-as.matrix(as.vector(mu))
+  P<-as.matrix(P)    
+  
+## Allow function to be called without offset2
+  
+if(length(n)>1) n<-length(n)	   
+nobs <- NROW(y)
+nvars <- ncol(x)
+
+if(is.null(offset2)) offset2=rep(0,nobs)
+nvars2<-length(mu)	
+if(!nvars==nvars2) stop("incompatible dimensions")
+if (!all(dim(P) == c(nvars2, nvars2))) 
+  stop("incompatible dimensions")
+if(!isSymmetric(P))stop("matrix P must be symmetric")
+if(length(wt)==1) wt=rep(wt,nobs)
+nobs2=NROW(wt)
+nobs3=NROW(x)
+nobs4=NROW(offset2)
+if(nobs2!=nobs) stop("weighting vector must have same number of elements as y")
+if(nobs3!=nobs) stop("matrix X must have same number of rows as y")
+if(nobs4!=nobs) stop("offset vector must have same number of rows as y")
+
+tol<- 1e-06 # Link this to Magnitude of P	
+eS <- eigen(P, symmetric = TRUE,only.values = FALSE)
+ev <- eS$values
+if (!all(ev >= -tol * abs(ev[1L]))) 
+  stop("'P' is not positive definite")
 
 ## Should add dimension checks here  
 ## Should move core part of rmultireg inside this code to avoid call
@@ -15,8 +48,9 @@ LL<-matrix(1,n)
 
 for(i in 1:n){
   
-#  LL[i]<-f1(b=sim$B[i,],y=y,x=x,alpha=offset2,wt=wt/sim$Sigma[i])	
-  LL[i]=-f1(b=sim$B[i,],y=y,x=x,alpha=offset2,wt=wt/sim$Sigma[i])	
+    ## This function should return the negative log-likelihood 
+  
+    LL[i]=f1(b=sim$B[i,],y=y,x=x,alpha=offset2,wt=wt/sim$Sigma[i])	
 }
 
 outlist<-list(coefficients=sim$B,PostMode=sim$BStar,

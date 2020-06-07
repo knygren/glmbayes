@@ -2,11 +2,13 @@
 \alias{ctpnorm}
 \alias{ctrnorm}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Finds the probability of the center of a normal density (probability of area between lower and upper bound)}
-\description{
+\title{Distribution function and random generation from the center of the normal distribution with mean equal to mu and standard deviation equal to sigma.
+
 Finds the probability of the center of a normal density (probability of area between lower and upper bound)}
+\description{The distribution function ctpnorm finds the probability of the center of a normal density (the probability of the area between the lower a and upper bound b) while the random number generator ctrnorm samples from a restricted normal density where lgrt is the log of the distribution between the lower bound and infinity and lglt is the log of the distribution function between negative infinity and the upper bound. The sum of the exponentiated values for the two (exp(lgrt)+exp(lglt)) must sum to more than 1.}
 \usage{
 ctpnorm(a = -Inf, b = Inf, mu = 0, sigma = 1, log.p = TRUE, Diff = FALSE)
+ctrnorm(n,lgrt,lglt,mu=0,sigma=1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -14,6 +16,12 @@ ctpnorm(a = -Inf, b = Inf, mu = 0, sigma = 1, log.p = TRUE, Diff = FALSE)
 lower bound}
   \item{b}{
 upper bound}
+  \item{n}{
+number of draws to generate}
+  \item{lgrt}{
+log of the distribution function between the lower bound and infinity}
+  \item{lglt}{
+log of the distribution function between negative infinity and the upper bound}
   \item{mu}{
 mean parameter}
   \item{sigma}{

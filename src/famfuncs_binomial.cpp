@@ -97,7 +97,6 @@ NumericVector cpprbinom2(int n, double size, NumericVector prob) {
 
 ///////////////////////// Logit Functions ///////////////////////////////////////
 
-// [[Rcpp::export]]
 NumericVector  f1_binomial_logit(NumericMatrix b,NumericVector y,NumericMatrix x,NumericVector alpha,NumericVector wt)
 {
  
@@ -322,7 +321,6 @@ arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,Nu
 
 ///////////////////////// Probit Functions ///////////////////////////////////////
 
-// [[Rcpp::export]]
 NumericVector  f1_binomial_probit(NumericMatrix b,NumericVector y,NumericMatrix x,NumericVector alpha,NumericVector wt)
 {
  
@@ -544,7 +542,6 @@ arma::mat  f3_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,N
 
 ///////////////////////// cLOGLOG FUNCTION ///////////////////////////////////////
 
-// [[Rcpp::export]]
 NumericVector  f1_binomial_cloglog(NumericMatrix b,NumericVector y,NumericMatrix x,NumericVector alpha,NumericVector wt)
 {
  

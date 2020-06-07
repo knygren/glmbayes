@@ -13,7 +13,6 @@ NumericVector dnorm_glmb( NumericVector x, NumericVector means, NumericVector sd
 }
 
 
-// [[Rcpp::export]]
 NumericVector  f1_gaussian(NumericMatrix b,NumericVector y,NumericMatrix x,NumericMatrix alpha,NumericVector wt)
 {
  

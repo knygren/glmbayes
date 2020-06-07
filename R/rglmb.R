@@ -1,6 +1,3 @@
-#rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=2)UseMethod("rglmb")
-
-#rglmb.default<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=2)
 rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=3)
   {
   
@@ -81,6 +78,8 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=gaussian
                   family$family , paste(sQuote(okfamilies), collapse = ", ")), 
          domain = NA)
   }
+  
+  
   if(family$family=="poisson"||family$family=="binomial")dispersion2<-1
   else dispersion2<-dispersion
   
@@ -94,18 +93,7 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=gaussian
     
     else{
       
-      sim<-rmultireg(n=n,Y=matrix((y-offset2)*sqrt(wt),nrow=length(y)),X=x*sqrt(wt),Bbar=mu,A=P,nu=nu,V=V)
-      draws<-matrix(1,n)
-      LL<-matrix(1,n)
-      
-      for(i in 1:n){
-        LL[i]<-f1(b=sim$B[i,],y=y,x=x,alpha=offset2,wt=wt/sim$Sigma[i])	
-      }
-      
-      outlist<-list(coefficients=sim$B,PostMode=sim$BStar,
-                    Prior=list(mean=as.numeric(mu),Precision=P),
-                    iters=draws,famfunc=famfunc,Envelope=NULL,
-                    dispersion=sim$Sigma,loglike=LL)
+      outlist=rnorm_gamma_reg(n=n,y=y,x=x,mu=mu,P=P,nu=nu,V=V,offset2=offset2,wt=wt)
       
     }
     
@@ -113,8 +101,11 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=gaussian
   
   else{
     if(is.null(dispersion)){dispersion2=1}
-    
-    outlist<-glmbsim_NGauss_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,famfunc=famfunc,f1=f1,f2=f2,f3=f3,
+
+    # f1, f2, and f3 passed here - Likely legacy of R code
+    ## Can eliminate and replace with calling of corresponding c++ functions
+    outlist<-glmbsim_NGauss_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,
+                                famfunc=famfunc,f1=f1,f2=f2,f3=f3,
                                 start=start,family=family$family,link=family$link,Gridtype=Gridtype)
     
   }

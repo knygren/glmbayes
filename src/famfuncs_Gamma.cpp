@@ -17,8 +17,9 @@ NumericVector dgamma_glmb( NumericVector x, NumericVector shape, NumericVector s
 
 
 ////////////////////////////////////////////////////////////////
+// See if it is possible to avoid having some or all of these functions exported
 
-// [[Rcpp::export]]
+
 NumericVector  f1_gamma(NumericMatrix b,NumericVector y,NumericMatrix x,NumericVector alpha,NumericVector wt)
 {
  

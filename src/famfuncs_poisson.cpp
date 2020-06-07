@@ -19,10 +19,6 @@ NumericVector dpois_glmb( NumericVector x, NumericVector means, int lg){
     return res ;
 }
 
-
-
-
-// [[Rcpp::export]]
 NumericVector  f1_poisson(NumericMatrix b,NumericVector y,NumericMatrix x,NumericMatrix alpha,NumericVector wt)
 {
  
