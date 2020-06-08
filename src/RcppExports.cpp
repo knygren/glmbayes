@@ -6,9 +6,9 @@
 
 using namespace Rcpp;
 
-// glmbenvelope_c
-List glmbenvelope_c(NumericVector bStar, NumericMatrix A, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, std::string family, std::string link, int Gridtype, int n, bool sortgrid);
-RcppExport SEXP _glmbayes_glmbenvelope_c(SEXP bStarSEXP, SEXP ASEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP, SEXP nSEXP, SEXP sortgridSEXP) {
+// EnvelopeBuild_c
+List EnvelopeBuild_c(NumericVector bStar, NumericMatrix A, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, std::string family, std::string link, int Gridtype, int n, bool sortgrid);
+RcppExport SEXP _glmbayes_EnvelopeBuild_c(SEXP bStarSEXP, SEXP ASEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP, SEXP nSEXP, SEXP sortgridSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -25,7 +25,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
     Rcpp::traits::input_parameter< bool >::type sortgrid(sortgridSEXP);
-    rcpp_result_gen = Rcpp::wrap(glmbenvelope_c(bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid));
+    rcpp_result_gen = Rcpp::wrap(EnvelopeBuild_c(bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -120,7 +120,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_glmbayes_glmbenvelope_c", (DL_FUNC) &_glmbayes_glmbenvelope_c, 13},
+    {"_glmbayes_EnvelopeBuild_c", (DL_FUNC) &_glmbayes_EnvelopeBuild_c, 13},
     {"_glmbayes_glmb_Standardize_Model", (DL_FUNC) &_glmbayes_glmb_Standardize_Model, 5},
     {"_glmbayes_glmbsim_cpp", (DL_FUNC) &_glmbayes_glmbsim_cpp, 12},
     {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 16},

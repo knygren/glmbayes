@@ -1,5 +1,5 @@
 
-optgrid<-function(a1,n){
+EnvelopeOpt<-function(a1,n){
 
 a1rank<-rank(1/(1+a1))
 l1<-length(a1)

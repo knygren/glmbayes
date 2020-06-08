@@ -1,6 +1,6 @@
-\name{glmbenvelope_c}
+\name{EnvelopeBuild_c}
 %\alias{glmbenvelope}
-\alias{glmbenvelope_c}
+\alias{EnvelopeBuild_c}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Constructs Enveloping function for simulation
@@ -9,7 +9,7 @@ Constructs Enveloping function for simulation
 Constructs Enveloping function for simulation
 }
 \usage{
-glmbenvelope_c(bStar,A,y,x,mu,P,alpha,wt,family="binomial",link = "logit", 
+EnvelopeBuild_c(bStar,A,y,x,mu,P,alpha,wt,family="binomial",link = "logit", 
 Gridtype=2,n = 1, sortgrid = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -81,7 +81,7 @@ Kjell Nygren
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{rglmb}}, \code{\link{expand.grid}}, \code{\link{optgrid}}
+\code{\link{rglmb}}, \code{\link{expand.grid}}, \code{\link{EnvelopeOpt}}
 }
 \examples{
 
@@ -180,7 +180,7 @@ P2=Standard_Mod$P2
 L2Inv=Standard_Mod$L2Inv
 L3Inv=Standard_Mod$L3Inv
 
-Env2=glmbenvelope_c(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
+Env2=EnvelopeBuild_c(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
     as.matrix(mu2,ncol=1),as.matrix(P2),as.vector(alpha),as.vector(wt2),
     family="binomial",link="logit",Gridtype=as.integer(3), n=as.integer(n),sortgrid=TRUE)
 

@@ -55,7 +55,7 @@ Kjell Nygren
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{rglmb}}, \code{\link{expand.grid}}, \code{\link{optgrid}}
+\code{\link{rglmb}}, \code{\link{expand.grid}}, \code{\link{EnvelopeOpt}}
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----

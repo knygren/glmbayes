@@ -5,7 +5,7 @@
 
 using namespace Rcpp;
 
-List glmbenvelope_c(NumericVector bStar,NumericMatrix A,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,std::string family="binomial",std::string link="logit",int Gridtype=2, int n=1,bool sortgrid=false);  
+List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,std::string family="binomial",std::string link="logit",int Gridtype=2, int n=1,bool sortgrid=false);  
 List Set_Grid(Rcpp::NumericMatrix GIndex,  Rcpp::NumericMatrix cbars, Rcpp::NumericMatrix Lint);
 List   setlogP(NumericMatrix logP,NumericVector NegLL,NumericMatrix cbars,NumericMatrix G3);
 Rcpp::List Set_Grid_C(Rcpp::NumericMatrix GIndex,  Rcpp::NumericMatrix cbars, Rcpp::NumericMatrix Lint,Rcpp::NumericMatrix Down,Rcpp::NumericMatrix Up,Rcpp::NumericMatrix lglt,Rcpp::NumericMatrix lgrt,Rcpp::NumericMatrix lgct,Rcpp::NumericMatrix logU,Rcpp::NumericMatrix logP);

@@ -474,12 +474,12 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     
         
     if(n==1){
-      Envelope=glmbenvelope_c(bstar2_temp, A_temp,y, x2_temp,mu2_temp,
+      Envelope=EnvelopeBuild_c(bstar2_temp, A_temp,y, x2_temp,mu2_temp,
                               P2_temp,alpha,wt2,family,link,Gridtype, n,false);
           }
     
     if(n>1){
-      Envelope=glmbenvelope_c(bstar2_temp, A_temp,y, x2_temp,mu2_temp,
+      Envelope=EnvelopeBuild_c(bstar2_temp, A_temp,y, x2_temp,mu2_temp,
                               P2_temp,alpha,wt2,family,link,Gridtype, n,true);
           }
     

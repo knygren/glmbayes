@@ -150,7 +150,7 @@ P2=Standard_Mod$P2
 L2Inv=Standard_Mod$L2Inv
 L3Inv=Standard_Mod$L3Inv
 
-Env2=glmbenvelope_c(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
+Env2=EnvelopeBuild_c(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
     as.matrix(mu2,ncol=1),as.matrix(P2),as.vector(alpha),as.vector(wt2),
     family="binomial",link="logit",Gridtype=as.integer(3), n=as.integer(n),sortgrid=TRUE)
 

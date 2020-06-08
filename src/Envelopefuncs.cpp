@@ -175,7 +175,7 @@ void setlogP_C2(NumericMatrix logP,NumericVector NegLL,NumericMatrix cbars,Numer
 
 // [[Rcpp::export]]
 
-List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
+List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
                     NumericVector y, 
                     NumericMatrix x,
                     NumericMatrix mu,
@@ -212,12 +212,11 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
   arma::colvec yy_2b(yy_2.begin(), yy_2.size(), false);
   List G2(a_1.size());
   List GIndex1(a_1.size());
-  Rcpp::Function opGrid("optgrid");
+  Rcpp::Function EnvelopeOpt("EnvelopeOpt");
   Rcpp::Function expGrid("expand.grid");
   Rcpp::Function asMat("as.matrix");
   Rcpp::Function EnvSort("EnvelopeSort");
-  
-  
+
   int i;  
   
   //  bStar_2.print("bstar part of Grid calculation");
@@ -237,17 +236,21 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
   NumericVector gridindex(l1);
   
   if(Gridtype==2){
-    gridindex=opGrid(a_2,n);
+    gridindex=EnvelopeOpt(a_2,n);
   }
   
   NumericVector Temp1=G1( _, 0);
   double Temp2;
   
+  // Should write a small note with logic behind types 1 and 2
+  
   for(i=0;i<l1;i++){
-    
-    
-    
+  
     if(Gridtype==1){
+      
+      // For Gridtype==1, small 1+a[i]<=(2/sqrt(M_PI) yields grid over full line
+      // Can check speed for simulation when Gridtype=1 vs. Gridtyp=2 or 3     
+      
       if((1+a_2[i])<=(2/sqrt(M_PI))){ 
         Temp2=G1(1,i);
         G2[i]=NumericVector::create(Temp2);

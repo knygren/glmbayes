@@ -1,5 +1,5 @@
-\name{optgrid}
-\alias{optgrid}
+\name{EnvelopeOpt}
+\alias{EnvelopeOpt}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Optimizes the grid for the envelope
@@ -8,13 +8,13 @@ Optimizes the grid for the envelope
 Optimizes the grid for the envelope
 }
 \usage{
-optgrid(a1, n)
+EnvelopeOpt(a1, n)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{a1}{Diagonal elements of data precision matrix for a model in standard form
 }
-  \item{n}{Nunber of draws to genrate}
+  \item{n}{Number of draws to generate}
 }
 \details{
 This function attempts to find a computationally optimal gridsize by using information on the strenght of the prior and the number of iterations desired. Generally, more data (i.e., larger values for the diagonal elements of the precision matrix) will require a larger grid. The same also holds when the number of desired draws is higher (as the setup costs associated with the larger grid is offset by the savings in the number of candidates per sample).
@@ -30,7 +30,7 @@ Kjell Nygren
 }
 
 \seealso{
-\code{\link{rglmb}}, \code{\link{glmbenvelope_c}}, \code{\link{expand.grid}}
+\code{\link{rglmb}}, \code{\link{EnvelopeBuild_c}}, \code{\link{expand.grid}}
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----
