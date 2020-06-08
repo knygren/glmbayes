@@ -246,51 +246,5 @@ printCoefmat(x$Percentiles,digits=4)
 
 }
 
-residuals.glmb<-function(object,...)
-{
-	y<-object$glm$y	
-	n<-length(object$coefficients[,1])
-	fitted.values<-object$fitted.values
-
-	dev.residuals<-object$glm$family$dev.resids
-	DevRes<-matrix(0,nrow=n,ncol=length(y))
-#	yrep<-matrix(0,nrow=n,ncol=length(y))
 
 
-	for(i in 1:n)
-	{
-	DevRes[i,]<-sign(y-fitted.values[i,])*sqrt(dev.residuals(y,fitted.values[i,],1))
-#	if(fit$family$family=="poisson")yrep[i,]<-rpois(length(y),fitted.values[i,])
-
-	}
-
-	colnames(DevRes)<-names(y)
-	DevRes
-}
-
-
-extractAIC.glmb<-function(fit,scale=NULL,k=NULL,...)
-{
-c(fit$pD,fit$DIC)
-
-}
-
-logLik.glmb<-function(object,...){
-
-y<-object$glm$y
-x<-object$glm$x
-wt<-object$glm$prior.weights
-dispersion<-object$dispersion
-
-
-#alpha # to be updated 
-f1<-object$famfunc$f1
-n<-length(object$coefficients[,1])
-
-logLikout<-matrix(0,nrow=n,ncol=1)
-#f1temp(b=out$coefficients,y=out$y,x=out$x,alpha=0,wt=Claims/dispersion)
-for(i in 1:n){
-logLikout[i,1]<--f1(object$coefficients[i,],y=y,x=x,wt=wt/dispersion)
-}
-logLikout
-}

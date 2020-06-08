@@ -1,14 +1,9 @@
 \name{glmb}
 \alias{glmb}
-%\alias{glmb.default}
 \alias{print.glmb}
-\alias{extractAIC.glmb}
-\alias{logLik.glmb}
-\alias{residuals.glmb}
-\title{Producing iid samples for Bayesian Generalized Linear Models}
+\title{Fitting Bayesian Generalized Linear Models}
 \description{
-\code{glmb} is used to produce iid samples for Bayesian generalized linear models, specified by giving a symbolic description of the linear predictor, 
-a description of the error distribution, and a multivariate normal prior.
+\code{glmb} is used to fit Bayesian generalized linear models, specified by giving a symbolic description of the linear predictor, a description of the error distribution, and a multivariate normal prior.
 }
 \usage{
 glmb(n,formula,family=binomial,dispersion=NULL,mu,Sigma,nu=NULL,V=NULL,

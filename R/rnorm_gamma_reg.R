@@ -1,3 +1,21 @@
+#' The Bayesian Normal-Gamma Regression Distribution
+#'
+#' \code{rnorm_gamma_reg} is used to generate iid samples from Bayesian linear models with a normal-gamma prior. 
+#' The model is specified by providing a data vector, a design matrix, and 4 prior constants.
+#' @param n An integer
+#' @param y A vector
+#' @param x A matrix
+#' @param mu A vector
+#' @param P A matrix
+#' @param nu A numeric constant>0
+#' @param V A numeric constant>0
+#' @param offset2 A vector
+#' @param wt A vector or a numeric constant
+#' @return The sum of \code{x} and \code{y}
+#' @examples
+#' 1+1
+#' 10+1
+
 
 rnorm_gamma_reg<-function(n,y,x,mu,P,nu,V,offset2=NULL,wt=1){
 

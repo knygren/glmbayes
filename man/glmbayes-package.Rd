@@ -2,9 +2,9 @@
 \alias{glmbayes-package}
 \alias{glmbayes}
 \docType{package}
-\title{glmbayes}
+\title{Bayesian Generalized Linear Models (iid Samples)}
 \description{
-Produces iid sampling for Bayesian Generalized Linear models}
+Generates iid samples for Bayesian Generalized Linear models}
 \details{
 \tabular{ll}{
 Package: \tab glmbayes\cr

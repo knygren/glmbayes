@@ -2,10 +2,10 @@
 \alias{ctpnorm}
 \alias{ctrnorm}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Distribution function and random generation from the center of the normal distribution with mean equal to mu and standard deviation equal to sigma.
-
-Finds the probability of the center of a normal density (probability of area between lower and upper bound)}
-\description{The distribution function ctpnorm finds the probability of the center of a normal density (the probability of the area between the lower a and upper bound b) while the random number generator ctrnorm samples from a restricted normal density where lgrt is the log of the distribution between the lower bound and infinity and lglt is the log of the distribution function between negative infinity and the upper bound. The sum of the exponentiated values for the two (exp(lgrt)+exp(lglt)) must sum to more than 1.}
+\title{The Central Normal Distribution
+}
+\description{Distribution function and random generation for the center (between a lower and an upper bound) of the normal distribution with mean equal to mu and standard deviation equal to sigma.
+}
 \usage{
 ctpnorm(a = -Inf, b = Inf, mu = 0, sigma = 1, log.p = TRUE, Diff = FALSE)
 ctrnorm(n,lgrt,lglt,mu=0,sigma=1)
@@ -34,7 +34,9 @@ If True the second parameter is the difference between the lower and upper bound
 }
 }
 \details{
-Finds the probability of the center of a normal density (probability of area between lower and upper bound)
+
+The distribution function ctpnorm finds the probability of the center of a normal density (the probability of the area between a lower bound \code{a} and an upper bound \code{b}) while the random number generator ctrnorm samples from a restricted normal density where lgrt is the log of the distribution between the lower bound and infinity and lglt is the log of the distribution function between negative infinity and the upper bound. The sum of the exponentiated values for the two (exp(lgrt)+exp(lglt)) must sum to more than 1.
+
 }
 \value{
 A vector of length equal to length of a}

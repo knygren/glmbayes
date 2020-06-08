@@ -2,16 +2,16 @@
 \alias{rglmb}
 %\alias{rglmb.default}
 \alias{print.rglmb}
-\alias{rnorm_gamma_reg}
+%\alias{rnorm_gamma_reg}
 \alias{glmbsim_NGauss_cpp}
 \alias{glmbsim_Gauss_cpp}
 
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Producing iid samples for Bayesian Generalized Linear Models
+Bayesian Generalized Linear Model Distributions
 }
 \description{
-\code{rglmb} is used to produce iid samples for Bayesian generalized linear models, specified by providing a data vector, a design matrix, a description of the error distribution and a multivariate normal prior
+\code{rglmb} is used to generate iid samples for Bayesian generalized linear models, specified by providing a data vector, a design matrix, a description of the error distribution and a multivariate normal prior
 }
 \usage{
 rglmb(n = 1, y, x, mu, P, wt = 1, dispersion=NULL,nu=NULL,

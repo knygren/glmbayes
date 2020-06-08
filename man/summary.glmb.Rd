@@ -1,24 +1,23 @@
 \name{summary.glmb}
 \alias{summary.glmb}
 \alias{print.summary.glmb}
-\title{
-Summarizes the output from the \code{\link{glmb}} function
-}
-\description{
-The \code{summary.glmb} function summarizes the output from the \code{\link{glmb}} function. It takes an object of class \code{glmb} as an input. The output to a large extent mirrors the output from the \code{\link{summary.glm}} function. This is particularly true for the print output from the function (i.e. the output of the function \code{\link{print.summary.glmb}}). 
-}
+\title{Summarizing Bayesian Generalized Linear Model Fits}
 \usage{
-\method{summary}{glmb}(object, ...)
-
+\method{summary}{glmb}(object,\dots)
+\method{print}{summary.glmb}(x,  \dots)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{object}{
-an object of class \code{rglmb} for which a summary is desired
+an object of class \code{glmb} for which a summary is desired
 }
+\item{x}{an object of class \code{summary.glmb} for which a printed output is desired}
   \item{\dots}{
 %%     ~~Describe \code{\dots} here~~
 }
+}
+\description{
+  These functions are all \code{\link{methods}} for class \code{glmb} or
+  \code{summary.glmb} objects.
 }
 \details{
 The \code{summary.glmb} function summarizes the output from the \code{\link{glmb}} function. Key output includes mean residuals, information related to the prior, mean coefficients with associated stats, percentiles for the coefficients, as well as the effective number of parameters and the DIC statistic.
@@ -26,8 +25,8 @@ The \code{summary.glmb} function summarizes the output from the \code{\link{glmb
 
 \value{
 %%  ~Describe the value returned
-%%  If it is a LIST, use
-A list with the following elements:
+  \code{summary.glm} returns an object of class \code{"summary.glmb"}, a
+  list with components
  \item{n }{number of draws generated}
   \item{residuals}{vector of mean deviance residuals}
   \item{coefficients1}{Matrix with the prior mean and maximum likelihood coefficients with associated standard deviations}
