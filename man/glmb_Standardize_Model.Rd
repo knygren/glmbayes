@@ -95,7 +95,7 @@ n=1000
 
 ## Appears that the type for some of these arguments are important/problematic
 
-outlist<-glmbsim_NGauss_cpp(n=as.integer(n),y=as.vector(y),
+outlist<-rnnorm_reg_cpp(n=as.integer(n),y=as.vector(y),
 x=as.matrix(x),mu=as.vector(mu),P=as.matrix(P),
 offset2=as.vector(offset2),wt=as.vector(wt),dispersion=as.numeric(dispersion2),
 famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=as.vector(start),family="binomial",

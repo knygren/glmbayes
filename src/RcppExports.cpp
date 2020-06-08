@@ -93,9 +93,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// glmbsim_NGauss_cpp
-Rcpp::List glmbsim_NGauss_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P, NumericVector offset2, NumericVector wt, double dispersion, Rcpp::List famfunc, Function f1, Function f2, Function f3, NumericVector start, std::string family, std::string link, int Gridtype);
-RcppExport SEXP _glmbayes_glmbsim_NGauss_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP offset2SEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP famfuncSEXP, SEXP f1SEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP) {
+// rnnorm_reg_cpp
+Rcpp::List rnnorm_reg_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P, NumericVector offset2, NumericVector wt, double dispersion, Rcpp::List famfunc, Function f1, Function f2, Function f3, NumericVector start, std::string family, std::string link, int Gridtype);
+RcppExport SEXP _glmbayes_rnnorm_reg_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP offset2SEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP famfuncSEXP, SEXP f1SEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -115,7 +115,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
     Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
     Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
-    rcpp_result_gen = Rcpp::wrap(glmbsim_NGauss_cpp(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype));
+    rcpp_result_gen = Rcpp::wrap(rnnorm_reg_cpp(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -152,7 +152,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_setlogP", (DL_FUNC) &_glmbayes_setlogP, 4},
     {"_glmbayes_glmb_Standardize_Model", (DL_FUNC) &_glmbayes_glmb_Standardize_Model, 5},
     {"_glmbayes_glmbsim_cpp", (DL_FUNC) &_glmbayes_glmbsim_cpp, 12},
-    {"_glmbayes_glmbsim_NGauss_cpp", (DL_FUNC) &_glmbayes_glmbsim_NGauss_cpp, 16},
+    {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 16},
     {"_glmbayes_rnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnorm_reg_cpp, 16},
     {NULL, NULL, 0}
 };

@@ -353,7 +353,7 @@ return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws);
 
 // [[Rcpp::export]]
 
-Rcpp::List glmbsim_NGauss_cpp(int n,NumericVector y,NumericMatrix x, 
+Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x, 
 NumericVector mu,NumericMatrix P,NumericVector offset2,NumericVector wt,double dispersion,Rcpp::List
 famfunc, Function f1,Function f2,Function f3,NumericVector start,
       std::string family="binomial",
