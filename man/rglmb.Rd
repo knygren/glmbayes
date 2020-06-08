@@ -4,7 +4,7 @@
 \alias{print.rglmb}
 %\alias{rnorm_gamma_reg}
 \alias{glmbsim_NGauss_cpp}
-\alias{rnorm_reg_cpp}
+%\alias{rnorm_reg_cpp}
 
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
