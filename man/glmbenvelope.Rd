@@ -1,5 +1,5 @@
-\name{glmbenvelope}
-\alias{glmbenvelope}
+\name{glmbenvelope_c}
+%\alias{glmbenvelope}
 \alias{glmbenvelope_c}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
@@ -81,7 +81,7 @@ Kjell Nygren
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{rglmb}}, \code{\link{expand.grid}}, \code{\link{optgrid}}, \code{\link{Set_Grid}}, \code{\link{setlogP}}
+\code{\link{rglmb}}, \code{\link{expand.grid}}, \code{\link{optgrid}}
 }
 \examples{
 

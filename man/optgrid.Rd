@@ -30,7 +30,7 @@ Kjell Nygren
 }
 
 \seealso{
-\code{\link{rglmb}}, \code{\link{glmbenvelope}}, \code{\link{expand.grid}}, \code{\link{Set_Grid}}, \code{\link{setlogP}}
+\code{\link{rglmb}}, \code{\link{glmbenvelope_c}}, \code{\link{expand.grid}}
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----

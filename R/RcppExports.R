@@ -5,14 +5,6 @@ glmbenvelope_c <- function(bStar, A, y, x, mu, P, alpha, wt, family = "binomial"
     .Call('_glmbayes_glmbenvelope_c', PACKAGE = 'glmbayes', bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid)
 }
 
-Set_Grid <- function(GIndex, cbars, Lint) {
-    .Call('_glmbayes_Set_Grid', PACKAGE = 'glmbayes', GIndex, cbars, Lint)
-}
-
-setlogP <- function(logP, NegLL, cbars, G3) {
-    .Call('_glmbayes_setlogP', PACKAGE = 'glmbayes', logP, NegLL, cbars, G3)
-}
-
 glmb_Standardize_Model <- function(y, x, P, bstar, A1) {
     .Call('_glmbayes_glmb_Standardize_Model', PACKAGE = 'glmbayes', y, x, P, bstar, A1)
 }

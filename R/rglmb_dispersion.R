@@ -1,7 +1,25 @@
-#rglmbdisp<-function(n,y,x,b,alpha=0,wt=1,shape,rate,family=gaussian()) UseMethod("rglmbdisp")
+#' The Bayesian Generalized Linear Model Dispersion Distribution
+#'
+#' \code{rglmb_dispersion} is used to generate iid samples for the dispersion parameter in Bayesian Generalized Linear models. 
+#' The model is specified by providing the model structure, regression coefficient, and a Gamma prior.
+#' @aliases
+#' rglmb_dispersion
+#' print.rglmb_dispersion
+#' @param n An integer
+#' @param y A vector
+#' @param x A matrix
+#' @param b A vector
+#' @param alpha A vector or a numeric constant
+#' @param wt A vector or a numeric constant
+#' @param shape A numeric prior shape constant
+#' @param rate  A numeric prior rate constant
+#' @param family A family
+#' @return The sum of \code{x} and \code{y}
+#' @examples
+#' 1+1
+#' 10+1
 
-#rglmbdisp.default<-function(n,y,x,b,alpha=0,wt=1,shape,rate,family=gaussian()){
-rglmbdisp<-function(n,y,x,b,alpha=0,wt=1,shape,rate,family=gaussian()){
+rglmb_dispersion<-function(n,y,x,b,alpha=0,wt=1,shape,rate,family=gaussian()){
     
   call <- match.call()
   
@@ -111,7 +129,7 @@ if(family$family=="Gamma")
 }
 
 
-print.rglmbdisp<-function (x, digits = max(3, getOption("digits") - 3), ...) 
+print.rglmb_dispersion<-function (x, digits = max(3, getOption("digits") - 3), ...) 
 {
   
   cat("\nCall:  ", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
@@ -125,7 +143,7 @@ print.rglmbdisp<-function (x, digits = max(3, getOption("digits") - 3), ...)
   else cat("No coefficients\n\n")
 }
 
-summary.rglmbdisp<-function(object,...){
+summary.rglmb_dispersion<-function(object,...){
   
   n<-length(object$coefficients)  
   percentiles<-matrix(0,nrow=1,ncol=7)

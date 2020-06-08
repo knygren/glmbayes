@@ -95,7 +95,7 @@ Written by Kjell Nygren.
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{glm}}, \code{\link{glmb}}, \code{\link{rglmbdisp}}, \code{\link{summary.rglmb}}
+\code{\link{glm}}, \code{\link{glmb}}, \code{\link{rglmb_dispersion}}, \code{\link{summary.rglmb}}
 }
 \examples{
 

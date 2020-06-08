@@ -29,33 +29,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// Set_Grid
-Rcpp::List Set_Grid(Rcpp::NumericMatrix GIndex, Rcpp::NumericMatrix cbars, Rcpp::NumericMatrix Lint);
-RcppExport SEXP _glmbayes_Set_Grid(SEXP GIndexSEXP, SEXP cbarsSEXP, SEXP LintSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type GIndex(GIndexSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type cbars(cbarsSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type Lint(LintSEXP);
-    rcpp_result_gen = Rcpp::wrap(Set_Grid(GIndex, cbars, Lint));
-    return rcpp_result_gen;
-END_RCPP
-}
-// setlogP
-Rcpp::List setlogP(NumericMatrix logP, NumericVector NegLL, NumericMatrix cbars, NumericMatrix G3);
-RcppExport SEXP _glmbayes_setlogP(SEXP logPSEXP, SEXP NegLLSEXP, SEXP cbarsSEXP, SEXP G3SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type logP(logPSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type NegLL(NegLLSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type cbars(cbarsSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type G3(G3SEXP);
-    rcpp_result_gen = Rcpp::wrap(setlogP(logP, NegLL, cbars, G3));
-    return rcpp_result_gen;
-END_RCPP
-}
 // glmb_Standardize_Model
 Rcpp::List glmb_Standardize_Model(NumericVector y, NumericMatrix x, NumericMatrix P, NumericMatrix bstar, NumericMatrix A1);
 RcppExport SEXP _glmbayes_glmb_Standardize_Model(SEXP ySEXP, SEXP xSEXP, SEXP PSEXP, SEXP bstarSEXP, SEXP A1SEXP) {
@@ -148,8 +121,6 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_glmbenvelope_c", (DL_FUNC) &_glmbayes_glmbenvelope_c, 13},
-    {"_glmbayes_Set_Grid", (DL_FUNC) &_glmbayes_Set_Grid, 3},
-    {"_glmbayes_setlogP", (DL_FUNC) &_glmbayes_setlogP, 4},
     {"_glmbayes_glmb_Standardize_Model", (DL_FUNC) &_glmbayes_glmb_Standardize_Model, 5},
     {"_glmbayes_glmbsim_cpp", (DL_FUNC) &_glmbayes_glmbsim_cpp, 12},
     {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 16},

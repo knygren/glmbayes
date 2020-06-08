@@ -36,7 +36,7 @@ an vector of weights to be used in the fitting process. }
 function used to calculate the negative of the log-posterior function
 }
   \item{Envelope}{
-an object of type \code{\link{glmbenvelope}}.
+an object of type \code{glmbenvelope}.
 }
   \item{family}{
 family used for simulation
@@ -64,7 +64,7 @@ Kjell Nygren
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{glmb}}, \code{\link{rglmb}}, \code{\link{glmbenvelope}}
+\code{\link{glmb}}, \code{\link{rglmb}}, \code{\link{glmbenvelope_c}}
 }
 \examples{
 

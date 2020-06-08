@@ -468,7 +468,6 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
 
 
 
-// [[Rcpp::export("Set_Grid")]]
 Rcpp::List Set_Grid(Rcpp::NumericMatrix GIndex,  Rcpp::NumericMatrix cbars, Rcpp::NumericMatrix Lint) {
 
   // Get dimensions
@@ -558,7 +557,6 @@ Rcpp::List Set_Grid(Rcpp::NumericMatrix GIndex,  Rcpp::NumericMatrix cbars, Rcpp
 }
 
 
-// [[Rcpp::export]]
 Rcpp::List   setlogP(NumericMatrix logP,NumericVector NegLL,NumericMatrix cbars,NumericMatrix G3) {
 
     int n = logP.nrow(), k = logP.ncol();

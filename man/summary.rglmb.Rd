@@ -1,6 +1,6 @@
 \name{summary.rglmb}
 \alias{summary.rglmb}
-\alias{summary.rglmbdisp}
+\alias{summary.rglmb_dispersion}
 \alias{print.summary.rglmb}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
