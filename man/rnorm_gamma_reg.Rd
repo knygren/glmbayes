@@ -29,8 +29,8 @@ rnorm_gamma_reg(n, y, x, mu, P, nu, V, offset2 = NULL, wt = 1)
 The sum of \code{x} and \code{y}
 }
 \description{
-Computes the Deviance Information Criterion for a fitted Bayesian
-Generalized Linear Model
+\code{rnorm_gamma_reg} is used to generate iid samples from Bayesian linear models with a normal-gamma prior. 
+The model is specified by providing a data vector, a design matrix, and 4 prior constants.
 }
 \examples{
 1+1

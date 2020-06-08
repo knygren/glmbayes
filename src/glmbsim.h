@@ -13,6 +13,6 @@ Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,NumericMatrix mu,N
 
 Rcpp::List glmbsim_NGauss_cpp(int n,NumericVector y,NumericMatrix x,NumericVector mu,NumericMatrix P,NumericVector offset2,NumericVector wt,double dispersion,Rcpp::List famfunc, Function f1,Function f2,Function f3,NumericVector start,std::string family="binomial",std::string link="logit",int Gridtype=2);
 
-Rcpp::List glmbsim_Gauss_cpp(int n,NumericVector y,NumericMatrix x, NumericVector mu,NumericMatrix P,NumericVector offset2,NumericVector wt,double dispersion,Rcpp::List famfunc, Function f1,Function f2,Function f3,NumericVector start,std::string family="binomial",std::string link="logit",int Gridtype=2);
+Rcpp::List rnorm_reg_cpp(int n,NumericVector y,NumericMatrix x, NumericVector mu,NumericMatrix P,NumericVector offset2,NumericVector wt,double dispersion,Rcpp::List famfunc, Function f1,Function f2,Function f3,NumericVector start,std::string family="binomial",std::string link="logit",int Gridtype=2);
 
 

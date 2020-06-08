@@ -536,7 +536,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
 // [[Rcpp::export]]
 
-Rcpp::List glmbsim_Gauss_cpp(int n,NumericVector y,NumericMatrix x, 
+Rcpp::List rnorm_reg_cpp(int n,NumericVector y,NumericMatrix x, 
 NumericVector mu,NumericMatrix P,NumericVector offset2,NumericVector wt,double dispersion,Rcpp::List
 famfunc, Function f1,Function f2,Function f3,NumericVector start,
       std::string family="binomial",
