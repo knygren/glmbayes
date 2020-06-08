@@ -144,7 +144,6 @@ NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,Numer
 
 
 
-// [[Rcpp::export]]
 arma::mat  f3_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  

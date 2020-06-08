@@ -223,7 +223,6 @@ NumericVector  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix 
 
 
 
-// [[Rcpp::export]]
 arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  
@@ -442,7 +441,6 @@ NumericVector  f2_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix
 
 
 
-// [[Rcpp::export]]
 arma::mat  f3_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  
@@ -668,7 +666,6 @@ NumericVector  f2_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatri
 
 
 
-// [[Rcpp::export]]
 arma::mat  f3_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  

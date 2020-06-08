@@ -154,7 +154,6 @@ NumericVector  f2_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,Numeric
 
 
 
-// [[Rcpp::export]]
 arma::mat  f3_gamma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
  

@@ -56,113 +56,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// f3_gamma
-arma::mat f3_gamma(NumericMatrix b, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, int progbar);
-RcppExport SEXP _glmbayes_f3_gamma(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP progbarSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type b(bSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f3_gamma(b, y, x, mu, P, alpha, wt, progbar));
-    return rcpp_result_gen;
-END_RCPP
-}
-// f3_binomial_logit
-arma::mat f3_binomial_logit(NumericMatrix b, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, int progbar);
-RcppExport SEXP _glmbayes_f3_binomial_logit(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP progbarSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type b(bSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f3_binomial_logit(b, y, x, mu, P, alpha, wt, progbar));
-    return rcpp_result_gen;
-END_RCPP
-}
-// f3_binomial_probit
-arma::mat f3_binomial_probit(NumericMatrix b, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, int progbar);
-RcppExport SEXP _glmbayes_f3_binomial_probit(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP progbarSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type b(bSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f3_binomial_probit(b, y, x, mu, P, alpha, wt, progbar));
-    return rcpp_result_gen;
-END_RCPP
-}
-// f3_binomial_cloglog
-arma::mat f3_binomial_cloglog(NumericMatrix b, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, int progbar);
-RcppExport SEXP _glmbayes_f3_binomial_cloglog(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP progbarSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type b(bSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f3_binomial_cloglog(b, y, x, mu, P, alpha, wt, progbar));
-    return rcpp_result_gen;
-END_RCPP
-}
-// f3_gaussian
-arma::mat f3_gaussian(NumericMatrix b, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericMatrix alpha, NumericVector wt);
-RcppExport SEXP _glmbayes_f3_gaussian(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type b(bSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    rcpp_result_gen = Rcpp::wrap(f3_gaussian(b, y, x, mu, P, alpha, wt));
-    return rcpp_result_gen;
-END_RCPP
-}
-// f3_poisson
-arma::mat f3_poisson(NumericMatrix b, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, int progbar);
-RcppExport SEXP _glmbayes_f3_poisson(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP progbarSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type b(bSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
-    rcpp_result_gen = Rcpp::wrap(f3_poisson(b, y, x, mu, P, alpha, wt, progbar));
-    return rcpp_result_gen;
-END_RCPP
-}
 // glmb_Standardize_Model
 Rcpp::List glmb_Standardize_Model(NumericVector y, NumericMatrix x, NumericMatrix P, NumericMatrix bstar, NumericMatrix A1);
 RcppExport SEXP _glmbayes_glmb_Standardize_Model(SEXP ySEXP, SEXP xSEXP, SEXP PSEXP, SEXP bstarSEXP, SEXP A1SEXP) {
@@ -257,12 +150,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_glmbenvelope_c", (DL_FUNC) &_glmbayes_glmbenvelope_c, 13},
     {"_glmbayes_Set_Grid", (DL_FUNC) &_glmbayes_Set_Grid, 3},
     {"_glmbayes_setlogP", (DL_FUNC) &_glmbayes_setlogP, 4},
-    {"_glmbayes_f3_gamma", (DL_FUNC) &_glmbayes_f3_gamma, 8},
-    {"_glmbayes_f3_binomial_logit", (DL_FUNC) &_glmbayes_f3_binomial_logit, 8},
-    {"_glmbayes_f3_binomial_probit", (DL_FUNC) &_glmbayes_f3_binomial_probit, 8},
-    {"_glmbayes_f3_binomial_cloglog", (DL_FUNC) &_glmbayes_f3_binomial_cloglog, 8},
-    {"_glmbayes_f3_gaussian", (DL_FUNC) &_glmbayes_f3_gaussian, 7},
-    {"_glmbayes_f3_poisson", (DL_FUNC) &_glmbayes_f3_poisson, 8},
     {"_glmbayes_glmb_Standardize_Model", (DL_FUNC) &_glmbayes_glmb_Standardize_Model, 5},
     {"_glmbayes_glmbsim_cpp", (DL_FUNC) &_glmbayes_glmbsim_cpp, 12},
     {"_glmbayes_glmbsim_NGauss_cpp", (DL_FUNC) &_glmbayes_glmbsim_NGauss_cpp, 16},

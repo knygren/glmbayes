@@ -1,6 +1,6 @@
-#' Negative Log-Posterior for a Bayesian Generalized Linear Model
+#' Gradient for the Negative Log-Posterior of a Bayesian Generalized Linear Model
 #'
-#' @param b a matrix where each row represents a point at which Negative Log-Posterior is to be calculated
+#' @param b a matrix where each row represents a point at which Gradient for the Negative Log-Posterior is to be calculated
 #' @param y A vector
 #' @param x A matrix
 #' @param alpha A vector
@@ -14,7 +14,7 @@
 #' 10+1
 
 
-Neg_Log_Posterior<-function(b, y, x,mu,P, alpha, wt,family){
+Neg_LP_Gradient<-function(b, y, x,mu,P, alpha, wt,family){
   
   ## Add required checks on other inputs at the top
   
@@ -59,7 +59,7 @@ Neg_Log_Posterior<-function(b, y, x,mu,P, alpha, wt,family){
          domain = NA)
   }
   
-  return(f2(b, y, x, mu,P, alpha, wt)) 
+  return(f3(b, y, x, mu,P, alpha, wt)) 
 
 }
 

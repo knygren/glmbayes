@@ -334,13 +334,13 @@ List glmbenvelope_c(NumericVector bStar,NumericMatrix A,
     
     //    NegLL_2.print("Value of NegLL_2 after f4_binomial_logit");  
     
-    //    Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+        Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
     NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,1);  
     
     //    NegLL_2.print("Value of NegLL_2 after f2_binomial_logit");  
     
     
-    //        Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+            Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
     
     // This might point cbars2 to a different part of memory so cbars does not get updated
     cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,1);

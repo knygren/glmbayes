@@ -7,7 +7,7 @@
 Neg_Log_Posterior(b, y, x, mu, P, alpha, wt, family)
 }
 \arguments{
-\item{b}{a matrix where each row represents a point at which Negative Log-Likelihood is to be calculated}
+\item{b}{a matrix where each row represents a point at which Negative Log-Posterior is to be calculated}
 
 \item{y}{A vector}
 

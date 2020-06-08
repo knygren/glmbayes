@@ -129,7 +129,6 @@ NumericVector  f2_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,Nume
 
 
 
-// [[Rcpp::export]]
 arma::mat  f3_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericMatrix alpha,NumericVector wt)
 {
  
