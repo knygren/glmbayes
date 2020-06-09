@@ -51,7 +51,7 @@ An object of class \code{"rglmbdisp"} is a list containing at least the followin
 The model is specified by providing the model structure, regression coefficient, and a Gamma prior.
 }
 \details{
-The \code{rglmb} function produces iid samples for Bayesian generalized linear 
+The \code{rglmb_dispersion} function produces iid samples for Bayesian generalized linear 
 models. It has a more minimialistic interface than than the \code{\link{glmb}} 
 function. Core required inputs for the function include the data vector, the design  
 matrix and a prior specification. In addition, the dispersion parameter must 
@@ -75,8 +75,4 @@ to build the enveloping function. See \code{\link{EnvelopeBuild_c}} for details.
 Depending on the selection, the time to build the envelope and the acceptance rate 
 during the simulation process may vary. The returned value \code{iters} contains the 
 number of candidates generated before acceptance for each draw.
-}
-\examples{
-1+1
-10+1
 }

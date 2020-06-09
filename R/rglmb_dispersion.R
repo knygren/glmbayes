@@ -22,7 +22,7 @@
 #' An object of class \code{"rglmbdisp"} is a list containing at least the following components:
 #' \item{dispersion}{an \code{n} by \code{1} matrix with simulated values for the dispersion}
 #' \item{Prior}{A list with two components. The first being the prior mean vector and the second the prior precision matrix}
-#' @details The \code{rglmb} function produces iid samples for Bayesian generalized linear 
+#' @details The \code{rglmb_dispersion} function produces iid samples for Bayesian generalized linear 
 #' models. It has a more minimialistic interface than than the \code{\link{glmb}} 
 #' function. Core required inputs for the function include the data vector, the design  
 #' matrix and a prior specification. In addition, the dispersion parameter must 
@@ -46,9 +46,7 @@
 #' Depending on the selection, the time to build the envelope and the acceptance rate 
 #' during the simulation process may vary. The returned value \code{iters} contains the 
 #' number of candidates generated before acceptance for each draw.
-#' @examples
-#' 1+1
-#' 10+1
+#' @example inst/examples/Ex_rglmb_dispersion.R
 
 rglmb_dispersion<-function(n,y,x,b,alpha=0,wt=1,shape,rate,family=gaussian()){
     

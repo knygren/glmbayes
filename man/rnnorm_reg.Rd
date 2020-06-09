@@ -46,7 +46,7 @@ rnnorm_reg(
 
 \item{start}{an optional argument providing starting values for the posterior mode optimization.}
 
-\item{Gridtype}{an optional argument specifying the method used to determine number of likelihood subgradient densities used to construct the enveloping function.}
+\item{Gridtype}{an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.}
 }
 \value{
 \code{rnnorm_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 
@@ -69,7 +69,7 @@ An object of class \code{"rglmb"} is a list containing at least the following co
 The model is specified by providing a data vector, a design matrix, and 2 prior constants.
 }
 \details{
-The \code{rglmb} function produces iid samples for Bayesian generalized linear 
+The \code{rnnorm_reg} function produces iid samples for Bayesian generalized linear 
 models. It has a more minimialistic interface than than the \code{\link{glmb}} 
 function. Core required inputs for the function include the data vector, the design  
 matrix and a prior specification. In addition, the dispersion parameter must 

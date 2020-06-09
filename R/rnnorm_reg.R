@@ -17,7 +17,7 @@
 #' @param family a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
 #' @param offset2 this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
 #' @param start an optional argument providing starting values for the posterior mode optimization.
-#' @param Gridtype an optional argument specifying the method used to determine number of likelihood subgradient densities used to construct the enveloping function.
+#' @param Gridtype an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.
 #' @return \code{rnnorm_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
@@ -32,7 +32,7 @@
 #' \item{Envelope}{an object of class \code{"envelope"}  }
 #' \item{dispersion}{the dispersion parameter used in the model}
 #' \item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
-#' @details The \code{rglmb} function produces iid samples for Bayesian generalized linear 
+#' @details The \code{rnnorm_reg} function produces iid samples for Bayesian generalized linear 
 #' models. It has a more minimialistic interface than than the \code{\link{glmb}} 
 #' function. Core required inputs for the function include the data vector, the design  
 #' matrix and a prior specification. In addition, the dispersion parameter must 

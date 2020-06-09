@@ -27,7 +27,7 @@
 #' \item{Envelope}{an object of class \code{"envelope"}  }
 #' \item{dispersion}{the dispersion parameter used in the model}
 #' \item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
-#' @details The \code{rglmb} function produces iid samples for Bayesian generalized linear 
+#' @details The \code{rnorm_reg} function produces iid samples for Bayesian generalized linear 
 #' models. It has a more minimialistic interface than than the \code{\link{glmb}} 
 #' function. Core required inputs for the function include the data vector, the design  
 #' matrix and a prior specification. In addition, the dispersion parameter must 
@@ -51,9 +51,7 @@
 #' Depending on the selection, the time to build the envelope and the acceptance rate 
 #' during the simulation process may vary. The returned value \code{iters} contains the 
 #' number of candidates generated before acceptance for each draw.
-#' @examples
-#' 1+1
-#' 10+1
+#' @example inst/examples/Ex_rnorm_reg.R
 
 
 rnorm_reg<-function(n=1,y,x,mu,P,wt=1,dispersion=1,offset2=NULL)

@@ -1,3 +1,64 @@
+#' The Bayesian Generalized Linear Model Distribution
+#'
+#' \code{rglmb} is used to generate iid samples from Non-Gaussian Bayesian Generalized Linear Models with a normal prior. 
+#' The model is specified by providing a data vector, a design matrix, and 2 prior constants.
+#' @aliases
+#' rglmb
+#' print.rglmb
+#' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
+#' @param y a vector of observations of length \code{m}.
+#' @param x a design matrix of dimension \code{m * p}.
+#' @param mu a vector of length \code{p} giving the prior means of the variables in the design matrix.
+#' @param P a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior precision matrix of the variable.
+#' @param wt an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
+#' @param dispersion the dispersion parameter. Either a single numerical value or NULL (the default). Must be provided here, use \code{\link{rnorm_gamma_reg}} to give the dispersion a prior.
+#' @param nu Prior shape parameter for the dispersion parameter (gaussian model only).
+#' @param V Prior rate parameter for the dispersion parameter (gaussian model only).
+#' @param family a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
+#' @param offset2 this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
+#' @param start an optional argument providing starting values for the posterior mode optimization.
+#' @param Gridtype an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.
+#' @return \code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
+#' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
+#' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
+#' \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
+#' various useful features of the value returned by \code{\link{rglmb}}.
+#' An object of class \code{"rglmb"} is a list containing at least the following components:
+#' \item{coefficients}{a \code{n} by \code{length(mu)} matrix with one sample in each row}
+#' \item{PostMode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
+#' \item{Prior}{A list with two components. The first being the prior mean vector and the second the prior precision matrix}
+#' \item{iters}{an \code{n} by \code{1} matrix giving the number of candidates generated before acceptance for each sample.}
+#' \item{famfunc}{an object of class \code{"famfunc"}}
+#' \item{Envelope}{an object of class \code{"envelope"}  }
+#' \item{dispersion}{the dispersion parameter used in the model}
+#' \item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
+#' @details The \code{rglmb} function produces iid samples for Bayesian generalized linear 
+#' models. It has a more minimialistic interface than than the \code{\link{glmb}} 
+#' function. Core required inputs for the function include the data vector, the design  
+#' matrix and a prior specification. In addition, the dispersion parameter must 
+#' currently be provided for the gaussian, Gamma, quasipoisson, and quasibinomial 
+#' families (future implementations may incorporate a prior for these into the 
+#' \code{rglmb} function).
+#' 
+#' Current implemented models include the gaussian family (identity link function), the
+#' poisson and quasipoisson families (log link function), the gamma family (log link 
+#' function), as well as the binomial and quasibinomial families (logit, probit, and 
+#' cloglog link functions).  The function returns the simulated Bayesian coefficients 
+#' and some associated outputs.
+#' 
+#' For the gaussian family, iid samples from the posterior density are genererated using 
+#' standard simulation procedures for multivariate normal densities. For all other 
+#' families, the samples are generated using accept-reject procedures by leveraging the 
+#' likelihood subgradient approach of Nygren and Nygren (2006). This approach relies on
+#' tight enveloping functions that bound the posterior density from above. The Gridtype 
+#' parameter is used to select the method used for determining the size of a Grid used 
+#' to build the enveloping function. See \code{\link{EnvelopeBuild_c}} for details. 
+#' Depending on the selection, the time to build the envelope and the acceptance rate 
+#' during the simulation process may vary. The returned value \code{iters} contains the 
+#' number of candidates generated before acceptance for each draw.
+#' @example inst/examples/Ex_rglmb.R
+
+
 rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=3)
   {
   
