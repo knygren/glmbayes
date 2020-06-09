@@ -1,5 +1,5 @@
-\name{glmbsim_cpp}
-\alias{glmbsim_cpp}
+\name{rnnorm_reg_std_cpp}
+\alias{rnnorm_reg_std_cpp}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Simulates from the posterior density of a model in standard form
@@ -8,30 +8,28 @@ Simulates from the posterior density of a model in standard form
 Simulates from the posterior density of a model in standard form
 }
 \usage{
-glmbsim_cpp(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link,progbar)
+rnnorm_reg_std_cpp(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link,progbar)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{n}{
-number of draws to generate from posterior density. If length(n) > 1, the length is taken 
-to be the number required.
+number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
 }
   \item{y}{
-a vector of observations of length m
+a vector of observations of length \code{m}.
 }
   \item{x}{
-a design matrix of dimension m*p
+a design matrix of dimension \code{m * p}.
 }
   \item{mu}{
-a vector giving the prior means of the variables.
+a vector of length \code{p} giving the prior means of the variables in the design matrix.
 }
   \item{P}{
-a positive-definite symmetric matrix specifying the prior precision matrix of the variables.
-}
+a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior precision matrix of the variable.}
   \item{alpha}{
-an Offset vector}
+this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.}
   \item{wt}{
-an vector of weights to be used in the fitting process. }
+an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector. }
   \item{f2}{
 function used to calculate the negative of the log-posterior function
 }
@@ -39,10 +37,11 @@ function used to calculate the negative of the log-posterior function
 an object of type \code{glmbenvelope}.
 }
   \item{family}{
-family used for simulation
+family used for simulation. Used that this is different from the family used in other functions.
 }
   \item{link}{
-link function used for simulation}
+link function used for simulation.
+}
   \item{progbar}{dummy for flagging if a progressbar should be produced during the call}
 
 }
@@ -51,7 +50,7 @@ Simulates from the posterior density of a model in standard form
 }
 \value{
 A list consisting of the following:
-\item{out}{A matrix with simulated draws from a model in standard form. Each row represents on draw from the density}
+\item{out}{A matrix with simulated draws from a model in standard form. Each row represents one draw from the density}
 \item{draws}{A vector with the number of candidates required before acceptance for each draw}
 }
 \references{
@@ -186,7 +185,7 @@ Env2
 ### May be better to call an R function wrapper that checks (and converts when possible) 
 ##  to correct types
 
-sim=glmbsim_cpp(n=as.integer(n),y=as.vector(y),x=as.matrix(x2),mu=as.matrix(mu2,ncol=1),
+sim=rnnorm_reg_std_cpp(n=as.integer(n),y=as.vector(y),x=as.matrix(x2),mu=as.matrix(mu2,ncol=1),
 P=as.matrix(P2),alpha=as.vector(alpha),wt=as.vector(wt2),
 f2=f2,Envelope=Env2,family="binomial",link="logit")
 

@@ -14,7 +14,7 @@
 #' 10+1
 
 
-Neg_LP_Gradient<-function(b, y, x,mu,P, alpha, wt,family){
+Neg_logPost_Gradient<-function(b, y, x,mu,P, alpha, wt,family){
   
   ## Add required checks on other inputs at the top
   

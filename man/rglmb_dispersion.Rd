@@ -18,23 +18,23 @@ rglmb_dispersion(
 )
 }
 \arguments{
-\item{n}{An integer}
+\item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
 
-\item{y}{A vector}
+\item{y}{a vector of observations of length \code{m}.}
 
-\item{x}{A matrix}
+\item{x}{a design matrix of dimension \code{m * p}.}
 
-\item{b}{A vector}
+\item{b}{a vector of estimated regression parameters. Typically the output of a single draw using \code{\link{rglmb}} during block-Gibbs sampling.}
 
-\item{alpha}{A vector or a numeric constant}
+\item{alpha}{this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.}
 
-\item{wt}{A vector or a numeric constant}
+\item{wt}{an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.}
 
-\item{shape}{A numeric prior shape constant}
+\item{shape}{Prior shape parameter for the dispersion parameter.}
 
-\item{rate}{A numeric prior rate constant}
+\item{rate}{Prior rate parameter for the dispersion parameter.}
 
-\item{family}{A family}
+\item{family}{a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)}
 }
 \value{
 The sum of \code{x} and \code{y}

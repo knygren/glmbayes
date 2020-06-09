@@ -17,7 +17,7 @@ lower bound}
   \item{b}{
 upper bound}
   \item{n}{
-number of draws to generate}
+number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required}
   \item{lgrt}{
 log of the distribution function between the lower bound and infinity}
   \item{lglt}{
@@ -49,7 +49,7 @@ Kjell Nygren
 
 
 \seealso{
-\code{\link{glmbsim_cpp}}
+\code{\link{rnnorm_reg_std_cpp}}
 }
 \examples{
 

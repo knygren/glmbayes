@@ -1,10 +1,12 @@
-#' Negative Log-Likelihood for a Generalized Linear Model
+#' Negative Log-Posterior for a Bayesian Generalized Linear Model
 #'
-#' @param b a matrix where each row represents a point at which Negative Log-Likelihood is to be calculated
+#' @param b a matrix where each row represents a point at which Negative Log-Posterior is to be calculated
 #' @param y A vector
 #' @param x A matrix
 #' @param alpha A vector
 #' @param wt A vector
+#' @param mu A vector
+#' @param P A matrix
 #' @param family A family
 #' @return The sum of \code{x} and \code{y}
 #' @examples
@@ -12,7 +14,7 @@
 #' 10+1
 
 
-Neg_LL<-function(b, y, x, alpha, wt,family){
+Neg_logPost<-function(b, y, x,mu,P, alpha, wt,family){
   
   ## Add required checks on other inputs at the top
   
@@ -40,8 +42,8 @@ Neg_LL<-function(b, y, x, alpha, wt,family){
       f1<-famfunc$f1
       f2<-famfunc$f2
       f3<-famfunc$f3
-#      f5<-famfunc$f5
-#      f6<-famfunc$f6
+    #  f5<-famfunc$f5
+    #  f6<-famfunc$f6
     }
     else{
       stop(gettextf("link \"%s\" not available for selected family; available links are %s", 
@@ -57,7 +59,7 @@ Neg_LL<-function(b, y, x, alpha, wt,family){
          domain = NA)
   }
   
-  return(f1(b, y, x, alpha, wt)) 
+  return(f2(b, y, x, mu,P, alpha, wt)) 
 
 }
 

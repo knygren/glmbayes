@@ -5,15 +5,15 @@
 #' @aliases
 #' rglmb_dispersion
 #' print.rglmb_dispersion
-#' @param n An integer
-#' @param y A vector
-#' @param x A matrix
-#' @param b A vector
-#' @param alpha A vector or a numeric constant
-#' @param wt A vector or a numeric constant
-#' @param shape A numeric prior shape constant
-#' @param rate  A numeric prior rate constant
-#' @param family A family
+#' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
+#' @param y a vector of observations of length \code{m}.
+#' @param x a design matrix of dimension \code{m * p}.
+#' @param b a vector of estimated regression parameters. Typically the output of a single draw using \code{\link{rglmb}} during block-Gibbs sampling.
+#' @param alpha this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
+#' @param wt an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
+#' @param shape Prior shape parameter for the dispersion parameter.
+#' @param rate  Prior rate parameter for the dispersion parameter.
+#' @param family a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
 #' @return The sum of \code{x} and \code{y}
 #' @examples
 #' 1+1

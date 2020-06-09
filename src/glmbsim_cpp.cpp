@@ -215,7 +215,7 @@ Rcpp::List glmb_Standardize_Model(
 
 // [[Rcpp::export]]
 
-Rcpp::List  glmbsim_cpp(int n,NumericVector y,NumericMatrix x,
+Rcpp::List  rnnorm_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
 NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,
 Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
 {
@@ -487,7 +487,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
     // Run simulation 
     
-    Rcpp::List sim=glmbsim_cpp(n,y,x2_temp,mu2_temp,P2_temp,alpha,wt2,
+    Rcpp::List sim=rnnorm_reg_std_cpp(n,y,x2_temp,mu2_temp,P2_temp,alpha,wt2,
                                f2,Envelope,family,link);
     
         

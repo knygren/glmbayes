@@ -5,14 +5,14 @@
 #' @aliases
 #' rnorm_reg
 #' rnorm_reg_cpp
-#' @param n An integer
-#' @param y A vector
-#' @param x A matrix
-#' @param mu A vector
-#' @param P A matrix
-#' @param offset2 A vector
-#' @param wt A vector or a numeric constant
-#' @param dispersion A vector or a numeric constant
+#' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
+#' @param y a vector of observations of length \code{m}.
+#' @param x a design matrix of dimension \code{m * p}.
+#' @param mu a vector of length \code{p} giving the prior means of the variables in the design matrix.
+#' @param P a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior precision matrix of the variable.
+#' @param offset2 this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
+#' @param wt an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
+#' @param dispersion the dispersion parameter. Either a single numerical value or NULL (the default). Must be provided here. Use \code{\link{rnorm_gamma_reg}} or Block-Gibbs sampling using \code{\link{rglmb_dispersion}} to give the dispersion a prior.
 #' @return The sum of \code{x} and \code{y}
 #' @examples
 #' 1+1

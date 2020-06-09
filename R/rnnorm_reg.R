@@ -5,19 +5,19 @@
 #' @aliases
 #' rnnorm_reg
 #' rnnorm_reg_cpp
-#' @param n An integer
-#' @param y A vector
-#' @param x A matrix
-#' @param mu A vector
-#' @param P A matrix
-#' @param wt A vector or a numeric constant
-#' @param dispersion A vector or a numeric constant
-#' @param nu An optional numeric constant
-#' @param V An optional numeric constant
-#' @param family A family
-#' @param offset2 A vector or a numeric constant
-#' @param start A vector
-#' @param Gridtype An integer
+#' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
+#' @param y a vector of observations of length \code{m}.
+#' @param x a design matrix of dimension \code{m * p}.
+#' @param mu a vector of length \code{p} giving the prior means of the variables in the design matrix.
+#' @param P a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior precision matrix of the variable.
+#' @param wt an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
+#' @param dispersion the dispersion parameter. Either a single numerical value or NULL (the default). Must be provided here, use \code{\link{rnorm_gamma_reg}} to give the dispersion a prior.
+#' @param nu Prior shape parameter for the dispersion parameter (gaussian model only).
+#' @param V Prior rate parameter for the dispersion parameter (gaussian model only).
+#' @param family a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
+#' @param offset2 this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
+#' @param start an optional argument providing starting values for the posterior mode optimization.
+#' @param Gridtype an optional argument specifying the method used to determine number of likelihood subgradient densities used to construct the enveloping function.
 #' @return The sum of \code{x} and \code{y}
 #' @examples
 #' 1+1

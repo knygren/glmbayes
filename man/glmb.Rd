@@ -1,7 +1,12 @@
 \name{glmb}
 \alias{glmb}
+%\alias{glmb.fit}
 \alias{print.glmb}
 \title{Fitting Bayesian Generalized Linear Models}
+\concept{regression}
+\concept{logistic}
+\concept{log-linear}
+\concept{loglinear}
 \description{
 \code{glmb} is used to fit Bayesian generalized linear models, specified by giving a symbolic description of the linear predictor, a description of the error distribution, and a multivariate normal prior.
 }
@@ -9,48 +14,45 @@
 glmb(n,formula,family=binomial,dispersion=NULL,mu,Sigma,nu=NULL,V=NULL,
 Gridtype=1,data,weights,subset2,na.action,start=NULL,etastart,mustart,
 offset,control=list(...),model=TRUE,method="glm.fit",x=FALSE,y =TRUE,
-contrasts = NULL,...)
+contrasts = NULL,\ldots)
 }
 \arguments{
   \item{n}{
-number of draws to generate from posterior density. If length(n) > 1, the length is taken to be the number required.
+number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
 }
   \item{formula}{
-an object of class formula (or one that can be coerced to that class): a symbolic 
-description of the model to be fitted. The details of model specification are given under 
-Details.}
+an object of class \code{"\link{formula}"} (or one that can be coerced to that class): a symbolic 
+description of the model to be fitted. The details of model specification are given under \sQuote{Details}.}
   \item{family}{
 a description of the error distribution and link function to be used in the model. This can be a 
-character string naming a family function, a family function or the result of a call to a family 
-function. (See family for details of family functions.)
+character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
 }
   \item{dispersion}{
 the dispersion parameter for the family used. Either a single numerical value or NULL (the default). Must be provided for all
 families other than the Poisson and Binomial.
 }
-  \item{mu}{
-a vector giving the prior means of the variables}
+  \item{mu}{a vector of length \code{p} giving the prior means of the variables in the design matrix.}
   \item{Sigma}{
-a positive-definite symmetric matrix specifying the prior covariance matrix of the variables.}
-\item{nu}{ Optional prior information for dispersion parameter (gaussian model only)}
-\item{V}{ Optional prior information for dispersion parameter (gaussian model only)}
+a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior covariance matrix of the variables.}
+\item{nu}{Optional prior shape parameter for the dispersion parameter (gaussian model only)}
+\item{V}{Optional prior rate parameter for the dispersion parameter (gaussian and gamma model only)}
   \item{Gridtype}{
-an optional argument specifying the method used to determine number of likelihood subgradient 
+an optional argument specifying the method used to determine the number of likelihood subgradient 
 densities used to construct the enveloping function.
 }
   \item{data}{
-an optional data frame, list or environment (or object coercible by as.data.frame to a data frame)
-containing the variables in the model. If not found in data, the variables are taken from environment
-(formula), typically the environment from which glm is called.}
+an optional data frame, list or environment (or object coercible by \code{\link{as.data.frame}} to a data frame)
+containing the variables in the model. If not found in \code{data}, the variables are taken from \code{environment
+(formula)}, typically the environment from which \code{glm} is called.}
   \item{weights}{
-an optional vector of prior weights to be used in the fitting process. Should be NULL or a numeric 
+an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric 
 vector.}
   \item{subset2}{
 an optional vector specifying a subset of observations to be used in the fitting process.}
   \item{na.action}{
-a function which indicates what should happen when the data contain NAs. The default is set 
-by the na.action setting of options, and is na.fail if that is unset. The factory-fresh 
-default is na.omit. Another possible value is NULL, no action. Value na.exclude can be useful.}
+a function which indicates what should happen when the data contain \code{NAs}. The default is set 
+by the \code{na.action} setting of \code{options}, and is \code{\link{na.fail}} if that is unset. The \sQuote{factory-fresh} 
+default is \code{NULL}, no action. Value \code{\link{na.exclude}} can be useful.}
   \item{start}{
 starting values for the parameters in the linear predictor.
 }
@@ -60,22 +62,21 @@ starting values for the linear predictor.}
 starting values for the vector of means.
 }
   \item{offset}{
-this can be used to specify an a priori known component to be included in the linear predictor during
- fitting. This should be NULL or a numeric vector of length equal to the number of cases. One or more 
-offset terms can be included in the formula instead or as well, and if more than one is specified their 
-sum is used. See model.offset.}
+this can be used to specify an \emph{a priori} known component to be included in the linear predictor during
+ fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their 
+sum is used. See \code{\link{model.offset}}.}
   \item{control}{
-a list of parameters for controlling the fitting process.
+a list of parameters for controlling the fitting process. 
 }
   \item{model}{
-a logical value indicating whether model frame should be included as a component of the returned value.
+a logical value indicating whether \emph{model frame} should be included as a component of the returned value.
 }
   \item{method}{
-the method to be used in fitting the model. The default method glm.fit uses iteratively reweighted least 
-squares (IWLS): the alternative model.frame returns the model frame and does no fitting.
+the method to be used in fitting the model. The default method \code{glm.fit} uses iteratively reweighted least 
+squares (IWLS): the alternative \code{"model.frame"} returns the model frame and does no fitting.
 User-supplied fitting functions can be supplied either as a function or a character string naming a function, 
-with a function which takes the same arguments as glm.fit. If specified as a character string it is looked up from 
-within the stats namespace. 
+with a function which takes the same arguments as \code{glm.fit}. If specified as a character string it is looked up from 
+within the \pkg{stats} namespace. 
 }
   \item{x,y}{
 logical values indicating whether the response vector and model matrix used in the fitting process should be 

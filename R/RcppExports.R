@@ -9,8 +9,8 @@ glmb_Standardize_Model <- function(y, x, P, bstar, A1) {
     .Call('_glmbayes_glmb_Standardize_Model', PACKAGE = 'glmbayes', y, x, P, bstar, A1)
 }
 
-glmbsim_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar = 1L) {
-    .Call('_glmbayes_glmbsim_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
+rnnorm_reg_std_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar = 1L) {
+    .Call('_glmbayes_rnnorm_reg_std_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
 }
 
 rnnorm_reg_cpp <- function(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L) {
