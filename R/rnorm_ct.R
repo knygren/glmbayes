@@ -1,4 +1,4 @@
-ctrnorm<-function(n,lgrt,lglt,mu=0,sigma=1)
+rnorm_ct<-function(n,lgrt,lglt,mu=0,sigma=1)
 {
 
 if(is.numeric(lgrt)==FALSE||is.numeric(lglt)==FALSE||is.numeric(mu)==FALSE||is.numeric(sigma)==FALSE){stop("Non-numeric argument to mathematical function")}

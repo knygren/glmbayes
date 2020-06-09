@@ -8,7 +8,7 @@
 
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Bayesian Generalized Linear Model Distributions
+The Bayesian Generalized Linear Model Distribution
 }
 \description{
 \code{rglmb} is used to generate iid samples for Bayesian generalized linear models, specified by providing a data vector, a design matrix, a description of the error distribution and a multivariate normal prior

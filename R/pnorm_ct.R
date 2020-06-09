@@ -1,4 +1,4 @@
-ctpnorm<-function(a=-Inf,b=Inf,mu=0,sigma=1,log.p=TRUE,Diff=FALSE){
+pnorm_ct<-function(a=-Inf,b=Inf,mu=0,sigma=1,log.p=TRUE,Diff=FALSE){
 
 if(is.vector(a)==FALSE||is.vector(b)==FALSE){stop("Arguments a and b must be vectors")}
 if(is.numeric(a)==FALSE||is.numeric(b)==FALSE||is.numeric(mu)==FALSE||is.numeric(sigma)==FALSE){stop("Non-numeric argument to mathematical function")}

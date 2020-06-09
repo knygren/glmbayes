@@ -1,14 +1,14 @@
-\name{ctpnorm}
-\alias{ctpnorm}
-\alias{ctrnorm}
+\name{Normal_ct}
+\alias{pnorm_ct}
+\alias{rnorm_ct}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{The Central Normal Distribution
 }
 \description{Distribution function and random generation for the center (between a lower and an upper bound) of the normal distribution with mean equal to mu and standard deviation equal to sigma.
 }
 \usage{
-ctpnorm(a = -Inf, b = Inf, mu = 0, sigma = 1, log.p = TRUE, Diff = FALSE)
-ctrnorm(n,lgrt,lglt,mu=0,sigma=1)
+pnorm_ct(a = -Inf, b = Inf, mu = 0, sigma = 1, log.p = TRUE, Diff = FALSE)
+rnorm_ct(n,lgrt,lglt,mu=0,sigma=1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -53,10 +53,10 @@ Kjell Nygren
 }
 \examples{
 
-ctpnorm(0.2,0.4)
-exp(ctpnorm(0.2,0.4))
-ctpnorm(0.2,0.4,log.p=FALSE)
-log(ctpnorm(0.2,0.4,log.p=FALSE))
+pnorm_ct(0.2,0.4)
+exp(pnorm_ct(0.2,0.4))
+pnorm_ct(0.2,0.4,log.p=FALSE)
+log(pnorm_ct(0.2,0.4,log.p=FALSE))
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

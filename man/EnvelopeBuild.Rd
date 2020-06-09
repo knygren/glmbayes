@@ -3,7 +3,7 @@
 \alias{EnvelopeBuild_c}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Constructs Enveloping function for simulation
+Builds Envelope function for simulation
 }
 \description{
 Constructs Enveloping function for simulation

@@ -3,7 +3,7 @@
 \name{rnnorm_reg}
 \alias{rnnorm_reg}
 \alias{rnnorm_reg_cpp}
-\title{Bayesian Non-Gaussian Generalized Linear Model Distributions}
+\title{The Bayesian Non-Gaussian Generalized Linear Model Distribution}
 \usage{
 rnnorm_reg(
   n = 1,

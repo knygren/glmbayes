@@ -4,7 +4,7 @@
 \alias{print.summary.rglmb}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Summarizes the output from the \code{\link{rglmb}} function
+Summarizes Bayesian Generalized Linear Model Distributions \code{\link{rglmb}} function
 }
 \description{
 The \code{summary.rglmb} function summarizes the output from the \code{\link{rglmb}} function. It takes an object of class \code{rglmb} as an input. The output to a large extent mirrors the output from the \code{\link{summary.glm}} function. This is particularly true for the print output from the function (i.e. the output of the function \code{\link{print.summary.rglmb}}).

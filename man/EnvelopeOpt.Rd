@@ -2,7 +2,7 @@
 \alias{EnvelopeOpt}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Optimizes the grid for the envelope
+Optimizes Envelope function for simulation
 }
 \description{
 Optimizes the grid for the envelope
