@@ -72,7 +72,7 @@ a list of parameters for controlling the fitting process.
 a logical value indicating whether \emph{model frame} should be included as a component of the returned value.
 }
   \item{method}{
-the method to be used in fitting the model. The default method \code{glm.fit} uses iteratively reweighted least 
+the method to be used in fitting the classical model during a call to \code{\link{glm}}. The default method \code{glm.fit} uses iteratively reweighted least 
 squares (IWLS): the alternative \code{"model.frame"} returns the model frame and does no fitting.
 User-supplied fitting functions can be supplied either as a function or a character string naming a function, 
 with a function which takes the same arguments as \code{glm.fit}. If specified as a character string it is looked up from 
@@ -92,7 +92,11 @@ arguments to be used to form the default control argument if it is not supplied 
 \details{
 The function \code{glmb} is a Bayesian version of the classical \code{\link{glm}} function.  Setup of the models mirrors those for the \code{\link{glm}} function but add additional required arguments \code{mu} and \code{Sigma}, representing a multivariate normal prior. In addition, the dispersion parameter must currently be provided for the gaussian, Gamma, quasipoisson, and quasibinomial families (future implementations may incoporate priors for these into the \code{glmb} function).  The function generates random iid samples from the posterior density associated with the model (assuming a fixed dispersion parameter). 
 
-For the gaussian family, iid samples from the posterior density is genererated using standard simulation procedures for multivariate normal densities. For all other families, the samples are generated using accept-reject procedures by leveraging the likelihood subgradient approach of Nygren and Nygren (2006). Current implemented models include the gaussian family (identity link function), the poisson and quasipoisson families (log link function), the gamma family (log link function), as well as the binomial and quasibinomial families (logit, probit, and cloglog link functions).  
+Current implemented models include the gaussian family (identity link function), the poisson and quasipoisson families (log link function), the gamma family (log link function), as well as the binomial and quasibinomial families (logit, probit, and cloglog link functions).
+
+The function returns the output from a call to the function \code{\link{glm}} as well as the simulated Bayesian coefficients and associated outputs. In addition, the function returns model diagnostic information related to the \code{DIC}, a Bayesian Information Criterion similar to the \code{AIC} for classical models. See \code{\link{glmbdic}} for details.  
+
+For the gaussian family, iid samples from the posterior density are genererated using standard simulation procedures for multivariate normal densities. For all other families, the samples are generated using accept-reject procedures by leveraging the likelihood subgradient approach of Nygren and Nygren (2006). This approach relies on tight enveloping functions that bound the posterior density from above. The Gridtype parameter is used to select the method used for determining the size of a Grid used to build the enveloping function. See \code{\link{EnvelopeBuild_c}} for details. Depending on the selection, the time to build the envelope and the acceptance rate during the simulation process may vary. The returned value \code{iters} contains the number of candidates generated before acceptance for each draw.
 
 }
 \value{

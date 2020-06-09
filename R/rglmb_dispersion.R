@@ -14,7 +14,38 @@
 #' @param shape Prior shape parameter for the dispersion parameter.
 #' @param rate  Prior rate parameter for the dispersion parameter.
 #' @param family a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
-#' @return The sum of \code{x} and \code{y}
+#' @return \code{rglmb_dispersion} returns a object of class \code{"rglmbdisp"}.  The function \code{summary} 
+#' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
+#' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
+#' \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
+#' various useful features of the value returned by \code{\link{rglmb_dispersion}}.
+#' An object of class \code{"rglmbdisp"} is a list containing at least the following components:
+#' \item{dispersion}{an \code{n} by \code{1} matrix with simulated values for the dispersion}
+#' \item{Prior}{A list with two components. The first being the prior mean vector and the second the prior precision matrix}
+#' @details The \code{rglmb} function produces iid samples for Bayesian generalized linear 
+#' models. It has a more minimialistic interface than than the \code{\link{glmb}} 
+#' function. Core required inputs for the function include the data vector, the design  
+#' matrix and a prior specification. In addition, the dispersion parameter must 
+#' currently be provided for the gaussian, Gamma, quasipoisson, and quasibinomial 
+#' families (future implementations may incorporate a prior for these into the 
+#' \code{rglmb} function).
+#' 
+#' Current implemented models include the gaussian family (identity link function), the
+#' poisson and quasipoisson families (log link function), the gamma family (log link 
+#' function), as well as the binomial and quasibinomial families (logit, probit, and 
+#' cloglog link functions).  The function returns the simulated Bayesian coefficients 
+#' and some associated outputs.
+#' 
+#' For the gaussian family, iid samples from the posterior density is genererated using 
+#' standard simulation procedures for multivariate normal densities. For all other 
+#' families, the samples are generated using accept-reject procedures by leveraging the 
+#' likelihood subgradient approach of Nygren and Nygren (2006). This approach relies on
+#' tight enveloping functions that bound the posterior density from above. The Gridtype 
+#' parameter is used to select the method used for determining the size of a Grid used 
+#' to build the enveloping function. See \code{\link{EnvelopeBuild_c}} for details. 
+#' Depending on the selection, the time to build the envelope and the acceptance rate 
+#' during the simulation process may vary. The returned value \code{iters} contains the 
+#' number of candidates generated before acceptance for each draw.
 #' @examples
 #' 1+1
 #' 10+1
@@ -118,7 +149,7 @@ if(family$family=="Gamma")
   
 }
   
-  outlist=list(coefficients=out,Prior=list(shape=shape,rate=rate))
+  outlist=list(dispersion=out,Prior=list(shape=shape,rate=rate))
 
   outlist$call<-match.call()
   
@@ -135,9 +166,9 @@ print.rglmb_dispersion<-function (x, digits = max(3, getOption("digits") - 3), .
   cat("\nCall:  ", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
       "\n\n", sep = "")
   if (length(coef(x))) {
-    cat("Simulated Coefficients")
+    cat("Simulated Dispersion")
     cat(":\n")
-    print.default(format(x$coefficients, digits = digits), 
+    print.default(format(x$dispersion, digits = digits), 
                   print.gap = 2, quote = FALSE)
   }
   else cat("No coefficients\n\n")
@@ -145,13 +176,14 @@ print.rglmb_dispersion<-function (x, digits = max(3, getOption("digits") - 3), .
 
 summary.rglmb_dispersion<-function(object,...){
   
-  n<-length(object$coefficients)  
+  n<-length(object$dispersion)  
   percentiles<-matrix(0,nrow=1,ncol=7)
-  se<-sqrt(var(object$coefficients))
+  me=mean(object$dispersion)
+  se<-sqrt(var(object$dispersion))
   mc<-se/n
   Priorwt<-(se/(sqrt(object$Prior$shape)/object$Prior$rate))^2
-    percentiles[1,]<-quantile(object$coefficients,probs=c(0.01,0.025,0.05,0.5,0.95,0.975,0.99))
-    test<-append(object$coefficients,object$Prior$shape/object$Prior$rate)
+    percentiles[1,]<-quantile(object$dispersion,probs=c(0.01,0.025,0.05,0.5,0.95,0.975,0.99))
+    test<-append(object$dispersion,object$Prior$shape/object$Prior$rate)
     test2<-rank(test)
     priorrank<-test2[n+1]
    pval1<-priorrank/(n+1)
@@ -163,7 +195,7 @@ summary.rglmb_dispersion<-function(object,...){
               )
   TAB<-cbind(
     #"Post.Mode"=as.numeric(object$PostMode),
-    "Post.Mean"=mean(coef(object)),
+    "Post.Mean"=me,
     "Post.Sd"=se,
     "MC Error"=as.numeric(mc)
     ,"Pr(tail)"=as.numeric(pval2)

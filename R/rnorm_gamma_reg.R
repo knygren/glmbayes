@@ -15,7 +15,7 @@
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
 #' \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
-#' various useful features of the value returned by \code{\link{rglmb}}.
+#' various useful features of the value returned by \code{\link{rnorm_gamma_reg}}.
 #' An object of class \code{"rglmb"} is a list containing at least the following components:
 #' \item{coefficients}{a \code{n} by \code{length(mu)} matrix with one sample in each row}
 #' \item{PostMode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
@@ -23,8 +23,32 @@
 #' \item{iters}{an \code{n} by \code{1} matrix giving the number of candidates generated before acceptance for each sample.}
 #' \item{famfunc}{an object of class \code{"famfunc"}}
 #' \item{Envelope}{an object of class \code{"envelope"}  }
-#' \item{dispersion}{the dispersion parameter used in the model}
+#' \item{dispersion}{an \code{n} by \code{1} matrix with simulated values for the dispersion}
 #' \item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
+#' @details The \code{rglmb} function produces iid samples for Bayesian generalized linear 
+#' models. It has a more minimialistic interface than than the \code{\link{glmb}} 
+#' function. Core required inputs for the function include the data vector, the design  
+#' matrix and a prior specification. In addition, the dispersion parameter must 
+#' currently be provided for the gaussian, Gamma, quasipoisson, and quasibinomial 
+#' families (future implementations may incorporate a prior for these into the 
+#' \code{rglmb} function).
+#' 
+#' Current implemented models include the gaussian family (identity link function), the
+#' poisson and quasipoisson families (log link function), the gamma family (log link 
+#' function), as well as the binomial and quasibinomial families (logit, probit, and 
+#' cloglog link functions).  The function returns the simulated Bayesian coefficients 
+#' and some associated outputs.
+#' 
+#' For the gaussian family, iid samples from the posterior density is genererated using 
+#' standard simulation procedures for multivariate normal densities. For all other 
+#' families, the samples are generated using accept-reject procedures by leveraging the 
+#' likelihood subgradient approach of Nygren and Nygren (2006). This approach relies on
+#' tight enveloping functions that bound the posterior density from above. The Gridtype 
+#' parameter is used to select the method used for determining the size of a Grid used 
+#' to build the enveloping function. See \code{\link{EnvelopeBuild_c}} for details. 
+#' Depending on the selection, the time to build the envelope and the acceptance rate 
+#' during the simulation process may vary. The returned value \code{iters} contains the 
+#' number of candidates generated before acceptance for each draw.
 #' @examples
 #' 1+1
 #' 10+1

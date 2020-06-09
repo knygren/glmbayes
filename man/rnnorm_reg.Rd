@@ -49,7 +49,7 @@ rnnorm_reg(
 \item{Gridtype}{an optional argument specifying the method used to determine number of likelihood subgradient densities used to construct the enveloping function.}
 }
 \value{
-\code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
+\code{rnnorm_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 
 (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
 \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
@@ -68,7 +68,60 @@ An object of class \code{"rglmb"} is a list containing at least the following co
 \code{rnnorm_reg} is used to generate iid samples from Non-Gaussian Bayesian Generalized Linear Models with a normal prior. 
 The model is specified by providing a data vector, a design matrix, and 2 prior constants.
 }
+\details{
+The \code{rglmb} function produces iid samples for Bayesian generalized linear 
+models. It has a more minimialistic interface than than the \code{\link{glmb}} 
+function. Core required inputs for the function include the data vector, the design  
+matrix and a prior specification. In addition, the dispersion parameter must 
+currently be provided for the gaussian, Gamma, quasipoisson, and quasibinomial 
+families (future implementations may incorporate a prior for these into the 
+\code{rglmb} function).
+
+Current implemented models include the gaussian family (identity link function), the
+poisson and quasipoisson families (log link function), the gamma family (log link 
+function), as well as the binomial and quasibinomial families (logit, probit, and 
+cloglog link functions).  The function returns the simulated Bayesian coefficients 
+and some associated outputs.
+
+For the gaussian family, iid samples from the posterior density are genererated using 
+standard simulation procedures for multivariate normal densities. For all other 
+families, the samples are generated using accept-reject procedures by leveraging the 
+likelihood subgradient approach of Nygren and Nygren (2006). This approach relies on
+tight enveloping functions that bound the posterior density from above. The Gridtype 
+parameter is used to select the method used for determining the size of a Grid used 
+to build the enveloping function. See \code{\link{EnvelopeBuild_c}} for details. 
+Depending on the selection, the time to build the envelope and the acceptance rate 
+during the simulation process may vary. The returned value \code{iters} contains the 
+number of candidates generated before acceptance for each draw.
+}
 \examples{
-1+1
-10+1
+data(menarche)
+
+summary(menarche)
+plot(Menarche/Total ~ Age, data=menarche)
+
+Age2=menarche$Age-13
+
+x<-matrix(as.numeric(1.0),nrow=length(Age2),ncol=2)
+x[,2]=Age2
+
+y=menarche$Menarche/menarche$Total
+wt=menarche$Total
+
+mu<-matrix(as.numeric(0.0),nrow=2,ncol=1)
+mu[2,1]=(log(0.9/0.1)-log(0.5/0.5))/3
+
+V1<-1*diag(as.numeric(2.0))
+
+# 2 standard deviations for prior estimate at age 13 between 0.1 and 0.9
+## Specifies uncertainty around the point estimates
+
+V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
+V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
+
+out<-rglmb(n = 1000, y=y, x=x, mu=mu, P=solve(V1), wt = wt, 
+           family = binomial(logit), Gridtype = 3) 
+summary(out)
+
+mean(out$iters)
 }
