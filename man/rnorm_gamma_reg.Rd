@@ -26,7 +26,20 @@ rnorm_gamma_reg(n, y, x, mu, P, nu, V, offset2 = NULL, wt = 1)
 \item{wt}{an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.}
 }
 \value{
-The sum of \code{x} and \code{y}
+\code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
+(i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
+The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
+\code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
+various useful features of the value returned by \code{\link{rglmb}}.
+An object of class \code{"rglmb"} is a list containing at least the following components:
+\item{coefficients}{a \code{n} by \code{length(mu)} matrix with one sample in each row}
+\item{PostMode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
+\item{Prior}{A list with two components. The first being the prior mean vector and the second the prior precision matrix}
+\item{iters}{an \code{n} by \code{1} matrix giving the number of candidates generated before acceptance for each sample.}
+\item{famfunc}{an object of class \code{"famfunc"}}
+\item{Envelope}{an object of class \code{"envelope"}  }
+\item{dispersion}{the dispersion parameter used in the model}
+\item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
 }
 \description{
 \code{rnorm_gamma_reg} is used to generate iid samples from Bayesian linear models with a normal-gamma prior. 

@@ -67,17 +67,17 @@ For the gaussian family, iid samples from the posterior density is genererated u
 
 }
 \value{
-\code{rglmb} returns a object of class "rglmb".  The function \code{summary} (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a 
-summary of the results.  The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}}, \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract various useful features of the value returned by \code{\link{rglmb}}.
-An object of class "rglmb" is a list containing at least the following components:
-  \item{coefficients}{an n by length(mu) matrix with one sample in each row}
-  \item{PostMode}{a vector of length(mu) with the estimated posterior mode coefficients}
+\code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
+(i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.  The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}}, \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract various useful features of the value returned by \code{\link{rglmb}}.
+An object of class \code{"rglmb"} is a list containing at least the following components:
+  \item{coefficients}{a \code{n} by \code{length(mu)} matrix with one sample in each row}
+  \item{PostMode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
   \item{Prior}{A list with two components. The first being the prior mean vector and the second the prior precision matrix}
-  \item{iters}{an n by 1 matrix giving the number of candidates generated before acceptance for each sample.}
-  \item{famfunc}{an object of class famfunc}
-  \item{Envelope}{an object of class envelope}
-  \item{dispersion}{the dispersion parameter used in the model}
-  \item{loglike}{an n by 1 matrix containing the negative loglikelihood for each sample.}
+  \item{iters}{a \code{n} by \code{1} matrix giving the number of candidates generated before acceptance for each sample.}
+  \item{famfunc}{an object of class \code{"famfunc"}}
+  \item{Envelope}{an object of class \code{"envelope"}  }
+  \item{dispersion}{the dispersion parameter used in the model. A single value for most models but a \code{n} by \code{1} matrix if the dispersion is given a prior for the gaussian model}
+  \item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
 }
 \references{
 Nygren, K.N, and Nygren, L.M, Likelihood Subgradient Densities.  Journal of the American Statistical Association.

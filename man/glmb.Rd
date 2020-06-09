@@ -96,24 +96,23 @@ For the gaussian family, iid samples from the posterior density is genererated u
 
 }
 \value{
-\code{glmb} returns an object of class "glmb". The function \code{summary} (i.e., \code{\link{summary.glmb}}) can be used to obtain or print a 
-summary of the results.  The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}}, \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to
-extract various useful features of the value returned by code{\link{glmb}}.
-An object of class "glmb" is a list containing at least the following components:
+\code{glmb} returns an object of class \code{"glmb"}. The function \code{summary} (i.e., \code{\link{summary.glmb}}) can be used to obtain or print a summary of the results.  The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}}, \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract various useful features of the value returned by code{\link{glmb}}.
 
-\item{glm}{a object of class glm containing the output from a call to the function glm}
-\item{coefficients}{an n by length(mu) matrix with one sample in each row}
-\item{coef.means}{a vector of length(mu) with the estimated posterior mean coefficients}
-\item{coef.mode}{a vector of length(mu) with the estimated posterior mode coefficients}
-\item{fitted.values}{an n by length(y) matrix with one sample for the mean values in each row}
-\item{linear.predictors}{an n by length(y) matrix with one sample for the linear fit on the link scale in each row}
-\item{deviance}{an n by 1 matrix with one sample for the deviance in each row}
-\item{pD}{Estimate for effective number of parameters}
+An object of class \code{"glmb"} is a list containing at least the following components:
+
+\item{glm}{an object of class \code{"glm"} containing the output from a call to the function \code{\link{glm}} }
+\item{coefficients}{a matrix of dimension \code{n} by \code{length(mu)} with one sample in each row}
+\item{coef.means}{a vector of \code{length(mu)} with the estimated posterior mean coefficients}
+\item{coef.mode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
+\item{fitted.values}{a maytix of dimension \code{n} by \code{length(y)} with one sample for the mean fitted values in each row}
+\item{linear.predictors}{an \code{n} by \code{length(y)} matrix with one sample for the linear fit on the link scale in each row}
+\item{deviance}{an \code{n} by \code{1} matrix with one sample for the deviance in each row}
+\item{pD}{An Estimate for the effective number of parameters}
 \item{Dbar}{Expected value for minus twice the log-likelihood function}
-\item{Dthetabar}{Value of minus twice the log-likelihood function evaluated at mean value for coefficients}
+\item{Dthetabar}{Value of minus twice the log-likelihood function evaluated at the mean value for the coefficients}
 \item{DIC}{Estimated Deviance Information criterion}
 \item{famfunc}{Family functions used during estimation process}
-\item{iters}{an n by 1 matrix giving the number of candidates generated before acceptance for each sample.}
+\item{iters}{an \code{n} by \code{1} matrix giving the number of candidates generated before acceptance for each sample.}
 }
 
 

@@ -18,7 +18,20 @@
 #' @param offset2 this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
 #' @param start an optional argument providing starting values for the posterior mode optimization.
 #' @param Gridtype an optional argument specifying the method used to determine number of likelihood subgradient densities used to construct the enveloping function.
-#' @return The sum of \code{x} and \code{y}
+#' @return \code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
+#' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
+#' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
+#' \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
+#' various useful features of the value returned by \code{\link{rglmb}}.
+#' An object of class \code{"rglmb"} is a list containing at least the following components:
+#' \item{coefficients}{a \code{n} by \code{length(mu)} matrix with one sample in each row}
+#' \item{PostMode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
+#' \item{Prior}{A list with two components. The first being the prior mean vector and the second the prior precision matrix}
+#' \item{iters}{an \code{n} by \code{1} matrix giving the number of candidates generated before acceptance for each sample.}
+#' \item{famfunc}{an object of class \code{"famfunc"}}
+#' \item{Envelope}{an object of class \code{"envelope"}  }
+#' \item{dispersion}{the dispersion parameter used in the model}
+#' \item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
 #' @examples
 #' 1+1
 #' 10+1
