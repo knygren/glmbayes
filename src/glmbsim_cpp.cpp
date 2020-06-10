@@ -350,7 +350,8 @@ return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws);
 
 }
 
-
+//' @rdname rglmb
+//' @order 2   
 // [[Rcpp::export]]
 
 Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x, 

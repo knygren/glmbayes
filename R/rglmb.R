@@ -2,9 +2,12 @@
 #'
 #' \code{rglmb} is used to generate iid samples from Non-Gaussian Bayesian Generalized Linear Models with a normal prior. 
 #' The model is specified by providing a data vector, a design matrix, and 2 prior constants.
+#' @name 
+#' rglmb
 #' @aliases
 #' rglmb
 #' print.rglmb
+#' rnnorm_reg_cpp
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
 #' @param y a vector of observations of length \code{m}.
 #' @param x a design matrix of dimension \code{m * p}.
@@ -18,6 +21,12 @@
 #' @param offset2 this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
 #' @param start an optional argument providing starting values for the posterior mode optimization.
 #' @param Gridtype an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.
+#' @param famfunc an object of class \code{\link{glmbfamfunc}} that typically is the result
+#' of a call to the function glmbfamfunc. 
+#' @param f1 Negative log-likelihood function for model of interest.
+#' @param f2 Negative log-posterior function for model of interest.
+#' @param f3 Gradient function of negative log-posterior for the model of interest.
+#' @param link link function for the model of interest.
 #' @param digits the number of significant digits to use when printing.
 #' @param \ldots additional optional arguments.
 #' @return \code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
@@ -45,7 +54,7 @@
 #' Current implemented models include the gaussian family (identity link function), the
 #' poisson and quasipoisson families (log link function), the gamma family (log link 
 #' function), as well as the binomial and quasibinomial families (logit, probit, and 
-#' cloglog link functions).  The function returns the simulated Bayesian coefficients 
+#' cloglog link functions). The function returns the simulated Bayesian coefficients 
 #' and some associated outputs.
 #' 
 #' For the gaussian family, iid samples from the posterior density are genererated using 
@@ -85,6 +94,9 @@
 #' 
 #' @example inst/examples/Ex_rglmb.R
 
+
+#' @rdname rglmb
+#' @order 1
 
 rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=3)
   {
@@ -209,6 +221,7 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=gaussian
 }
 
 #' @rdname rglmb
+#' @order 3
 #' @method print rglmb
 
 
