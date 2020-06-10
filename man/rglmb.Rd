@@ -4,6 +4,7 @@
 \alias{rglmb}
 \alias{print.rglmb}
 \alias{rnnorm_reg_cpp}
+\alias{rnorm_reg_cpp}
 \title{The Bayesian Generalized Linear Model Distribution}
 \usage{
 rglmb(
@@ -23,6 +24,25 @@ rglmb(
 )
 
 rnnorm_reg_cpp(
+  n,
+  y,
+  x,
+  mu,
+  P,
+  offset2,
+  wt,
+  dispersion,
+  famfunc,
+  f1,
+  f2,
+  f3,
+  start,
+  family = "binomial",
+  link = "logit",
+  Gridtype = 2L
+)
+
+rnorm_reg_cpp(
   n,
   y,
   x,

@@ -8,6 +8,7 @@
 #' rglmb
 #' print.rglmb
 #' rnnorm_reg_cpp
+#' rnorm_reg_cpp
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
 #' @param y a vector of observations of length \code{m}.
 #' @param x a design matrix of dimension \code{m * p}.
@@ -221,7 +222,7 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=gaussian
 }
 
 #' @rdname rglmb
-#' @order 3
+#' @order 4
 #' @method print rglmb
 
 

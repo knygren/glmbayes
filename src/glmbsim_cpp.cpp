@@ -535,6 +535,8 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 }
 
 
+//' @rdname rglmb
+//' @order 3   
 // [[Rcpp::export]]
 
 Rcpp::List rnorm_reg_cpp(int n,NumericVector y,NumericMatrix x, 
