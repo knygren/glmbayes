@@ -47,29 +47,14 @@ The model is specified by providing a data vector, a design matrix, and 4 prior 
 }
 \details{
 The \code{rnorm_gamma} function produces iid samples for Bayesian generalized linear 
-models. It has a more minimialistic interface than than the \code{\link{glmb}} 
-function. Core required inputs for the function include the data vector, the design  
-matrix and a prior specification. In addition, the dispersion parameter must 
-currently be provided for the gaussian, Gamma, quasipoisson, and quasibinomial 
-families (future implementations may incorporate a prior for these into the 
-\code{rglmb} function).
+models from the gaussian family (identity link) with a conjugate multivariate normal-gamma prior
+for the regression coefficients and the dispersion (variance).
+See Raiffa and Schlaifer (1961) for details on conjugate priors. 
 
-Current implemented models include the gaussian family (identity link function), the
-poisson and quasipoisson families (log link function), the gamma family (log link 
-function), as well as the binomial and quasibinomial families (logit, probit, and 
-cloglog link functions).  The function returns the simulated Bayesian coefficients 
-and some associated outputs.
-
-For the gaussian family, iid samples from the posterior density is genererated using 
-standard simulation procedures for multivariate normal densities. For all other 
-families, the samples are generated using accept-reject procedures by leveraging the 
-likelihood subgradient approach of Nygren and Nygren (2006). This approach relies on
-tight enveloping functions that bound the posterior density from above. The Gridtype 
-parameter is used to select the method used for determining the size of a Grid used 
-to build the enveloping function. See \code{\link{EnvelopeBuild_c}} for details. 
-Depending on the selection, the time to build the envelope and the acceptance rate 
-during the simulation process may vary. The returned value \code{iters} contains the 
-number of candidates generated before acceptance for each draw.
+Core required inputs for the function include the data vector, the design  
+matrix and a prior specification. The function returns the simulated Bayesian coefficients 
+and some associated outputs. The iid samples from the posterior density is genererated using 
+standard simulation procedures for multivariate normal and gamma distributions.
 }
 \examples{
 data(menarche)
@@ -101,4 +86,29 @@ out<-rglmb(n = 1000, y=y, x=x, mu=mu, P=solve(V1), wt = wt,
 summary(out)
 
 mean(out$iters)
+}
+\references{
+Dobson, A. J. (1990)
+\emph{An Introduction to Generalized Linear Models.}
+London: Chapman and Hall.
+
+Hastie, T. J. and Pregibon, D. (1992)
+\emph{Generalized linear models.}
+Chapter 6 of \emph{Statistical Models in S}
+eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
+McCullagh P. and Nelder, J. A. (1989)
+\emph{Generalized Linear Models.}
+London: Chapman and Hall.
+
+Nygren, K.N. and Nygren, L.M (2006)
+Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
+vol.101, no.475, pp 1144-1156.
+
+Raiffa, Howard and Schlaifer, R (1961)
+\emph{Applied Statistical Decision Theory.}
+Boston: Clinton Press, Inc.
+
+Venables, W. N. and Ripley, B. D. (2002)
+\emph{Modern Applied Statistics with S.}
+New York: Springer.
 }

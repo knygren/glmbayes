@@ -1,14 +1,11 @@
 #' Extract Log-Likelihood
 #'
-#' This function is a method function for the \code{glmb} class used to Extract the
-#' Log-Likelihood from a Bayesian Generalized Linear Model.
+#' This function is a method function for the \code{"glmb"} class used to 
+#' Extract the log-Likelihood from a Bayesian Generalized Linear Model.
 #' @param object an object of class \code{glmb}, typically the result of a call to \link{glmb}
 #' @param ... further arguments to or from other methods
-#' @return The sum of \code{x} and \code{y}
-#' @examples
-#' 1+1
-#' 10+1
-
+#' @return The function returns a vector, \code{logLikout} with the estimated log-likelihood for each draw. 
+#' @example inst/examples/Ex_logLik.glmb.R
 
 
 logLik.glmb<-function(object,...){

@@ -51,30 +51,18 @@ An object of class \code{"rglmbdisp"} is a list containing at least the followin
 The model is specified by providing the model structure, regression coefficient, and a Gamma prior.
 }
 \details{
-The \code{rglmb_dispersion} function produces iid samples for Bayesian generalized linear 
-models. It has a more minimialistic interface than than the \code{\link{glmb}} 
-function. Core required inputs for the function include the data vector, the design  
-matrix and a prior specification. In addition, the dispersion parameter must 
-currently be provided for the gaussian, Gamma, quasipoisson, and quasibinomial 
-families (future implementations may incorporate a prior for these into the 
-\code{rglmb} function).
+The \code{rglmb_dispersion} function produces iid samples for 
+the dispersion parameter in Bayesian generalized linear models (gaussian and Gamma families
+only). Core required inputs for the function include the data vector, the design  
+matrix, an estimate for the regression coefficients, and a prior gamma distribution specification. 
+The function returns the simulated Bayesian conditional dispersion and the prior specification.
+The most practical use of this function is likely to be in conjunction with the 
+\code{\link{rglmb}} function as part of block Gibbs sampling procedues.
 
-Current implemented models include the gaussian family (identity link function), the
-poisson and quasipoisson families (log link function), the gamma family (log link 
-function), as well as the binomial and quasibinomial families (logit, probit, and 
-cloglog link functions).  The function returns the simulated Bayesian coefficients 
-and some associated outputs.
-
-For the gaussian family, iid samples from the posterior density is genererated using 
-standard simulation procedures for multivariate normal densities. For all other 
-families, the samples are generated using accept-reject procedures by leveraging the 
-likelihood subgradient approach of Nygren and Nygren (2006). This approach relies on
-tight enveloping functions that bound the posterior density from above. The Gridtype 
-parameter is used to select the method used for determining the size of a Grid used 
-to build the enveloping function. See \code{\link{EnvelopeBuild_c}} for details. 
-Depending on the selection, the time to build the envelope and the acceptance rate 
-during the simulation process may vary. The returned value \code{iters} contains the 
-number of candidates generated before acceptance for each draw.
+For the gaussian family, iid samples from the posterior density are genererated using 
+standard simulation procedures for gamma distributions. For the Gamma family,  
+, the samples are generated using accept-reject procedures by leveraging the 
+likelihood subgradient approach of Nygren and Nygren (2006).
 }
 \examples{
 data(menarche)

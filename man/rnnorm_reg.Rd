@@ -69,27 +69,28 @@ An object of class \code{"rglmb"} is a list containing at least the following co
 The model is specified by providing a data vector, a design matrix, and 2 prior constants.
 }
 \details{
-The \code{rnnorm_reg} function produces iid samples for Bayesian generalized linear 
-models. It has a more minimialistic interface than than the \code{\link{glmb}} 
-function. Core required inputs for the function include the data vector, the design  
+The functions \code{rnnorm_reg} and \code{rnnorm_reg_cpp}
+produce iid samples for non-gaussian Bayesian generalized linear models,
+with the former being a safe version of the latter with additional overhead that checks for 
+validity and consistency of inputs while also assigning the \code{"rglmb"} class
+to the resulting output.
+
+Core required inputs for the two functions include the data vector, the design  
 matrix and a prior specification. In addition, the dispersion parameter must 
-currently be provided for the gaussian, Gamma, quasipoisson, and quasibinomial 
+currently be provided for the Gamma, quasipoisson, and quasibinomial 
 families (future implementations may incorporate a prior for these into the 
 \code{rglmb} function).
 
-Current implemented models include the gaussian family (identity link function), the
-poisson and quasipoisson families (log link function), the gamma family (log link 
-function), as well as the binomial and quasibinomial families (logit, probit, and 
-cloglog link functions).  The function returns the simulated Bayesian coefficients 
-and some associated outputs.
+Current implemented models for the two functions include the poisson and quasipoisson families 
+(log link function), the gamma family (log link function), as well as the binomial and 
+quasibinomial families (logit, probit, and cloglog link functions).  The function returns the 
+simulated Bayesian coefficients and some associated outputs.
 
-For the gaussian family, iid samples from the posterior density are genererated using 
-standard simulation procedures for multivariate normal densities. For all other 
-families, the samples are generated using accept-reject procedures by leveraging the 
-likelihood subgradient approach of Nygren and Nygren (2006). This approach relies on
-tight enveloping functions that bound the posterior density from above. The Gridtype 
-parameter is used to select the method used for determining the size of a Grid used 
-to build the enveloping function. See \code{\link{EnvelopeBuild_c}} for details. 
+For these models, iid samples from the posterior density are genererated using 
+accept-reject procedures by leveraging the likelihood subgradient approach of Nygren 
+and Nygren (2006). This approach relies on tight enveloping functions that bound the 
+posterior density from above. The Gridtype parameter is used to select the method used 
+for determining the size of a Grid used to build the enveloping function. See \code{\link{EnvelopeBuild_c}} for details. 
 Depending on the selection, the time to build the envelope and the acceptance rate 
 during the simulation process may vary. The returned value \code{iters} contains the 
 number of candidates generated before acceptance for each draw.
@@ -119,9 +120,34 @@ V1<-1*diag(as.numeric(2.0))
 V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
 V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
 
-out<-rglmb(n = 1000, y=y, x=x, mu=mu, P=solve(V1), wt = wt, 
+out<-rnnorm_reg(n = 1000, y=y, x=x, mu=mu, P=solve(V1), wt = wt, 
            family = binomial(logit), Gridtype = 3) 
 summary(out)
 
 mean(out$iters)
+}
+\references{
+Dobson, A. J. (1990)
+\emph{An Introduction to Generalized Linear Models.}
+London: Chapman and Hall.
+
+Hastie, T. J. and Pregibon, D. (1992)
+\emph{Generalized linear models.}
+Chapter 6 of \emph{Statistical Models in S}
+eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
+McCullagh P. and Nelder, J. A. (1989)
+\emph{Generalized Linear Models.}
+London: Chapman and Hall.
+
+Nygren, K.N. and Nygren, L.M (2006)
+Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
+vol.101, no.475, pp 1144-1156.
+
+Raiffa, Howard and Schlaifer, R (1961)
+\emph{Applied Statistical Decision Theory.}
+Boston: Clinton Press, Inc.
+
+Venables, W. N. and Ripley, B. D. (2002)
+\emph{Modern Applied Statistics with S.}
+New York: Springer.
 }

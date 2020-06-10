@@ -20,6 +20,8 @@ rglmb(
   start = NULL,
   Gridtype = 3
 )
+
+\method{print}{rglmb}(x, digits = max(3, getOption("digits") - 3), ...)
 }
 \arguments{
 \item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
@@ -47,6 +49,10 @@ rglmb(
 \item{start}{an optional argument providing starting values for the posterior mode optimization.}
 
 \item{Gridtype}{an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.}
+
+\item{digits}{the number of significant digits to use when printing.}
+
+\item{\ldots}{additional optional arguments.}
 }
 \value{
 \code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
@@ -124,4 +130,29 @@ out<-rglmb(n = 1000, y=y, x=x, mu=mu, P=solve(V1), wt = wt,
 summary(out)
 
 mean(out$iters)
+}
+\references{
+Dobson, A. J. (1990)
+\emph{An Introduction to Generalized Linear Models.}
+London: Chapman and Hall.
+
+Hastie, T. J. and Pregibon, D. (1992)
+\emph{Generalized linear models.}
+Chapter 6 of \emph{Statistical Models in S}
+eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
+McCullagh P. and Nelder, J. A. (1989)
+\emph{Generalized Linear Models.}
+London: Chapman and Hall.
+
+Nygren, K.N. and Nygren, L.M (2006)
+Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
+vol.101, no.475, pp 1144-1156.
+
+Raiffa, Howard and Schlaifer, R (1961)
+\emph{Applied Statistical Decision Theory.}
+Boston: Clinton Press, Inc.
+
+Venables, W. N. and Ripley, B. D. (2002)
+\emph{Modern Applied Statistics with S.}
+New York: Springer.
 }

@@ -3,10 +3,9 @@
 #' These functions are all \link{methods} for class \code{glmb} or \code{summary.glmb} objects.
 #' @param object an object of class \code{glmb}, typically the result of a call to \link{glmb}
 #' @param ... further arguments to or from other methods
-#' @return The sum of \code{x} and \code{y}
-#' @examples
-#' 1+1
-#' 10+1
+#' @return A matrix \code{DevRes} of dimension \code{n} times \code{p} containing
+#' the Deviance residuals for each draw.
+#' @example inst/examples/Ex_residuals.glmb.R
 
 residuals.glmb<-function(object,...)
 {

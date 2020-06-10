@@ -18,6 +18,8 @@
 #' @param offset2 this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
 #' @param start an optional argument providing starting values for the posterior mode optimization.
 #' @param Gridtype an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.
+#' @param digits the number of significant digits to use when printing.
+#' @param \ldots additional optional arguments.
 #' @return \code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
@@ -56,6 +58,31 @@
 #' Depending on the selection, the time to build the envelope and the acceptance rate 
 #' during the simulation process may vary. The returned value \code{iters} contains the 
 #' number of candidates generated before acceptance for each draw.
+#' @references 
+#' Dobson, A. J. (1990)
+#' \emph{An Introduction to Generalized Linear Models.}
+#' London: Chapman and Hall.
+#' 
+#' Hastie, T. J. and Pregibon, D. (1992)
+#' \emph{Generalized linear models.}
+#' Chapter 6 of \emph{Statistical Models in S}
+#' eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
+#' McCullagh P. and Nelder, J. A. (1989)
+#' \emph{Generalized Linear Models.}
+#' London: Chapman and Hall.
+#' 
+#' Nygren, K.N. and Nygren, L.M (2006)
+#' Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
+#' vol.101, no.475, pp 1144-1156.
+#' 
+#' Raiffa, Howard and Schlaifer, R (1961)
+#' \emph{Applied Statistical Decision Theory.}
+#' Boston: Clinton Press, Inc.
+#' 
+#' Venables, W. N. and Ripley, B. D. (2002)
+#' \emph{Modern Applied Statistics with S.}
+#' New York: Springer.
+#' 
 #' @example inst/examples/Ex_rglmb.R
 
 
@@ -181,8 +208,8 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,nu=NULL,V=NULL,family=gaussian
   
 }
 
-
-
+#' @rdname rglmb
+#' @method print rglmb
 
 
 print.rglmb<-function (x, digits = max(3, getOption("digits") - 3), ...) 
@@ -200,53 +227,7 @@ print.rglmb<-function (x, digits = max(3, getOption("digits") - 3), ...)
  }
 
 
-summary.rglmb<-function(object,...){
 
-
-n<-length(object$coefficients[,1])  
-l1<-length(object$PostMode)
-percentiles<-matrix(0,nrow=l1,ncol=7)
-se<-sqrt(diag(var(object$coefficients)))
-mc<-se/n
-Priorwt<-(se/sqrt(diag(solve(object$Prior$Precision))))^2
-priorrank<-matrix(0,nrow=l1,ncol=1)
-pval1<-matrix(0,nrow=l1,ncol=1)
-pval2<-matrix(0,nrow=l1,ncol=1)
-for(i in 1:l1){
-percentiles[i,]<-quantile(object$coefficients[,i],probs=c(0.01,0.025,0.05,0.5,0.95,0.975,0.99))
-test<-append(object$coefficients[,i],object$Prior$mean[i])
-test2<-rank(test)
-priorrank[i,1]<-test2[n+1]
-pval1[i,1]<-priorrank[i,1]/(n+1)
-pval2[i,1]<-min(pval1[i,1],1-pval1[i,1])
-
-}
-
-Tab1<-cbind("Prior Mean"=object$Prior$mean,"Prior.sd"=as.numeric(sqrt(diag(solve(object$Prior$Precision)))),"Approx.Prior.wt"=Priorwt)
-TAB<-cbind("Post.Mode"=as.numeric(object$PostMode),"Post.Mean"=colMeans(coef(object)),"Post.Sd"=se,"MC Error"=as.numeric(mc),"Pr(tail)"=as.numeric(pval2))
-TAB2<-cbind("1.0%"=percentiles[,1],"2.5%"=percentiles[,2],"5.0%"=percentiles[,3],Median=as.numeric(percentiles[,4]),"95.0%"=percentiles[,5],"97.5%"=as.numeric(percentiles[,6]),"99.0%"=as.numeric(percentiles[,7]))
-
-rownames(Tab1)<-rownames(TAB)
-rownames(TAB2)<-rownames(TAB)
-
-res<-list(call=object$call,n=n,coefficients1=Tab1,coefficients=TAB,Percentiles=TAB2)
-
-class(res)<-"summary.rglmb"
-res
-
-}
-
-print.summary.rglmb<-function(x,...){
-cat("Call\n")
-print(x$call)
-cat("\nPrior Estimates with Standard Deviations\n\n")
-printCoefmat(x$coefficients1,digits=4)
-cat("\nBayesian Estimates Based on",x$n,"iid draws\n\n")
-printCoefmat(x$coefficients,digits=4,P.values=TRUE,has.Pvalue=TRUE)
-cat("\nDistribution Percentiles\n\n")
-printCoefmat(x$Percentiles,digits=4)
-
-}
 
 
 

@@ -45,30 +45,12 @@ An object of class \code{"rglmb"} is a list containing at least the following co
 The model is specified by providing a data vector, a design matrix, and 2 prior constants.
 }
 \details{
-The \code{rnorm_reg} function produces iid samples for Bayesian generalized linear 
-models. It has a more minimialistic interface than than the \code{\link{glmb}} 
-function. Core required inputs for the function include the data vector, the design  
+The \code{rnorm_reg} function produces iid samples for Bayesian linear 
+models with a multivariate normal prior. Core required inputs for the function include the data vector, the design  
 matrix and a prior specification. In addition, the dispersion parameter must 
-currently be provided for the gaussian, Gamma, quasipoisson, and quasibinomial 
-families (future implementations may incorporate a prior for these into the 
-\code{rglmb} function).
-
-Current implemented models include the gaussian family (identity link function), the
-poisson and quasipoisson families (log link function), the gamma family (log link 
-function), as well as the binomial and quasibinomial families (logit, probit, and 
-cloglog link functions).  The function returns the simulated Bayesian coefficients 
-and some associated outputs.
-
-For the gaussian family, iid samples from the posterior density is genererated using 
-standard simulation procedures for multivariate normal densities. For all other 
-families, the samples are generated using accept-reject procedures by leveraging the 
-likelihood subgradient approach of Nygren and Nygren (2006). This approach relies on
-tight enveloping functions that bound the posterior density from above. The Gridtype 
-parameter is used to select the method used for determining the size of a Grid used 
-to build the enveloping function. See \code{\link{EnvelopeBuild_c}} for details. 
-Depending on the selection, the time to build the envelope and the acceptance rate 
-during the simulation process may vary. The returned value \code{iters} contains the 
-number of candidates generated before acceptance for each draw.
+currently be provided.The function returns the simulated Bayesian coefficients 
+and some associated outputs. The iid samples from the posterior density are genererated using 
+standard simulation procedures for multivariate normal densities.
 }
 \examples{
 data(menarche)

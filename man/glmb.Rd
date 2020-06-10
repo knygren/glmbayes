@@ -31,6 +31,8 @@ glmb(
   contrasts = NULL,
   ...
 )
+
+\method{print}{glmb}(x, digits = max(3, getOption("digits") - 3), ...)
 }
 \arguments{
 \item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
@@ -89,6 +91,8 @@ returned as components of the returned value.}
 
 \item{contrasts}{an optional list. See the contrasts.arg of model.matrix.default.}
 
+\item{digits}{the number of significant digits to use when printing.}
+
 \item{\ldots}{arguments to be used to form the default control argument if it is not supplied directly.}
 }
 \value{
@@ -111,6 +115,7 @@ An object of class \code{"glmb"} is a list containing at least the following com
 \item{DIC}{Estimated Deviance Information criterion} 
 \item{famfunc}{Family functions used during estimation process}
 \item{iters}{an \code{n} by \code{1} matrix giving the number of candidates generated before acceptance for each sample.}
+\item{digits}{the number of significant digits to use when printing.}
 }
 \description{
 \code{glmb} is used to fit Bayesian generalized linear models, specified by giving a symbolic description of the linear predictor, a description of the error distribution, and a multivariate normal prior.
@@ -200,4 +205,29 @@ glmb.out3<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age,family=binomial(cloglog),
 
 summary(glm.out3)
 summary(glmb.out3)
+}
+\references{
+Dobson, A. J. (1990)
+\emph{An Introduction to Generalized Linear Models.}
+London: Chapman and Hall.
+
+Hastie, T. J. and Pregibon, D. (1992)
+\emph{Generalized linear models.}
+Chapter 6 of \emph{Statistical Models in S}
+eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
+McCullagh P. and Nelder, J. A. (1989)
+\emph{Generalized Linear Models.}
+London: Chapman and Hall.
+
+Nygren, K.N. and Nygren, L.M (2006)
+Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
+vol.101, no.475, pp 1144-1156.
+
+Raiffa, Howard and Schlaifer, R (1961)
+\emph{Applied Statistical Decision Theory.}
+Boston: Clinton Press, Inc.
+
+Venables, W. N. and Ripley, B. D. (2002)
+\emph{Modern Applied Statistics with S.}
+New York: Springer.
 }
