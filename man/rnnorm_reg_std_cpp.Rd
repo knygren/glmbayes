@@ -2,10 +2,12 @@
 \alias{rnnorm_reg_std_cpp}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Simulates from the posterior density of a model in standard form
+The Bayesian Generalized Linear Model Distribution in Standard Form
 }
 \description{
-Simulates from the posterior density of a model in standard form
+\code{rnnorm_reg_std_cpp} is used to generate iid samplers from Non-Gaussian 
+Generalized Linear Models in standard form. The function should only
+be called after standardization of a Generalized Linear Model.
 }
 \usage{
 rnnorm_reg_std_cpp(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link,progbar)

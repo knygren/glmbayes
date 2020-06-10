@@ -1,19 +1,5 @@
-#glmbfamfunc<-function(family) UseMethod("glmbfamfunc")
 
-#glmbfamfunc.default<-function(family)
-glmbfamfunc<-function(family)
-  {
-  
-  out<-glmbfamfuncset(family=family)
-  out$call<-match.call()
-  
-  class(out)<-"glmbfamfunc"
-  out
-}
-
-
-
-glmbfamfuncset<-function(family){
+glmbfamfunc<-function(family){
 
 # need to add handling for offsets 
 
@@ -338,11 +324,17 @@ if(family$family=="Gamma" && family$link=="log")
 
 	}	
 
-	list(f1=f1,f2=f2,f3=f3,f4=f4,
+	out=list(f1=f1,f2=f2,f3=f3,f4=f4,
 	     #f5=f5,
 	     #f6=f6,
 	     f7=f7)
+
+	out$call<-match.call()
 	
+	class(out)<-"glmbfamfunc"
+	out
+	
+		
 }
 
 

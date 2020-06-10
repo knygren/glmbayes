@@ -122,8 +122,9 @@ An object of class \code{"rglmb"} is a list containing at least the following co
 \item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
 }
 \description{
-\code{rglmb} is used to generate iid samples from Non-Gaussian Bayesian Generalized Linear Models with a normal prior. 
-The model is specified by providing a data vector, a design matrix, and 2 prior constants.
+\code{rglmb} is used to generate iid samples from Bayesian Generalized Linear Models 
+with multivariate normal priors. The model is specified by providing a data vector, 
+a design matrix, and 2 prior constants.
 }
 \details{
 The \code{rglmb} function produces iid samples for Bayesian generalized linear 

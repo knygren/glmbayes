@@ -1,7 +1,6 @@
 \name{glmbfamfunc}
 \alias{glmbfamfunc}
 %\alias{glmbfamfunc.default}
-\alias{glmbfamfuncset}
 \alias{print.glmbfamfunc}
 
 %- Also NEED an '\alias' for EACH other topic documented here.
@@ -29,8 +28,7 @@ A list with the following components
   \item{f2}{Negative log-posterior function}
   \item{f3}{Gradient function for negative log-posterior function}
   \item{f4}{Deviance function}
-  \item{f5}{Vectorized version of Negative log-posterior function}
-  \item{f6}{Vectorized version of Gradient for log-posterior function}
+  \item{f7}{Another function}
 %% ...
 }
 \references{

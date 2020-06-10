@@ -1,7 +1,8 @@
 #' The Bayesian Generalized Linear Model Distribution
 #'
-#' \code{rglmb} is used to generate iid samples from Non-Gaussian Bayesian Generalized Linear Models with a normal prior. 
-#' The model is specified by providing a data vector, a design matrix, and 2 prior constants.
+#' \code{rglmb} is used to generate iid samples from Bayesian Generalized Linear Models 
+#' with multivariate normal priors. The model is specified by providing a data vector, 
+#' a design matrix, and 2 prior constants.
 #' @name 
 #' rglmb
 #' @aliases
