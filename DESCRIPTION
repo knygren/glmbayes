@@ -5,7 +5,7 @@ Version: 1.0
 Date: 2020-06-05
 Author: Kjell Nygren
 Maintainer: Kjell Nygren <kjell.a.nygren@gmail.com>
-Description: Package can be used for Bayesian analysis (iid sampling) for most generalized linear models available in the glm function.
+Description: Generates iid samples for Bayesian Generalized Linear Models.
 License: GPL-2
 Imports:
     Rcpp (>= 0.11.0),RcppArmadillo (>= 0.4.100.2.1),mnormt
