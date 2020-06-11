@@ -589,6 +589,7 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
     arma::mat x2bb(x2b.begin(), l2, l1, false);
     arma::mat P2(P.begin(), P.nrow(), P.ncol(), false);
 
+    // Adjusts for dispersion here 
   
     NumericVector  wt2=wt/dispersion2;
     arma::vec wt3(wt2.begin(), x.nrow());
@@ -616,17 +617,28 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
 
 
         arma::mat RA=arma::chol(P2);
-        
+
+        // Stacks rows of design matrix and RA (Cholesky of Prior)  
+                
         W.rows(0,l2-1)=x2bb;
         W.rows(l2,l2+l1-1)=RA;
+        
+        // Stacks data and Cholesky multiplied by Cholesky (thing Square root of P2)
+        
         z.rows(0,l2-1)=y2b;
         z.rows(l2,l1+l2-1)=RA*mu2;
         
-        // WTW apparently take on very large values
+        // This should be WTW= XTX +P
+        // Seems redundant to store here and then recalculate below
         
         arma::mat WTW=trans(W)*W;
 
+        // This should be IR = (XTX + P)^{-1} - The posterior variance-Covariance
+        
         arma::mat IR=arma::inv(trimatu(chol(trans(W)*W)));
+
+        // This should be posterior mean 
+        
         arma::mat b2=(IR*trans(IR))*(trans(W)*z);
     
         NumericMatrix out(n,l1);
@@ -639,6 +651,9 @@ famfunc, Function f1,Function f2,Function f3,NumericVector start,
         
         for(i=0;i<n;i++){
            U1( _, i)=rnorm(l1);
+          
+          // Normal Draws are scaled by Posterior Variance
+          
           out2.row(i)=trans(b2+IR*U2.col(i));
 //  Log-likelihood not set correctly if wrong famfuncs passed to this function
 // Poisson throws warning....

@@ -29,9 +29,6 @@ rmultireg=
     Ytemp=matrix(Y,ncol=1)
 
     l1=nrow(Ytemp)
-#    m=ncol(Y)
-
-        
     if(l0>l1) stop("Dimensions of y not correct")
 
     m=1

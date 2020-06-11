@@ -10,55 +10,109 @@ lm_summary=summary(lm.D9)
 
 lm_summary
 lm.D9$coefficients
-lm_summary$sigma
 
-
-n<-1000
+n<-10000
 y<-lm.D9$y
 x<-as.matrix(lm.D9$x)
 
+### Set old regression and dispersion coefficients
+
+b_old=lm.D9$coefficients
+v_old=lm_summary$sigma^2
+
+#### Set up for rglmb_dispersion
+
+n0=0.1
+shape=n0/2
+rate=shape*v_old
+
+rate/(shape-1)
+rate/shape
+
+#a1<-shape+n1/2
+#b1<-rate+sum(SS)/2
+
+#out<-1/rgamma(n,shape=a1,rate=b1)
+## v0=sum(SS)/n1 ~ (2*rate+sum(SS))/(2*shape+n1)=[(2*rate+sum(SS))/2]/((2*shape+n1)/2) 
+n1=length(y)
+SS=v0*n1
+
+n1 # This is equal to 20
+
+
+n0=2 # Prior observations
+v_prior=v_old  # Prior point estimate for variance (the mean of (1/dispersion=1/v_prior))
+wt0=(n0/n1)  
+
+## set shape=0.01*(n1/2)
+## set rate= 0.01*SS/2
+
+shape=wt0*(n1/2)   ###  Shape is prior observations /2
+rate=shape*v_prior  ### rate is essentiall prior SS - V in rmultireg should be this
+rate/shape ## Should match v_prior (currently also v_old)
+
+## We see that this currently matches 
+### (test different v_prior with various prior observations below) 
+
+dispout<-rglmb_dispersion(n=n,y,x,b_old,alpha= rep(0, length(y)),shape=shape,rate=rate,family=gaussian())
+mean(dispout$dispersion) 
+v_prior
+v_old
+#summary(dispout)  ## Summary function not working - need to write
+
+### Set up test rglmb regressions without and with prior for dispersion 
 
 mu<-c(0,0)
+mu=b_old  ### For testing purposes, set prior=b_old
 P<-0.1*diag(2)
+wt2=rep(1,length(y))
 
-#solve(P)
-x
-b=lm.D9$coefficients
-b_old=lm.D9$coefficients
+### Check
 
-v0=lm_summary$sigma
-Prior_Sd=(0.1*sqrt(v0))^2
+outtemp1<-glmb(n = 1000, weight ~ group, mu=mu, Sigma = solve(P), 
+               dispersion=v_old,family = gaussian(),  start = b, Gridtype = 3)
+## Could use a residuals function here -- For now, maybe run the glmb function
 
-v0/Prior_SD=shape/sqrt(shape)=sqrt(shape)
-shape=(v0/Prior_Sd)^2
-rate=shape/v0
-shape
-rate
+summary(outtemp1)
+mean(colMeans(residuals(outtemp1)^2))
+v_old
+colMeans((outtemp1$coefficients))
+b_old
 
-dispout<-rglmbdisp(n=n,y,x,b,alpha= rep(0, length(y)),shape=shape,rate=rate,family=gaussian())
-summary(dispout)
-### This part works now
-
-wt=1
-wt2=0*c(1:length(y))+wt
-
-outtemp<-rglmb(n = 1000, y, x, mu, P, wt = wt2, dispersion=dispout$coefficient[1],family = gaussian(), offset2 = rep(0, length(y)), start = b, Gridtype = 3)
-
-outtemp<-rglmb(n = 1000, y, x, mu, P, wt = wt2,dispersion=dispout$coefficient[1],family = gaussian(), offset2 = rep(0, length(y)), start = b, Gridtype = 3)
-
-summary(outtemp)
-
-
-outtemp2<-rglmb(n = 1000, y, x, mu, P, wt = wt2, dispersion=NULL,
-nu=3,V=3,family = gaussian(), offset2 = rep(0, length(y)), start = b, Gridtype = 3)
+outtemp2<-rglmb(n = 1000, y, x, mu=mu, P=P, wt = wt2, dispersion=v_old,family = gaussian(), offset2 = rep(0, length(y)), start = b_old, Gridtype = 3)
 summary(outtemp2)
+colMeans((outtemp2$coefficients))
+b_old
 
-#outtemp2
 
-outtemp3<-rnorm_gamma_reg(n=1000,y,x,mu,P,nu=3,V=3,offset2= rep(0, length(y)),wt=wt2)
+outtemp3<-glmb(n = 10000, weight ~ group, mu=mu, Sigma = solve(P), nu=shape*2, V=rate,
+family = gaussian(),  start = b_old, Gridtype = 3)
+## Could use a residuals function here -- For now, maybe run the glmb function
 
-#outtemp3
 summary(outtemp3)
+mean(colMeans(residuals(outtemp3)^2))
+v_old
+colMeans((outtemp3$coefficients))
+b_old
+mean(outtemp3$dispersion)  ## Seems slightly smaller --> Needs qc
+v_old
 
 
+outtemp4<-rglmb(n = 10000, y, x, mu=mu, P=P, wt = wt2, dispersion=NULL,
+nu=shape*2,V=rate,family = gaussian(), offset2 = rep(0, length(y)), start = b_old, Gridtype = 3)
+summary(outtemp4)
+
+mean(outtemp4$dispersion)  ## Seems slightly smaller --> Needs qc
+v_old
+
+outtemp5<-rnorm_gamma_reg(n = 10000, y, x, mu, P, wt = wt2, 
+                nu=shape*2,V=rate, offset2 = rep(0, length(y)))
+summary(outtemp5)
+mean(outtemp5$dispersion)  ## Seems slightly smaller --> Needs qc
+v_old
+
+outtemp6<-rnorm_gamma_reg_temp5(n = 10000, y, x, mu, P, wt = wt2, 
+                          nu=shape*2,V=rate, offset2 = rep(0, length(y)))
+summary(outtemp6)
+mean(outtemp6$dispersion)  ## This version now seems to match the intended dispersion!
 
