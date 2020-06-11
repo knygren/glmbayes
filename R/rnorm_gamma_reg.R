@@ -10,7 +10,7 @@
 #' @param mu a vector of length \code{p} giving the prior means of the variables in the design matrix.
 #' @param P a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior precision matrix of the variable.
 #' @param shape Prior shape parameter for the dispersion parameter (gaussian model only).
-#' @param V Prior rate parameter for the dispersion parameter (gaussian model only).
+#' @param rate Prior rate parameter for the dispersion parameter (gaussian model only).
 #' @param offset2 this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
 #' @param wt an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
 #' @return \code{rnorm_gamma_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 
@@ -65,7 +65,7 @@
 #' @example inst/examples/Ex_rnorm_gamma_reg.R
 
 
-rnorm_gamma_reg<-function(n,y,x,mu,P,shape,V,offset2=NULL,wt=1){
+rnorm_gamma_reg<-function(n,y,x,mu,P,shape,rate,offset2=NULL,wt=1){
 
 if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
 is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
@@ -112,7 +112,7 @@ Y=matrix((y-offset2)*sqrt(wt),nrow=length(y))
 X=x*sqrt(wt)
 Bbar=mu
 A=P
-V=V
+#V=V
 
 #####    Beginning of rmultireg operations
 
@@ -195,7 +195,7 @@ P_Post=P+t(X)%*%X
 mu_Post=solve(P_Post)%*%(mu+t(X)%*%Ytemp)
 
 a_prior=shape     ## Should be relationship to shape in Wishart  
-b_prior=V  ## Should be relationship to scale in Wishart (could also be V/2)
+b_prior=rate  ## Should be relationship to scale in Wishart (could also be V/2)
 
 a_post=a_prior+(nobs/2) # Posterior Shape parameter
 b_post=b_prior+0.5*S # Posterior rate  (S is scaled differently than V?)

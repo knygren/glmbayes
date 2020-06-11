@@ -40,7 +40,7 @@ SS=v_old*n1
 n1 # This is equal to 20
 
 
-n0=2 # Prior observations
+n0=1 # Prior observations
 v_prior=v_old  # Prior point estimate for variance (the mean of (1/dispersion=1/v_prior))
 wt0=(n0/n1)  
 
@@ -87,16 +87,18 @@ colMeans((outtemp2$coefficients))
 b_old
 
 
-outtemp3<-rglmb(n = 1000, y, x, mu=mu, P=P, wt = wt2, shape=shape, V=rate,
+outtemp3<-rglmb(n = 1000, y, x, mu=mu, P=P, wt = wt2, shape=shape, rate=rate,
                 family = gaussian(), offset2 = rep(0, length(y)), start = b_old, Gridtype = 3)
 summary(outtemp2)
 colMeans((outtemp2$coefficients))
 b_old
 
 
-outtemp3<-glmb(n = 10000, weight ~ group, mu=mu, Sigma = solve(P), shape=shape, V=rate,
+outtemp3<-glmb(n = 10000, weight ~ group, mu=mu, Sigma = solve(P), shape=shape, rate=rate,
 family = gaussian(),  start = b_old, Gridtype = 3)
 ## Could use a residuals function here -- For now, maybe run the glmb function
+
+
 
 summary(outtemp3)
 mean(colMeans(residuals(outtemp3)^2))
@@ -105,4 +107,9 @@ colMeans((outtemp3$coefficients))
 b_old
 mean(outtemp3$dispersion)  ## Seems slightly smaller --> Needs qc
 v_old
+var(outtemp3$dispersion) 
+## 0.0083622 -->n0=40 --->n0+n1=60
+## 0.02685044 -->n0=2 --> n0+n1=22
+## 0.02760717 -->n0=1 --> n0+n1=21
+
 rm(dispersion)

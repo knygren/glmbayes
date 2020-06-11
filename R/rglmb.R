@@ -18,7 +18,7 @@
 #' @param wt an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
 #' @param dispersion the dispersion parameter. Either a single numerical value or NULL (the default). Must be provided here, use \code{\link{rnorm_gamma_reg}} to give the dispersion a prior.
 #' @param shape Prior shape parameter for the dispersion parameter (gaussian model only).
-#' @param V Prior rate parameter for the dispersion parameter (gaussian model only).
+#' @param rate Prior rate parameter for the dispersion parameter (gaussian model only).
 #' @param family a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
 #' @param offset2 this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
 #' @param start an optional argument providing starting values for the posterior mode optimization.
@@ -100,7 +100,7 @@
 #' @rdname rglmb
 #' @order 1
 
-rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,V=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=3)
+rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=3)
   {
   
   if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
@@ -195,7 +195,7 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,V=NULL,family=gauss
     
     else{
       
-      outlist=rnorm_gamma_reg(n=n,y=y,x=x,mu=mu,P=P,shape=shape,V=V,offset2=offset2,wt=wt)
+      outlist=rnorm_gamma_reg(n=n,y=y,x=x,mu=mu,P=P,shape=shape,rate=rate,offset2=offset2,wt=wt)
       
     }
     

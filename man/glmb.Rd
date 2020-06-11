@@ -13,7 +13,7 @@ glmb(
   mu,
   Sigma,
   shape = NULL,
-  V = NULL,
+  rate = NULL,
   Gridtype = 1,
   data,
   weights,
@@ -51,7 +51,7 @@ character string naming a family function, a family function or the result of a 
 
 \item{shape}{Optional prior shape parameter for the dispersion parameter (gaussian model only).}
 
-\item{V}{Optional prior rate parameter for the dispersion parameter (gaussian model only).}
+\item{rate}{Optional prior rate parameter for the dispersion parameter (gaussian model only).}
 
 \item{Gridtype}{an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.}
 

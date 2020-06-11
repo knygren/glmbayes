@@ -4,7 +4,7 @@
 \alias{rnorm_gamma_reg}
 \title{The Bayesian Normal-Gamma Regression Distribution}
 \usage{
-rnorm_gamma_reg(n, y, x, mu, P, shape, V, offset2 = NULL, wt = 1)
+rnorm_gamma_reg(n, y, x, mu, P, shape, rate, offset2 = NULL, wt = 1)
 }
 \arguments{
 \item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
@@ -19,7 +19,7 @@ rnorm_gamma_reg(n, y, x, mu, P, shape, V, offset2 = NULL, wt = 1)
 
 \item{shape}{Prior shape parameter for the dispersion parameter (gaussian model only).}
 
-\item{V}{Prior rate parameter for the dispersion parameter (gaussian model only).}
+\item{rate}{Prior rate parameter for the dispersion parameter (gaussian model only).}
 
 \item{offset2}{this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.}
 
@@ -146,7 +146,7 @@ colMeans((outtemp2$coefficients))
 b_old
 
 
-outtemp3<-glmb(n = 10000, weight ~ group, mu=mu, Sigma = solve(P), shape=shape, V=rate,
+outtemp3<-glmb(n = 10000, weight ~ group, mu=mu, Sigma = solve(P), shape=shape, rate=rate,
                family = gaussian(),  start = b_old, Gridtype = 3)
 ## Could use a residuals function here -- For now, maybe run the glmb function
 

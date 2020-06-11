@@ -16,7 +16,7 @@ rglmb(
   wt = 1,
   dispersion = NULL,
   shape = NULL,
-  V = NULL,
+  rate = NULL,
   family = gaussian(),
   offset2 = rep(0, nobs),
   start = NULL,
@@ -80,7 +80,7 @@ rnorm_reg_cpp(
 
 \item{shape}{Prior shape parameter for the dispersion parameter (gaussian model only).}
 
-\item{V}{Prior rate parameter for the dispersion parameter (gaussian model only).}
+\item{rate}{Prior rate parameter for the dispersion parameter (gaussian model only).}
 
 \item{family}{a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)}
 
