@@ -15,7 +15,7 @@ rglmb(
   P,
   wt = 1,
   dispersion = NULL,
-  nu = NULL,
+  shape = NULL,
   V = NULL,
   family = gaussian(),
   offset2 = rep(0, nobs),
@@ -78,7 +78,7 @@ rnorm_reg_cpp(
 
 \item{dispersion}{the dispersion parameter. Either a single numerical value or NULL (the default). Must be provided here, use \code{\link{rnorm_gamma_reg}} to give the dispersion a prior.}
 
-\item{nu}{Prior shape parameter for the dispersion parameter (gaussian model only).}
+\item{shape}{Prior shape parameter for the dispersion parameter (gaussian model only).}
 
 \item{V}{Prior rate parameter for the dispersion parameter (gaussian model only).}
 

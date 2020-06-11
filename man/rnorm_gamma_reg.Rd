@@ -4,7 +4,7 @@
 \alias{rnorm_gamma_reg}
 \title{The Bayesian Normal-Gamma Regression Distribution}
 \usage{
-rnorm_gamma_reg(n, y, x, mu, P, nu, V, offset2 = NULL, wt = 1)
+rnorm_gamma_reg(n, y, x, mu, P, shape, V, offset2 = NULL, wt = 1)
 }
 \arguments{
 \item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
@@ -17,7 +17,7 @@ rnorm_gamma_reg(n, y, x, mu, P, nu, V, offset2 = NULL, wt = 1)
 
 \item{P}{a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior precision matrix of the variable.}
 
-\item{nu}{Prior shape parameter for the dispersion parameter (gaussian model only).}
+\item{shape}{Prior shape parameter for the dispersion parameter (gaussian model only).}
 
 \item{V}{Prior rate parameter for the dispersion parameter (gaussian model only).}
 
@@ -146,7 +146,7 @@ colMeans((outtemp2$coefficients))
 b_old
 
 
-outtemp3<-glmb(n = 10000, weight ~ group, mu=mu, Sigma = solve(P), nu=shape*2, V=rate,
+outtemp3<-glmb(n = 10000, weight ~ group, mu=mu, Sigma = solve(P), shape=shape, V=rate,
                family = gaussian(),  start = b_old, Gridtype = 3)
 ## Could use a residuals function here -- For now, maybe run the glmb function
 

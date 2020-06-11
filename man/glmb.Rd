@@ -12,7 +12,7 @@ glmb(
   dispersion = NULL,
   mu,
   Sigma,
-  nu = NULL,
+  shape = NULL,
   V = NULL,
   Gridtype = 1,
   data,
@@ -49,7 +49,7 @@ character string naming a family function, a family function or the result of a 
 
 \item{Sigma}{a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior covariance matrix of the variables.}
 
-\item{nu}{Optional prior shape parameter for the dispersion parameter (gaussian model only).}
+\item{shape}{Optional prior shape parameter for the dispersion parameter (gaussian model only).}
 
 \item{V}{Optional prior rate parameter for the dispersion parameter (gaussian model only).}
 

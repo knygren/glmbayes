@@ -12,7 +12,7 @@
 #' @param dispersion the dispersion parameter. Either a single numerical value or NULL (the default). Must be provided here, use \code{\link{rnorm_gamma_reg}} to give the dispersion a prior.
 #' @param mu a vector of length \code{p} giving the prior means of the variables in the design matrix.
 #' @param Sigma a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior covariance matrix of the variables.
-#' @param nu Optional prior shape parameter for the dispersion parameter (gaussian model only).
+#' @param shape Optional prior shape parameter for the dispersion parameter (gaussian model only).
 #' @param V Optional prior rate parameter for the dispersion parameter (gaussian model only).
 #' @param Gridtype an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.
 #' @param data an optional data frame, list or environment (or object coercible by \code{\link{as.data.frame}} to a data frame)
@@ -119,7 +119,7 @@
 #' 
 #' 
 
-glmb<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,nu=NULL,V=NULL,Gridtype=1,
+glmb<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,shape=NULL,V=NULL,Gridtype=1,
     data, weights, subset2,na.action, start = NULL, etastart, mustart, offset, 
     control = list(...), model = TRUE, method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
                           ...) 
@@ -207,7 +207,7 @@ glmb<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,nu=NULL,V=
     wtin<-fit$prior.weights	
 
 
-sim<-rglmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,dispersion=dispersion,nu=nu,V=V,offset2=offset,family=family,
+sim<-rglmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,dispersion=dispersion,shape=shape,V=V,offset2=offset,family=family,
            start=b,Gridtype=Gridtype)
 
 

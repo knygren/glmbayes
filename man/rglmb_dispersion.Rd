@@ -154,7 +154,7 @@ colMeans((outtemp2$coefficients))
 b_old
 
 
-outtemp3<-glmb(n = 10000, weight ~ group, mu=mu, Sigma = solve(P), nu=shape*2, V=rate,
+outtemp3<-glmb(n = 10000, weight ~ group, mu=mu, Sigma = solve(P), shape =shape, V=rate,
                family = gaussian(),  start = b_old, Gridtype = 3)
 ## Could use a residuals function here -- For now, maybe run the glmb function
 
