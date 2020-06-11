@@ -199,7 +199,7 @@ a_prior=nu/2     ## Should be relationship to shape in Wishart
 b_prior=V  ## Should be relationship to scale in Wishart
 
 a_post=a_prior+(nobs/2) # Posterior Shape parameter
-b_post=b_prior+0.5*S # Posterior rate
+b_post=b_prior+0.5*S # Posterior rate  (S is scaled differently than V?)
 
 out1<-matrix(0,nrow=n,ncol=k)
 dispersion=1/rgamma(n=n,shape=a_post,rate=b_post)
