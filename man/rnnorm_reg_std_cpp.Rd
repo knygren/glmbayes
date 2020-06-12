@@ -1,16 +1,16 @@
-\name{rnnorm_reg_std_cpp}
-\alias{rnnorm_reg_std_cpp}
+\name{rnnorm_reg_std}
+\alias{rnnorm_reg_std}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 The Bayesian Generalized Linear Model Distribution in Standard Form
 }
 \description{
-\code{rnnorm_reg_std_cpp} is used to generate iid samplers from Non-Gaussian 
+\code{rnnorm_reg_std} is used to generate iid samplers from Non-Gaussian 
 Generalized Linear Models in standard form. The function should only
 be called after standardization of a Generalized Linear Model.
 }
 \usage{
-rnnorm_reg_std_cpp(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link,progbar)
+rnnorm_reg_std(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link,progbar)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -65,7 +65,7 @@ Kjell Nygren
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{glmb}}, \code{\link{rglmb}}, \code{\link{EnvelopeBuild_c}}
+\code{\link{glmb}}, \code{\link{rglmb}}, \code{\link{EnvelopeBuild}}
 }
 \examples{
 
@@ -93,9 +93,9 @@ V1<-1*diag(as.numeric(2.0))
 V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
 V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 1 times as large as point estimate 
 
-out<-rglmb(n = 1000, y=y, x=x, mu=mu, P=solve(V1), wt = wt, 
-           family = binomial(logit), Gridtype = 3) 
-summary(out)
+#out<-rglmb(n = 1000, y=y, x=x, mu=mu, P=solve(V1), wt = wt, 
+#           family = binomial(logit), Gridtype = 3) 
+#summary(out)
 
 famfunc<-glmbfamfunc(binomial(logit))
 
@@ -151,7 +151,7 @@ P2=Standard_Mod$P2
 L2Inv=Standard_Mod$L2Inv
 L3Inv=Standard_Mod$L3Inv
 
-Env2=EnvelopeBuild_c(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
+Env2=EnvelopeBuild(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
 as.matrix(mu2,ncol=1),as.matrix(P2),as.vector(alpha),as.vector(wt2),
 family="binomial",link="logit",Gridtype=as.integer(3), 
 n=as.integer(n),sortgrid=TRUE)
@@ -169,7 +169,7 @@ Env2
 ### May be better to call an R function wrapper that checks (and converts when possible) 
 ##  to correct types
 
-sim=rnnorm_reg_std_cpp(n=as.integer(n),y=as.vector(y),x=as.matrix(x2),mu=as.matrix(mu2,ncol=1),
+sim=rnnorm_reg_std(n=as.integer(n),y=as.vector(y),x=as.matrix(x2),mu=as.matrix(mu2,ncol=1),
 P=as.matrix(P2),alpha=as.vector(alpha),wt=as.vector(wt2),
 f2=f2,Envelope=Env2,family="binomial",link="logit")
 

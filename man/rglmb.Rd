@@ -96,7 +96,7 @@ families, the samples are generated using accept-reject procedures by leveraging
 likelihood subgradient approach of Nygren and Nygren (2006). This approach relies on
 tight enveloping functions that bound the posterior density from above. The Gridtype 
 parameter is used to select the method used for determining the size of a Grid used 
-to build the enveloping function. See \code{\link{EnvelopeBuild_c}} for details. 
+to build the enveloping function. See \code{\link{EnvelopeBuild}} for details. 
 Depending on the selection, the time to build the envelope and the acceptance rate 
 during the simulation process may vary. The returned value \code{iters} contains the 
 number of candidates generated before acceptance for each draw.

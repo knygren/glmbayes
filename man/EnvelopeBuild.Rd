@@ -1,6 +1,6 @@
-\name{EnvelopeBuild_c}
+\name{EnvelopeBuild}
 %\alias{glmbenvelope}
-\alias{EnvelopeBuild_c}
+\alias{EnvelopeBuild}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Builds Envelope function for simulation
@@ -9,7 +9,7 @@ Builds Envelope function for simulation
 Constructs Enveloping function for simulation
 }
 \usage{
-EnvelopeBuild_c(bStar,A,y,x,mu,P,alpha,wt,family="binomial",link = "logit", 
+EnvelopeBuild(bStar,A,y,x,mu,P,alpha,wt,family="binomial",link = "logit", 
 Gridtype=2,n = 1, sortgrid = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -163,7 +163,7 @@ P2=Standard_Mod$P2
 L2Inv=Standard_Mod$L2Inv
 L3Inv=Standard_Mod$L3Inv
 
-Env2=EnvelopeBuild_c(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
+Env2=EnvelopeBuild(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
     as.matrix(mu2,ncol=1),as.matrix(P2),as.vector(alpha),as.vector(wt2),
     family="binomial",link="logit",Gridtype=as.integer(3), n=as.integer(n),sortgrid=TRUE)
 

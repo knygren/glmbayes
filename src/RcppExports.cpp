@@ -29,20 +29,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rnorm_ct_cpp
-double rnorm_ct_cpp(double lgrt, double lglt, double mu, double sigma);
-RcppExport SEXP _glmbayes_rnorm_ct_cpp(SEXP lgrtSEXP, SEXP lgltSEXP, SEXP muSEXP, SEXP sigmaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type lgrt(lgrtSEXP);
-    Rcpp::traits::input_parameter< double >::type lglt(lgltSEXP);
-    Rcpp::traits::input_parameter< double >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
-    rcpp_result_gen = Rcpp::wrap(rnorm_ct_cpp(lgrt, lglt, mu, sigma));
-    return rcpp_result_gen;
-END_RCPP
-}
 // glmb_Standardize_Model
 Rcpp::List glmb_Standardize_Model(NumericVector y, NumericMatrix x, NumericMatrix P, NumericMatrix bstar, NumericMatrix A1);
 RcppExport SEXP _glmbayes_glmb_Standardize_Model(SEXP ySEXP, SEXP xSEXP, SEXP PSEXP, SEXP bstarSEXP, SEXP A1SEXP) {
@@ -135,7 +121,6 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_EnvelopeBuild_c", (DL_FUNC) &_glmbayes_EnvelopeBuild_c, 13},
-    {"_glmbayes_rnorm_ct_cpp", (DL_FUNC) &_glmbayes_rnorm_ct_cpp, 4},
     {"_glmbayes_glmb_Standardize_Model", (DL_FUNC) &_glmbayes_glmb_Standardize_Model, 5},
     {"_glmbayes_rnnorm_reg_std_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_std_cpp, 12},
     {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 16},

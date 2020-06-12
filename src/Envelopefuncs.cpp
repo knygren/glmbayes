@@ -174,7 +174,7 @@ void setlogP_C2(NumericMatrix logP,NumericVector NegLL,NumericMatrix cbars,Numer
 }
 
 
-// [[Rcpp::export]]
+// [[Rcpp::export(".EnvelopeBuild_cpp")]]
 
 List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
                     NumericVector y, 

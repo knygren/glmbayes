@@ -13,7 +13,7 @@
 #' savings in the number of candidates per sample).
 #' @return A vector containing information on how many component each 
 #' dimension should be split into.
-#' @seealso \code{\link{rglmb}}, \code{\link{EnvelopeBuild_c}}, \code{\link{EnvelopeSort}} 
+#' @seealso \code{\link{rglmb}}, \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeSort}} 
 #' @example inst/examples/Ex_EnvelopeOpt.R
 
 
