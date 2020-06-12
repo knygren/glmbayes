@@ -212,6 +212,9 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=ga
     
   }
   
+  test_out=.rnorm_ct_cpp(lgrt=log(0.8),lglt=log(0.8),mu=0,sigma=1)
+  print(test_out)
+  
   
   colnames(outlist$coefficients)<-colnames(x)
   

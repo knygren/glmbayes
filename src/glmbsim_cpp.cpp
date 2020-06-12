@@ -11,6 +11,42 @@ using namespace Rcpp;
 
 void  f4_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL, NumericMatrix cbars, int progbar=0);
 
+// [[Rcpp::export(".rnorm_ct_cpp")]]
+
+double rnorm_ct_cpp(double lgrt,double lglt,double mu,double sigma){
+  RNGScope scope;
+  
+  double U=0;
+  double out=0;
+  double lgU2=0;
+  
+  if(lgrt>=lglt){
+    U=R::runif(0.0, 1.0);
+    double  u1=1-exp(lgrt);
+    double lgu1=log(u1);
+    lgU2=log(U)+lglt+log(1-exp(lgu1-lglt));
+    double lgU3=lgU2+log(1+exp(lgu1-lgU2));
+    out=R::qnorm(lgU3,mu,sigma,TRUE,TRUE);
+    
+    
+  }  
+  
+  if(lgrt<lglt){
+    U=R::runif(0.0, 1.0);
+    double e1mu2=1-exp(lglt);
+    double lg1mu2=log(e1mu2);
+    double lgU2=log(U)+lgrt+log(1-exp(lg1mu2-lgrt));
+    double lgU3=lgU2+log(1+exp(lg1mu2-lgU2));
+    out=R::qnorm(lgU3,mu,sigma,FALSE,TRUE);
+    
+  }
+  
+  
+  return out;
+  
+}
+
+
 
 double ctrnorm_cpp(double lgrt,double lglt,double mu,double sigma){
   RNGScope scope;
