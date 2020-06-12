@@ -123,23 +123,6 @@ offset2=rep(as.numeric(0.0),length(y))
 P=solve(V1)
 n=1000
 
-## Appears that the type for some of these arguments are important/problematic
-
-outlist<-rnnorm_reg_cpp(n=as.integer(n),y=as.vector(y),
-x=as.matrix(x),mu=as.vector(mu),P=as.matrix(P),
-offset2=as.vector(offset2),wt=as.vector(wt),dispersion=as.numeric(dispersion2),
-famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=as.vector(start),family="binomial",
-link="logit",Gridtype=as.integer(3))
-
-### This allows use of the rglmb summary function 
-### add interface for glmbsim_NGauss_cpp later
-
-#outlist$call<-match.call()
-colnames(outlist$coefficients)<-colnames(x)
-class(outlist)<-c(outlist$class,"rglmb")
-#summary(outlist)
-Env1=outlist$Envelope
-
 
 ###### Adjust weight for dispersion
 
@@ -186,7 +169,6 @@ Env2=EnvelopeBuild_c(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
 
 ## These now seem to match
 
-Env1
 Env2
 
 

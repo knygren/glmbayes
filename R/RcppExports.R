@@ -18,22 +18,10 @@ rnnorm_reg_std_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, 
 }
 
 .rnnorm_reg_cpp <- function(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L) {
-    .Call('_glmbayes_rnnorm_reg_cpp_temp', PACKAGE = 'glmbayes', n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype)
-}
-
-#' @rdname rglmb
-#' @order 2   
-rnnorm_reg_cpp <- function(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L) {
     .Call('_glmbayes_rnnorm_reg_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype)
 }
 
 .rnorm_reg_cpp <- function(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L) {
-    .Call('_glmbayes_rnorm_reg_cpp_temp', PACKAGE = 'glmbayes', n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype)
-}
-
-#' @rdname rglmb
-#' @order 3   
-rnorm_reg_cpp <- function(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L) {
     .Call('_glmbayes_rnorm_reg_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype)
 }
 

@@ -108,7 +108,7 @@ b_old
 mean(outtemp3$dispersion)  ## Seems slightly smaller --> Needs qc
 v_old
 var(outtemp3$dispersion) 
-## 0.0083622 -->n0=40 --->n0+n1=60
+## 0.0083622  -->n0=40 --->n0+n1=60
 ## 0.02685044 -->n0=2 --> n0+n1=22
 ## 0.02760717 -->n0=1 --> n0+n1=21
 
