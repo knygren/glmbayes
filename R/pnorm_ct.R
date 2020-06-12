@@ -1,3 +1,46 @@
+#' The Central Normal Distribution
+#'
+#' Distribution function and random generation for the center (between a lower and an upper bound)
+#' of the normal distribution with mean equal to mu and standard deviation equal to sigma.
+#' 
+#' @name 
+#' Normal_ct
+#' @aliases
+#' Normal_ct
+#' pnorm_ct
+#' rnorm_ct
+#' @param a lower bound
+#' @param b upper bound
+#' @param n number of draws to generate. If \code{length(n) > 1}, 
+#' the length is taken to be the number required
+#' @param lgrt log of the distribution function between the 
+#' lower bound and infinity
+#' @param lglt log of the distribution function between negative 
+#' infinity and the upper bound
+#' @param mu mean parameter
+#' @param sigma standard deviation
+#' @param log.p Logical argument. If \code{TRUE}, the log probability is provided
+#' @param Diff Logical argument. If \code{TRUE} the second parameter is the difference between the lower and upper bound
+#' @return For \code{pnorm_ct}, vector of length equal to length of \code{a} and for
+#' \code{rnorm_ct}, a vector with length determined by \code{n} containing draws from 
+#' the center of the normal distribution.
+#' @details  The distribution function pnorm_ct finds the probability of the 
+#' center of a normal density (the probability of the area between a lower 
+#' bound a and an upper bound b) while the random number generator rnorm_ct 
+#' samples from a restricted normal density where lgrt is the log of the 
+#' distribution between the lower bound and infinity and lglt is the log of 
+#' the distribution function between negative infinity and the upper bound. 
+#' The sum of the exponentiated values for the two (exp(lgrt)+exp(lglt)) must 
+#' sum to more than 1.
+#' 
+#' These functions are mainly used to handle cases where the differences 
+#' between the upper and lower bounds \code{b-a} are small. In such cases,
+#' using \code{pnorm(b)-pnorm(a)} may result in 0 being returned even when the 
+#' difference is supposed to be positive. 
+#' @example inst/examples/Ex_Normal_ct.R
+#' @rdname Normal_ct
+#' @order 1
+
 pnorm_ct<-function(a=-Inf,b=Inf,mu=0,sigma=1,log.p=TRUE,Diff=FALSE){
 
 if(is.vector(a)==FALSE||is.vector(b)==FALSE){stop("Arguments a and b must be vectors")}

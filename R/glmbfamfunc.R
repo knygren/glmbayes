@@ -1,3 +1,27 @@
+#' Return family functions used during simulation and post processing
+#'
+#' This function takes as input a \code{\link{family}} object and returns a 
+#' set of functions that are used during simulation and summarization of models 
+#' using the \code{\link{glmb}}, and \code{\link{rglmb}} functions.
+#' 
+#' @name 
+#' glmbfamfunc
+#' @aliases
+#' glmbfamfunc
+#' print.glmbfamfunc
+#' @param family an object of class \code{\link{family}}
+#' @param x an object of class \code{"glmbfamfunc"} for which a printed output is desired.
+#' @param \ldots additional optional arguments
+#' @return A list with the following components
+#' \item{f1}{Negative log-likelihood function}
+#' \item{f2}{Negative log-posterior function}
+#' \item{f3}{Gradient function for negative log-posterior function}
+#' \item{f4}{Deviance function}
+#' \item{f7}{Another function}
+#' @details  This function takes as input a family and returns a set of functions related to the family.
+#' @example inst/examples/Ex_glmbfamfunc.R
+#' @rdname glmbfamfunc
+#' @order 1
 
 glmbfamfunc<-function(family){
 
@@ -337,6 +361,9 @@ if(family$family=="Gamma" && family$link=="log")
 		
 }
 
+#' @rdname glmbfamfunc
+#' @order 2
+#' @method print glmbfamfunc
 
 
 print.glmbfamfunc<-function(x,...)

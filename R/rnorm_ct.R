@@ -1,3 +1,6 @@
+#' @rdname Normal_ct
+#' @order 2
+
 rnorm_ct<-function(n,lgrt,lglt,mu=0,sigma=1)
 {
 
