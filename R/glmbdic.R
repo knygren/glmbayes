@@ -1,3 +1,23 @@
+#' Calculates DIC and Deviance Information
+#'
+#' Caculates DIC and Deviance Information for a fitted model.
+#' @param coefficients A matrix with coefficients from the rglmb function
+#' @param y a vector of observations of length m
+#' @param x a design matrix of dimension m*p
+#' @param alpha an offset parameter or vector
+#' @param f1 A function used to calculate the negative log-likelihood
+#' @param f4 A function used to calculate the deviance
+#' @param wt a vector of weights
+#' @param dispersion dispersion parameter
+#' 
+#' @details Calculates DIC and Deviance Information
+#' @return A list with the following components
+#' \item{Deviance}{A \code{n * 1} matrix with the deviance for each draw}
+#' \item{Dbar}{Mean for negative 2 times negative log-likelihood}
+#' \item{Dthetabar}{Negative 2 times log-likelihood evaluated at mean parameters}
+#' \item{pD}{Effective number of parameters}
+#' \item{DIC}{DIC statistic}
+#' @example inst/examples/Ex_glmbdic.R
 
 glmbdic<-function(coefficients,y,x,alpha=0,f1,f4,wt=1,dispersion=1){
 
