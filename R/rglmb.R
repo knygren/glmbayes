@@ -190,8 +190,10 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=ga
     if(is.null(dispersion)){dispersion2=0}
     if(dispersion2>0){
       
-      outlist<-rnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)
-    }
+#      outlist<-rnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)
+      outlist<-.rnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)
+      
+         }
     
     else{
       
@@ -206,15 +208,18 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=ga
 
     # f1, f2, and f3 passed here - Likely legacy of R code
     ## Can eliminate and replace with calling of corresponding c++ functions
-    outlist<-rnnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,
-                                famfunc=famfunc,f1=f1,f2=f2,f3=f3,
-                                start=start,family=family$family,link=family$link,Gridtype=Gridtype)
+#    outlist<-rnnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,
+#                                famfunc=famfunc,f1=f1,f2=f2,f3=f3,
+#                                start=start,family=family$family,link=family$link,Gridtype=Gridtype)
     
-  }
+    outlist<-.rnnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,
+                            famfunc=famfunc,f1=f1,f2=f2,f3=f3,
+                            start=start,family=family$family,link=family$link,Gridtype=Gridtype)
+    
+    
+      }
   
-  test_out=.rnorm_ct_cpp(lgrt=log(0.8),lglt=log(0.8),mu=0,sigma=1)
-  print(test_out)
-  
+
   
   colnames(outlist$coefficients)<-colnames(x)
   
