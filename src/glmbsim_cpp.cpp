@@ -256,15 +256,14 @@ Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterV
   arma::mat btemp2(btemp.begin(),l1,1,false); 
   NumericVector testll(1);
 
-  if(progbar==1){
-  Rcpp::Rcout << "Starting Simulation:" << std::endl;  };
+  if(progbar==1){ Rcpp::Rcout << "Starting Simulation:" << std::endl;  };
     for(int i=0;i<n;i++){
       
       Rcpp::checkUserInterrupt();
-     // if(progbar==1){
+      if(progbar==1){
         progress_bar2(i, n-1);
       if(i==n-1) {Rcpp::Rcout << "" << std::endl;}
-      //}
+      }
       
       
     a1=0;
@@ -488,8 +487,10 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   // Run simulation 
   
+  int progbar=0;
+  
   Rcpp::List sim=rnnorm_reg_std_cpp(n,y,x2_temp,mu2_temp,P2_temp,alpha,wt2,
-                                    f2,Envelope,family,link);
+                                    f2,Envelope,family,link,progbar);
   
   
   //  Post processing

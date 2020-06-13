@@ -1,0 +1,283 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 2.9.7440 64-bit) (preloaded format=pdflatex 2020.5.29)  13 JUN 2020 12:28
+entering extended mode
+**./glmbayes.tex
+(glmbayes.tex
+LaTeX2e <2020-02-02> patch level 5
+L3 programming layer <2020-05-15>
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/latex/base\article.cl
+s"
+Document Class: article 2019/12/20 v1.4l Standard LaTeX document class
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/latex/base\size10.clo
+"
+File: size10.clo 2019/12/20 v1.4l Standard LaTeX file (size option)
+)
+\c@part=\count167
+\c@section=\count168
+\c@subsection=\count169
+\c@subsubsection=\count170
+\c@paragraph=\count171
+\c@subparagraph=\count172
+\c@figure=\count173
+\c@table=\count174
+\abovecaptionskip=\skip47
+\belowcaptionskip=\skip48
+\bibindent=\dimen134
+)
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/latex/graphics\graphi
+cx.sty"
+Package: graphicx 2019/11/30 v1.2a Enhanced LaTeX Graphics (DPC,SPQR)
+
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/latex/graphics\keyval
+.sty"
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+\KV@toks@=\toks15
+)
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/latex/graphics\graphi
+cs.sty"
+Package: graphics 2019/11/30 v1.4a Standard LaTeX Graphics (DPC,SPQR)
+
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/latex/graphics\trig.s
+ty"
+Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
+)
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/latex/graphics-cfg\gr
+aphics.cfg"
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 105.
+
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/latex/graphics-def\pd
+ftex.def"
+File: pdftex.def 2018/01/08 v1.0l Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen135
+\Gin@req@width=\dimen136
+)
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/latex/graphics\color.
+sty"
+Package: color 2019/11/23 v1.2a Standard LaTeX Color (DPC)
+
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/latex/graphics-cfg\co
+lor.cfg"
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package color Info: Driver file: pdftex.def on input line 147.
+)
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/latex/framed\framed.s
+ty"
+Package: framed 2011/10/22 v 0.96: framed or shaded text with page breaks
+\OuterFrameSep=\skip49
+\fb@frw=\dimen137
+\fb@frh=\dimen138
+\FrameRule=\dimen139
+\FrameSep=\dimen140
+)
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/latex/base\alltt.sty"
+Package: alltt 1997/06/16 v2.0g defines alltt environment
+)
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/latex/upquote\upquote
+.sty"
+Package: upquote 2012/04/19 v1.3 upright-quote and grave-accent glyphs in verba
+tim
+)
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/latex/l3backend\l3bac
+kend-pdfmode.def"
+File: l3backend-pdfmode.def 2020-05-05 L3 backend support: PDF mode
+\l__kernel_color_stack_int=\count175
+\l__pdf_internal_box=\box45
+) (glmbayes.aux)
+\openout1 = `glmbayes.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/context/base/mkii\sup
+p-pdf.mkii"
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count176
+\scratchdimen=\dimen141
+\scratchbox=\box46
+\nofMPsegments=\count177
+\nofMParguments=\count178
+\everyMPshowfont=\toks16
+\MPscratchCnt=\count179
+\MPscratchDim=\dimen142
+\MPnumerator=\count180
+\makeMPintoPDFobject=\count181
+\everyMPtoPDFconversion=\toks17
+)
+("C:\Users\i0276170\AppData\Local\Programs\MiKTeX 2.9\tex/latex/epstopdf-pkg\ep
+stopdf-base.sty"
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+85.
+)
+Package color Info: Redefining color shadecolor on input line 59.
+LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 61.
+Package color Info: Redefining color shadecolor on input line 69.
+Package color Info: Redefining color shadecolor on input line 95.
+Package color Info: Redefining color shadecolor on input line 107.
+
+Overfull \hbox (38.24666pt too wide) in paragraph at lines 122--122
+[]\OT1/cmtt/m/n/10 ## Call:  glm(formula = counts ~ outcome + treatment, family
+ = poisson())[] 
+ []
+
+
+Overfull \hbox (1.49698pt too wide) in paragraph at lines 122--122
+[]\OT1/cmtt/m/n/10 ## (Intercept)     outcome2     outcome3   treatment2   trea
+tment3[] 
+ []
+
+
+Overfull \hbox (1.49698pt too wide) in paragraph at lines 122--122
+[]\OT1/cmtt/m/n/10 ##   3.045e+00   -4.543e-01   -2.930e-01    1.338e-15    1.4
+21e-15[] 
+ []
+
+[1
+
+{C:/Users/i0276170/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}]
+Package color Info: Redefining color shadecolor on input line 130.
+Package color Info: Redefining color shadecolor on input line 161.
+Package color Info: Redefining color shadecolor on input line 181.
+
+Overfull \hbox (80.24629pt too wide) in paragraph at lines 184--184
+[][]\OT1/cmtt/m/n/10 glmb.D93[][]<-[][]glmb[][](counts[] []~[] []outcome[] []+[
+] []treatment,[][]family[] []=[] []poisson[][](),[][]n[][]=n,[][]mu[][]=mu,[][]
+Sigma[][]=V)[][] 
+ []
+
+[2]
+Package color Info: Redefining color shadecolor on input line 201.
+
+Overfull \hbox (80.24629pt too wide) in paragraph at lines 217--217
+[]\OT1/cmtt/m/n/10 ## Call:  glmb(n = n, formula = counts ~ outcome + treatment
+, family = poisson(),[] 
+ []
+
+
+Overfull \hbox (1.49698pt too wide) in paragraph at lines 217--217
+[]\OT1/cmtt/m/n/10 ## (Intercept)     outcome2     outcome3   treatment2   trea
+tment3[] 
+ []
+
+
+Overfull \hbox (1.49698pt too wide) in paragraph at lines 217--217
+[]\OT1/cmtt/m/n/10 ##    3.013728    -0.436761    -0.269464     0.006341    -0.
+003915[] 
+ []
+
+Package color Info: Redefining color shadecolor on input line 222.
+
+Overfull \hbox (1.49698pt too wide) in paragraph at lines 254--254
+[]\OT1/cmtt/m/n/10 ## glm(formula = counts ~ outcome + treatment, family = pois
+son())[] 
+ []
+
+
+Overfull \hbox (80.24629pt too wide) in paragraph at lines 254--254
+[]\OT1/cmtt/m/n/10 ##        1         2         3         4         5         
+6         7         8[] 
+ []
+
+
+Overfull \hbox (80.24629pt too wide) in paragraph at lines 254--254
+[]\OT1/cmtt/m/n/10 ## -0.67125   0.96272  -0.16965  -0.21999  -0.95552   1.0493
+9   0.84715  -0.09167[] 
+ []
+
+[3]
+Package color Info: Redefining color shadecolor on input line 259.
+
+Overfull \hbox (43.49661pt too wide) in paragraph at lines 308--308
+[]\OT1/cmtt/m/n/10 ## glmb(n = n, formula = counts ~ outcome + treatment, famil
+y = poisson(),[] 
+ []
+
+
+Overfull \hbox (43.49661pt too wide) in paragraph at lines 308--308
+[]\OT1/cmtt/m/n/10 ##        1        2        3        4        5        6    
+    7        8[] 
+ []
+
+
+Overfull \hbox (43.49661pt too wide) in paragraph at lines 308--308
+[]\OT1/cmtt/m/n/10 ## -0.55729  0.99103 -0.16224 -0.13021 -0.95305  1.03238  0.
+99178 -0.05149[] 
+ []
+
+
+Overfull \hbox (1.49698pt too wide) in paragraph at lines 308--308
+[]\OT1/cmtt/m/n/10 ## Prior and Maximum Likelihood Estimates with Standard Devi
+ations[] 
+ []
+
+
+Overfull \hbox (74.99634pt too wide) in paragraph at lines 308--308
+[]\OT1/cmtt/m/n/10 ##                  1.0%      2.5%      5.0%    Median     9
+5.0%     97.5% 99.0%[] 
+ []
+
+
+Overfull \hbox (74.99634pt too wide) in paragraph at lines 308--308
+[]\OT1/cmtt/m/n/10 ## (Intercept)  2.617811  2.675934  2.726062  3.014661  3.28
+4156  3.341939 3.387[] 
+ []
+
+
+Overfull \hbox (74.99634pt too wide) in paragraph at lines 308--308
+[]\OT1/cmtt/m/n/10 ## outcome2    -0.936338 -0.863943 -0.794507 -0.436180 -0.09
+3240 -0.038541 0.015[] 
+ []
+
+
+Overfull \hbox (74.99634pt too wide) in paragraph at lines 308--308
+[]\OT1/cmtt/m/n/10 ## outcome3    -0.679785 -0.620496 -0.575448 -0.272055  0.03
+7269  0.116785 0.187[] 
+ []
+
+
+Overfull \hbox (74.99634pt too wide) in paragraph at lines 308--308
+[]\OT1/cmtt/m/n/10 ## treatment2  -0.442861 -0.374234 -0.326694  0.019567  0.30
+5070  0.343982 0.439[] 
+ []
+
+
+Overfull \hbox (74.99634pt too wide) in paragraph at lines 308--308
+[]\OT1/cmtt/m/n/10 ## treatment3  -0.409679 -0.366995 -0.313983 -0.007799  0.29
+5986  0.352706 0.410[] 
+ []
+
+[4] [5] (glmbayes.aux) ) 
+Here is how much of TeX's memory you used:
+ 1273 strings out of 482727
+ 19716 string characters out of 2947675
+ 256668 words of memory out of 3000000
+ 17071 multiletter control sequences out of 15000+200000
+ 532674 words of font info for 26 fonts, out of 3000000 for 9000
+ 0 hyphenation exceptions out of 8191
+ 30i,5n,25p,356b,278s stack positions out of 5000i,500n,10000p,200000b,50000s
+<C:/Users/i0276170/AppData/Local/Programs/MiKTeX 2.9/fo
+nts/type1/public/amsfonts/cm/cmitt10.pfb><C:/Users/i0276170/AppData/Local/Progr
+ams/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/i0276170/AppD
+ata/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on glmbayes.pdf (5 pages, 57494 bytes).
+PDF statistics:
+ 30 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+

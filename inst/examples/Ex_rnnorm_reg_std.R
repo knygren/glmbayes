@@ -100,7 +100,7 @@ Env2
 
 sim=rnnorm_reg_std(n=as.integer(n),y=as.vector(y),x=as.matrix(x2),mu=as.matrix(mu2,ncol=1),
                    P=as.matrix(P2),alpha=as.vector(alpha),wt=as.vector(wt2),
-                   f2=f2,Envelope=Env2,family="binomial",link="logit")
+                   f2=f2,Envelope=Env2,family="binomial",link="logit",as.integer(0))
 
 out=L2Inv%*%L3Inv%*%t(sim$out)
 
