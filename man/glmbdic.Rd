@@ -60,14 +60,23 @@ V1<-1*diag(as.numeric(2.0))
 ## Specifies uncertainty around the point estimates
 
 V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
-V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 1 times as large as point estimate 
+V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
 
-famfunc<-glmbfamfunc(binomial(logit))
+out<-rglmb(n = 1000, y=y, x=x, mu=mu, P=solve(V1), wt = wt, 
+           family = binomial(logit), Gridtype = 3) 
+summary(out)
 
-f1<-famfunc$f1
-f2<-famfunc$f2
-f3<-famfunc$f3
-f5<-famfunc$f5
-f6<-famfunc$f6
+alpha<-matrix(rep(0,length(y)),ncol=1)
+wtin<-wt   ## From glm call (  )
+dispersion2<-1
+famfunc<-out$famfunc
+f1=out$famfunc$f1
+f4=out$famfunc$f4
+
+glmbdic(out$coefficients,y=y,x=x,alpha=alpha,
+        f1=f1,f4=f4,wt=wtin/dispersion2,
+        dispersion=dispersion2)
+
+
 
 }

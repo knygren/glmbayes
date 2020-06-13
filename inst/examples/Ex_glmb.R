@@ -16,7 +16,7 @@ summary(glmb.D93)
 
 # Menarche Binomial Data Example 
 
-library(MASS)
+#library(MASS)
 data(menarche)
 
 summary(menarche)

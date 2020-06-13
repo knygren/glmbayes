@@ -130,6 +130,7 @@ out<-rglmb(n = 1000, y=y, x=x, mu=mu, P=solve(V1), wt = wt,
            family = binomial(logit), Gridtype = 3) 
 summary(out)
 
+# Add mean(out$iters to rglmb summary function)
 mean(out$iters)
 }
 \references{
