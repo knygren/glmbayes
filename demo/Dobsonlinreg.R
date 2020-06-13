@@ -9,6 +9,7 @@ lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
 lm_summary=summary(lm.D9)
 
 lm_summary
+
 lm.D9$coefficients
 
 n<-10000
