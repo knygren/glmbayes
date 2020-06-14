@@ -50,6 +50,7 @@
 
 \usepackage{alltt}
 %\VignetteIndexEntry{glmbayes Package: An Introduction}
+%\VignetteEngine{Sweave}
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \begin{document}
 
@@ -63,7 +64,7 @@ First we install the glmbayes library.
 \end{kframe}
 \end{knitrout}
 
-To understand how the output of the glmb function mirrors that for the glm function, it useful to take a look at the first portion of the example that is provided for the glm function. The data is based on Randomized Controlled Trial data from Dobson (1990). Here is a view of the data.
+To understand how the output of the glmb function mirrors that for the glm function, it is useful to take a look at the first portion of the example that is provided with the glm function. The data is based on Randomized Controlled Trial data from Dobson (1990). Here is a view of the data.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -89,7 +90,49 @@ To understand how the output of the glmb function mirrors that for the glm funct
 \end{kframe}
 \end{knitrout}
 
-The example code for the glm function specifies a Poisson regression model for this data as follows:
+The example code for the glm function specifies a Poisson regression model based on the formula: counts ~ outcome + treatment.  The resulting model has an intercept, 
+
+
+To run a Bayesian version of this model, we first need to add a prior. As the output above had 5 columns, we need a prior mean with 5 components. For now, we use log(mean(counts)) as a prior point estimate for the intercept and 0 as point estimates for the other components. 
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{mu}\hlkwb{<-}\hlkwd{matrix}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{5}\hlstd{)}
+\hlstd{mu[}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{]}\hlkwb{=}\hlkwd{log}\hlstd{(}\hlkwd{mean}\hlstd{(counts))}
+\hlstd{mu}
+\end{alltt}
+\begin{verbatim}
+##          [,1]
+## [1,] 2.813411
+## [2,] 0.000000
+## [3,] 0.000000
+## [4,] 0.000000
+## [5,] 0.000000
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+For now, we give all of the components a prior standard deviation of 1 and use it to populate a diagonal prior Variance-Covariance matrix.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{mysd}\hlkwb{<-}\hlnum{1}
+\hlstd{V}\hlkwb{=}\hlstd{((mysd)}\hlopt{^}\hlnum{2}\hlstd{)}\hlopt{*}\hlkwd{diag}\hlstd{(}\hlnum{5}\hlstd{)}
+\hlstd{V}
+\end{alltt}
+\begin{verbatim}
+##      [,1] [,2] [,3] [,4] [,5]
+## [1,]    1    0    0    0    0
+## [2,]    0    1    0    0    0
+## [3,]    0    0    1    0    0
+## [4,]    0    0    0    1    0
+## [5,]    0    0    0    0    1
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -100,8 +143,7 @@ The example code for the glm function specifies a Poisson regression model for t
 \end{kframe}
 \end{knitrout}
 
-The printed output from the call to glm looks as follows (note there are 5 variables in the model). One of the coefficients represents the intercept, while the others reprent the effect o
-outcomes and treatment on the counts.
+The printed output from the call to glm looks as follows (note there are 5 variables in the model). One of the coefficients represents the intercept, while the others represent the effect of outcome and treatment on the counts.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -123,65 +165,15 @@ outcomes and treatment on the counts.
 \end{kframe}
 \end{knitrout}
 
-To run a Bayesian version of this model, we first need to add a prior.  As the output above had 5 columns, we need a prior mean with 5 components. For now, we use log(mean(counts)) as a prior
-point estimate for the intercept and 0 as point estimates for the other components. 
 
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{mu}\hlkwb{<-}\hlkwd{matrix}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{5}\hlstd{)}
-\hlstd{mu}
-\end{alltt}
-\begin{verbatim}
-##      [,1]
-## [1,]    0
-## [2,]    0
-## [3,]    0
-## [4,]    0
-## [5,]    0
-\end{verbatim}
-\begin{alltt}
-\hlstd{mu[}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{]}\hlkwb{=}\hlkwd{log}\hlstd{(}\hlkwd{mean}\hlstd{(counts))}
-\hlstd{mu}
-\end{alltt}
-\begin{verbatim}
-##          [,1]
-## [1,] 2.813411
-## [2,] 0.000000
-## [3,] 0.000000
-## [4,] 0.000000
-## [5,] 0.000000
-\end{verbatim}
-\end{kframe}
-\end{knitrout}
-
-For now, we give all of the components a prior standard deviation of 1 as use it to populate a diagonal prior Variance matrix.
-
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{mysd}\hlkwb{<-}\hlnum{1}
-\hlstd{V}\hlkwb{=}\hlstd{((mysd)}\hlopt{^}\hlnum{2}\hlstd{)}\hlopt{*}\hlkwd{diag}\hlstd{(}\hlnum{5}\hlstd{)}
-\hlstd{V}
-\end{alltt}
-\begin{verbatim}
-##      [,1] [,2] [,3] [,4] [,5]
-## [1,]    1    0    0    0    0
-## [2,]    0    1    0    0    0
-## [3,]    0    0    1    0    0
-## [4,]    0    0    0    1    0
-## [5,]    0    0    0    0    1
-\end{verbatim}
-\end{kframe}
-\end{knitrout}
-
-We are now ready to call the glmb function using similar code to that for glm. In addition to the two prior components, we also tell the function to generate 1000 random samples for the analysis (similar to how functions like rnorm would be called). [This part of the code does not seem to currently be getting printed to the *.pdf file.]
+We are now ready to call the glmb function using similar code to that for glm. In addition to the two prior components, we also tell the function to generate 1000 random samples for the analysis (similar to how functions like rnorm would be called). 
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{n}\hlkwb{<-}\hlnum{1000}
-\hlstd{glmb.D93}\hlkwb{<-}\hlkwd{glmb}\hlstd{(counts} \hlopt{~} \hlstd{outcome} \hlopt{+} \hlstd{treatment,}\hlkwc{family} \hlstd{=} \hlkwd{poisson}\hlstd{(),}\hlkwc{n}\hlstd{=n,}\hlkwc{mu}\hlstd{=mu,}\hlkwc{Sigma}\hlstd{=V)}
+\hlstd{glmb.D93}\hlkwb{<-}\hlkwd{glmb}\hlstd{(}\hlkwc{n}\hlstd{=n,counts} \hlopt{~} \hlstd{outcome} \hlopt{+} \hlstd{treatment,}
+               \hlkwc{family} \hlstd{=} \hlkwd{poisson}\hlstd{(),}\hlkwc{mu}\hlstd{=mu,}\hlkwc{Sigma}\hlstd{=V)}
 \end{alltt}
 \begin{verbatim}
 ## Standardizing the model:
@@ -197,6 +189,8 @@ We are now ready to call the glmb function using similar code to that for glm. I
 \end{kframe}
 \end{knitrout}
 
+We can now take a look at the printed output for the glmb function and note that it mirror's what we saw for the glm function above [Change digits default here].
+
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -209,14 +203,15 @@ We are now ready to call the glmb function using similar code to that for glm. I
 ## 
 ## Posterior Mean Coefficients:
 ## (Intercept)     outcome2     outcome3   treatment2   treatment3  
-##    3.013728    -0.436761    -0.269464     0.006341    -0.003915  
+##    3.007997    -0.439683    -0.275736     0.019163    -0.004407  
 ## 
-## Effective Number of Parameters: 4.626228 
-## Expected Residual Deviance: 9.82226 
-## DIC: 56.08067
+## Effective Number of Parameters: 4.558103 
+## Expected Residual Deviance: 9.786093 
+## DIC: 55.97637
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
+
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -267,9 +262,9 @@ We are now ready to call the glmb function using similar code to that for glm. I
 ## 
 ## Expected Deviance Residuals:
 ##        1        2        3        4        5        6        7        8 
-## -0.55729  0.99103 -0.16224 -0.13021 -0.95305  1.03238  0.99178 -0.05149 
+## -0.52820  1.02394 -0.11549 -0.16185 -0.96581  1.02774  1.01889 -0.01801 
 ##        9 
-## -0.94523 
+## -0.89896 
 ## 
 ## Prior and Maximum Likelihood Estimates with Standard Deviations
 ## 
@@ -283,28 +278,34 @@ We are now ready to call the glmb function using similar code to that for glm. I
 ## Bayesian Estimates Based on 1000 iid draws
 ## 
 ##             Post.Mode Post.Mean   Post.Sd MC Error Pr(tail)  
-## (Intercept)  3.027191  3.013728  0.174809        0   0.1269  
-## outcome2    -0.428953 -0.436761  0.204607        0   0.0130 *
-## outcome3    -0.272569 -0.269464  0.189596        0   0.0779 .
-## treatment2   0.004042  0.006341  0.194856        0   0.4695  
-## treatment3   0.004042 -0.003915  0.186309        0   0.4875  
+## (Intercept)  3.027191  3.007997  0.159878        0   0.1059  
+## outcome2    -0.428953 -0.439683  0.196844        0   0.0130 *
+## outcome3    -0.272569 -0.275736  0.196388        0   0.0819 .
+## treatment2   0.004042  0.019163  0.184747        0   0.4585  
+## treatment3   0.004042 -0.004407  0.185666        0   0.4985  
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## Distribution Percentiles
 ## 
-##                  1.0%      2.5%      5.0%    Median     95.0%     97.5% 99.0%
-## (Intercept)  2.617811  2.675934  2.726062  3.014661  3.284156  3.341939 3.387
-## outcome2    -0.936338 -0.863943 -0.794507 -0.436180 -0.093240 -0.038541 0.015
-## outcome3    -0.679785 -0.620496 -0.575448 -0.272055  0.037269  0.116785 0.187
-## treatment2  -0.442861 -0.374234 -0.326694  0.019567  0.305070  0.343982 0.439
-## treatment3  -0.409679 -0.366995 -0.313983 -0.007799  0.295986  0.352706 0.410
+##                   1.0%       2.5%       5.0%     Median      95.0%      97.5%
+## (Intercept)  2.6230813  2.6915309  2.7561487  3.0056965  3.2668026  3.3052487
+## outcome2    -0.8933500 -0.8211660 -0.7661215 -0.4392009 -0.1138020 -0.0408785
+## outcome3    -0.7107920 -0.6501652 -0.5956323 -0.2770641  0.0415381  0.0845974
+## treatment2  -0.4114017 -0.3230641 -0.2940852  0.0246325  0.3028095  0.3546182
+## treatment3  -0.4031580 -0.3522902 -0.2994844 -0.0006627  0.3046038  0.3584036
+##             99.0%
+## (Intercept) 3.373
+## outcome2    0.017
+## outcome3    0.131
+## treatment2  0.415
+## treatment3  0.420
 ## 
-## Effective Number of Parameters: 4.626228 
-## Expected Residual Deviance: 9.82226 
-## DIC: 56.08067 
+## Effective Number of Parameters: 4.558103 
+## Expected Residual Deviance: 9.786093 
+## DIC: 55.97637 
 ## 
-## Mean Likelihood Subgradient Candidates Per iid sample: 1.815
+## Mean Likelihood Subgradient Candidates Per iid sample: 1.76
 \end{verbatim}
 \end{kframe}
 \end{knitrout}

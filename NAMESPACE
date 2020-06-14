@@ -12,7 +12,7 @@ S3method(summary,rglmb)
 S3method(summary,rglmb_dispersion)
 S3method(print,summary.glmb)
 S3method(print,summary.rglmb)
-import(RcppArmadillo,mnormt)
+import(RcppArmadillo)
 importFrom(Rcpp, evalCpp)
 importFrom("stats", ".getXlevels", "binomial", "coef", "dbinom",
              "dgamma", "dnorm", "dpois", "gaussian", "is.empty.model",

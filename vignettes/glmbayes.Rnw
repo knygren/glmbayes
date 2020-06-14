@@ -1,6 +1,6 @@
 \documentclass{article}
 %\VignetteIndexEntry{glmbayes Package: An Introduction}
-
+%\VignetteEngine{Sweave}
 \begin{document}
 
 First we install the glmbayes library.
@@ -9,7 +9,7 @@ First we install the glmbayes library.
 library(glmbayes)
 @
 
-To understand how the output of the glmb function mirrors that for the glm function, it useful to take a look at the first portion of the example that is provided for the glm function. The data is based on Randomized Controlled Trial data from Dobson (1990). Here is a view of the data.
+To understand how the output of the glmb function mirrors that for the glm function, it is useful to take a look at the first portion of the example that is provided with the glm function. The data is based on Randomized Controlled Trial data from Dobson (1990). Here is a view of the data.
 
 <<Dobson Data>>=
 
@@ -20,31 +20,18 @@ treatment <- gl(3,3)
 print(d.AD <- data.frame(treatment, outcome, counts))
 @
 
-The example code for the glm function specifies a Poisson regression model for this data as follows:
+The example code for the glm function specifies a Poisson regression model based on the formula: counts ~ outcome + treatment.  The resulting model has an intercept, 
 
-<<Call glm>>=
-glm.D93 <- glm(counts ~ outcome + treatment, 
-              family = poisson())
-@
 
-The printed output from the call to glm looks as follows (note there are 5 variables in the model). One of the coefficients represents the intercept, while the others reprent the effect o
-outcomes and treatment on the counts.
-
-<<Print glm>>=
-print(glm.D93)
-@
-
-To run a Bayesian version of this model, we first need to add a prior.  As the output above had 5 columns, we need a prior mean with 5 components. For now, we use log(mean(counts)) as a prior
-point estimate for the intercept and 0 as point estimates for the other components. 
+To run a Bayesian version of this model, we first need to add a prior. As the output above had 5 columns, we need a prior mean with 5 components. For now, we use log(mean(counts)) as a prior point estimate for the intercept and 0 as point estimates for the other components. 
 
 <<glmbprior mean>>=
 mu<-matrix(0,5)
-mu
 mu[1,1]=log(mean(counts))
 mu
 @
 
-For now, we give all of the components a prior standard deviation of 1 as use it to populate a diagonal prior Variance matrix.
+For now, we give all of the components a prior standard deviation of 1 and use it to populate a diagonal prior Variance-Covariance matrix.
 
 <<glmbprior variance>>=
 mysd<-1
@@ -52,16 +39,33 @@ V=((mysd)^2)*diag(5)
 V
 @
 
-We are now ready to call the glmb function using similar code to that for glm. In addition to the two prior components, we also tell the function to generate 1000 random samples for the analysis (similar to how functions like rnorm would be called). [This part of the code does not seem to currently be getting printed to the *.pdf file.]
+
+<<Call glm>>=
+glm.D93 <- glm(counts ~ outcome + treatment, 
+              family = poisson())
+@
+
+The printed output from the call to glm looks as follows (note there are 5 variables in the model). One of the coefficients represents the intercept, while the others represent the effect of outcome and treatment on the counts.
+
+<<Print glm>>=
+print(glm.D93)
+@
+
+
+We are now ready to call the glmb function using similar code to that for glm. In addition to the two prior components, we also tell the function to generate 1000 random samples for the analysis (similar to how functions like rnorm would be called). 
 
 <<Run glmb>>=
 n<-1000
-glmb.D93<-glmb(counts ~ outcome + treatment,family = poisson(),n=n,mu=mu,Sigma=V)
+glmb.D93<-glmb(n=n,counts ~ outcome + treatment,
+               family = poisson(),mu=mu,Sigma=V)
 @
+
+We can now take a look at the printed output for the glmb function and note that it mirror's what we saw for the glm function above [Change digits default here].
 
 <<Print glmb>>=
 print(glmb.D93)
 @
+
 
 <<glmexamplesummary>>=
 summary(glm.D93)
