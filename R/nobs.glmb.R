@@ -5,7 +5,7 @@
 #' @param object A fitted model object.
 #' @param \ldots further arguments to be passed to other methods
 #' @return A single number, normally an integer.  Could be \code{NA}.
-#' @example inst/examples/Ex_extractAIC.glmb.R
+#' @example inst/examples/Ex_nobs.glmb.R
 
 nobs.glmb<-function(object,...)
 {

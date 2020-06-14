@@ -69,33 +69,28 @@ variables found are not of the same length as those in \code{newdata}
 if it was supplied.
 }
 \examples{
-data(menarche)
 
-summary(menarche)
-plot(Menarche/Total ~ Age, data=menarche)
+## ----dobson-------------------------------------------------------------------
+## Dobson (1990) Page 93: Randomized Controlled Trial :
+counts <- c(18,17,15,20,10,20,25,13,12)
+outcome <- gl(3,1,9)
+treatment <- gl(3,3)
+print(d.AD <- data.frame(treatment, outcome, counts))
 
-Age2=menarche$Age-13
+## ----Prior_and_Calls,results = "hide"-----------------------------------------
+## Prior mean vector 
+mu<-matrix(0,5)           
+mu[1,1]=log(mean(counts)) 
+## Prior standard deviation and Variance
+mysd<-1           
+V=((mysd)^2)*diag(5)  
 
-x<-matrix(as.numeric(1.0),nrow=length(Age2),ncol=2)
-x[,2]=Age2
+## Call to glmb
+glmb.D93<-glmb(n=1000,counts ~ outcome + treatment,
+               family = poisson(),mu=mu,Sigma=V)
 
-y=menarche$Menarche/menarche$Total
-wt=menarche$Total
+## ----glmb predictions---------------------------------------------------------
+## predictions for the glmb function
+colMeans(predict(glmb.D93)) 
 
-mu<-matrix(as.numeric(0.0),nrow=2,ncol=1)
-mu[2,1]=(log(0.9/0.1)-log(0.5/0.5))/3
-
-V1<-1*diag(as.numeric(2.0))
-
-# 2 standard deviations for prior estimate at age 13 between 0.1 and 0.9
-## Specifies uncertainty around the point estimates
-
-V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
-V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
-
-out<-rglmb(n = 1000, y=y, x=x, mu=mu, P=solve(V1), wt = wt, 
-           family = binomial(logit), Gridtype = 3) 
-summary(out)
-
-mean(out$iters)
 }

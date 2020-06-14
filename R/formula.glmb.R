@@ -6,7 +6,7 @@
 #' @param \ldots further arguments passed to or from other methods.
 #' @return Produce an object of class \code{"formula"} which
 #' contains a symbolic model formula.
-#' @example inst/examples/Ex_extractAIC.glmb.R
+#' @example inst/examples/Ex_formula.glmb.R
 
 formula.glmb<-function(x,...)
 {
