@@ -4,7 +4,7 @@
 \alias{confint.glmb}
 \title{Extract DIC from a Fitted Bayesian Model}
 \usage{
-\method{confint}{glmb}(object, parm, level, ...)
+\method{confint}{glmb}(object, parm, level = 0.95, ...)
 }
 \arguments{
 \item{object}{an object of class \code{"glmb"}, typically the result of a call to \link{glmb}}
