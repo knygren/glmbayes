@@ -2,23 +2,22 @@
 % Please edit documentation in R/formula.glmb.R
 \name{formula.glmb}
 \alias{formula.glmb}
-\title{Extract DIC from a Fitted Bayesian Model}
+\title{Model Formulae}
 \usage{
 \method{formula}{glmb}(x, ...)
 }
 \arguments{
-\item{x}{an object of class \code{"glmb"}, typically the result of a call to \link{glmb}}
+\item{x}{\R object.}
 
-\item{...}{further arguments to or from other methods}
+\item{\ldots}{further arguments passed to or from other methods.}
 }
 \value{
-A list with the Estimated effective number of parameters \code{pD}
-and the \code{DIC} from the object \code{fit} of class \code{"glmb"}. See \code{\link{glmbdic}}
-for details on the definition of these objects.
+Produce an object of class \code{"formula"} which
+contains a symbolic model formula.
 }
 \description{
-Computes the Deviance Information Criterion for a fitted Bayesian
-Generalized Linear Model
+The generic function \code{formula} and its specific methods provide a
+way of extracting formulae which have been included in other objects.
 }
 \examples{
 data(menarche)

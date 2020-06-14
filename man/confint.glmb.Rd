@@ -2,27 +2,27 @@
 % Please edit documentation in R/confint.glmb.R
 \name{confint.glmb}
 \alias{confint.glmb}
-\title{Extract DIC from a Fitted Bayesian Model}
+\title{Credible Intervals for Model Parameters}
 \usage{
 \method{confint}{glmb}(object, parm, level = 0.95, ...)
 }
 \arguments{
-\item{object}{an object of class \code{"glmb"}, typically the result of a call to \link{glmb}}
+\item{object}{a fitted model object of class \code{"glmb"}. Typically the result of a call to \link{glmb}.}
 
-\item{parm}{an object of class \code{"glmb"}, typically the result of a call to \link{glmb}}
+\item{parm}{a specification (not yet implmented) of which parameters are to be given credible sets,
+either a vector of numbers or a vector of names. If missing, all parameters are considered.}
 
-\item{level}{an object of class \code{"glmb"}, typically the result of a call to \link{glmb}}
+\item{level}{the credible interval required.}
 
-\item{...}{further arguments to or from other methods}
+\item{\ldots}{additional argument(s) for methods.}
 }
 \value{
-A list with the Estimated effective number of parameters \code{pD}
-and the \code{DIC} from the object \code{fit} of class \code{"glmb"}. See \code{\link{glmbdic}}
-for details on the definition of these objects.
+A matrix (or vector) with columnes giving lower and
+upper credible limits for each parameter. These will be labeled
+(1-level)/2 and 1-(1-level)/2 in \% (by default 2.5\% and 97.5\%).
 }
 \description{
-Computes the Deviance Information Criterion for a fitted Bayesian
-Generalized Linear Model
+Computes credible intervals for Model Parameters
 }
 \examples{
 data(menarche)

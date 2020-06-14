@@ -3,7 +3,7 @@ title: "glmb vs glm: A side-by-side comparison"
 author: "Kjell Nygren"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{glmb_vs_glm}
+  %\VignetteIndexEntry{glmb vs glm: A side-by-side comparison}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -102,7 +102,7 @@ The summary for the glmb function follow a similar structure but adds a table co
 summary(glmb.D93)
 ```
 
-**Model Fit, Predictions, Deviance Residuals, and Covariance Matrix**
+**Model Fit, Predictions, Deviance Residuals, Covariance Matrix, and Confidence/Credible Intervals**
 
 Let's next take a look at the outputs from these summary methods to see how they compare. Note that the Bayesian version of these contain random draws tied to the underlying distributions so the column means are used in these comparisons.
 
@@ -148,20 +148,32 @@ colMeans(residuals(glmb.D93))
 *vcov*
 
 ```{r glm vcov}
-## nobs for the glm function
+## vcov for the glm function
 vcov(glm.D93)
 ```
 
 ```{r glmb vcov}
-## nobs for the glm function
-cov(glmb.D93$coefficients)
+## vcov for the glm function
 vcov(glmb.D93)
+```
+
+*confint*
+
+Confidence intervals
+```{r glm confint}
+## confint for the glm function
+confint(glm.D93)
+```
+
+```{r glmb confint}
+## confint for the glm function
+confint(glmb.D93)
 ```
 
 
 **AIC/DIC, Deviance, and the Log-Likelihood**
 
-These Model statistics are useful when comparing different model specifications. The Bayesian Versions of these will be discussed in greater detail in a separate Vignette.
+These model statistics are useful when comparing different model specifications. The Bayesian versions of these will be discussed in greater detail in a separate Vignette.
 
 *AIC/DIC*
 
@@ -171,7 +183,7 @@ extractAIC(glm.D93)
 ```
 
 ```{r glmb DIC}
-## DIC for the glmb function (Estimated effective number of parameters and the DIC)
+## DIC for the glmb function (estimated effective number of parameters and the DIC)
 extractAIC(glmb.D93)
 ```
 
@@ -200,7 +212,7 @@ logLik(glm.D93)
 mean(logLik(glmb.D93))
 ```
 
-**Model Frame, Formula, family, and nobs**
+**Model Frame, formula, family, and nobs**
 
 These are mostly useful for understanding various aspects of the model.
 
@@ -225,7 +237,6 @@ formula(glm.D93)
 
 ```{r glmb formula}
 ## formula for the glmb function
-formula(glmb.D93$glm)
 formula(glmb.D93)
 ```
 
@@ -238,7 +249,6 @@ nobs(glm.D93)
 
 ```{r glmb nobs}
 ## nobs for the glmb function
-nobs(glmb.D93$glm)
 nobs(glmb.D93)
 ```
 
@@ -261,29 +271,16 @@ family(glmb.D93$glm)
 This appears to be just the same as the print function (reference in that section)
 
 ```{r glm show}
-## nobs for the glm function
+## show for the glm function
 show(glm.D93)
 ```
 
 ```{r glmb show}
-## nobs for the glm function
+## show for the glm function
 ## works without a "glmb" class specific generic function
 show(glmb.D93)
 ```
 
-*confint*
-
-Confidence intervals
-```{r glm confint}
-## confint for the glm function
-confint(glm.D93)
-```
-
-```{r glmb confint}
-## confint for the glm function
-t(apply(glmb.D93$coefficients, 2, FUN = quantile,probs=c(0.025,0.975)))
-confint(glmb.D93)
-```
 
 
 **Maybe implementable**

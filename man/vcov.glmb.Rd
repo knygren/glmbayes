@@ -2,23 +2,24 @@
 % Please edit documentation in R/vcov.glmb.R
 \name{vcov.glmb}
 \alias{vcov.glmb}
-\title{Extract DIC from a Fitted Bayesian Model}
+\title{Calculate Variance-Covariance Matrux for a Fitted Model Object}
 \usage{
 \method{vcov}{glmb}(object, ...)
 }
 \arguments{
-\item{object}{an object of class \code{"glmb"}, typically the result of a call to \link{glmb}}
+\item{object}{fitted model object, typically the result of a call to \code{"glmb"}.}
 
-\item{...}{further arguments to or from other methods}
+\item{\ldots}{additional arguments for method functions.}
 }
 \value{
-A list with the Estimated effective number of parameters \code{pD}
-and the \code{DIC} from the object \code{fit} of class \code{"glmb"}. See \code{\link{glmbdic}}
-for details on the definition of these objects.
+A matrix of estimated covariances between the parameter estimates
+in the linear or non-linear predictor of the model. This should have
+row and column names corresponding to the parameter names given by the
+\code{\link{coef}} method.
 }
 \description{
-Computes the Deviance Information Criterion for a fitted Bayesian
-Generalized Linear Model
+Returns the variance-covariance matrix of the main parameters of
+a fitted model object.
 }
 \examples{
 data(menarche)
