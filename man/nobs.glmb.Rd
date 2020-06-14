@@ -2,23 +2,20 @@
 % Please edit documentation in R/nobs.glmb.R
 \name{nobs.glmb}
 \alias{nobs.glmb}
-\title{Extract DIC from a Fitted Bayesian Model}
+\title{Extract the Number of Observations from a Fit.}
 \usage{
 \method{nobs}{glmb}(object, ...)
 }
 \arguments{
-\item{object}{an object of class \code{"glmb"}, typically the result of a call to \link{glmb}}
+\item{object}{A fitted model object.}
 
-\item{...}{further arguments to or from other methods}
+\item{\ldots}{further arguments to be passed to other methods}
 }
 \value{
-A list with the Estimated effective number of parameters \code{pD}
-and the \code{DIC} from the object \code{fit} of class \code{"glmb"}. See \code{\link{glmbdic}}
-for details on the definition of these objects.
+A single number, normally an integer.  Could be \code{NA}.
 }
 \description{
-Computes the Deviance Information Criterion for a fitted Bayesian
-Generalized Linear Model
+Extract the Number of \sQuote{observations} from a Fit.
 }
 \examples{
 data(menarche)

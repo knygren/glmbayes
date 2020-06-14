@@ -1,12 +1,10 @@
-#' Extract DIC from a Fitted Bayesian Model
+#' Extract the Number of Observations from a Fit.
 #'
-#' Computes the Deviance Information Criterion for a fitted Bayesian
-#' Generalized Linear Model
-#' @param object an object of class \code{"glmb"}, typically the result of a call to \link{glmb}
-#' @param ... further arguments to or from other methods
-#' @return A list with the Estimated effective number of parameters \code{pD}
-#' and the \code{DIC} from the object \code{fit} of class \code{"glmb"}. See \code{\link{glmbdic}}
-#' for details on the definition of these objects.
+#' 
+#' Extract the Number of \sQuote{observations} from a Fit.
+#' @param object A fitted model object.
+#' @param \ldots further arguments to be passed to other methods
+#' @return A single number, normally an integer.  Could be \code{NA}.
 #' @example inst/examples/Ex_extractAIC.glmb.R
 
 nobs.glmb<-function(object,...)
