@@ -102,7 +102,7 @@ The summary for the glmb function follow a similar structure but adds a table co
 summary(glmb.D93)
 ```
 
-**Model Fit, Predictions, and Deviance Residuals**
+**Model Fit, Predictions, Deviance Residuals, and Covariance Matrix**
 
 Let's next take a look at the outputs from these summary methods to see how they compare. Note that the Bayesian version of these contain random draws tied to the underlying distributions so the column means are used in these comparisons.
 
@@ -116,6 +116,7 @@ fitted(glm.D93)
 
 ```{r glmb fitted outputs}
 ## mean of fitted outputs for the glm function
+## works without a "glmb" class specific generic function
 colMeans(fitted(glmb.D93))
 ```
 
@@ -143,6 +144,19 @@ residuals(glm.D93)
 colMeans(residuals(glmb.D93))
 ```
 
+*vcov*
+
+```{r glm vcov}
+## nobs for the glm function
+vcov(glm.D93)
+```
+
+```{r glmb vcov}
+## nobs for the glm function
+cov(glmb.D93$coefficients)
+```
+
+
 **AIC/DIC, Deviance, and the Log-Likelihood**
 
 These Model statistics are useful when comparing different model specifications. The Bayesian Versions of these will be discussed in greater detail in a separate Vignette.
@@ -168,6 +182,7 @@ deviance(glm.D93)
 
 ```{r glmb Deviance}
 ## Deviance for the glmb function
+## works without a "glmb" class specific generic function
 mean(deviance(glmb.D93))
 ```
 
@@ -223,9 +238,23 @@ nobs(glm.D93)
 nobs(glmb.D93$glm)
 ```
 
-This appears to be just the same as the print function (reference in that section)
+
+*family*
+
+```{r glm family}
+## family for the glm function
+family(glm.D93)
+```
+
+```{r glmb family}
+## family for the glmb function
+family(glmb.D93$glm)
+```
+
 
 *show*
+
+This appears to be just the same as the print function (reference in that section)
 
 ```{r glm show}
 ## nobs for the glm function
@@ -234,5 +263,35 @@ show(glm.D93)
 
 ```{r glmb show}
 ## nobs for the glm function
+## works without a "glmb" class specific generic function
 show(glmb.D93)
 ```
+
+*confint*
+
+Confidence intervals
+```{r glm confint}
+## nobs for the glm function
+confint(glm.D93)
+```
+
+```{r glmb confint}
+## nobs for the glm function
+t(apply(glmb.D93$coefficients, 2, FUN = quantile,probs=c(0.025,0.975)))
+```
+
+
+**Maybe implementable**
+
+effects - seems to just involve a QR decomposition of 
+weights (not sure what these weights are)
+
+**Not easily implementable methods**
+
+Methods Category 1: influence, cooks.distance, rstudent, rstandard
+
+Methods Category 2: add1, drop 1
+
+Methods Category 3: anova - Analysis of deviance table - Likely not possible
+
+Methods category 4: initialize (don't know what this does), slotsFromS3
