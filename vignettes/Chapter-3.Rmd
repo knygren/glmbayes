@@ -1,9 +1,8 @@
 ---
-title: "Chapter 3: A Side-by-Side Comparison of glm and glmb"
-author: "Kjell Nygren"
+title: "Chapter-3:A_Side-by-Side_Comparison_of_glm_and_glmb"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 3: A Side-by-Side Comparison of glm and glmb}
+  %\VignetteIndexEntry{Chapter-3:A_Side-by-Side_Comparison_of_glm_and_glmb}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,16 +14,15 @@ knitr::opts_chunk$set(
 )
 ```
 
-
 ```{r setup,echo = FALSE}
 library(glmbayes)
 ```
 
-The **glmb** function and related *generic functions* that handle the output are designed to be Bayesian versions of the **glm** function and many of its *generic functions*. This vignette shows how the basic setup/calling of the functions compare and then walks through how the generic functions for glmb can be called to generate similar outputs to those from the glm functions.
+The **glmb** function and related *method functions* that handle the output are designed to be Bayesian versions of the **glm** function and many of its *method functions*. This vignette shows how the basic setup/calling of the functions compare and then walks through how the method functions for glmb can be called to generate similar outputs to those from the glm functions.
 
 **Dobson Randomized Control Data**
 
-To understand how the outputs of the glmb function mirrors that for the glm function, it is useful to take a look at the first portion of the example that is provided with the glm function. The data is based on Randomized Controlled Trial data from Dobson (1990). Here is a view of the data:
+To understand how the outputs of the glmb function mirrors those for the glm function, it is useful to take a look at the first portion of the example that is provided with the glm function. The data is based on Randomized Controlled Trial data from Dobson (1990). Here is a view of the data:
 
 ```{r dobson}
 ## Dobson (1990) Page 93: Randomized Controlled Trial :

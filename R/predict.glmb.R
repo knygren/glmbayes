@@ -44,8 +44,11 @@ predict.glmb<-function(object,newdata=NULL,type="link",
                        na.action = na.pass,...)
 {
 
-  ## Note: may need adjustment for case whee dispersion is random !
-  ## residual.scalen needs to be adjusted every iteration!
+
+  ## Note: may need adjustment for case when dispersion is random 
+  ## residual.scale be may not be 1 or link-inverse may not be accurate
+  ## Possible that this only matters if we want to simulate
+  ## from likelihood function, so may be ok. Need to verify.
   
   ## If newdata is missing, simply return the model predictions 
   ## on either the scale of the linear predictors or on the scale
@@ -70,7 +73,7 @@ predict.glmb<-function(object,newdata=NULL,type="link",
     lm_object=object$glm ## set object to glm object from glmb class
 
     
-    residual.scale <- as.vector(sqrt(dispersion))
+#    residual.scale <- as.vector(sqrt(dispersion))
     
     ## Loop through draws
     for(i in 1:n)
@@ -78,7 +81,7 @@ predict.glmb<-function(object,newdata=NULL,type="link",
       # Update object and then return predictions from predict.lm
       lm_object$coefficients=betas[i,1:nvars]
       pred[i,1:npreds]<- predict.lm(object, newdata, se.fit, 
-                              scale = residual.scale, type =  "response",
+                              scale = 1, type =  "response",
                 terms = terms, na.action = na.action)
 
       ## Rescale predictiosn if type="response"
