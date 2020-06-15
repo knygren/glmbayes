@@ -1,10 +1,10 @@
 ---
-title: "Chapter A1: Simulation Methods - Traditional iid Sampling Methods"
+title: "Chapter 6: A Selection of Bayesian Generalized Linear Models"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter A1: Simulation Methods - Traditional iid Sampling Methods}
+  %\VignetteIndexEntry{Chapter 6: A Selection of Bayesian Generalized Linear Models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

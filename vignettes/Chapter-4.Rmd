@@ -1,8 +1,11 @@
 ---
-title: "Chapter-4"
+title: "Chapter 4: Specifying Multivariate Normal Priors"
+author: "Kjell Nygren"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
+toc: true
 vignette: >
-  %\VignetteIndexEntry{Chapter-4}
+  %\VignetteIndexEntry{Chapter 4: Specifying Multivariate Normal Priors}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,6 +17,213 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup,echo = FALSE}
 library(glmbayes)
+```
+
+**General Discussion**
+
+**The Age of Menarche Data**
+
+
+As we discussed in chapter 2...
+
+(rename this data to glmb_menarche and reference MASS package) 
+
+```{r menarche data}
+## Load menarche data
+data(menarche2)
+head(menarche2, 5)
+
+```
+
+```{r Analysis Setup}
+## Number of variables in model
+Age=menarche2$Age
+nvars=2
+
+## Reference Ages for setting of priors and Age_Difference
+
+ref_age1=13  # user can modify this
+ref_age2=15  ## user can modify this
+
+## Define variables used later in analysis
+Age2=Age-ref_age1
+Age_Diff=ref_age2-ref_age1
+
+```
+
+```{r Prior Info}
+
+## Point estimates at reference ages
+m1=0.5  
+m2=0.9
+
+## Lower bound of prior credible intervals for point estimates
+m1_lower=0.2
+m2_lower=0.5
+
+## slope sd as % point estimate
+## Note: Implied prior credible interval is 
+## Lower bound: slope_est-1.96*sd_pc*slope_est,
+## Upper bound: slope_est+1.96*sd_pc*slope_est,
+
+sd_pct = 0.5
+```
+
+
+
+**The Logit Model**
+
+```{r set up family info and initialize prior matrices}
+
+bi_logit <- binomial(link="logit")
+bi_logit_linkfun=bi_logit$linkfun
+
+
+mu1<-matrix(0,nrow=nvars,ncol=1)
+V1<-1*diag(nvars)
+```
+
+```{r Prior mean and sd at ref ages}
+p1=0.5        # point estimate at ref_age1
+p1_upper=0.8  # Upper end of prior credible interval
+
+q1=0.9        # point estimate at ref_age2
+q1_lower=0.6  # Lower end of prior credible interval
+
+```
+
+Using this infomation, we can now derive our priors
+
+```{r Implied prior means}
+## Prior mean for intercept is set to point estimate 
+## at reference age1 (on logit scale)
+mu1[1,1]=bi_logit$linkfun(m1)
+
+## Prior mean for slope is set to difference in point estimates
+## on logit scale divided by Age_Diff
+
+mu1[2,1]=(bi_logit$linkfun(m2) -bi_logit$linkfun(m1))/Age_Diff 
+
+## Implied standard deviations for point estimates on logit scale
+sd_m1= (bi_logit$linkfun(m1) -bi_logit$linkfun(m1_lower))/1.96
+sd_m2= (bi_logit$linkfun(m2) -bi_logit$linkfun(m1_lower))/1.96
+sd_slope=sd_pct*mu1[2,1]
+
+## Note: sd_m2^2 = sd_m1^2 + sd_slope^2 + 2* cov_V1 Implies
+
+cov_V1=(sd_m2^2-sd_m1^2-sd_slope^2)/2
+```
+
+
+
+```{r Additional Setup}
+sd2_perc=0.9
+mu1_upper=log(p1_upper/(1-p1_upper))
+```
+
+
+```{r Derivation of Variance matrix}
+# Standard Deviation for intercept
+sd1=(mu1_upper -mu1[1,1])/1.96   
+sd1
+# Standard Deviation for slope
+sd2=sd2_perc*mu1[2,1]
+sd2
+# Standard Deviation at ref_age2
+
+sd3=(log(q1/(1-q1))-log(q1_lower/(1-q1_lower)))/2
+sd3
+## Sine sd3^2 =sd1^2 + sd2^2 +2*cov_V1 we have 
+
+cov_V1=(sd3^2-sd1^2-sd2^2)/2
+
+cov_V1
+# Set covariance matrix
+
+V1[1,1]=sd1^2
+V1[2,2]=sd2^2
+V1[1,2]=cov_V1
+V1[2,1]=V1[1,2]
+V1
+```
+
+
+```{r Run Logit,results = "hide"}
+glmb.out1<-glmb(n=1000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu1,Sigma=V1,Gridtype=1, data=menarche2)
+```
+
+
+```{r Summary Logit}
+summary(glmb.out1)
+```
+
+
+**The Probit Model: **
+
+```{r Probit Model}
+n=1000
+#################################################### Probit Model ############################################
+
+mu<-matrix(0,nrow=2,ncol=1)
+mu[2,1]=2*(0.9-0.5)/3 ## Implied Slope at age 13 should be 0.5*mu[1,1]*(0.9-0.5)/3 
+V1<-1*diag(2)
+
+
+# 2 standard deviations for prior estimate at age 13 between 0.1 and 0.9
+## Specifies uncertainty around the point estimates
+
+V1[1,1]=((0.9-0.5)/2)^2 
+V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
+
+  
+glm.out2<-glm(cbind(Menarche,Total-Menarche)~Age2,family=binomial(probit), data=menarche2)
+summary(glm.out2)
+
+#  Note: Slope coefficient here is a bit more than half of the value of that in the logit model 
+
+Like_std=summary(glm.out2)$coefficients[,2]
+Menarche_Prior_Error_Checks=Prior_Likelihood_Check(mu,sqrt(diag(V1)),glm.out2$coefficients,Like_std)
+
+glmb.out2<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age2,family=binomial(probit),mu=mu,Sigma=V1,Gridtype=1,data=menarche2)
+summary(glmb.out2)
+
+# ~1.251 candidates per iid sample
+```
+
+
+**The Clog-Log Model:**
+
+#################################################### Clog_Log Model ############################################
+
+```{r Clog_Log Model}
+
+# Need to improve the prior specification here 
+
+mu<-matrix(0,nrow=2,ncol=1)
+mu[1,1]=log(-log(1-0.5))  # Derived prior
+1-exp(-exp((mu[1,1])))    # implies point estimate at age 13 is 0.5
+mu[2,1]=(log(-log(1-0.9))-mu[1,1])/3 # implies 90% menarche at age 16
+
+
+V1<-1*diag(2)
+V1[1,1]=((log(-log(1-0.9))-mu[1,1])/2)^2  ## Corresponding standard deviation
+V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
+
+
+glm.out3 <-glm(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(cloglog), data=menarche2)
+summary(glm.out3)
+
+#1-exp(-exp(-0.59602))
+
+Like_std=summary(glm.out3)$coefficients[,2]
+Menarche_Prior_Error_Checks=Prior_Likelihood_Check(mu,sqrt(diag(V1)),glm.out3$coefficients,Like_std)
+
+
+glmb.out3<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age2,family=binomial(cloglog),mu=mu,Sigma=V1,Gridtype=1,data=menarche2)
+summary(glmb.out3)
+
+# Candidates per iid samples ~ 1.255
+
 ```

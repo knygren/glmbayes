@@ -1,8 +1,10 @@
 ---
-title: "Chapter-1"
+title: "Chapter 1: Generalized Linear Models-A General Overview"
+author: "Kjell Nygren"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter-1}
+  %\VignetteIndexEntry{Chapter 1: Generalized Linear Models-A General Overview}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

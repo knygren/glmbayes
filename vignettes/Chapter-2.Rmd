@@ -1,8 +1,10 @@
 ---
-title: "Chapter-2"
+title: "Chapter 2: An Introduction to Bayesian Models"
+author: "Kjell Nygren"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter-2}
+  %\VignetteIndexEntry{Chapter 2: An Introduction to Bayesian Models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

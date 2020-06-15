@@ -41,18 +41,18 @@ function. This is particularly true for the print output from the function
 (i.e. the output of the function \code{\link{print.summary.rglmb}}).
 }
 \examples{
-data(menarche)
+data(menarche2)
 
-summary(menarche)
-plot(Menarche/Total ~ Age, data=menarche)
+summary(menarche2)
+plot(Menarche/Total ~ Age, data=menarche2)
 
-Age2=menarche$Age-13
+Age2=menarche2$Age-13
 
 x<-matrix(as.numeric(1.0),nrow=length(Age2),ncol=2)
 x[,2]=Age2
 
-y=menarche$Menarche/menarche$Total
-wt=menarche$Total
+y=menarche2$Menarche/menarche2$Total
+wt=menarche2$Total
 
 mu<-matrix(as.numeric(0.0),nrow=2,ncol=1)
 mu[2,1]=(log(0.9/0.1)-log(0.5/0.5))/3

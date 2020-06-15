@@ -1,8 +1,10 @@
 ---
-title: "Chapter-3:A_Side-by-Side_Comparison_of_glm_and_glmb"
+title: "Chapter 3: A Side by Side Comparison of glm and glmb"
+author: "Kjell Nygren"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter-3:A_Side-by-Side_Comparison_of_glm_and_glmb}
+  %\VignetteIndexEntry{Chapter 3: A Side by Side Comparison of glm and glmb}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

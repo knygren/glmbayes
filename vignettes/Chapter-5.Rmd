@@ -1,8 +1,10 @@
 ---
-title: "Chapter-5"
+title: "Chapter 5: Specifying Priors for Dispersion (variance) Parameters"
+author: "Kjell Nygren"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter-5}
+  %\VignetteIndexEntry{Chapter 5: Specifying Priors for Dispersion (variance) Parameters}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
