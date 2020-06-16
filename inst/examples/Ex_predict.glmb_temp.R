@@ -91,6 +91,50 @@ pred1=predict(budworm.lgb, newdata=newdatatemp,olddata=olddata,type = "response"
 
 colMeans(pred1)
 
+formula(budworm.lgb)[1]
+formula(budworm.lgb)[2]
+formula(budworm.lgb)[3]
+
+formula.formula(budworm.lgb$glm$formula)
+
+formula.data.frame(budworm.lgb$glm$formula)
+
+
+myvars=attr(terms(budworm.lgb$glm),"variables")
+myvars[1]
+myvars[2]
+myvars[3]
+myvars[4]
+mypredvars=attr(terms(budworm.lgb$glm),"predvars")
+mypredvars[1]
+mypredvars[2]
+mypredvars[3]
+mypredvars[4]
+
+cbind(Menarche, Total - Menarche) ~ 
+  Age2
+myvars=attr(terms(glmb.out1$glm),"variables")
+myvars[1]
+myvars[2]
+myvars[3]
+myvars[4]
+mypredvars=attr(terms(budworm.lgb$glm),"predvars")
+mypredvars[1]
+mypredvars[2]
+mypredvars[3]
+mypredvars[4]
+
+
+
+myvars[2]
+myvars[3]
+myvars[4]
+
+
+
+pred1
+colMeans(pred1)
+
 
 predc1=predict(budworm.lg, data.frame(ldose = ld,
 sex = factor(rep("M", length(ld)), levels = levels(sex))),type = "response")

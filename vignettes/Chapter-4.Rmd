@@ -158,9 +158,14 @@ olddata
 olddata$Age2=Age2 # Add missing variables from environment
 olddata
 
+#formula(glmb.out1)[1]
+#formula(glmb.out1)[2]
+#formula(glmb.out1)[3]
+newdata
+pred_newdata=predict(glmb.out1,newdata=newdata,olddata=olddata)
 
-#pred_newdata=predict(glmb.out1,newdata=newdata,olddata=olddata,terms=NULL)
-#pred_newdata
+colMeans(pred_newdata)
+
 ```
 
 

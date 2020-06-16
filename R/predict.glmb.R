@@ -67,29 +67,72 @@ predict.glmb<-function(object,newdata=NULL,type="link",
   
   else{
 
-    ## Function asumes columns the same so data frames can be combined
+    ## Function assumes columns the same so data frames can be combined
     ## also assumes no critical variables are missing
     
     if (missing(olddata)) stop("olddata must be provided whenever newdata is provided")
     
-    # get original list of model variables
+    # Short function used to separate model 
+    # variables into those used in derivation of explanatory and dependent variables
+    
+    
+    get_vars=function(all_vars,xstring){
+      
+      ## Initialize model t
+      xvars=all_vars
+      xflags=list(rep("TRUE",length(xvars)))
+      
+      check_data=data.frame(xvars=xvars,xflags=xflags)
+      colnames(check_data)=c("xvars","xflags")
+      
+      for(i in 1:length(xvars)){
+        if(isFALSE(grepl(xvars[i], xstring))) check_data$xflags[i]=FALSE
+      }
+      
+      xdata=subset(check_data, xflags==TRUE)
+      return(unique(xdata$xvars))
+      
+    }
     
     mod_vars=all.vars(formula(object))
-    yvars=as.character(formula(object))[2] ## This should usually be the yvars
-    xvars <- setdiff(mod_vars, yvars)
+    mod_formula=formula(object)
+    
+    ystring=as.character(mod_formula[2]) ## Seems to be contain formula for dependent variables
+    xstring=as.character(mod_formula[3]) ## Seems to contain formula for explanatory variables
+
+    
+    
+    x_vars=get_vars(all_vars=mod_vars,xstring=xstring)
+    y_vars1=setdiff(mod_vars,x_vars)
+    y_vars2=get_vars(all_vars=y_vars1,xstring=ystring)
+    miss_vars=setdiff(y_vars1,y_vars2)
+    
+    if(length(miss_vars)>0){  
+    warning("Some Model Variables Not Found - May cause unpredictable behavior")
+      x_vars=c(x_vars,miss_vars)
+            }
+
+    
+    
+    y_vars=y_vars2
+    x_vars=x_vars
+    
+    #return(list(xvars=x_vars,y_vars=y_vars))
     
     
     ## Subset olddata and newdata to model variables
     
     ## Try with error handling
+
     
     tryCatch(olddata[mod_vars],error=function(e) {stop("olddata does not contain all model variables")})
-    tryCatch(newdata[xvars],error=function(e) {stop("newdata does not contain all explanatory variables")})
-    
+    tryCatch(newdata[x_vars],error=function(e) {stop("newdata does not contain all explanatory variables")})
+
     newvars=names(newdata)
     miss_newvars=setdiff(mod_vars, newvars)  # These should now be any missing dependent variables 
 
-    if(length(miss_newvars)>1) stop("newdata has more than one missing dependent variable")
+    
+    if(length(miss_newvars)>2) stop("newdata has more than two missing dependent variables")
 
     #newdata[miss_newvars] <- NA
     old_miss_newvars=olddata[miss_newvars]
@@ -110,11 +153,15 @@ predict.glmb<-function(object,newdata=NULL,type="link",
     newdata[miss_newvars] <- Temp2
 
     ## Look to see if this is producing the desired result
-
-    tryCatch(newdata[mod_vars],error=function(e) {stop("newdata does not contain all model variables")})
+    
+    #return(list(newdata=newdata,x_vars=x_vars))
+    
+    tryCatch(newdata[mod_vars],error=function(e) {stop("Modified newdata does not contain all model variables")})
     
     olddata=olddata[mod_vars]
     newdata=newdata[mod_vars]
+    
+    #return(list(olddata=olddata,newdata=newdata))
     
     ## Run check to see if olddata returns same x_data a stored in object
     temp_glm1=glm(object$glm$formula, family = object$glm$family,x=TRUE,data=olddata)
@@ -135,7 +182,8 @@ predict.glmb<-function(object,newdata=NULL,type="link",
     
     x_matrix=get_x_matrix(object$glm,olddata,newdata)
     
-    
+    #return(x_matrix)
+        
     nvars=ncol(object$coefficients)
     n=nrow(object$coefficients)
     betas=object$coefficients

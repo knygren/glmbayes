@@ -1,10 +1,8 @@
 ---
-title: "Chapter 5: Viewing Model Predictions and Using Model Statistics"
-author: "Kjell Nygren"
-date: "`r Sys.Date()`"
+title: "Chapter 7: A Selection of Bayesian Generalized Linear Models"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 5: Viewing Model Predictions and Using Model Statistics}
+  %\VignetteIndexEntry{Chapter 7: A Selection of Bayesian Generalized Linear Models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
