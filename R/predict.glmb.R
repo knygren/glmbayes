@@ -21,6 +21,9 @@
 #' A character vector specifies which terms are to be returned.
 #' @param na.action function determining what should be done with missing values in
 #' \code{newdata}. The default is to predict \code{NA}.
+#' @param olddata a data frame that should contain all the variables used in the 
+#' original model specification. Must currently be provided whenever newdata is 
+#' provided and rbind(olddata,newdata) must not lead to an error being returned.
 #' @param ... further arguments passed to or from other methods.
 #' @return A list with the Estimated effective number of parameters \code{pD}
 #' and the \code{DIC} from the object \code{fit} of class \code{"glmb"}. See \code{\link{glmbdic}}
@@ -41,7 +44,7 @@
 
 predict.glmb<-function(object,newdata=NULL,type="link",
                        se.fit = FALSE, dispersion = NULL, terms = NULL, 
-                       na.action = na.pass,...)
+                       na.action = na.pass,olddata=NULL,...)
 {
 
 
@@ -60,35 +63,38 @@ predict.glmb<-function(object,newdata=NULL,type="link",
       }
   
   else{
-    
-    ## if newdata is missing build matrix for storing predictions 
-    ## draws come down, predictions for rows in newdata come across
-    n=nrow(object$coefficients)
-    nvars=ncol(object$coefficients)
-    betas=object$coefficients
-    npreds=nrow(newdata)
-    pred=matrix(0,nrow=n,ncol=nrow(newdata))
-    
-    ## Initialize lm object to glm object from glmb function
-    lm_object=object$glm ## set object to glm object from glmb class
 
+    ## Function asumes columns the same so data frames can be combined
+    ## also assumes no critical variables are missing
     
-#    residual.scale <- as.vector(sqrt(dispersion))
-    
-    ## Loop through draws
-    for(i in 1:n)
-    {
-      # Update object and then return predictions from predict.lm
-      lm_object$coefficients=betas[i,1:nvars]
-      pred[i,1:npreds]<- predict.lm(object, newdata, se.fit, 
-                              scale = 1, type =  "response",
-                terms = terms, na.action = na.action)
-
-      ## Rescale predictiosn if type="response"
-        if(type=="response") pred[i,1:npreds]<- family(object$glm)$linkinv(pred[i,1:npreds])
-         
+    get_x_matrix<-function(object,olddata,newdata){
+      nrow1=nrow(olddata)
+      nrow2=nrow(newdata)
+      combodata=rbind(olddata,newdata)
+      temp_glm=glm(object$formula, family = object$family,x=TRUE,data=combodata)
+      return(temp_glm$x[(nrow1+1):(nrow1+nrow2),])
     }
     
+    x_matrix=get_x_matrix(object$glm,olddata,newdata)
+    
+    
+    nvars=ncol(object$coefficients)
+    n=nrow(object$coefficients)
+    betas=object$coefficients
+    npreds=nrow(newdata)
+    pred=matrix(0,nrow=n,ncol=npreds)
+    
+    for(i in 1:n)
+    {## Making sure names match
+      betas_temp=betas[i,1:nvars]
+      pred[i,1:npreds]=t(x_matrix%*%as.matrix(betas_temp,ncol=1))
+      
+      ## Rescale predictions if type="response"
+      if(type=="response") pred[i,1:npreds]<- family(object$glm)$linkinv(pred[i,1:npreds])
+      
+    }
+    
+
   }
   return(pred)
   

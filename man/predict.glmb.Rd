@@ -12,6 +12,7 @@
   dispersion = NULL,
   terms = NULL,
   na.action = na.pass,
+  olddata = NULL,
   ...
 )
 }
@@ -40,6 +41,10 @@ A character vector specifies which terms are to be returned.}
 
 \item{na.action}{function determining what should be done with missing values in
 \code{newdata}. The default is to predict \code{NA}.}
+
+\item{olddata}{a data frame that should contain all the variables used in the 
+original model specification. Must currently be provided whenever newdata is 
+provided and rbind(olddata,newdata) must not lead to an error being returned.}
 
 \item{...}{further arguments passed to or from other methods.}
 }

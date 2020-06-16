@@ -25,7 +25,7 @@ importFrom("stats", ".getXlevels", "binomial", "coef", "dbinom",
              "model.response", "model.weights", "nobs", "pnorm",
              "printCoefmat", "qnorm", "quantile", "rchisq", "residuals",
              "rgamma", "rnorm", "runif", "var","cov","formula","family",
-              "na.pass","predict.lm")
+              "na.pass","predict.lm","glm")
 exportPattern("^[[:alpha:]]+")
 
 

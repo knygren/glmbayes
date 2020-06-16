@@ -3,7 +3,6 @@ title: "Chapter 4: Specifying Multivariate Normal Priors"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
-toc: true
 vignette: >
   %\VignetteIndexEntry{Chapter 4: Specifying Multivariate Normal Priors}
   %\VignetteEngine{knitr::rmarkdown}
@@ -43,7 +42,6 @@ Age=menarche2$Age
 nvars=2
 
 ## Reference Ages for setting of priors and Age_Difference
-
 ref_age1=13  # user can modify this
 ref_age2=15  ## user can modify this
 
@@ -63,40 +61,26 @@ m2=0.9
 m1_lower=0.2
 m2_lower=0.5
 
-## slope sd as % point estimate
-## Note: Implied prior credible interval is 
-## Lower bound: slope_est-1.96*sd_pc*slope_est,
-## Upper bound: slope_est+1.96*sd_pc*slope_est,
-
-sd_pct = 0.5
+## specify correlation between the two
+m_corr=0.2
 ```
 
 
 
 **The Logit Model**
 
-```{r set up family info and initialize prior matrices}
+```{r Logit: set up link function info and initialize prior matrices}
 
+## Set up link function and initialize prior
 bi_logit <- binomial(link="logit")
-bi_logit_linkfun=bi_logit$linkfun
-
-
 mu1<-matrix(0,nrow=nvars,ncol=1)
 V1<-1*diag(nvars)
 ```
 
-```{r Prior mean and sd at ref ages}
-p1=0.5        # point estimate at ref_age1
-p1_upper=0.8  # Upper end of prior credible interval
-
-q1=0.9        # point estimate at ref_age2
-q1_lower=0.6  # Lower end of prior credible interval
-
-```
 
 Using this infomation, we can now derive our priors
 
-```{r Implied prior means}
+```{r Logit:set prior means/sd}
 ## Prior mean for intercept is set to point estimate 
 ## at reference age1 (on logit scale)
 mu1[1,1]=bi_logit$linkfun(m1)
@@ -107,47 +91,47 @@ mu1[1,1]=bi_logit$linkfun(m1)
 mu1[2,1]=(bi_logit$linkfun(m2) -bi_logit$linkfun(m1))/Age_Diff 
 
 ## Implied standard deviations for point estimates on logit scale
+
 sd_m1= (bi_logit$linkfun(m1) -bi_logit$linkfun(m1_lower))/1.96
-sd_m2= (bi_logit$linkfun(m2) -bi_logit$linkfun(m1_lower))/1.96
-sd_slope=sd_pct*mu1[2,1]
+sd_m2= (bi_logit$linkfun(m2) -bi_logit$linkfun(m2_lower))/1.96
+sd_slope=sqrt(sd_m1^2+sd_m2^2-2*sd_m1*sd_m2*m_corr)
 
-## Note: sd_m2^2 = sd_m1^2 + sd_slope^2 + 2* cov_V1 Implies
+#Cov(m1,slope)=cov(m1, m2-m1)=E[(m1-E[m1])((m2-m1)-E[m2-m1])]
+#   =E[(m1-E[m1])(m2-E[m2])]- E[(m1-E[m1])(m1-E[m1])]
+##   =Cov[m1,m2] - Var[m1]
+##  =sd_m1*sd_m2*m_corr+sd_m1*sd_m1
+cov_V1=sd_m1*sd_m2*m_corr-sd_m1*sd_m1
 
-cov_V1=(sd_m2^2-sd_m1^2-sd_slope^2)/2
-```
-
-
-
-```{r Additional Setup}
-sd2_perc=0.9
-mu1_upper=log(p1_upper/(1-p1_upper))
-```
-
-
-```{r Derivation of Variance matrix}
-# Standard Deviation for intercept
-sd1=(mu1_upper -mu1[1,1])/1.96   
-sd1
-# Standard Deviation for slope
-sd2=sd2_perc*mu1[2,1]
-sd2
-# Standard Deviation at ref_age2
-
-sd3=(log(q1/(1-q1))-log(q1_lower/(1-q1_lower)))/2
-sd3
-## Sine sd3^2 =sd1^2 + sd2^2 +2*cov_V1 we have 
-
-cov_V1=(sd3^2-sd1^2-sd2^2)/2
-
-cov_V1
 # Set covariance matrix
-
-V1[1,1]=sd1^2
-V1[2,2]=sd2^2
+V1[1,1]=sd_m1^2
+V1[2,2]=sd_slope^2
 V1[1,2]=cov_V1
 V1[2,1]=V1[1,2]
+```
+
+
+```{r Logit: Prior Mean}
+## Resulting Prior mean for model
+mu1
+```
+
+```{r Logit: Prior Variance-Covariance Matrix}
+## Resulting Prior Variance-Covariance for model
 V1
 ```
+
+This code is a test - Seems like the covariance make sense and the correlation matches that intended
+
+```{r Check Prior}
+#library(MASS)
+#sim_test <- mvrnorm(1000, mu = mu1, Sigma = V1 ) # from MASS package
+#colMeans(sim_test)
+#var(sim_test)
+#b=sim_test[,1]+sim_test[,2]
+#mean(b)
+#var(cbind(sim_test[,1],b))
+```
+
 
 
 ```{r Run Logit,results = "hide"}
@@ -160,7 +144,69 @@ summary(glmb.out1)
 ```
 
 
+
+
 **The Probit Model: **
+
+
+```{r Probit: set up link function info and initialize prior matrices}
+## Set up link function and initialize prior
+bi_probit <- binomial(link="probit")
+mu2<-matrix(0,nrow=nvars,ncol=1)
+V2<-1*diag(nvars)
+```
+
+Using this infomation, we can now derive our priors
+
+```{r Probit:set prior means/sd}
+## Prior mean for intercept is set to point estimate 
+## at reference age1 (on logit scale)
+mu2[1,1]=bi_probit$linkfun(m1)
+
+## Prior mean for slope is set to difference in point estimates
+## on logit scale divided by Age_Diff
+
+mu2[2,1]=(bi_probit$linkfun(m2) -bi_probit$linkfun(m1))/Age_Diff 
+
+## Implied standard deviations for point estimates on logit scale
+
+sd_m1= (bi_probit$linkfun(m1) -bi_probit$linkfun(m1_lower))/1.96
+sd_m2= (bi_probit$linkfun(m2) -bi_probit$linkfun(m2_lower))/1.96
+sd_slope=sqrt(sd_m1^2+sd_m2^2-2*sd_m1*sd_m2*m_corr)
+
+#Cov(m1,slope)=cov(m1, m2-m1)=E[(m1-E[m1])((m2-m1)-E[m2-m1])]
+#   =E[(m1-E[m1])(m2-E[m2])]- E[(m1-E[m1])(m1-E[m1])]
+##   =Cov[m1,m2] - Var[m1]
+##  =sd_m1*sd_m2*m_corr+sd_m1*sd_m1
+cov_V2=sd_m1*sd_m2*m_corr-sd_m1*sd_m1
+
+# Set covariance matrix
+V2[1,1]=sd_m1^2
+V2[2,2]=sd_slope^2
+V2[1,2]=cov_V2
+V2[2,1]=V2[1,2]
+```
+
+```{r Probit: Prior Mean}
+## Resulting Prior mean for model
+mu2
+```
+
+```{r Probit: Prior Variance-Covariance Matrix}
+## Resulting Prior Variance-Covariance for model
+V2
+```
+
+```{r Run Pobit,results = "hide"}
+glmb.out2<-glmb(n=1000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(probit),mu=mu2,Sigma=V2,Gridtype=1, data=menarche2)
+```
+
+
+```{r Summary Probit}
+summary(glmb.out2)
+```
+
+
 
 ```{r Probit Model}
 n=1000
