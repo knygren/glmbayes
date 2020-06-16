@@ -44,7 +44,10 @@ A character vector specifies which terms are to be returned.}
 
 \item{olddata}{a data frame that should contain all the variables used in the 
 original model specification. Must currently be provided whenever newdata is 
-provided and rbind(olddata,newdata) must not lead to an error being returned.}
+provided. Both olddata and newdata are subsetted to the model variables extracte
+from the object model formula and rbind(olddata,newdata) must be valid after this step. 
+A check is also run to verify if the resulting x matrix from olddata is consistent with that 
+from the original model object.}
 
 \item{...}{further arguments passed to or from other methods.}
 }

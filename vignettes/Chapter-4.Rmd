@@ -143,6 +143,27 @@ glmb.out1<-glmb(n=1000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(lo
 summary(glmb.out1)
 ```
 
+```{r newdata}
+newdata=matrix(0,nrow=3,ncol=2)
+colnames(newdata)=c("Age","Age2")
+newdata[1,1]=11
+newdata[2,1]=13
+newdata[3,1]=15
+
+newdata[,2]=newdata[,1]-13
+newdata= as.data.frame(newdata)
+
+olddata=menarche2 # Set olddata=menarche2
+olddata
+olddata$Age2=Age2 # Add missing variables from environment
+olddata
+
+
+#pred_newdata=predict(glmb.out1,newdata=newdata,olddata=olddata,terms=NULL)
+#pred_newdata
+```
+
+
 
 
 

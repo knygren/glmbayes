@@ -23,7 +23,10 @@
 #' \code{newdata}. The default is to predict \code{NA}.
 #' @param olddata a data frame that should contain all the variables used in the 
 #' original model specification. Must currently be provided whenever newdata is 
-#' provided and rbind(olddata,newdata) must not lead to an error being returned.
+#' provided. Both olddata and newdata are subsetted to the model variables extracte
+#' from the object model formula and rbind(olddata,newdata) must be valid after this step. 
+#' A check is also run to verify if the resulting x matrix from olddata is consistent with that 
+#' from the original model object.
 #' @param ... further arguments passed to or from other methods.
 #' @return A list with the Estimated effective number of parameters \code{pD}
 #' and the \code{DIC} from the object \code{fit} of class \code{"glmb"}. See \code{\link{glmbdic}}
@@ -66,6 +69,61 @@ predict.glmb<-function(object,newdata=NULL,type="link",
 
     ## Function asumes columns the same so data frames can be combined
     ## also assumes no critical variables are missing
+    
+    if (missing(olddata)) stop("olddata must be provided whenever newdata is provided")
+    
+    # get original list of model variables
+    
+    mod_vars=all.vars(formula(object))
+    yvars=as.character(formula(object))[2] ## This should usually be the yvars
+    xvars <- setdiff(mod_vars, yvars)
+    
+    
+    ## Subset olddata and newdata to model variables
+    
+    ## Try with error handling
+    
+    tryCatch(olddata[mod_vars],error=function(e) {stop("olddata does not contain all model variables")})
+    tryCatch(newdata[xvars],error=function(e) {stop("newdata does not contain all explanatory variables")})
+    
+    newvars=names(newdata)
+    miss_newvars=setdiff(mod_vars, newvars)  # These should now be any missing dependent variables 
+
+    if(length(miss_newvars)>1) stop("newdata has more than one missing dependent variable")
+
+    #newdata[miss_newvars] <- NA
+    old_miss_newvars=olddata[miss_newvars]
+    m_miss_newvars=colMeans(old_miss_newvars)
+    #names(old_miss_newvars)[1]
+    
+    
+    for(i in 1:length(names(m_miss_newvars)))
+      
+    {
+      Temp1=matrix(colMeans(olddata[miss_newvars])[i],nrow=nrow(newdata),ncol=1)  
+      colnames(Temp1)=names(m_miss_newvars)[i]
+      if(i==1) Temp2=Temp1
+      else(Temp2=cbind(Temp2,Temp1))
+      
+    }
+    
+    newdata[miss_newvars] <- Temp2
+
+    ## Look to see if this is producing the desired result
+
+    tryCatch(newdata[mod_vars],error=function(e) {stop("newdata does not contain all model variables")})
+    
+    olddata=olddata[mod_vars]
+    newdata=newdata[mod_vars]
+    
+    ## Run check to see if olddata returns same x_data a stored in object
+    temp_glm1=glm(object$glm$formula, family = object$glm$family,x=TRUE,data=olddata)
+
+    x_old=object$glm$x
+    x_new=temp_glm1$x
+    
+    if(isFALSE(all.equal(x_new,x_old))) stop("olddata does not yield an x matrix consistent with that 
+                                             stored in the original model object")
     
     get_x_matrix<-function(object,olddata,newdata){
       nrow1=nrow(olddata)
