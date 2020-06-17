@@ -198,11 +198,15 @@ glmb<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,shape=NULL
             mf)))
     class(fit) <- c(fit$class, c("glm", "lm"))
     
-    # Initialize
-	
+    # Verify inputs and Initialize
+    
+    if(is.numeric(n)==FALSE||is.numeric(mu)==FALSE||is.numeric(Sigma)==FALSE) stop("non-numeric argument to numeric function")
+    
     y<-fit$y	
     x<-fit$x
-    b<-fit$coefficients	
+    b<-fit$coefficients
+    mu<-as.matrix(as.vector(mu))
+    Sigma<-as.matrix(Sigma)    
     P<-solve(Sigma) 
     wtin<-fit$prior.weights	
 
@@ -214,7 +218,6 @@ sim<-rglmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,dispersion=dispersion,shape=shape,rate=
 	dispersion2<-sim$dispersion
 	famfunc<-sim$famfunc
 	
-
 	Prior<-list(mean=as.numeric(mu),Variance=Sigma)
 	names(Prior$mean)<-colnames(fit$x)
 	colnames(Prior$Variance)<-colnames(fit$x)

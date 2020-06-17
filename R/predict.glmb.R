@@ -97,14 +97,25 @@ predict.glmb<-function(object,newdata=NULL,type="link",
     mod_vars=all.vars(formula(object))
     mod_formula=formula(object)
     
-    ystring=as.character(mod_formula[2]) ## Seems to be contain formula for dependent variables
-    xstring=as.character(mod_formula[3]) ## Seems to contain formula for explanatory variables
+    ystring=as.character(mod_formula[2]) ## Seems to be formula for dependent variables
+    xstring=as.character(mod_formula[3]) ## Seems to be formula for explanatory variables
 
     
+    if(length(xstring)>0 & length(mod_vars)>0){  x_vars=get_vars(all_vars=mod_vars,xstring=xstring)}
+    else{x_vars=NULL    }
     
-    x_vars=get_vars(all_vars=mod_vars,xstring=xstring)
+    
     y_vars1=setdiff(mod_vars,x_vars)
+    
+    if(length(ystring)>0 & length(y_vars1)>0){
     y_vars2=get_vars(all_vars=y_vars1,xstring=ystring)
+    }
+    else{y_vars2=y_vars1}
+    
+    if(length(y_vars1)==0) {warning("No data variables appear to be used in formula 
+for dependent variable. The number of observation set by formula are likely fixed and 
+predictions may currently only work if the number of observations in newdata match those in olddata")}
+
     miss_vars=setdiff(y_vars1,y_vars2)
     
     if(length(miss_vars)>0){  
@@ -116,9 +127,6 @@ predict.glmb<-function(object,newdata=NULL,type="link",
     
     y_vars=y_vars2
     x_vars=x_vars
-    
-    #return(list(xvars=x_vars,y_vars=y_vars))
-    
     
     ## Subset olddata and newdata to model variables
     
@@ -134,16 +142,15 @@ predict.glmb<-function(object,newdata=NULL,type="link",
     
     if(length(miss_newvars)>2) stop("newdata has more than two missing dependent variables")
 
-    #newdata[miss_newvars] <- NA
+  
+    if(length(miss_newvars)>0){
     old_miss_newvars=olddata[miss_newvars]
-    m_miss_newvars=colMeans(old_miss_newvars)
-    #names(old_miss_newvars)[1]
-    
-    
+    m_miss_newvars=round(colMeans(old_miss_newvars))
+
     for(i in 1:length(names(m_miss_newvars)))
       
     {
-      Temp1=matrix(colMeans(olddata[miss_newvars])[i],nrow=nrow(newdata),ncol=1)  
+      Temp1=matrix(round(colMeans(olddata[miss_newvars])[i]),nrow=nrow(newdata),ncol=1)  
       colnames(Temp1)=names(m_miss_newvars)[i]
       if(i==1) Temp2=Temp1
       else(Temp2=cbind(Temp2,Temp1))
@@ -152,12 +159,13 @@ predict.glmb<-function(object,newdata=NULL,type="link",
     
     newdata[miss_newvars] <- Temp2
 
+    }
+    
     ## Look to see if this is producing the desired result
     
-    #return(list(newdata=newdata,x_vars=x_vars))
-    
+
     tryCatch(newdata[mod_vars],error=function(e) {stop("Modified newdata does not contain all model variables")})
-    
+
     olddata=olddata[mod_vars]
     newdata=newdata[mod_vars]
     
@@ -171,19 +179,19 @@ predict.glmb<-function(object,newdata=NULL,type="link",
     
     if(isFALSE(all.equal(x_new,x_old))) stop("olddata does not yield an x matrix consistent with that 
                                              stored in the original model object")
-    
+
     get_x_matrix<-function(object,olddata,newdata){
       nrow1=nrow(olddata)
       nrow2=nrow(newdata)
       combodata=rbind(olddata,newdata)
+    
       temp_glm=glm(object$formula, family = object$family,x=TRUE,data=combodata)
+      
       return(temp_glm$x[(nrow1+1):(nrow1+nrow2),])
     }
+
     
     x_matrix=get_x_matrix(object$glm,olddata,newdata)
-    
-    #return(x_matrix)
-        
     nvars=ncol(object$coefficients)
     n=nrow(object$coefficients)
     betas=object$coefficients

@@ -136,6 +136,14 @@ This code is a test - Seems like the covariance make sense and the correlation m
 
 ```{r Run Logit,results = "hide"}
 glmb.out1<-glmb(n=1000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu1,Sigma=V1,Gridtype=1, data=menarche2)
+
+## Run nonsense model to test predict function (this seemed to work)
+#glmb.out1<-glmb(n=1000,cbind(Menarche, 2*Menarche) ~ #Age2,family=binomial(logit),mu=mu1,Sigma=V1,Gridtype=1, data=menarche2)
+
+## Another nonsense model to test predict function (this does not work when predicting because the formula implies a fixed number of observations)
+#glmb.out1<-glmb(n=1000,cbind(rep(5,25), rep(10,25)) ~ #Age2,family=binomial(logit),mu=mu1,Sigma=V1,Gridtype=1, data=menarche2)
+
+
 ```
 
 
@@ -144,11 +152,13 @@ summary(glmb.out1)
 ```
 
 ```{r newdata}
-newdata=matrix(0,nrow=3,ncol=2)
+newdata=matrix(0,nrow=5,ncol=2)
 colnames(newdata)=c("Age","Age2")
 newdata[1,1]=11
-newdata[2,1]=13
-newdata[3,1]=15
+newdata[2,1]=12
+newdata[3,1]=13
+newdata[4,1]=14
+newdata[5,1]=15
 
 newdata[,2]=newdata[,1]-13
 newdata= as.data.frame(newdata)
@@ -162,9 +172,13 @@ olddata
 #formula(glmb.out1)[2]
 #formula(glmb.out1)[3]
 newdata
+
 pred_newdata=predict(glmb.out1,newdata=newdata,olddata=olddata)
+pred_newdata=predict(glmb.out1,newdata=newdata,olddata=olddata,type="response")
 
 colMeans(pred_newdata)
+plot(colMeans(pred_newdata))
+#colMeans(matrix(pred_newdata[,1],ncol=1))
 
 ```
 
