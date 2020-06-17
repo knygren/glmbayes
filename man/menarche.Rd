@@ -2,27 +2,27 @@
 \alias{menarche2}
 \docType{data}
 \title{
-Age of Menarche Data}
+Age Of Menarche In Warsaw}
 \description{
-This data provides information for 25 different age groups on how many out of a sample that have undergone menarche (first perior)
+Proportions of female children at various ages during adolescence who have reached menarche.
 
 }
 \usage{data(menarche2)}
 \format{
-  A data frame with 20 observations on the following 6 variables.
+  This data frame contains the following columns:
   \describe{
-    \item{\code{Age}}{Numeric (not necessarily integer) }
-    \item{\code{Total}}{Total sample of females for that age}
-    \item{\code{Menarche}}{Number of girls who had undergone menarche}
+    \item{\code{Age}}{Average age of the group. (The groups are reasonably age homogeneous.)}
+    \item{\code{Total}}{Total number of children in the group.}
+    \item{\code{Menarche}}{Number who have reached menarche.}
   }
 }
 \details{
-One can apply various Binomial models to this data
+Details to be added...
 }
 \source{
 MASS package (find more details). 
 }
-\references{TBD
+\references{Venables, W. N. and Ripley, B. D. (2002) Modern Applied Statistics with S. Fourth edition. Springer.
 }
 \examples{
 data(menarche2)
