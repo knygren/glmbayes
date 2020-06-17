@@ -177,7 +177,7 @@ predictions may currently only work if the number of observations in newdata mat
     x_old=object$glm$x
     x_new=temp_glm1$x
     
-    if(isFALSE(all.equal(x_new,x_old))) stop("olddata does not yield an x matrix consistent with that 
+    if(isTRUE(all.equal(x_new,x_old))==FALSE) stop("olddata alone does not yield an x matrix consistent with that 
                                              stored in the original model object")
 
     get_x_matrix<-function(object,olddata,newdata){
@@ -187,11 +187,29 @@ predictions may currently only work if the number of observations in newdata mat
     
       temp_glm=glm(object$formula, family = object$family,x=TRUE,data=combodata)
       
-      return(temp_glm$x[(nrow1+1):(nrow1+nrow2),])
+      x_old=temp_glm$x[1:(nrow1),]
+      x_new=temp_glm$x[(nrow1+1):(nrow1+nrow2),]
+      
+      return(list(x_old=x_old,x_new=x_new))
     }
 
+    x_matrices=get_x_matrix(object$glm,olddata,newdata)
     
-    x_matrix=get_x_matrix(object$glm,olddata,newdata)
+    x_old2=x_matrices$x_old
+  
+    # Check that if dimensions and column namesfor constructed matrix x_old2 match x_old
+    # These checks should catch almost all errors
+    
+    if(!dim(x_old2)[1]==dim(x_old)[1]) stop("Number of rows in final constucted x matrix for olddata does not match original")
+    if(!dim(x_old2)[2]==dim(x_old)[2]) stop("Number of columns in final constucted x matrix for olddata does not match original")
+    
+    for(i in 1:dim(x_old2)[2]){
+      if(!colnames(x_old2)[i]==colnames(x_old)[i]) stop("Column names in final matrix does not match original")
+    }
+    
+  
+    x_matrix=x_matrices$x_new
+
     nvars=ncol(object$coefficients)
     n=nrow(object$coefficients)
     betas=object$coefficients
