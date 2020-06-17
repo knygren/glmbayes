@@ -1,0 +1,19 @@
+---
+title: "Chapter 7: A Selection of Bayesian Generalized Linear Models"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Chapter 7: A Selection of Bayesian Generalized Linear Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(glmbayes)
+```

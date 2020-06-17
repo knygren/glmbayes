@@ -16,6 +16,8 @@ print(d.AD <- data.frame(treatment, outcome, counts))
 
 glm.D93 <- glm(counts ~ outcome + treatment, family = poisson(),x=TRUE)
 summary(glm.D93)
+predict(glm.D93,newdata=d.AD)
+
 
 n<-1000
 mu<-matrix(0,5)
@@ -44,5 +46,15 @@ sqrt(diag(V0)),glm.D93$coefficients,Like_std)
 
 glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),mu=mu,Sigma=V0,Gridtype=3)
 summary(glmb.D93)
+
+## This triggers issues with glmb function itsefl
+
+glmb.D93<-glmb(n=n,counts ~1 , family = poisson(),mu=mu[1],Sigma=V0[1,1],Gridtype=3)
+
+summary(glmb.D93)
+pred_out=predict(glmb.D93,newdata=d.AD,olddata=d.AD)
+colMeans(pred_out)
+
+
 
 # Approximate number of candidates per iid sample 1.714

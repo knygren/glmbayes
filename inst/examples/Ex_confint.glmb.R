@@ -19,7 +19,7 @@ glmb.D93<-glmb(n=1000,counts ~ outcome + treatment,
                family = poisson(),mu=mu,Sigma=V)
 
 
-## ----glmb residuals-----------------------------------------------------------
-## residuals for the glmb function
-colMeans(residuals(glmb.D93))
+## ----glmb confint-------------------------------------------------------------
+## confint for the glmb function
+confint(glmb.D93)
 

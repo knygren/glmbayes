@@ -18,8 +18,7 @@ V=((mysd)^2)*diag(5)
 glmb.D93<-glmb(n=1000,counts ~ outcome + treatment,
                family = poisson(),mu=mu,Sigma=V)
 
-
-## ----glmb residuals-----------------------------------------------------------
-## residuals for the glmb function
-colMeans(residuals(glmb.D93))
+## ----glmb formula-------------------------------------------------------------
+## formula for the glmb function
+formula(glmb.D93)
 

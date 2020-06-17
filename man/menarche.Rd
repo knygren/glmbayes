@@ -1,5 +1,5 @@
-\name{menarche}
-\alias{menarche}
+\name{menarche2}
+\alias{menarche2}
 \docType{data}
 \title{
 Age of Menarche Data}
@@ -7,7 +7,7 @@ Age of Menarche Data}
 This data provides information for 25 different age groups on how many out of a sample that have undergone menarche (first perior)
 
 }
-\usage{data(menarche)}
+\usage{data(menarche2)}
 \format{
   A data frame with 20 observations on the following 6 variables.
   \describe{
@@ -25,6 +25,6 @@ MASS package (find more details).
 \references{TBD
 }
 \examples{
-data(menarche)
+data(menarche2)
 }
 \keyword{datasets, Bayesian Binomial Regression}
