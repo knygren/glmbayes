@@ -193,6 +193,11 @@ predictions may currently only work if the number of observations in newdata mat
     
     x_matrix=get_x_matrix(object$glm,olddata,newdata)
     nvars=ncol(object$coefficients)
+    nvars2=ncol(x_matrix)
+    
+    if(!nvars==nvars2) stop("The Number of Columns in the constructed Design matrix does not match the number
+of Columns for the Design matrix in the original model. Usually caused by inconsistent factor levels for olddata and newdata.")
+    
     n=nrow(object$coefficients)
     betas=object$coefficients
     npreds=nrow(newdata)

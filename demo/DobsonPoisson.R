@@ -47,14 +47,17 @@ sqrt(diag(V0)),glm.D93$coefficients,Like_std)
 glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),mu=mu,Sigma=V0,Gridtype=3)
 summary(glmb.D93)
 
-## This triggers issues with glmb function itsefl
+## This triggers issues with glmb function itself
 
-glmb.D93<-glmb(n=n,counts ~1 , family = poisson(),mu=mu[1],Sigma=V0[1,1],Gridtype=3)
+#glmb.D93<-glmb(n=n,counts ~1 , family = poisson(),mu=mu[1],Sigma=V0[1,1],Gridtype=3)
 
 summary(glmb.D93)
 pred_out=predict(glmb.D93,newdata=d.AD,olddata=d.AD)
 colMeans(pred_out)
 
+outcome2 <- gl(4,1,9)
 
+d.AD4 <- data.frame(treatment, outcome=outcome2, counts)
+pred_out=predict(glmb.D93,newdata=d.AD4,olddata=d.AD)
 
 # Approximate number of candidates per iid sample 1.714
