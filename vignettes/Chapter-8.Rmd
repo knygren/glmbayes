@@ -1,8 +1,8 @@
 ---
-title: "Chapter 7: Specifying Priors for Dispersion (variance) Parameters"
+title: "Chapter 8: A Selection of Bayesian Generalized Linear Models"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 7: Specifying Priors for Dispersion (variance) Parameters}
+  %\VignetteIndexEntry{Chapter 8: A Selection of Bayesian Generalized Linear Models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

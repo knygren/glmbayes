@@ -1,10 +1,10 @@
 ---
-title: "Chapter 5: Viewing Model Predictions and Using Model Statistics"
+title: "Chapter 5: Checking Prior Specifications"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 5: Viewing Model Predictions and Using Model Statistics}
+  %\VignetteIndexEntry{Chapter 5: Checking Prior Specifications}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,7 +20,7 @@ references:
     given: Lan Ma
   container-title: Journal of the American Statistical Association
   volume: 101
-  URL: 'https://www.jstor.org/stable/27590791'
+  URL: 'https://doi.org/10.1198/016214506000000357'
   DOI: 10.1198/016214506000000357
   issue: 475
   publisher: Taylor and Francis, Ltd
@@ -56,6 +56,46 @@ references:
   issued:
     year: 2004
     month: 11
+
+- id: Evans2006
+  title: Checking for Prior-Data Conflict
+  author:
+  - family: Evans
+    given: Michael
+  - family: Moshonov
+    given: Hadas
+  container-title: Bayesian Analysis
+  volume: 1
+  URL: 'http://dx.doi.org/10.1214/06-BA129'
+  DOI: 10.1214/06-BA129
+  issue: 4
+  page: 893-914
+  type: article-journal
+  issued:
+    year: 2006
+    month: 
+
+- id: Spiegelhalter2002
+  title: Bayesian measures of model complexity and fit
+  author:
+  - family: Spiegelhalter
+    given: David J.
+  - family: Best
+    given: Nicola G.
+  - family: Carlin
+    given: Bradley P.
+  - family: Van Der Linde
+    given: Angelika
+  container-title: Journal of the Royal Statistical Society Series B (Statistical Methodology)
+  volume: 64
+  URL: 'https://doi.org/10.1111/1467-9868.00353'
+  DOI: 10.1111/1467-9868.00353
+  issue: 4
+  page: 583-639
+  type: article-journal
+  issued:
+    year: 2002
+    month: 9
 
     
 ---
@@ -110,6 +150,7 @@ In addition to the intercept, our model will contain a slope coefficient for the
 ## Number of variables in model
 Age=menarche2$Age
 nvars=2
+set.seed(333)
 
 ## Reference Ages for setting of priors and Age_Difference
 ref_age1=13  # user can modify this
@@ -236,7 +277,7 @@ The below code performs the step creating the Model data frame and then submits 
 
 ```{r Run Logit,results = "hide"}
 Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,Menarche=menarche2$Menarche,Age2)
-glmb.out1<-glmb(n=1000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
+glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
 
 ```
 
@@ -273,7 +314,7 @@ We discuss several of these after the print view of the output from the call to 
 summary(glmb.out1)
 ```
 
-*Interpreting the "Prior and Maximum Likeihood Estimates with Standard Deviations" table*
+*Interpreting the "Prior and Maximum Likelihood Estimates with Standard Deviations" table*
 
 This table gives a side-by-side comparison of the prior and the data driven maximum likelihood estimates (that should match the ouput from the glm function for the same model). In addition to revealing any differences in the estimates themselves, the relative magnitude of the standard deviations give insight into how "strong" the prior specification is relative to the information contained in the data.  The unstandardized weights on the prior and data respectively are in most cases likely to be close to *(1/sd_prior)^2* and *(1/sd_data)^2* respectively. The fact that the prior standard deviations are much larger in this case tells us that the posterior estimates are likely to be much closer to the maximum likelihood estimates than to the prior estimates.
 
@@ -291,173 +332,130 @@ This table providence credible interval information at several significance leve
 
 *Brief discussion of Findings from model*
 
-As we noted above, the posterior estimates for the intercept appear broadly consistent with the prior specification, so in a sense our prior beliefs are "validated" for the 13 year old girls. As the slope is substantially larger than in our prior specification, however, it seems like we underestimated the % of girls at age 15 who had already had their first period.  It is apparently substantially higher than the 90% we specificed using our prior and if we are Bayesians we should hence update our beliefs substantially based on the data. To understand exactly how much requires us to look at the model predictions(in particular predictions on the inverse link scale). We will do so in a later chapter.
+As we noted above, the posterior estimates for the intercept appear broadly consistent with the prior specification, so in a sense our prior beliefs are "validated" for the 13 year old girls. As the slope is substantially larger than in our prior specification, however, it seems like we underestimated the % of girls at age 15 who had already had their first period.  The percentage is apparently substantially higher than the 90% we specificed using our prior and if we are Bayesians we should hence update our beliefs substantially based on the data. To understand exactly how much requires us to look at the model predictions(in particular predictions on the inverse link scale). We will do so in a later chapter.
 
-* Checking Prior ahead of model submission
+# Checking For Prior-Data Conflicts Ahead of Model Estimation
 
+We close this chapter with a discussion of a function provided as part of this package that allows the user to check for prior-data conflicts prior to estimation of the Bayesian model. 
 
+As we noted in the section titled "Variable Transformation and Preliminary Setup", it is important to a sensible prior specification to be able to interpret coefficents in Bayesian models prior to setting of the priors. Efforts aimed at enhancing interpretation through model transformations or efforts aimed at gathering meaningful prior information can be difficult and/or time consuming in some cases. Unfortunately, this leaves open the possibility for analysts to specify priors that end up having more influence on the posterior estimates than they may have intended. This is particularly problematic in cases where the anayst is attempting to use what might best be described as a "non-informative prior".  
 
-```{r newdata}
-newdata=matrix(0,nrow=5,ncol=2)
-colnames(newdata)=c("Age","Age2")
-newdata[1,1]=11
-newdata[2,1]=12
-newdata[3,1]=13
-newdata[4,1]=14
-newdata[5,1]=15
+To catch some of these cases without influencing potentially good prior specifiations un-necessarily we propose an approach that involes running a classical model with the same specification as the Bayesian model without directly viewing the coefficient estimates and then passing information related to the classical estimates together with the prior specification to our function to check if the maximum likelihood estimates seem to conflict with the prior. In particular, we check if the prior Bayesian credible interval has overlap with the confidence interval based on the maximum likelihood estimate.
 
-newdata[,2]=newdata[,1]-13
-newdata= as.data.frame(newdata)
+Conceptually, this approach is similar to that described in [@Evans2006]. Here are a few examples implementing this approach:
 
-olddata=menarche2 # Set olddata=menarche2
-olddata
-olddata$Age2=Age2 # Add missing variables from environment
-olddata
+*Our prior Specification*
 
-#formula(glmb.out1)[1]
-#formula(glmb.out1)[2]
-#formula(glmb.out1)[3]
-newdata
+We first run the checks for our original specification. The resulting check just indicates that the maximum likelihood estimates are roughly consistent with the prior. This is mainly because the maximum likelihood estimate for the slope, while different from our prior estimate, was still well within the prior credible interval.
 
-pred_newdata=predict(glmb.out1,newdata=newdata,olddata=olddata)
-pred_newdata=predict(glmb.out1,newdata=newdata,olddata=olddata,type="response")
+```{r Check Old Prior}
+glm.out1<-glm(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),data=Menarche_Model_Data)
 
-colMeans(pred_newdata)
-plot(colMeans(pred_newdata))
-#colMeans(matrix(pred_newdata[,1],ncol=1))
+Like_std=summary(glm.out1)$coefficients[,2]
+
+#D93_Prior_Error_Checks=
+Prior_Check(glm.out1,mu1,V1)
+
 
 ```
 
+*Same prior but original Age variable *
 
+Here we run a model with the same prior but with the original Age variable. This now indicates a potential problem. A prior point estimate for half of all girls having had their first period is clearly non-sensical, but it would clearly be difficult to provide any kind of sensible prior point estimate that far out or the range of the data.
 
-
-
-# The Probit Model: 
-
-
-```{r Probit: set up link function info and initialize prior matrices}
-## Set up link function and initialize prior
-bi_probit <- binomial(link="probit")
-mu2<-matrix(0,nrow=nvars,ncol=1)
-V2<-1*diag(nvars)
-```
-
-Using this infomation, we can now derive our priors
-
-```{r Probit:set prior means/sd}
-## Prior mean for intercept is set to point estimate 
-## at reference age1 (on logit scale)
-mu2[1,1]=bi_probit$linkfun(m1)
-
-## Prior mean for slope is set to difference in point estimates
-## on logit scale divided by Age_Diff
-
-mu2[2,1]=(bi_probit$linkfun(m2) -bi_probit$linkfun(m1))/Age_Diff 
-
-## Implied standard deviations for point estimates on logit scale
-
-sd_m1= (bi_probit$linkfun(m1) -bi_probit$linkfun(m1_lower))/1.96
-sd_m2= (bi_probit$linkfun(m2) -bi_probit$linkfun(m2_lower))/1.96
-sd_slope=sqrt(sd_m1^2+sd_m2^2-2*sd_m1*sd_m2*m_corr)
-
-#Cov(m1,slope)=cov(m1, m2-m1)=E[(m1-E[m1])((m2-m1)-E[m2-m1])]
-#   =E[(m1-E[m1])(m2-E[m2])]- E[(m1-E[m1])(m1-E[m1])]
-##   =Cov[m1,m2] - Var[m1]
-##  =sd_m1*sd_m2*m_corr+sd_m1*sd_m1
-cov_V2=sd_m1*sd_m2*m_corr-sd_m1*sd_m1
-
-# Set covariance matrix
-V2[1,1]=sd_m1^2
-V2[2,2]=sd_slope^2
-V2[1,2]=cov_V2
-V2[2,1]=V2[1,2]
-```
-
-```{r Probit: Prior Mean}
-## Resulting Prior mean for model
-mu2
-```
-
-```{r Probit: Prior Variance-Covariance Matrix}
-## Resulting Prior Variance-Covariance for model
-V2
-```
-
-```{r Run Pobit,results = "hide"}
-glmb.out2<-glmb(n=1000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(probit),mu=mu2,Sigma=V2,Gridtype=1, data=menarche2)
-```
-
-
-```{r Summary Probit}
-summary(glmb.out2)
-```
-
-
-
-```{r Probit Model}
-n=1000
-#################################################### Probit Model ############################################
-
-mu<-matrix(0,nrow=2,ncol=1)
-mu[2,1]=2*(0.9-0.5)/3 ## Implied Slope at age 13 should be 0.5*mu[1,1]*(0.9-0.5)/3 
-V1<-1*diag(2)
-
-
-# 2 standard deviations for prior estimate at age 13 between 0.1 and 0.9
-## Specifies uncertainty around the point estimates
-
-V1[1,1]=((0.9-0.5)/2)^2 
-V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
-
-  
-glm.out2<-glm(cbind(Menarche,Total-Menarche)~Age2,family=binomial(probit), data=menarche2)
-summary(glm.out2)
-
-#  Note: Slope coefficient here is a bit more than half of the value of that in the logit model 
+```{r Check Old Age}
+glm.out2<-glm(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),data=Menarche_Model_Data)
 
 Like_std=summary(glm.out2)$coefficients[,2]
-Menarche_Prior_Error_Checks=Prior_Likelihood_Check(object=glm.out2,mu,V1)
 
-glmb.out2<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age2,family=binomial(probit),mu=mu,Sigma=V1,Gridtype=1,data=menarche2)
-summary(glmb.out2)
+#D93_Prior_Error_Checks=
+Prior_Check(glm.out2,mu1,V1)
 
-# ~1.251 candidates per iid sample
 ```
 
+Let's take a look what would have happened to our estimates if we would have proceeded with this model specification.
 
-# The Clog-Log Model:
+```{r Run wrong Age,results = "hide"}
+glmb.out2<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
+```
 
-#################################################### Clog_Log Model ############################################
+```{r Summary Logit - Wrong Age}
+summary(glmb.out2)
+```
 
-```{r Clog_Log Model}
-
-# Need to improve the prior specification here 
-
-mu<-matrix(0,nrow=2,ncol=1)
-mu[1,1]=log(-log(1-0.5))  # Derived prior
-1-exp(-exp((mu[1,1])))    # implies point estimate at age 13 is 0.5
-mu[2,1]=(log(-log(1-0.9))-mu[1,1])/3 # implies 90% menarche at age 16
+Under this specification, the Intercept standard deviation was much higher than under the original specification, and as a result the posterior estimates (mode and mean) end up somewhere in between the prior mean and maximum likelihood estimates. However, the posterior credible interval suggests that both the prior and the maximum likelihood estimates are inconsistent with the posterior distribution.  Because the posterior estimates for the intercept are much higher than the very negative) maximum likelihood estimate, the posterior coefficients for the Age variable is cut roughly in half relative to our other original model and the Deviance residuals are much larger than those we see if we go back to review the output from the original model.  Clearly, this would not be a model that should be run so catching potential issues ahead of the fact (as we did using our above approach) would be important.
 
 
-V1<-1*diag(2)
-V1[1,1]=((log(-log(1-0.9))-mu[1,1])/2)^2  ## Corresponding standard deviation
-V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
+*Same Age and Variance but 0 mean vector *
+
+Here we run a model with the same Age variable as in our original specification but with a 0 prior mean vector combined with the original Variance-Covariance matrix. This now also indicates a potential problem. Looking at the details from the summary function, we see that the issue now is with the slope parameter instead of the mean but the magnitude of the issue appears to be less as the ratio is smaller.
 
 
-glm.out3 <-glm(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(cloglog), data=menarche2)
-summary(glm.out3)
-
-#1-exp(-exp(-0.59602))
+```{r Check 0 mean}
+glm.out3<-glm(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),data=Menarche_Model_Data)
 
 Like_std=summary(glm.out3)$coefficients[,2]
-Menarche_Prior_Error_Checks=Prior_Likelihood_Check(object=glm.out3,mu,V1)
 
+mu2=mu1
+mu2[2,1]=0
 
-glmb.out3<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age2,family=binomial(cloglog),mu=mu,Sigma=V1,Gridtype=1,data=menarche2)
-summary(glmb.out3)
+#D93_Prior_Error_Checks=
+Prior_Check_3=Prior_Check(glm.out3,mu2,V1)
 
-# Candidates per iid samples ~ 1.255
+Prior_Check_3
 
 ```
+Let's proceed with running the model to see how it compares to the original model.
+
+
+```{r Run wrong mean,results = "hide"}
+glmb.out3<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu2,Sigma=V1,data=Menarche_Model_Data)
+```
+
+```{r Summary Logit - 0 Slope}
+summary(glmb.out3)
+```
+
+In reviewing the output, we can now see that the impact of this specification on the results relative to the original model is relatively small. Because the prior mean for the slope is so far away from the maximum likelihood estimate, the posterior estimate for the slope does get pulled away a bit more from the maximum likelihood estimate than under the original specification (about one standard deviation if we use the posterior standard deviation) but in relation to the overall magnitude of the coefficient, this is not all that big of an impact. 
+
+In this case of this particular model, we had some (although imprecise) prior insight into the fact that the slope should be positive and of a somewhat reasonable magnitude. In other applications, the analyst may indeed not have any clear insight into the magnitude or even the sign of some of the coefficients. In such cases, specifying a prior with 0 mean can indeed make some sense. Setting the prior standard deviation/variance sufficiently large can in such cases present some challenges. Using our Prior check to see if the prior standard deviation/variance is sufficiently large can in such cases be a sensible alternative that can facilitate adjustments to the prior.
+
+Let's look at what would have happened to our results if we scaled up the prior standard deviation for the slope based on the ratio from our model check.
+
+```{r Run wrong mean-adjusted Variance,results = "hide"}
+V2=V1
+V2[2,2]=(Prior_Check_3[2,1]*sd_slope)^2
+glmb.out4<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu2,Sigma=V2,data=Menarche_Model_Data)
+```
+
+```{r Summary Logit - 0 Slope - Adjusted Variance}
+summary(glmb.out4)
+```
+
+While we will leave a formal discussion of the DIC [@Spiegelhalter2002] to a later chapter, we here produce a summary of how the models fitted so far compare on the measure (generally, a smaller DIC tends to be preferred). We can see below that the model using the Regular Age variable by this crteria peforms particularly poorly. We can also see that our last model with an ajusted variance term perfoms better than the one with a stronger prior centered away from the maximum likelihood estimate.  The original model specifications just beats out the last model with the lowest overall DIC.   
+
+```{r DIC Comparison}
+DIC_Info=rbind(extractAIC.glmb(glmb.out1),
+extractAIC.glmb(glmb.out2),
+extractAIC.glmb(glmb.out3),
+extractAIC.glmb(glmb.out4))
+
+colnames(DIC_Info)=c("pD","DIC")
+rownames(DIC_Info)=c("Original Specification","Regular Age","Slope Mean=0 - No Var Adjustment",
+                     "Slope Mean=0 - Var Adjustment")
+print(DIC_Info)
+
+```
+# Concluding Discussion
+
+In this note, we walked through an example illustrating a process for setting of the prior in the case of the *Age of Menarche* model based on the data in [@Venables2002]. There are several approaches taken here the we believe analysts can find useful in setting reasonable priors. These include:
+
+* Centering variables so that the intercept can be given a meaningful prior and so that meaningful priors for the other variables can be formulated based on sensitivity in the support of data
+* Incorporating external information if available (like our information regarding the average age of Menarche in the UK)
+* Making reasonable assumptions based on other knowledge/insight (e.g., our prior point estimate at age 15)
+* Checking the prior to see if there is any conflict between the data and the prior before running the model
+* As needed, scaling up prior variance components if the previous step suggests potential conflicts between the prior and the data
+
+In the next section, we take a closer look at how to use some of method functions for the package in order to understand model fit and related statistics.
 
 # References

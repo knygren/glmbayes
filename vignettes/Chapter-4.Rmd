@@ -354,7 +354,7 @@ glm.out1<-glm(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),data
 Like_std=summary(glm.out1)$coefficients[,2]
 
 #D93_Prior_Error_Checks=
-Prior_Likelihood_Check(glm.out1,mu1,V1)
+Prior_Check(glm.out1,mu1,V1)
 
 
 ```
@@ -369,7 +369,7 @@ glm.out2<-glm(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),data=
 Like_std=summary(glm.out2)$coefficients[,2]
 
 #D93_Prior_Error_Checks=
-Prior_Likelihood_Check(glm.out2,mu1,V1)
+Prior_Check(glm.out2,mu1,V1)
 
 ```
 
@@ -400,7 +400,7 @@ mu2=mu1
 mu2[2,1]=0
 
 #D93_Prior_Error_Checks=
-Prior_Check_3=Prior_Likelihood_Check(glm.out3,mu2,V1)
+Prior_Check_3=Prior_Check(glm.out3,mu2,V1)
 
 Prior_Check_3
 
