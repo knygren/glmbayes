@@ -1,5 +1,24 @@
 Prior_Likelihood_Check<-function(Prior_mean, Prior_std, Like_est, Like_std){
   
+  std_dev_sum=1.96*(Prior_std+Like_std)
+  
+  abs_ratio=matrix(rep(0,length(Like_est),nrow=length(Like_est),ncol=1))
+  abs_diff=abs(Prior_mean-Like_est)
+  abs_ratio[1:length(Like_est),]=abs_diff/std_dev_sum
+  
+  rownames(abs_ratio)=rownames(Prior_mean)
+  max_abs_ratio=max(abs_ratio)
+  
+  
+  if(max_abs_ratio>1) {
+     print("At least one of the coefficients appears to be inconsistent with the data")
+  }
+  
+  else{
+    print("The maximum likelihood estimates for all coefficients appear to be roughly consistent with the prior.")
+  }
+  return(abs_ratio)
+  
   Prior_diff=(Like_est-Prior_mean)/Prior_std
   Likelihood_diff=(Prior_mean-Like_est)/Like_std
   Abs_Prior_error=sqrt(Prior_diff^2)
