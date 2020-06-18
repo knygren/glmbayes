@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{a fitted model object of class \code{"glmb"}. Typically the result of a call to \link{glmb}.}
 
-\item{parm}{a specification (not yet implmented) of which parameters are to be given credible sets,
+\item{parm}{a specification (not yet implemented) of which parameters are to be given credible sets,
 either a vector of numbers or a vector of names. If missing, all parameters are considered.}
 
 \item{level}{the credible interval required.}
@@ -17,7 +17,7 @@ either a vector of numbers or a vector of names. If missing, all parameters are 
 \item{\ldots}{additional argument(s) for methods.}
 }
 \value{
-A matrix (or vector) with columnes giving lower and
+A matrix (or vector) with columns giving lower and
 upper credible limits for each parameter. These will be labeled
 (1-level)/2 and 1-(1-level)/2 in \% (by default 2.5\% and 97.5\%).
 }

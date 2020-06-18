@@ -1,17 +1,43 @@
-Prior_Likelihood_Check<-function(Prior_mean, Prior_std, Like_est, Like_std){
+#' Checks for Prior-data conflicts
+#'
+#' Checks if the credible intervals for the prior overlaps with the implied confidence intervals from 
+#' the classical model that comes from a call to the glm function 
+#' @param object a fitted model object of class \code{"glm"}. Typically the result of a call to \link{glm}.
+#' @param mu a vector of length \code{p} giving the prior means of the variables in the design matrix.
+#' @param Sigma a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior covariance matrix of the variables.
+#' @param level the confidence level at whihc the Prior-data conflict should be checked.
+#' @return A vector where each item provided the ratio of the absolue value for the difference between the 
+#' prior and maximum likelihood estimate divided by the length of the sum of half of the two intervals 
+#' (where normality is assumed)
+#' @example inst/examples/Ex_confint.glmb.R
+
+
+Prior_Likelihood_Check<-function(object,mu, Sigma,level=0.95){
   
-  std_dev_sum=1.96*(Prior_std+Like_std)
+  if(level<=0.5) stop("level must be greater than 0.5")
+
+    
+  Sigma=as.matrix(Sigma)
+  Prior_std=sqrt(diag(Sigma))
+    
+  Like_est=object$coefficients
+  Like_std=summary(object)$coefficients[,2]
+  
+  print("Variable Names")
+  
+  print(names(Like_est))
+  std_dev_sum=qnorm(level)*(Prior_std+Like_std)
   
   abs_ratio=matrix(rep(0,length(Like_est),nrow=length(Like_est),ncol=1))
-  abs_diff=abs(Prior_mean-Like_est)
+  abs_diff=abs(mu-Like_est)
   abs_ratio[1:length(Like_est),]=abs_diff/std_dev_sum
   
-  rownames(abs_ratio)=rownames(Prior_mean)
-  max_abs_ratio=max(abs_ratio)
-  
+  rownames(abs_ratio)=names(Like_est)
+  colnames(abs_ratio)=c("abs_ratio")
+    max_abs_ratio=max(abs_ratio)
   
   if(max_abs_ratio>1) {
-     print("At least one of the coefficients appears to be inconsistent with the data")
+     print("At least one of the maximum likelihood estimates appears to be inconsistent with the prior")
   }
   
   else{
@@ -19,29 +45,5 @@ Prior_Likelihood_Check<-function(Prior_mean, Prior_std, Like_est, Like_std){
   }
   return(abs_ratio)
   
-  Prior_diff=(Like_est-Prior_mean)/Prior_std
-  Likelihood_diff=(Prior_mean-Like_est)/Like_std
-  Abs_Prior_error=sqrt(Prior_diff^2)
-  Abs_Likelihood_error=sqrt(Likelihood_diff^2)
-  
-  Error_Checks=cbind(Prior_diff,Likelihood_diff,Abs_Prior_error,Abs_Likelihood_error)
-  
-  colnames(Error_Checks)=c("Prior_std_diff","Likelihood_std_diff","Abs_Prior_std_error","Abs_Likelihood_std_error")
-  
-  Max_Prior_error=max(Abs_Prior_error)
-  Max_Likelihood_error=max(Abs_Likelihood_error)
-  
-  if (Max_Prior_error>3){ 
-    warning("At least one of the maximum likelihood estimates is more than 3 standard deviations 
-            away from the prior point estimate (using the prior standard deviation). This suggest that the 
-            prior point estimate may be poorly choosen and/or that the prior could be set too strong 
-            (the prior standard deviation is too small).")}
-  
-  if (Max_Likelihood_error>3){ 
-    warning("At least one of the prior point estimates is more than 3 standard deviations away from 
-            the maximum likeihood estimate (using the likelihood standard deviation). This suggest that the 
-            prior point estimate may be poorly choosen and inconsistent with the data.")}
-  
-    return(Error_Checks)
   }
 

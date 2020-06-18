@@ -416,7 +416,7 @@ summary(glm.out2)
 #  Note: Slope coefficient here is a bit more than half of the value of that in the logit model 
 
 Like_std=summary(glm.out2)$coefficients[,2]
-Menarche_Prior_Error_Checks=Prior_Likelihood_Check(mu,sqrt(diag(V1)),glm.out2$coefficients,Like_std)
+Menarche_Prior_Error_Checks=Prior_Likelihood_Check(object=glm.out2,mu,V1)
 
 glmb.out2<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age2,family=binomial(probit),mu=mu,Sigma=V1,Gridtype=1,data=menarche2)
 summary(glmb.out2)
@@ -450,7 +450,7 @@ summary(glm.out3)
 #1-exp(-exp(-0.59602))
 
 Like_std=summary(glm.out3)$coefficients[,2]
-Menarche_Prior_Error_Checks=Prior_Likelihood_Check(mu,sqrt(diag(V1)),glm.out3$coefficients,Like_std)
+Menarche_Prior_Error_Checks=Prior_Likelihood_Check(object=glm.out3,mu,V1)
 
 
 glmb.out3<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age2,family=binomial(cloglog),mu=mu,Sigma=V1,Gridtype=1,data=menarche2)

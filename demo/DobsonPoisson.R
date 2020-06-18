@@ -49,12 +49,53 @@ summary(glmb.D93)
 
 ## This triggers issues with glmb function itsefl
 
-glmb.D93<-glmb(n=n,counts ~1 , family = poisson(),mu=mu[1],Sigma=V0[1,1],Gridtype=3)
+#glmb.D93<-glmb(n=n,counts ~1 , family = poisson(),mu=mu[1],Sigma=V0[1,1],Gridtype=3)
 
-summary(glmb.D93)
-pred_out=predict(glmb.D93,newdata=d.AD,olddata=d.AD)
+#summary(glmb.D93)
+
+d.AD2 <- data.frame(treatment, outcome)
+pred_out=predict(glmb.D93,newdata=d.AD2,olddata=d.AD)
+
 colMeans(pred_out)
 
+### This should fail (one of independent variables is missings) and does
+d.AD3 <- data.frame(treatment)
+pred_out=predict(glmb.D93,newdata=d.AD3,olddata=d.AD)
 
+### This should fail (olddata does not have dependent variable)
+pred_out=predict(glmb.D93,newdata=d.AD2,olddata=d.AD2)
+
+### This should fail (wrong number of levels for one of variables in newdata)
+
+outcome2 <- gl(4,1,9)
+d.AD4 <- data.frame(treatment, outcome=outcome2, counts)
+pred_out=predict(glmb.D93,newdata=d.AD4,olddata=d.AD)
+
+
+
+dim(pred_out$x_old2)
+dim(pred_out$x_old)
+
+dim(pred_out$x_old2)[1]
+
+if(!dim(pred_out$x_old2)[1]==dim(pred_out$x_old)[1]) print("Number of rows do not match")
+if(!dim(pred_out$x_old2)[2]==dim(pred_out$x_old)[2]) print("Number of columns do not match")
+
+
+for(i in 1:dim(pred_out$x_old2)[2]){
+if(!colnames(pred_out$x_old2)[i]==colnames(pred_out$x_old)[i]) stop("Column names do not match")
+}
+
+
+isTRUE()
+isTRUE(all.equal(pred_out$x_old2,pred_out$x_old))
+
+if(isTRUE(all.equal(pred_out$x_old2,pred_out$x_old))==FALSE) print("This is false")
+
+
+isFALSE(all.equal(pred_out$x_old2,pred_out$x_old))
+
+
+isTRUE(all.equal(pred_out$x_old,pred_out$x_old))
 
 # Approximate number of candidates per iid sample 1.714
