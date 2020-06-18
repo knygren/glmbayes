@@ -299,7 +299,7 @@ In reviewing the coefficients, we see that the intercepts look quite close, so o
 
 **Summarizing the model**
 
-To get a more detaile view of the model output, we simply use the summary function and its print method much like you would to generate a summary for output from the *glm* function. This results in a printed view with several sections of outputs
+To get a more detailed view of the model output, we simply use the summary function and its print method much like you would to generate a summary for output from the *glm* function. This results in a printed view with several sections of outputs
 
 * Expected Deviance Residuals (Discussed more in the next Chapter)
 * Prior and Maximum Likelihood Estimates with Standard Deviations
@@ -334,118 +334,6 @@ This table providence credible interval information at several significance leve
 
 As we noted above, the posterior estimates for the intercept appear broadly consistent with the prior specification, so in a sense our prior beliefs are "validated" for the 13 year old girls. As the slope is substantially larger than in our prior specification, however, it seems like we underestimated the % of girls at age 15 who had already had their first period.  The percentage is apparently substantially higher than the 90% we specificed using our prior and if we are Bayesians we should hence update our beliefs substantially based on the data. To understand exactly how much requires us to look at the model predictions(in particular predictions on the inverse link scale). We will do so in a later chapter.
 
-# Checking For Prior-Data Conflicts Ahead of Model Estimation
-
-We close this chapter with a discussion of a function provided as part of this package that allows the user to check for prior-data conflicts prior to estimation of the Bayesian model. 
-
-As we noted in the section titled "Variable Transformation and Preliminary Setup", it is important to a sensible prior specification to be able to interpret coefficents in Bayesian models prior to setting of the priors. Efforts aimed at enhancing interpretation through model transformations or efforts aimed at gathering meaningful prior information can be difficult and/or time consuming in some cases. Unfortunately, this leaves open the possibility for analysts to specify priors that end up having more influence on the posterior estimates than they may have intended. This is particularly problematic in cases where the anayst is attempting to use what might best be described as a "non-informative prior".  
-
-To catch some of these cases without influencing potentially good prior specifiations un-necessarily we propose an approach that involes running a classical model with the same specification as the Bayesian model without directly viewing the coefficient estimates and then passing information related to the classical estimates together with the prior specification to our function to check if the maximum likelihood estimates seem to conflict with the prior. In particular, we check if the prior Bayesian credible interval has overlap with the confidence interval based on the maximum likelihood estimate.
-
-Conceptually, this approach is similar to that described in [@Evans2006]. Here are a few examples implementing this approach:
-
-*Our prior Specification*
-
-We first run the checks for our original specification. The resulting check just indicates that the maximum likelihood estimates are roughly consistent with the prior. This is mainly because the maximum likelihood estimate for the slope, while different from our prior estimate, was still well within the prior credible interval.
-
-```{r Check Old Prior}
-glm.out1<-glm(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),data=Menarche_Model_Data)
-
-Like_std=summary(glm.out1)$coefficients[,2]
-
-#D93_Prior_Error_Checks=
-Prior_Check(glm.out1,mu1,V1)
-
-
-```
-
-*Same prior but original Age variable *
-
-Here we run a model with the same prior but with the original Age variable. This now indicates a potential problem. A prior point estimate for half of all girls having had their first period is clearly non-sensical, but it would clearly be difficult to provide any kind of sensible prior point estimate that far out or the range of the data.
-
-```{r Check Old Age}
-glm.out2<-glm(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),data=Menarche_Model_Data)
-
-Like_std=summary(glm.out2)$coefficients[,2]
-
-#D93_Prior_Error_Checks=
-Prior_Check(glm.out2,mu1,V1)
-
-```
-
-Let's take a look what would have happened to our estimates if we would have proceeded with this model specification.
-
-```{r Run wrong Age,results = "hide"}
-glmb.out2<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
-```
-
-```{r Summary Logit - Wrong Age}
-summary(glmb.out2)
-```
-
-Under this specification, the Intercept standard deviation was much higher than under the original specification, and as a result the posterior estimates (mode and mean) end up somewhere in between the prior mean and maximum likelihood estimates. However, the posterior credible interval suggests that both the prior and the maximum likelihood estimates are inconsistent with the posterior distribution.  Because the posterior estimates for the intercept are much higher than the very negative) maximum likelihood estimate, the posterior coefficients for the Age variable is cut roughly in half relative to our other original model and the Deviance residuals are much larger than those we see if we go back to review the output from the original model.  Clearly, this would not be a model that should be run so catching potential issues ahead of the fact (as we did using our above approach) would be important.
-
-
-*Same Age and Variance but 0 mean vector *
-
-Here we run a model with the same Age variable as in our original specification but with a 0 prior mean vector combined with the original Variance-Covariance matrix. This now also indicates a potential problem. Looking at the details from the summary function, we see that the issue now is with the slope parameter instead of the mean but the magnitude of the issue appears to be less as the ratio is smaller.
-
-
-```{r Check 0 mean}
-glm.out3<-glm(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),data=Menarche_Model_Data)
-
-Like_std=summary(glm.out3)$coefficients[,2]
-
-mu2=mu1
-mu2[2,1]=0
-
-#D93_Prior_Error_Checks=
-Prior_Check_3=Prior_Check(glm.out3,mu2,V1)
-
-Prior_Check_3
-
-```
-Let's proceed with running the model to see how it compares to the original model.
-
-
-```{r Run wrong mean,results = "hide"}
-glmb.out3<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu2,Sigma=V1,data=Menarche_Model_Data)
-```
-
-```{r Summary Logit - 0 Slope}
-summary(glmb.out3)
-```
-
-In reviewing the output, we can now see that the impact of this specification on the results relative to the original model is relatively small. Because the prior mean for the slope is so far away from the maximum likelihood estimate, the posterior estimate for the slope does get pulled away a bit more from the maximum likelihood estimate than under the original specification (about one standard deviation if we use the posterior standard deviation) but in relation to the overall magnitude of the coefficient, this is not all that big of an impact. 
-
-In this case of this particular model, we had some (although imprecise) prior insight into the fact that the slope should be positive and of a somewhat reasonable magnitude. In other applications, the analyst may indeed not have any clear insight into the magnitude or even the sign of some of the coefficients. In such cases, specifying a prior with 0 mean can indeed make some sense. Setting the prior standard deviation/variance sufficiently large can in such cases present some challenges. Using our Prior check to see if the prior standard deviation/variance is sufficiently large can in such cases be a sensible alternative that can facilitate adjustments to the prior.
-
-Let's look at what would have happened to our results if we scaled up the prior standard deviation for the slope based on the ratio from our model check.
-
-```{r Run wrong mean-adjusted Variance,results = "hide"}
-V2=V1
-V2[2,2]=(Prior_Check_3[2,1]*sd_slope)^2
-glmb.out4<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu2,Sigma=V2,data=Menarche_Model_Data)
-```
-
-```{r Summary Logit - 0 Slope - Adjusted Variance}
-summary(glmb.out4)
-```
-
-While we will leave a formal discussion of the DIC [@Spiegelhalter2002] to a later chapter, we here produce a summary of how the models fitted so far compare on the measure (generally, a smaller DIC tends to be preferred). We can see below that the model using the Regular Age variable by this crteria peforms particularly poorly. We can also see that our last model with an ajusted variance term perfoms better than the one with a stronger prior centered away from the maximum likelihood estimate.  The original model specifications just beats out the last model with the lowest overall DIC.   
-
-```{r DIC Comparison}
-DIC_Info=rbind(extractAIC.glmb(glmb.out1),
-extractAIC.glmb(glmb.out2),
-extractAIC.glmb(glmb.out3),
-extractAIC.glmb(glmb.out4))
-
-colnames(DIC_Info)=c("pD","DIC")
-rownames(DIC_Info)=c("Original Specification","Regular Age","Slope Mean=0 - No Var Adjustment",
-                     "Slope Mean=0 - Var Adjustment")
-print(DIC_Info)
-
-```
 # Concluding Discussion
 
 In this note, we walked through an example illustrating a process for setting of the prior in the case of the *Age of Menarche* model based on the data in [@Venables2002]. There are several approaches taken here the we believe analysts can find useful in setting reasonable priors. These include:
@@ -453,9 +341,7 @@ In this note, we walked through an example illustrating a process for setting of
 * Centering variables so that the intercept can be given a meaningful prior and so that meaningful priors for the other variables can be formulated based on sensitivity in the support of data
 * Incorporating external information if available (like our information regarding the average age of Menarche in the UK)
 * Making reasonable assumptions based on other knowledge/insight (e.g., our prior point estimate at age 15)
-* Checking the prior to see if there is any conflict between the data and the prior before running the model
-* As needed, scaling up prior variance components if the previous step suggests potential conflicts between the prior and the data
 
-In the next section, we take a closer look at how to use some of method functions for the package in order to understand model fit and related statistics.
+In the next section, we will take a take a look at how the analysts can identify the variables for which priors specifications are needed and approaches to checking whether the data seems consistent with the specified prior.
 
 # References

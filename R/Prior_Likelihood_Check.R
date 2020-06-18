@@ -20,7 +20,7 @@ Prior_Check<-function(object,mu=NULL, Sigma=NULL,level=0.95){
   if(is.null(mu)){
     print("No Prior mean vector provided. Variables with needed Priors are:")
         print(names(Like_est))
-    return(names(Like_est))    
+    names(Like_est)    
     
   }
 
