@@ -197,7 +197,7 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=ga
   
   else{
     if(is.null(dispersion)){dispersion2=1}
-
+    
     # f1, f2, and f3 passed here - Likely legacy of R code
     ## Can eliminate and replace with calling of corresponding c++ functions
 #    outlist<-rnnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,

@@ -50,6 +50,13 @@ predict.glmb<-function(object,newdata=NULL,type="link",
                        na.action = na.pass,olddata=NULL,...)
 {
 
+  ## Additional changes to consider
+  
+  ### 1) Replacing last step with a step that passes individual draws to glm [might be safer]
+  ### 2) QC that offsets are handled properly
+  ### 3) Implement version that allows y to be generated
+  
+  
 
   ## Note: may need adjustment for case when dispersion is random 
   ## residual.scale be may not be 1 or link-inverse may not be accurate
@@ -62,172 +69,68 @@ predict.glmb<-function(object,newdata=NULL,type="link",
    
   if (missing(newdata)) {
       if(type=="link")   pred <-  object$linear.predictors
-      if(type=="response")  pred <-   object$fitted.values
-      }
+      if(type=="response"){
+                          pred <-   object$fitted.values
+                          }
+      return(pred)
+         
+            }
   
   else{
 
-    ## Function assumes columns the same so data frames can be combined
-    ## also assumes no critical variables are missing
+    ## For now requires olddata be provided so that data can be compared for consistency
+        
     
-    if (missing(olddata)) stop("olddata must be provided whenever newdata is provided")
-    
-    # Short function used to separate model 
-    # variables into those used in derivation of explanatory and dependent variables
-    
-    
-    get_vars=function(all_vars,xstring){
-      
-      ## Initialize model t
-      xvars=all_vars
-      xflags=list(rep("TRUE",length(xvars)))
-      
-      check_data=data.frame(xvars=xvars,xflags=xflags)
-      colnames(check_data)=c("xvars","xflags")
-      
-      for(i in 1:length(xvars)){
-        if(isFALSE(grepl(xvars[i], xstring))) check_data$xflags[i]=FALSE
-      }
-      
-      xdata=subset(check_data, xflags==TRUE)
-      return(unique(xdata$xvars))
-      
-    }
-    
-    mod_vars=all.vars(formula(object))
-    mod_formula=formula(object)
-    
-    ystring=as.character(mod_formula[2]) ## Seems to be formula for dependent variables
-    xstring=as.character(mod_formula[3]) ## Seems to be formula for explanatory variables
+    ## Pull model frame from original model and olddata
+    ## This can likely be remove and moved inside complete_newdata function
 
+    original_frame=object$glm$model
     
-    if(length(xstring)>0 & length(mod_vars)>0){  x_vars=get_vars(all_vars=mod_vars,xstring=xstring)}
-    else{x_vars=NULL    }
+    # This could fail so use try
     
+    newdata_ok=1
+    newdata_frame=try(model.frame(formula(object$glm$model),newdata),silent=TRUE)
     
-    y_vars1=setdiff(mod_vars,x_vars)
+    #if(class(newdata_frame)=="data.frame") print("newdata built a model frame")    
+    if(class(newdata_frame)=="try-error") newdata_ok=0    
     
-    if(length(ystring)>0 & length(y_vars1)>0){
-    y_vars2=get_vars(all_vars=y_vars1,xstring=ystring)
-    }
-    else{y_vars2=y_vars1}
-    
-    if(length(y_vars1)==0) {warning("No data variables appear to be used in formula 
-for dependent variable. The number of observation set by formula are likely fixed and 
-predictions may currently only work if the number of observations in newdata match those in olddata")}
 
-    miss_vars=setdiff(y_vars1,y_vars2)
-    
-    if(length(miss_vars)>0){  
-    warning("Some Model Variables Not Found - May cause unpredictable behavior")
-      x_vars=c(x_vars,miss_vars)
-            }
+    ## Attempt comparison of newdata_frame to original_frame
+    ## This should pass if all variables (including dependent variables) are contained in 
+    ##  newdata_frame and the attributes match
 
-    
-    
-    y_vars=y_vars2
-    x_vars=x_vars
-    
-    ## Subset olddata and newdata to model variables
-    
-    ## Try with error handling
+    ## If newdata_frame matches original_frame other than in terms of number of rows, 
+    ## produce new_matrix right away (this should be correct)
 
-    
-    tryCatch(olddata[mod_vars],error=function(e) {stop("olddata does not contain all model variables")})
-    tryCatch(newdata[x_vars],error=function(e) {stop("newdata does not contain all explanatory variables")})
-
-    newvars=names(newdata)
-    miss_newvars=setdiff(mod_vars, newvars)  # These should now be any missing dependent variables 
-
-    
-    if(length(miss_newvars)>2) stop("newdata has more than two missing dependent variables")
-
-  
-    if(length(miss_newvars)>0){
-    old_miss_newvars=olddata[miss_newvars]
-    m_miss_newvars=round(colMeans(old_miss_newvars))
-
-    for(i in 1:length(names(m_miss_newvars)))
-      
+    if(newdata_ok==1){
+        if(isTRUE(Compare_Model_Frames(original_frame,newdata_frame,Check_Rows = FALSE)))
     {
-      Temp1=matrix(round(colMeans(olddata[miss_newvars])[i]),nrow=nrow(newdata),ncol=1)  
-      colnames(Temp1)=names(m_miss_newvars)[i]
-      if(i==1) Temp2=Temp1
-      else(Temp2=cbind(Temp2,Temp1))
+      new_x=model.matrix(formula(object$glm$model),newdata_frame)
+
+      pred=generate_predictions(object,type=type,new_x,newdata_frame)  
+      return(pred)
+      
       
     }
-    
-    newdata[miss_newvars] <- Temp2
-
-    }
-    
-    ## Look to see if this is producing the desired result
-    
-
-    tryCatch(newdata[mod_vars],error=function(e) {stop("Modified newdata does not contain all model variables")})
-
-    olddata=olddata[mod_vars]
-    newdata=newdata[mod_vars]
-    
-    #return(list(olddata=olddata,newdata=newdata))
-    
-    ## Run check to see if olddata returns same x_data a stored in object
-    temp_glm1=glm(object$glm$formula, family = object$glm$family,x=TRUE,data=olddata)
-
-    x_old=object$glm$x
-    x_new=temp_glm1$x
-    
-    if(isTRUE(all.equal(x_new,x_old))==FALSE) stop("olddata alone does not yield an x matrix consistent with that 
-                                             stored in the original model object")
-
-    get_x_matrix<-function(object,olddata,newdata){
-      nrow1=nrow(olddata)
-      nrow2=nrow(newdata)
-      combodata=rbind(olddata,newdata)
-    
-      temp_glm=glm(object$formula, family = object$family,x=TRUE,data=combodata)
+    else{newdata_ok=0}
       
-      x_old=temp_glm$x[1:(nrow1),]
-      x_new=temp_glm$x[(nrow1+1):(nrow1+nrow2),]
-      
-      return(list(x_old=x_old,x_new=x_new))
-    }
-
-    x_matrices=get_x_matrix(object$glm,olddata,newdata)
+    }  
     
-    x_old2=x_matrices$x_old
-  
-    # Check that if dimensions and column namesfor constructed matrix x_old2 match x_old
-    # These checks should catch almost all errors
+    ## if newdata_frame does not match, try constructing a valid frame using
+    ## information from olddata
     
-    if(!dim(x_old2)[1]==dim(x_old)[1]) stop("Number of rows in final constucted x matrix for olddata does not match original")
-    if(!dim(x_old2)[2]==dim(x_old)[2]) stop("Number of columns in final constucted x matrix for olddata does not match original")
+    if (missing(olddata)){ stop("no olddata available to complete newdata")}
     
-    for(i in 1:dim(x_old2)[2]){
-      if(!colnames(x_old2)[i]==colnames(x_old)[i]) stop("Column names in final matrix does not match original")
-    }
+    x_matrices=complete_newdata(object,newdata,olddata,type)
     
-  
-    x_matrix=x_matrices$x_new
-
-    nvars=ncol(object$coefficients)
-    n=nrow(object$coefficients)
-    betas=object$coefficients
-    npreds=nrow(newdata)
-    pred=matrix(0,nrow=n,ncol=npreds)
+    new_x=x_matrices$x_new
+    new_mod_frame=x_matrices$mod_frame_new
     
-    for(i in 1:n)
-    {## Making sure names match
-      betas_temp=betas[i,1:nvars]
-      pred[i,1:npreds]=t(x_matrix%*%as.matrix(betas_temp,ncol=1))
-      
-      ## Rescale predictions if type="response"
-      if(type=="response") pred[i,1:npreds]<- family(object$glm)$linkinv(pred[i,1:npreds])
-      
-    }
+    pred=generate_predictions(object,type=type,new_x,new_mod_frame)  
+    return(pred)
     
 
   }
-  return(pred)
+
   
 }
