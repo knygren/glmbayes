@@ -12,6 +12,7 @@ S3method(formula,glmb)
 S3method(nobs,glmb)
 S3method(predict,glmb)
 S3method(vcov,glmb)
+S3method(simulate,glmb)
 S3method(summary,glmb)
 S3method(summary,rglmb)
 S3method(summary,rglmb_dispersion)
@@ -25,7 +26,8 @@ importFrom("stats", ".getXlevels", "binomial", "coef", "dbinom",
              "model.response", "model.weights", "nobs", "pnorm",
              "printCoefmat", "qnorm", "quantile", "rchisq", "residuals",
              "rgamma", "rnorm", "runif", "var","cov","formula","family",
-              "na.pass","predict.lm","glm","model.frame","rbinom","rpois","terms")
+              "na.pass","predict.lm","glm","model.frame","rbinom",
+           "rpois","terms","simulate")
 exportPattern("^[[:alpha:]]+")
 
 

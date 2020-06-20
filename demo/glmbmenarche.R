@@ -45,6 +45,10 @@ all.vars(formula(glm.out2))
 
 ## Including prior.weights did not seem to change mean residuals much
 glmb.out1<-glmb(n=n,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu,Sigma=V1,Gridtype=1, data=menarche2)
+
+
+
+
 summary(glmb.out1)
 olddata=data.frame(Age=menarche2$Age,
                    Menarche=menarche2$Menarche,Total=menarche2$Total,Age2=Age2)
@@ -116,9 +120,17 @@ res_high1=apply(res_out,2,FUN=quantile,probs=c(0.975))
 # Plot without ylim first and then set to make graph symmetric
 plot(res_mean~Age2,main="Deviance Residuals for Menarche Model",xlab = "Age", ylab = "Avg. Dev. Res")
 plot(res_mean~Age2,ylim=c(-2.5,2.5),main="Deviance Residuals for Menarche Model",xlab = "Age", ylab = "Avg. Dev. Res")
-lines(Age2, 0*res_out,lty=1)
-lines(Age2, res_low,lty=2)
-lines(Age2, res_high,lty=2)
+lines(Age2, 0*res_mean,lty=1)
+lines(Age2, res_low1,lty=2)
+lines(Age2, res_high1,lty=2)
+
+
+ysim_temp=simulate.glmb(glmb.out1,nsim=1,seed=NULL,pred=pred1,family="binomial",
+              wt=weights(glmb.out1$glm))
+
+#colMeans(ysim_temp)
+
+
 
 ysim1=glmb_simulate(pred1,family="binomial",wt=weights(glmb.out1$glm))
 
@@ -144,8 +156,6 @@ lines(Age2, res_low,lty=1)
 lines(Age2, res_high,lty=1)
 lines(Age2, res_low1,lty=2)
 lines(Age2, res_high1,lty=2)
-
-
 
 
 ysim1[1:10,]

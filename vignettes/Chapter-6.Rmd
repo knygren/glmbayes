@@ -4,7 +4,7 @@ author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 6: Viewing Model Predictions and Using Model Statistics}
+  %\VignetteIndexEntry{Chapter 6: Reviewing Model Predictions, Deviance Residuals and Model Statistics}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

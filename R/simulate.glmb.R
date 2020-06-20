@@ -1,14 +1,30 @@
-#' Simulate New Data
+#' Simulate Responses
 #'
-#' Simulates New Data tied to the model predictions 
-#' @param pred Predictions from the predict function or the original glmb object
-#' @param family family used in model
-#' @param wt weighting variable (that incorporates the dispersion)
-#' @return Simulated values for data corresponding to the model predictions
+#' Simulate responses from the distribution corresponding to a fitted \code{glmb} object.
+#' @param object An object of class \code{glmb}, typically the result of a call to the 
+#' function \code{glmb}.
+#' @param nsim Defunct (see below).
+#' @param seed an object specifying if and how the random number generator should be 
+#' initialized (seeded).
+#' @param \ldots Additional arguments passed to the function. Will 
+#' frequently include a matrix pred of simulated predictions from
+#' the predict function, the family (e.g., binomial) and an optional
+#' vector of weights specifying prior.weights for the simulated values (default is 1)
+#' @return Simulated values for data corresponding to simulated model predictions that correspond either 
+#' to the original data or to a \code{newdata} data frame provided to the predict function. 
 #' @example inst/examples/Ex_confint.glmb.R
 
-
-glmb_simulate<-function(pred,family,wt=1){
+simulate.glmb<-function(object,nsim=1,seed=NULL,...){
+  
+  method_args=list(...)
+  pred=method_args$pred
+  family=method_args$family
+  wt=method_args$wt
+#  print(method_args)
+  #stop()
+    ## pred
+  ## family
+  ## wt
   
   ## For Poisson and binomial, dispersion2=1
   ## wt2=wt/dispersion
@@ -34,9 +50,9 @@ glmb_simulate<-function(pred,family,wt=1){
   nsims=nrow(pred)
   y_temp<-matrix(0,nrow=nrow(pred),ncol=ncol(pred))
   
-  print(nvars)
-  print(nsims)
-  print(y_temp)
+#  print(nvars)
+#  print(nsims)
+#  print(y_temp)
   
   for(i in 1:nsims){
     

@@ -251,23 +251,36 @@ if (is.null(offset)) {
 	linkinv<-fit$family$linkinv
 	fitted.values<-linkinv(linear.predictors)
 
-	outlist<-list(glm=fit,coefficients=sim$coefficients,coef.means=colMeans(sim$coefficients),
-      coef.mode=sim$PostMode,Prior=Prior,
-	fitted.values=fitted.values,
-	linear.predictors=linear.predictors,
-	deviance=DICinfo$Deviance,
-	pD=DICinfo$pD,
-	Dbar=DICinfo$Dbar,Dthetabar=DICinfo$Dthetabar,
-	DIC=DICinfo$DIC,
-  famfunc=famfunc,iters=sim$iters,
-#  dispersion=dispersion
-#,
-  dispersion=dispersion2
+	outlist<-list(
+	  glm=fit,
+	  coefficients=sim$coefficients,
+	  coef.means=colMeans(sim$coefficients),
+    coef.mode=sim$PostMode,
+	  dispersion=dispersion2,
+	  Prior=Prior,
+	  fitted.values=fitted.values,
+	  family=fit$family,
+	  linear.predictors=linear.predictors,
+	  deviance=DICinfo$Deviance,
+	  pD=DICinfo$pD,
+	  Dbar=DICinfo$Dbar,
+	  Dthetabar=DICinfo$Dthetabar,
+	  DIC=DICinfo$DIC,
+	  prior.weights=fit$prior.weights,
+	  y=fit$y,
+	  x=fit$x,
+	  model=fit$model,
+	  call=fit$call,
+	  formula=fit$formula,
+	  terms=fit$terms,
+	  data=fit$data,
+    famfunc=famfunc,
+	  iters=sim$iters
 )
 
 	outlist$call<-match.call()
 
-	class(outlist)<-c(outlist$class,"glmb")
+	class(outlist)<-c(outlist$class,"glmb","glm","lm")
 	outlist
 }
 
