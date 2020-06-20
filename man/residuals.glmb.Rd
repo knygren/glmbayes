@@ -4,16 +4,21 @@
 \alias{residuals.glmb}
 \title{Accessing Bayesian Generalized Linear Model Fits}
 \usage{
-\method{residuals}{glmb}(object, ...)
+\method{residuals}{glmb}(object, ysim = NULL, ...)
 }
 \arguments{
 \item{object}{an object of class \code{glmb}, typically the result of a call to \link{glmb}}
 
-\item{...}{further arguments to or from other methods}
+\item{ysim}{Optional simulated data for the data y.}
+
+\item{\ldots}{further arguments to or from other methods}
 }
 \value{
 A matrix \code{DevRes} of dimension \code{n} times \code{p} containing
-the Deviance residuals for each draw.
+the Deviance residuals for each draw. If ysim is provided, the residuals are based
+on a comparison to the simulated data instead. The credible intervals
+for residuals based on simulated data should be a more approproiate measure of
+whether individual residuals represent outliers or not
 }
 \description{
 These functions are all \link{methods} for class \code{glmb} or \code{summary.glmb} objects.

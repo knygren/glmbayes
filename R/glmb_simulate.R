@@ -34,6 +34,10 @@ glmb_simulate<-function(pred,family,wt=1){
   nsims=nrow(pred)
   y_temp<-matrix(0,nrow=nrow(pred),ncol=ncol(pred))
   
+  print(nvars)
+  print(nsims)
+  print(y_temp)
+  
   for(i in 1:nsims){
     
     #rgamma(n, shape, rate = 1, scale = 1/rate)
@@ -45,8 +49,10 @@ glmb_simulate<-function(pred,family,wt=1){
     if(family=="quasipoisson") y_temp[i,1:nvars]=rpois(n=nvars,pred[i,1:nvars])             
     ### Verify this part - rather complicated
     if(family=="Gamma") y_temp[i,1:nvars]=rgamma(n=nvars,shape=wt,(1/wt)*pred[i,1:nvars])              
-    if(family=="binomial") y_temp[i,1:nvars]=rbinom(n=nvars,size=round(wt),prob=pred[i,1:nvars])              
-    if(family=="quasibinomial") y_temp[i,1:nvars]=rbinom(n=nvars,size=round(wt),prob=pred[i,1:nvars])                            
+
+    ## Simulate from binomial and then divide by the weight!    
+    if(family=="binomial") y_temp[i,1:nvars]=rbinom(n=nvars,size=round(wt),prob=pred[i,1:nvars])/round(wt)              
+    if(family=="quasibinomial") y_temp[i,1:nvars]=rbinom(n=nvars,size=round(wt),prob=pred[i,1:nvars])/round(wt)                            
     
     ## Verify this part - rather complicated    
     if(family=="gaussian") y_temp[i,1:nvars]=rnorm(n=nvars,mean=pred[i,1:nvars],sd=sqrt(1/wt))              
@@ -54,4 +60,5 @@ glmb_simulate<-function(pred,family,wt=1){
     
   }
   
+  return(y_temp)
 }

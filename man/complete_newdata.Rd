@@ -27,8 +27,8 @@ Attempts to complete a newdata data frame with missing model
 variables. This will typically fail if variables used in the
 formula to derive exogenous or offset variables are missing 
 (unless the environment contains the needed information). It will generally 
-succeed if the all variabls used to derive exogenous or offset
-variables are present and newdata contains data for 
+succeed if the all variables used to derive exogenous or offset
+variables are present and olddata contains data for 
 the missing variables that can be used to substitute the missing 
 data in newdata with means from the olddata
 }

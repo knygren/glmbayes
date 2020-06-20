@@ -20,8 +20,9 @@ generate_predictions<-function(object,type="link",new_x,new_model_frame){
   
   betas=object$coefficients
   mod_formula=formula(object)
+  
   new_terms=terms(formula(object))
-
+  
     ## Initialized offset term to 0
   new_alpha=matrix(0,nrow=npreds,ncol=1)
   

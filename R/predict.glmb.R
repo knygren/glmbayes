@@ -129,8 +129,6 @@ predict.glmb<-function(object,newdata=NULL,type="link",
     pred=generate_predictions(object,type=type,new_x,new_mod_frame)  
     return(pred)
     
-
   }
-
   
 }

@@ -34,8 +34,8 @@ get_x_matrix<-function(object,olddata,newdata){
   mod_frame_old=combo_mod_frame[1:(nrow1),]
   mod_frame_new=combo_mod_frame[(nrow1+1):(nrow1+nrow2),]
   
-  x=object$glm$x
-  
+  x=object$x
+
   if(!dim(x_old)[1]==dim(x)[1]) stop("Number of rows in final constucted x matrix for olddata does not match original")
   if(!dim(x_old)[2]==dim(x)[2]) stop("Number of columns in final constucted x matrix for olddata does not match original")
   
@@ -43,9 +43,9 @@ get_x_matrix<-function(object,olddata,newdata){
     if(!colnames(x_old)[i]==colnames(x)[i]) stop("Column names in final matrix do not match original")
   }
   
-  x_new2=model.matrix(formula(object$glm$formula),mod_frame_new)
   
-
+  x_new2=model.matrix(formula(object$formula),mod_frame_new)
+  
   return(list(x_new=x_new2,mod_frame_new=mod_frame_new))
 }
 
