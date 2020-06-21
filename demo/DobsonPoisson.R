@@ -16,6 +16,9 @@ print(d.AD <- data.frame(treatment, outcome, counts))
 
 
 glm.D93 <- glm(counts ~ outcome + treatment, family = poisson(),x=TRUE)
+
+anova(glm.D93)
+
 summary(glm.D93)
 predict(glm.D93,newdata=d.AD)
 
@@ -46,8 +49,15 @@ mu[1,1]=log(mean(counts))
 #sqrt(diag(V0)),glm.D93$coefficients,Like_std)
 
 glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),mu=mu,Sigma=V0,Gridtype=3)
-summary(glmb.D93)
 
+
+
+
+test_dummy=dummy.coef(glmb.D93)
+
+test_dummy[2]
+
+length(test_dummy)
 
 
 get_all_vars(formula(glm.D93),d.AD)

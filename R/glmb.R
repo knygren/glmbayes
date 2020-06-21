@@ -275,8 +275,8 @@ if (is.null(offset)) {
 	  terms=fit$terms,
 	  data=fit$data,
     famfunc=famfunc,
-	  iters=sim$iters
-)
+	  iters=sim$iters,
+	  contrasts=fit$contrasts,	  xlevels=fit$xlevels)
 
 	outlist$call<-match.call()
 

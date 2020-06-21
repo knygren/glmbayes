@@ -1,19 +1,18 @@
 useDynLib(glmbayes)
+S3method(print,glmb)
+S3method(summary,glmb)
+S3method(predict,glmb)
+S3method(residuals,glmb)
 S3method(extractAIC,glmb)
 S3method(logLik,glmb)
-S3method(print,glmb)
+S3method(confint,glmb)
+S3method(vcov,glmb)
+S3method(simulate,glmb)
+S3method(dummy.coef,glmb)
 S3method(print,glmbfamfunc)
 S3method(print,rglmb)
 S3method(print,rlmb)
 S3method(print,rglmb_dispersion)
-S3method(residuals,glmb)
-S3method(confint,glmb)
-S3method(formula,glmb)
-S3method(nobs,glmb)
-S3method(predict,glmb)
-S3method(vcov,glmb)
-S3method(simulate,glmb)
-S3method(summary,glmb)
 S3method(summary,rglmb)
 S3method(summary,rglmb_dispersion)
 S3method(print,summary.glmb)
@@ -27,7 +26,8 @@ importFrom("stats", ".getXlevels", "binomial", "coef", "dbinom",
              "printCoefmat", "qnorm", "quantile", "rchisq", "residuals",
              "rgamma", "rnorm", "runif", "var","cov","formula","family",
               "na.pass","predict.lm","glm","model.frame","rbinom",
-           "rpois","terms","simulate")
+           "rpois","terms","simulate","delete.response","setNames",
+           "dummy.coef")
 exportPattern("^[[:alpha:]]+")
 
 
