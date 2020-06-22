@@ -97,7 +97,8 @@ summary.glmb<-function(object,...){
   
   rownames(TAB2)<-rownames(TAB)
   
-  res<-list(call=object$call,
+  res<-list(
+            call=object$call,
             n=n,
             residuals=mres,
             coefficients1=Tab1,

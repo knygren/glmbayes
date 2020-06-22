@@ -62,13 +62,19 @@ The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.va
 various useful features of the value returned by \code{\link{rglmb}}.
 An object of class \code{"rglmb"} is a list containing at least the following components:
 \item{coefficients}{a \code{n} by \code{length(mu)} matrix with one sample in each row}
-\item{PostMode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
-\item{Prior}{A list with two components. The first being the prior mean vector and the second the prior precision matrix}
-\item{iters}{an \code{n} by \code{1} matrix giving the number of candidates generated before acceptance for each sample.}
-\item{famfunc}{an object of class \code{"famfunc"}}
-\item{Envelope}{an object of class \code{"envelope"}  }
+\item{coef.mode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
 \item{dispersion}{the dispersion parameter used in the model}
+\item{Prior}{A list with two components. The first being the prior mean vector and the second the prior precision matrix}
+\item{family}{the \code{\link{family}} object used.}
+\item{prior.weights}{a vector of weights specified or implied by the model} 
+\item{y}{a vector with the dependent variable} 
+\item{x}{a matrix with the design matrix for the model} 
+\item{call}{the matched call} 
+\item{famfunc}{an object of class \code{"famfunc"}}
+\item{iters}{an \code{n} by \code{1} matrix giving the number of candidates generated before acceptance for each sample.}
+\item{Envelope}{an object of class \code{"envelope"}  }
 \item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
+\item{digits}{the number of significant digits to use when printing.}
 }
 \description{
 \code{rglmb} is used to generate iid samples from Bayesian Generalized Linear Models 
