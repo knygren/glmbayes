@@ -44,6 +44,8 @@
 #' variables found are not of the same length as those in \code{newdata}
 #' if it was supplied.
 #' @example inst/examples/Ex_predict.glmb.R
+#' @export
+#' @method predict glmb
 
 predict.glmb<-function(object,newdata=NULL,type="link",
                        se.fit = FALSE, dispersion = NULL, terms = NULL, 

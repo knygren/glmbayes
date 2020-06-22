@@ -57,7 +57,7 @@ V0<-((mysd)^2)*diag(5)
 
 glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),mu=mu,Sigma=V0,Gridtype=1)
 
-summary.glmb(glmb.D93)
+summary(glmb.D93)
 }
 \references{
 Dobson, A. J. (1990)

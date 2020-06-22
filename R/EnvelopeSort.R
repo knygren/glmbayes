@@ -29,6 +29,7 @@
 #' probability associated with each component in the Grid. Sorting helps 
 #' speed up simulation once the envelope is constructed.
 #' @example inst/examples/Ex_EnvelopeSort.R
+#' @export
 
 
 

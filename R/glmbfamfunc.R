@@ -20,6 +20,7 @@
 #' \item{f7}{Another function}
 #' @details  This function takes as input a family and returns a set of functions related to the family.
 #' @example inst/examples/Ex_glmbfamfunc.R
+#' @export
 #' @rdname glmbfamfunc
 #' @order 1
 

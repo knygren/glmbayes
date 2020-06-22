@@ -1,5 +1,6 @@
 #' @rdname Normal_ct
 #' @order 2
+#' @export
 
 rnorm_ct<-function(n,lgrt,lglt,mu=0,sigma=1)
 {

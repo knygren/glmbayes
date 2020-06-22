@@ -14,6 +14,9 @@
 #' @param shape Prior shape parameter for the dispersion parameter.
 #' @param rate  Prior rate parameter for the dispersion parameter.
 #' @param family a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
+#' @param digits Number of significant digits to use for printed outpute
+#' @param object an object of class \code{"glmb_dispersion"} that is to be summarized
+#' @param \ldots further arguments passed to or from other methods
 #' @return \code{rglmb_dispersion} returns a object of class \code{"rglmbdisp"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
@@ -35,6 +38,11 @@
 #' , the samples are generated using accept-reject procedures by leveraging the 
 #' likelihood subgradient approach of Nygren and Nygren (2006). 
 #' @example inst/examples/Ex_rglmb_dispersion.R
+#' @export 
+#' @rdname rglmb_dispersion
+#' @order 1
+
+
 
 rglmb_dispersion<-function(n,y,x,b,alpha=0,wt=1,shape,rate,family=gaussian()){
     
@@ -146,6 +154,11 @@ if(family$family=="Gamma")
 }
 
 
+#' @export
+#' @rdname rglmb_dispersion
+#' @order 2
+#' @method print rglmb_dispersion
+
 print.rglmb_dispersion<-function (x, digits = max(3, getOption("digits") - 3), ...) 
 {
   
@@ -159,6 +172,12 @@ print.rglmb_dispersion<-function (x, digits = max(3, getOption("digits") - 3), .
   }
   else cat("No coefficients\n\n")
 }
+
+#' @export
+#' @rdname rglmb_dispersion
+#' @order 3
+#' @method summary rglmb_dispersion
+
 
 summary.rglmb_dispersion<-function(object,...){
   

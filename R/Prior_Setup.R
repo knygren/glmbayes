@@ -8,6 +8,7 @@
 #' \item{model}{The model frame from \code{object} if it exists}
 #' \item{x}{The design matrix from \code{object} if it exists}
 #' @example inst/examples/Ex_Prior_Check.R
+#' @export
 
 
 Prior_Setup<-function(object){

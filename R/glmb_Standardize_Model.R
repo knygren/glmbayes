@@ -15,6 +15,7 @@
 #' \item{L2Inv}{A matrix used when undoing the first step in standardization}
 #' \item{L3Inv}{A matrix used when undoing the second step in standardization}
 #' @example inst/examples/Ex_glmb_Standardize_Model.R
+#' @export
 
 
 glmb_Standardize_Model<-function(y, x, P, bstar, A1){

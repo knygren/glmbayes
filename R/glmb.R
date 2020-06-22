@@ -117,7 +117,8 @@
 #' 
 #' @example inst/examples/Ex_glmb.R
 #' 
-#' 
+#' @export glmb
+#' @exportClass glmb
 
 glmb<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,shape=NULL,rate=NULL,Gridtype=1,
     data, weights, subset2,na.action, start = NULL, etastart, mustart, offset, 
@@ -286,6 +287,7 @@ if (is.null(offset)) {
 
 #' @rdname glmb
 #' @method print glmb
+#' @export 
 
 print.glmb<-function (x, digits = max(3, getOption("digits") - 3), ...) 
 {

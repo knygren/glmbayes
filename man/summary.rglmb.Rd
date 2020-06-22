@@ -3,7 +3,6 @@
 \name{summary.rglmb}
 \alias{summary.rglmb}
 \alias{print.summary.rglmb}
-\alias{summary.rglmb_dispersion}
 \title{Summarizing Bayesian Generalized Linear Model Distribution Functions}
 \usage{
 \method{summary}{rglmb}(object, ...)

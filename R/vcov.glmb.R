@@ -9,6 +9,8 @@
 #' row and column names corresponding to the parameter names given by the
 #' \code{\link{coef}} method.
 #' @example inst/examples/Ex_vcov.glmb.R
+#' @export
+#' @method vcov glmb
 
 vcov.glmb<-function(object,...)
 {

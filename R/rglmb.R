@@ -91,6 +91,7 @@
 
 #' @rdname rglmb
 #' @order 1
+#' @export 
 
 rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=3)
   {
@@ -225,7 +226,7 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=ga
 #' @rdname rglmb
 #' @order 4
 #' @method print rglmb
-
+#' @export
 
 print.rglmb<-function (x, digits = max(3, getOption("digits") - 3), ...) 
 {

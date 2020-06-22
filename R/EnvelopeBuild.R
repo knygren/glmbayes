@@ -33,6 +33,7 @@
 #' \item{logP}{A matrix containing log-probabilities related to the components of the grid}
 #' \item{PLSD}{A vector containing the probability of each component in the Grid}
 #' @example inst/examples/Ex_EnvelopeBuild.R
+#' @export
 
 
 

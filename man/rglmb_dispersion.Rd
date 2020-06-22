@@ -3,6 +3,7 @@
 \name{rglmb_dispersion}
 \alias{rglmb_dispersion}
 \alias{print.rglmb_dispersion}
+\alias{summary.rglmb_dispersion}
 \title{The Bayesian Generalized Linear Model Dispersion Distribution}
 \usage{
 rglmb_dispersion(
@@ -16,6 +17,10 @@ rglmb_dispersion(
   rate,
   family = gaussian()
 )
+
+\method{print}{rglmb_dispersion}(x, digits = max(3, getOption("digits") - 3), ...)
+
+\method{summary}{rglmb_dispersion}(object, ...)
 }
 \arguments{
 \item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
@@ -35,6 +40,12 @@ rglmb_dispersion(
 \item{rate}{Prior rate parameter for the dispersion parameter.}
 
 \item{family}{a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)}
+
+\item{digits}{Number of significant digits to use for printed outpute}
+
+\item{object}{an object of class \code{"glmb_dispersion"} that is to be summarized}
+
+\item{\ldots}{further arguments passed to or from other methods}
 }
 \value{
 \code{rglmb_dispersion} returns a object of class \code{"rglmbdisp"}.  The function \code{summary} 

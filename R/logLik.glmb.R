@@ -6,6 +6,8 @@
 #' @param ... further arguments to or from other methods
 #' @return The function returns a vector, \code{logLikout} with the estimated log-likelihood for each draw. 
 #' @example inst/examples/Ex_logLik.glmb.R
+#' @export
+#' @method logLik glmb
 
 
 logLik.glmb<-function(object,...){

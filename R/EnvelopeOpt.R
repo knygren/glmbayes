@@ -15,6 +15,7 @@
 #' dimension should be split into.
 #' @seealso \code{\link{rglmb}}, \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeSort}} 
 #' @example inst/examples/Ex_EnvelopeOpt.R
+#' @export
 
 
 EnvelopeOpt<-function(a1,n){

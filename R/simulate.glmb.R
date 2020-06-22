@@ -13,6 +13,8 @@
 #' @return Simulated values for data corresponding to simulated model predictions that correspond either 
 #' to the original data or to a \code{newdata} data frame provided to the predict function. 
 #' @example inst/examples/Ex_confint.glmb.R
+#' @export
+#' @method  simulate glmb
 
 simulate.glmb<-function(object,nsim=1,seed=NULL,...){
   

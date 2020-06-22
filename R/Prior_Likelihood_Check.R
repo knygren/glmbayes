@@ -10,6 +10,7 @@
 #' prior and maximum likelihood estimate divided by the length of the sum of half of the two intervals 
 #' (where normality is assumed)
 #' @example inst/examples/Ex_Prior_Check.R
+#' @export
 
 
 Prior_Check<-function(object,mu=NULL, Sigma=NULL,level=0.95){

@@ -74,6 +74,10 @@
 #' 
 #' @example inst/examples/Ex_glmbayes-package.R
 #' @docType package
+#' @author Kjell Nygren
+#' @import stats Rcpp RcppArmadillo
+#' @importFrom Rcpp evalCpp
+#' @useDynLib glmbayes
 #' @name glmbayes-package
 #' 
 NULL

@@ -10,6 +10,9 @@
 #' upper credible limits for each parameter. These will be labeled
 #' (1-level)/2 and 1-(1-level)/2 in \% (by default 2.5\% and 97.5\%).
 #' @example inst/examples/Ex_confint.glmb.R
+#' @export 
+#' @method confint glmb
+
 
 confint.glmb<-function(object,parm,level=0.95,...)
 {

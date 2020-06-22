@@ -5,7 +5,6 @@
 #' @aliases 
 #' summary.glmb
 #' print.summary.glmb
-#' @method summary glmb
 #' @param object an object of class \code{"glmb"} for which a summary is desired.
 #' @param x an object of class \code{"summary.glmb"} for which a printed output is desired.
 #' @param digits the number of significant digits to use when printing.
@@ -56,6 +55,8 @@
 #' New York: Springer.
 #' 
 #' @example inst/examples/Ex_summary.glmb.R
+#' @export
+#' @method summary glmb
 
 
 summary.glmb<-function(object,...){
@@ -104,6 +105,7 @@ summary.glmb<-function(object,...){
 }
 
 #' @rdname summary.glmb
+#' @export
 #' @method print summary.glmb
 
 print.summary.glmb<-function(x,digits = max(3, getOption("digits") - 3),...){

@@ -8,6 +8,8 @@
 #' and the \code{DIC} from the object \code{fit} of class \code{"glmb"}. See \code{\link{glmbdic}}
 #' for details on the definition of these objects.
 #' @example inst/examples/Ex_extractAIC.glmb.R
+#' @export
+#' @method extractAIC glmb
 
 extractAIC.glmb<-function(fit,...)
 {

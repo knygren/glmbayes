@@ -10,6 +10,8 @@
 #' for residuals based on simulated data should be a more approproiate measure of
 #' whether individual residuals represent outliers or not  
 #' @example inst/examples/Ex_residuals.glmb.R
+#' @export
+#' @method residuals glmb
 
 residuals.glmb<-function(object,ysim=NULL,...)
 {

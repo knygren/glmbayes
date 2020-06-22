@@ -30,6 +30,7 @@
 #' acceptance for each draw}
 #' @details Simulates from the posterior density of a model in standard form
 #' @example inst/examples/Ex_rnnorm_reg_std.R
+#' @export
 
 
 rnnorm_reg_std<-function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar = 1L){

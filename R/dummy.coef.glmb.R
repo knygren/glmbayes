@@ -16,10 +16,23 @@
 #' @return A list giving for each term the draws for the coefficients. 
 #' @example inst/examples/Ex_confint.glmb.R
 
+#' @method dummy.coef glmb
+#' @export
+
 
 dummy.coef.glmb<-function (object, use.na = FALSE, ...) 
 {
-  ## Note only one change from dummy.coef.lm
+  ## Top part added
+  
+  object_means=object
+  object_mode=object
+  object_means$coefficients=object$coef.means
+  object_mode$coefficients=object$coef.mode
+  
+  coef.means=dummy.coef.lm(object_means)
+  coef.mode=dummy.coef.lm(object_mode)
+  
+    ## Note only one change from dummy.coef.lm
   ## The matrix with coefficients in glmb
   ## has coefficients across and draws coming down
   ## while dummy.coef.glm has ability to handle reverse
@@ -121,10 +134,17 @@ dummy.coef.glmb<-function (object, use.na = FALSE, ...)
                            cf), rnn[ij])
     }
   }
-  if (int > 0) 
-    res <- c(list(`(Intercept)` = if (isM) coef[int, 
+  if (int > 0)     res <- c(list(`(Intercept)` = if (isM) coef[int, 
                                                 ] else coef[int]), res)
-  structure(res, class = "dummy_coef.glmb", matrix = isM)
+  
+    coefficients=res
+    structure(coefficients, class = "dummy_coef",  matrix = isM)
+  
+    res2=list(coefficients=coefficients,coef.means=coef.means,
+              coef.mode=coef.mode)
+    
+    structure(res2, class = "dummy_coef.glmb")
 }
 
 
+#print.dummy.coef.glmb<-function(x,...,title){}

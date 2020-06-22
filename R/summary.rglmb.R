@@ -5,8 +5,6 @@
 #' @aliases 
 #' summary.rglmb
 #' print.summary.rglmb
-#' summary.rglmb_dispersion
-#' @method summary rglmb
 #' @param object an object of class \code{"rglmb"} for which a 
 #' summary is desired.
 #' @param x an object of class \code{"summary.rglmb"} for which a printed output is desired.
@@ -54,6 +52,8 @@
 #' New York: Springer.
 #' 
 #' @example inst/examples/Ex_summary.rglmb.R
+#' @export
+#' @method summary rglmb
 
 
 summary.rglmb<-function(object,...){

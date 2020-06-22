@@ -86,8 +86,7 @@
 #' New York: Springer.
 #' 
 #' @example inst/examples/Ex_rglmb.R
-
-
+#' @export
 #' @rdname rlmb
 #' @order 1
 
@@ -220,6 +219,7 @@ rlmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=gau
 
 #' @rdname rlmb
 #' @order 2
+#' @export
 #' @method print rlmb
 
 
@@ -236,16 +236,5 @@ print.rlmb<-function (x, digits = max(3, getOption("digits") - 3), ...)
     }
     else cat("No coefficients\n\n")
  }
-
-
-
-
-
-
-
-
-
-
-
 
 

@@ -40,6 +40,7 @@
 #' @example inst/examples/Ex_Normal_ct.R
 #' @rdname Normal_ct
 #' @order 1
+#' @export
 
 pnorm_ct<-function(a=-Inf,b=Inf,mu=0,sigma=1,log.p=TRUE,Diff=FALSE){
 

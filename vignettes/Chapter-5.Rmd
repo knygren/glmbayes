@@ -380,10 +380,10 @@ summary(glmb.out4)
 While we will leave a formal discussion of the DIC [@Spiegelhalter2002] to a later chapter, we here produce a summary of how the models fitted so far compare on the measure (generally, a smaller DIC tends to be preferred). We can see below that the model using the Regular Age variable by this crteria peforms particularly poorly. We can also see that our last model with an ajusted variance term perfoms better than the one with a stronger prior centered away from the maximum likelihood estimate.  The original model specifications just beats out the last model with the lowest overall DIC.   
 
 ```{r DIC Comparison}
-DIC_Info=rbind(extractAIC.glmb(glmb.out1),
-extractAIC.glmb(glmb.out2),
-extractAIC.glmb(glmb.out3),
-extractAIC.glmb(glmb.out4))
+DIC_Info=rbind(extractAIC(glmb.out1),
+extractAIC(glmb.out2),
+extractAIC(glmb.out3),
+extractAIC(glmb.out4))
 
 colnames(DIC_Info)=c("pD","DIC")
 rownames(DIC_Info)=c("Original Specification","Regular Age","Slope Mean=0 - No Var Adjustment",
