@@ -51,16 +51,41 @@
 #' \item{coefficients}{a matrix of dimension \code{n} by \code{length(mu)} with one sample in each row}
 #' \item{coef.means}{a vector of \code{length(mu)} with the estimated posterior mean coefficients}
 #' \item{coef.mode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
+#' \item{dispersion}{Either a constant provided as part of the call, or a vector of length \code{n} with one sample in each row.}
+#' \item{Prior}{A list with the priors specified for the model in question. Items in
+#' list may vary based on the type of prior}
 #' \item{fitted.values}{a maytix of dimension \code{n} by \code{length(y)} with one sample for the mean fitted values in each row}
+#' \item{family}{the \code{\link{family}} object used.}
 #' \item{linear.predictors}{an \code{n} by \code{length(y)} matrix with one sample for the linear fit on the link scale in each row}
 #' \item{deviance}{an \code{n} by \code{1} matrix with one sample for the deviance in each row}
 #' \item{pD}{An Estimate for the effective number of parameters}
 #' \item{Dbar}{Expected value for minus twice the log-likelihood function}
 #' \item{Dthetabar}{Value of minus twice the log-likelihood function evaluated at the mean value for the coefficients}   
 #' \item{DIC}{Estimated Deviance Information criterion} 
+#' \item{prior.weights}{a vector of weights specified or implied by the model} 
+#' \item{y}{a vector with the dependent variable} 
+#' \item{x}{a matrix with the implied design matrix for the model} 
+#' \item{model}{if requested (the default),the model frame} 
+#' \item{call}{the matched call} 
+#' \item{formula}{the formula supplie} 
+#' \item{terms}{the \code{\link{terms}} object used} 
+#' \item{data}{the \code{data argument}} 
 #' \item{famfunc}{Family functions used during estimation process}
 #' \item{iters}{an \code{n} by \code{1} matrix giving the number of candidates generated before acceptance for each sample.}
+#' \item{contrasts}{(where relevant) the contrasts used.}
+#' \item{xlevels}{(where relevant) a record of the levels of the factors used in fitting}
 #' \item{digits}{the number of significant digits to use when printing.}
+#' In addition, non-empty fits will have (yet to be implemented) components \code{qr}, \code{R}
+#' and \code{effects} relating to the final weighted linear fit for the posterior mode.  
+#' Objects of class \code{"glmb"} are normall of class \code{c("glmb","glm","lm")},
+#' that is inherit from classes \code{glm} and \code{lm} and well-designed
+#' methods from those classed will be applied when appropriate.
+#' 
+#' If a \link{binomial} \code{glmb} model was specified by giving a two-column 
+#' response, the weights returned by \code{prior.weights} are the total number of
+#' cases (factored by the supplied case weights) and the component of \code{y}
+#' of the result is the proportion of successes.
+#' 
 #' @details The function \code{glmb} is a Bayesian version of the classical \code{\link{glm}} function.  Setup of
 #' the models mirrors those for the \code{\link{glm}} function but add additional required arguments
 #' \code{mu} and \code{Sigma}, representing a multivariate normal prior. In addition, the dispersion 
@@ -277,7 +302,9 @@ if (is.null(offset)) {
 	  data=fit$data,
     famfunc=famfunc,
 	  iters=sim$iters,
-	  contrasts=fit$contrasts,	  xlevels=fit$xlevels)
+	  contrasts=fit$contrasts,	  
+	  xlevels=fit$xlevels
+	  )
 
 	outlist$call<-match.call()
 

@@ -21,7 +21,8 @@
 \value{
 \code{summary.glmb} returns a object of class \code{"summary.glmb"}, a 
 list with components: 
-\item{summary.glmb}{number of draws generated}
+\item{call}{the component from \code{object}}
+\item{n}{number of draws generated}
 \item{residuals}{vector of mean deviance residuals}
 \item{coefficients1}{Matrix with the prior mean and maximum likelihood coefficients with associated standard deviations}
 \item{coefficients}{Matrix with columns for the posterior mode, posterior mean, posterior standard

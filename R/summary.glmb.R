@@ -11,7 +11,8 @@
 #' @param \ldots Additional optional arguments
 #' @return \code{summary.glmb} returns a object of class \code{"summary.glmb"}, a 
 #' list with components: 
-#' \item{summary.glmb}{number of draws generated}
+#' \item{call}{the component from \code{object}}
+#' \item{n}{number of draws generated}
 #' \item{residuals}{vector of mean deviance residuals}
 #' \item{coefficients1}{Matrix with the prior mean and maximum likelihood coefficients with associated standard deviations}
 #' \item{coefficients}{Matrix with columns for the posterior mode, posterior mean, posterior standard
@@ -96,7 +97,17 @@ summary.glmb<-function(object,...){
   
   rownames(TAB2)<-rownames(TAB)
   
-  res<-list(call=object$call,n=n,residuals=mres,coefficients1=Tab1,coefficients=TAB,Percentiles=TAB2,pD=object$pD,deviance=object$deviance,DIC=object$DIC,iters=mean(object$iters))
+  res<-list(call=object$call,
+            n=n,
+            residuals=mres,
+            coefficients1=Tab1,
+            coefficients=TAB,
+            Percentiles=TAB2,
+            pD=object$pD,
+            deviance=object$deviance,
+            DIC=object$DIC,
+            iters=mean(object$iters)
+            )
   
   class(res)<-"summary.glmb"
   
