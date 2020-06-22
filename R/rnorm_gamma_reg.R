@@ -219,10 +219,16 @@ for(i in 1:n){
 
 outlist<-list(
   coefficients=out1
-  ,PostMode=Btilde,
+  ,coef.mode=Btilde,
+  dispersion=dispersion,
   Prior=list(mean=as.numeric(mu),Precision=P),
-  iters=draws,famfunc=famfunc,Envelope=NULL,
-  dispersion=dispersion,loglike=LL)
+  prior.weights=wt,
+  y=y,
+  x=x,
+  famfunc=famfunc,
+  iters=draws,
+  Envelope=NULL,
+  loglike=LL)
 
 colnames(outlist$coefficients)<-colnames(x)
 

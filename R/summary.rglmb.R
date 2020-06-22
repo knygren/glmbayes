@@ -60,7 +60,7 @@ summary.rglmb<-function(object,...){
   
   
   n<-length(object$coefficients[,1])  
-  l1<-length(object$PostMode)
+  l1<-length(object$coef.mode)
   percentiles<-matrix(0,nrow=l1,ncol=7)
   se<-sqrt(diag(var(object$coefficients)))
   mc<-se/n
@@ -79,7 +79,7 @@ summary.rglmb<-function(object,...){
   }
   
   Tab1<-cbind("Prior Mean"=object$Prior$mean,"Prior.sd"=as.numeric(sqrt(diag(solve(object$Prior$Precision)))),"Approx.Prior.wt"=Priorwt)
-  TAB<-cbind("Post.Mode"=as.numeric(object$PostMode),"Post.Mean"=colMeans(coef(object)),"Post.Sd"=se,"MC Error"=as.numeric(mc),"Pr(tail)"=as.numeric(pval2))
+  TAB<-cbind("Post.Mode"=as.numeric(object$coef.mode),"Post.Mean"=colMeans(coef(object)),"Post.Sd"=se,"MC Error"=as.numeric(mc),"Pr(tail)"=as.numeric(pval2))
   TAB2<-cbind("1.0%"=percentiles[,1],"2.5%"=percentiles[,2],"5.0%"=percentiles[,3],Median=as.numeric(percentiles[,4]),"95.0%"=percentiles[,5],"97.5%"=as.numeric(percentiles[,6]),"99.0%"=as.numeric(percentiles[,7]))
   
   rownames(Tab1)<-rownames(TAB)

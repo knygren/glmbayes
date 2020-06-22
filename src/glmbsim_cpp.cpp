@@ -521,14 +521,18 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   Rcpp::List Prior=Rcpp::List::create(Rcpp::Named("mean")=mu,Rcpp::Named("Precision")=P);  
   
-  Rcpp::List outlist=Rcpp::List::create(Rcpp::Named("coefficients")=trans(out2),
-                                        Rcpp::Named("PostMode")=b2a+mu,
-                                        Rcpp::Named("Prior")=Prior,
-                                        Rcpp::Named("iters")=sim[1],
-                                                                Rcpp::Named("famfunc")=famfunc,
-                                                                Rcpp::Named("Envelope")=Envelope,
-                                                                Rcpp::Named("dispersion")=dispersion2,
-                                                                Rcpp::Named("loglike")=LL
+  Rcpp::List outlist=Rcpp::List::create(
+    Rcpp::Named("coefficients")=trans(out2),
+    Rcpp::Named("coef.mode")=b2a+mu,
+    Rcpp::Named("dispersion")=dispersion2,
+    Rcpp::Named("Prior")=Prior,
+    Rcpp::Named("prior.weights")=wt,
+    Rcpp::Named("y")=y,
+    Rcpp::Named("x")=x,
+    Rcpp::Named("famfunc")=famfunc,
+    Rcpp::Named("iters")=sim[1],
+    Rcpp::Named("Envelope")=Envelope,
+    Rcpp::Named("loglike")=LL
   );  
   
   return(outlist);
@@ -549,8 +553,11 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
 // [[Rcpp::export(".rnorm_reg_cpp")]]
 
 Rcpp::List rnorm_reg_cpp(int n,NumericVector y,NumericMatrix x, 
-                         NumericVector mu,NumericMatrix P,NumericVector offset2,NumericVector wt,double dispersion,Rcpp::List
-                           famfunc, Function f1,Function f2,Function f3,NumericVector start,
+                         NumericVector mu,NumericMatrix P,
+                         NumericVector offset2,NumericVector wt,
+                         double dispersion,Rcpp::List
+                           famfunc, Function f1,Function f2,Function f3,
+                           NumericVector start,
                            std::string family="binomial",
                            std::string link="logit",
                            int Gridtype=2      
@@ -672,14 +679,18 @@ Rcpp::List rnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   }
   Rcpp::List Prior=Rcpp::List::create(Rcpp::Named("mean")=mu,Rcpp::Named("Precision")=P);  
   
-  Rcpp::List outlist=Rcpp::List::create(Rcpp::Named("coefficients")=out,
-                                        Rcpp::Named("PostMode")=b2,
-                                        Rcpp::Named("Prior")=Prior,
-                                        Rcpp::Named("iters")=draws,
-                                        Rcpp::Named("famfunc")=famfunc,
-                                        Rcpp::Named("dispersion")=dispersion2,
-                                        //              Rcpp::Named("U")=U1,
-                                        Rcpp::Named("loglike")=LL
+  Rcpp::List outlist=Rcpp::List::create(
+    Rcpp::Named("coefficients")=out,
+    Rcpp::Named("coef.mode")=b2,
+    Rcpp::Named("dispersion")=dispersion2,
+    Rcpp::Named("Prior")=Prior,
+    Rcpp::Named("prior.weights")=wt,
+    Rcpp::Named("y")=y,
+    Rcpp::Named("x")=x,
+    Rcpp::Named("famfunc")=famfunc,
+    Rcpp::Named("iters")=draws,
+    Rcpp::Named("Envelope")=NULL,
+    Rcpp::Named("loglike")=LL
   );  
   
   return(outlist);

@@ -215,10 +215,13 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=ga
 
   
   colnames(outlist$coefficients)<-colnames(x)
+
+  # include family in final list
   
+  outlist$family=family  
   outlist$call<-match.call()
   
-  class(outlist)<-c(outlist$class,"rglmb")
+  class(outlist)<-c(outlist$class,c("rglmb","glmb","glm","lm"))
   outlist
   
 }

@@ -281,7 +281,7 @@ if (is.null(offset)) {
 	  glm=fit,
 	  coefficients=sim$coefficients,
 	  coef.means=colMeans(sim$coefficients),
-    coef.mode=sim$PostMode,
+    coef.mode=sim$coef.mode,
 	  dispersion=dispersion2,
 	  Prior=Prior,
 	  fitted.values=fitted.values,
