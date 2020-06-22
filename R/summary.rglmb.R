@@ -86,14 +86,27 @@ summary.rglmb<-function(object,...){
   rownames(TAB2)<-rownames(TAB)
   
   res<-list(
-    call=object$call,
+    coefficients=object$coefficients,
+    coef.mode=object$mode,
+    dispersion=object$dispersion,
+    Prior=object$Prior,
+    family=object$dispersion,
+    prior.weights=object$prior.weights,
+    y=object$y,
+    x=object$x,
+    call<-match.call(),
+    famfunc=object$famfunc,
+    iters=object$iters,
+    Envelope=object$Envelope,
+    loglike=object$loglike,
     n=n,
     coefficients.Tab0=Tab1,
     coefficients.Tab1=TAB,
     Percentiles=TAB2
     )
   
-  class(res)<-"summary.rglmb"
+  class(res)<-c(res$class,"summary.rglmb","glmb","glm","lm")
+  
   res
   
 }
