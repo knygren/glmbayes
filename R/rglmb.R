@@ -226,6 +226,7 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=ga
   
   outlist$family=family  
   outlist$call<-match.call()
+  outlist$offset2<-offset2
   
   class(outlist)<-c(outlist$class,c("rglmb","glmb","glm","lm"))
   outlist

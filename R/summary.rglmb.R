@@ -57,7 +57,50 @@
 
 
 summary.rglmb<-function(object,...){
+
+  ### Pull in information needed to compute linear.predictors, 
+  ## fitted.values, and DICInfo  
+
+  offset=object$offset2
+  dispersion2=object$dispersion
+  famfunc=object$famfunc
+  y=object$y
+  x=object$x
+  ## Need to check if prior weights adjust for dispersion  
+  ## This should calculate but need to verify DIC is correct
   
+  wtin=object$prior.weights  
+  
+  ##############################################
+  
+  if (!is.null(offset)) {
+    if(length(dispersion2)==1){
+      
+      DICinfo<-glmbdic(object$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
+    }
+    
+    if(length(dispersion2)>1){
+      DICinfo<-glmbdic(object$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+    }
+    
+    linear.predictors<-t(offset+x%*%t(object$coefficients))}
+  if (is.null(offset)) {
+    if(length(dispersion2)==1){
+      
+      DICinfo<-glmbdic(object$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
+    }
+    
+    if(length(dispersion2)>1){
+      DICinfo<-glmbdic(object$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+    }
+    
+    linear.predictors<-t(x%*%t(object$coefficients))
+    
+  }
+  linkinv<-object$family$linkinv
+  fitted.values<-linkinv(linear.predictors)
+  
+  ##################################################
   
   n<-length(object$coefficients[,1])  
   l1<-length(object$coef.mode)
@@ -87,10 +130,18 @@ summary.rglmb<-function(object,...){
   
   res<-list(
     coefficients=object$coefficients,
+    coef.means=colMeans(object$coefficients),
     coef.mode=object$mode,
     dispersion=object$dispersion,
     Prior=object$Prior,
+    fitted.values=fitted.values,
     family=object$dispersion,
+    linear.predictors=linear.predictors,
+    deviance=DICinfo$Deviance,
+    pD=DICinfo$pD,
+    Dbar=DICinfo$Dbar,
+    Dthetabar=DICinfo$Dthetabar,
+    DIC=DICinfo$DIC,
     prior.weights=object$prior.weights,
     y=object$y,
     x=object$x,

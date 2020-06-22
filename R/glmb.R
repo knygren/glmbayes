@@ -54,7 +54,7 @@
 #' \item{dispersion}{Either a constant provided as part of the call, or a vector of length \code{n} with one sample in each row.}
 #' \item{Prior}{A list with the priors specified for the model in question. Items in
 #' list may vary based on the type of prior}
-#' \item{fitted.values}{a maytix of dimension \code{n} by \code{length(y)} with one sample for the mean fitted values in each row}
+#' \item{fitted.values}{a matrix of dimension \code{n} by \code{length(y)} with one sample for the mean fitted values in each row}
 #' \item{family}{the \code{\link{family}} object used.}
 #' \item{linear.predictors}{an \code{n} by \code{length(y)} matrix with one sample for the linear fit on the link scale in each row}
 #' \item{deviance}{an \code{n} by \code{1} matrix with one sample for the deviance in each row}
@@ -277,6 +277,8 @@ if (is.null(offset)) {
 	linkinv<-fit$family$linkinv
 	fitted.values<-linkinv(linear.predictors)
 
+	
+	
 	outlist<-list(
 	  glm=fit,
 	  coefficients=sim$coefficients,
