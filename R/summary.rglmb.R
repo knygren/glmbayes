@@ -85,23 +85,44 @@ summary.rglmb<-function(object,...){
   rownames(Tab1)<-rownames(TAB)
   rownames(TAB2)<-rownames(TAB)
   
-  res<-list(call=object$call,n=n,coefficients1=Tab1,coefficients=TAB,Percentiles=TAB2)
+  res<-list(
+    call=object$call,
+    n=n,
+    coefficients.Tab0=Tab1,
+    coefficients.Tab1=TAB,
+    Percentiles=TAB2
+    )
   
   class(res)<-"summary.rglmb"
   res
   
 }
 
+##  coefficients=out1
+##,coef.mode=Btilde,
+##dispersion=dispersion,
+##Prior=list(mean=as.numeric(mu),Precision=P),
+##prior.weights=wt,
+##y=y,
+##x=x,
+##famfunc=famfunc,
+##iters=draws,
+##Envelope=NULL,
+##loglike=LL
+
+
 #' @rdname summary.rglmb
+#' @export
 #' @method print summary.rglmb
 
 print.summary.rglmb<-function(x,digits = max(3, getOption("digits") - 3),...){
   cat("Call\n")
   print(x$call)
   cat("\nPrior Estimates with Standard Deviations\n\n")
-  printCoefmat(x$coefficients1,digits=digits)
+  printCoefmat(x$coefficients.Tab0,digits=digits)
   cat("\nBayesian Estimates Based on",x$n,"iid draws\n\n")
-  printCoefmat(x$coefficients,digits=digits,P.values=TRUE,has.Pvalue=TRUE)
+  printCoefmat(x$coefficients.Tab1,digits=digits,P.values=TRUE,
+               has.Pvalue=TRUE)
   cat("\nDistribution Percentiles\n\n")
   printCoefmat(x$Percentiles,digits=digits)
   
