@@ -16,12 +16,23 @@
 #' @export
 #' @method  simulate glmb
 
+#### Note: need to add way of handling passed weight
+
 simulate.glmb<-function(object,nsim=1,seed=NULL,...){
   
+  family=object$family$family
   method_args=list(...)
-  pred=method_args$pred
-  family=method_args$family
-  wt=method_args$wt
+  
+  if(!is.null(method_args[['pred']])) { pred=method_args[['pred']]}
+  else{pred=predict(object)}
+  if(!is.null(method_args[['prior.weights']])) { wt=method_args[['prior.weights']]}
+  else{prior.weights=object$prior.weights}
+ 
+   ##  print(pred)
+#  stop()
+  #wt=method_args$wt
+  
+  
 #  print(method_args)
   #stop()
     ## pred

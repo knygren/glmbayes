@@ -223,10 +223,18 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=ga
   colnames(outlist$coefficients)<-colnames(x)
 
   # include family in final list
+  rglmb_df=as.data.frame(cbind(y,x))
+  rglmb_f=DF2formula(rglmb_df)
+  rglmb_mf=model.frame(rglmb_f,rglmb_df)
+  
   
   outlist$family=family  
   outlist$call<-match.call()
   outlist$offset2<-offset2
+  outlist$formula<-rglmb_f
+  outlist$model<-rglmb_mf
+  outlist$data<-rglmb_df
+  
   
   class(outlist)<-c(outlist$class,c("rglmb","glmb","glm","lm"))
   outlist

@@ -13,7 +13,7 @@
 
 case.names.glmb<-function(object,full=FALSE,...){
   w=weights(object)
-  dn=colnames(residuals(object))
+  dn=rownames(object$x)
   if(full || is.null(w)) dn else dn[w!=0]
 }
 
@@ -24,6 +24,5 @@ case.names.glmb<-function(object,full=FALSE,...){
 variable.names.glmb <- function(object, full = FALSE, ...)
 {
   # Currently just returns results based on glm object
-  object2=object$glm
-  return(variable.names(object2))
+  return(colnames(object$coefficients))
 }

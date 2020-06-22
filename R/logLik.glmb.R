@@ -12,9 +12,9 @@
 
 logLik.glmb<-function(object,...){
   
-  y<-object$glm$y
-  x<-object$glm$x
-  wt<-object$glm$prior.weights
+  y<-object$y
+  x<-object$x
+  wt<-object$prior.weights
   dispersion<-object$dispersion
   
   

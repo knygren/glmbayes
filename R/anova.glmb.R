@@ -20,7 +20,7 @@ anova.glmb<-function(object,...){
   # Gather information for full model (ideally would grab gridtype as well but not available)
   
   n=nrow(object$coefficients)
-  mu=object$Prior$mean
+  mu=as.matrix(object$Prior$mean,ncol=1)
   V=object$Prior$Variance
   obj_family=family(object)
   
@@ -66,7 +66,7 @@ anova.glmb<-function(object,...){
     mf=model.frame(newff)
     mm=model.matrix(mf)
     nvar=ncol(mm)
-    mu2=matrix(mu[1:nvar,1],ncol=1)
+    mu2=matrix(as.matrix(mu[1:nvar,1],ncol=1),ncol=1)
     V2=matrix(V[1:nvar,1:nvar],nrow=nvar,ncol=nvar)
     
     # Run glmb model for smaller model

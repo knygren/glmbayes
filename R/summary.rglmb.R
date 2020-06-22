@@ -128,6 +128,8 @@ summary.rglmb<-function(object,...){
   rownames(Tab1)<-rownames(TAB)
   rownames(TAB2)<-rownames(TAB)
   
+  glm_temp=glm(y~x-1,family=object$family)
+  
   res<-list(
     coefficients=object$coefficients,
     coef.means=colMeans(object$coefficients),
@@ -135,7 +137,7 @@ summary.rglmb<-function(object,...){
     dispersion=object$dispersion,
     Prior=object$Prior,
     fitted.values=fitted.values,
-    family=object$dispersion,
+    family=family(glm_temp),
     linear.predictors=linear.predictors,
     deviance=DICinfo$Deviance,
     pD=DICinfo$pD,
@@ -145,7 +147,10 @@ summary.rglmb<-function(object,...){
     prior.weights=object$prior.weights,
     y=object$y,
     x=object$x,
+    model=model.frame(glm_temp),
     call<-match.call(),
+    formula=object$formula,
+    data=object$data,
     famfunc=object$famfunc,
     iters=object$iters,
     Envelope=object$Envelope,
