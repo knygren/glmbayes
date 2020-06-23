@@ -17,6 +17,14 @@
 #' @param dispersion the dispersion parameter. Either a single numerical value or NULL (the default). Must be provided here, use \code{\link{rnorm_gamma_reg}} to give the dispersion a prior.
 #' @param shape Prior shape parameter for the dispersion parameter (gaussian model only).
 #' @param rate Prior rate parameter for the dispersion parameter (gaussian model only).
+#' @param prior A list with the prior constants used by the model. Typically will include a prior
+#' vector mu of length \code{p} giving the prior means of the variables in the
+#' design matrix and a positive-definite symmetric matrix Sigma of dimension \code{p*p} 
+#' specifying the prior covariance matrix of the variables. Optionally, prior constants 
+#' shape and rate can also be provided for the dispersion parameters in the gaussian
+#' and Gamma families (either together with or without the multivariate normal component). 
+#' If no prior is provided for the dispersion, then the dispersion must be assumed to 
+#' be a constant with the default for the Poisson and binomial families being a dispersion of 1. 
 #' @param family a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
 #' @param offset2 this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
 #' @param start an optional argument providing starting values for the posterior mode optimization.
@@ -99,7 +107,7 @@
 #' @order 1
 #' @export 
 
-rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=3)
+rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,prior=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=3)
   {
   
   if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||

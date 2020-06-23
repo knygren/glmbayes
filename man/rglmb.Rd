@@ -15,6 +15,7 @@ rglmb(
   dispersion = NULL,
   shape = NULL,
   rate = NULL,
+  prior = NULL,
   family = gaussian(),
   offset2 = rep(0, nobs),
   start = NULL,
@@ -41,6 +42,15 @@ rglmb(
 \item{shape}{Prior shape parameter for the dispersion parameter (gaussian model only).}
 
 \item{rate}{Prior rate parameter for the dispersion parameter (gaussian model only).}
+
+\item{prior}{A list with the prior constants used by the model. Typically will include a prior
+vector mu of length \code{p} giving the prior means of the variables in the
+design matrix and a positive-definite symmetric matrix Sigma of dimension \code{p*p} 
+specifying the prior covariance matrix of the variables. Optionally, prior constants 
+shape and rate can also be provided for the dispersion parameters in the gaussian
+and Gamma families (either together with or without the multivariate normal component). 
+If no prior is provided for the dispersion, then the dispersion must be assumed to 
+be a constant with the default for the Poisson and binomial families being a dispersion of 1.}
 
 \item{family}{a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)}
 
