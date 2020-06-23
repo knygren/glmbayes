@@ -17,8 +17,7 @@ rlmb(
   rate = NULL,
   family = gaussian(),
   offset2 = rep(0, nobs),
-  start = NULL,
-  Gridtype = 3
+  start = NULL
 )
 
 \method{print}{rlmb}(x, digits = max(3, getOption("digits") - 3), ...)
@@ -48,8 +47,6 @@ rlmb(
 
 \item{start}{an optional argument providing starting values for the posterior mode optimization.}
 
-\item{Gridtype}{an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.}
-
 \item{digits}{the number of significant digits to use when printing.}
 
 \item{\ldots}{additional optional arguments.}
@@ -71,9 +68,8 @@ An object of class \code{"rglmb"} is a list containing at least the following co
 \item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
 }
 \description{
-\code{rlmb} is used to generate iid samples from Bayesian Linear Models 
-with multivariate normal priors. The model is specified by providing a data vector, 
-a design matrix, and 2 prior constants.
+\code{rlmb} is used to generate iid samples from Bayesian Linear Models with multivariate normal priors. 
+The model is specified by providing a data vector, a design matrix, and at least 2 prior constants.
 }
 \details{
 The \code{rglmb} function produces iid samples for Bayesian generalized linear 

@@ -53,7 +53,7 @@ generate_predictions<-function(object,type="link",new_x,new_model_frame){
     ## May need adjustment for offset 
     
     if(type=="response") {
-      pred[i,1:npreds]<- family(object$glm)$linkinv(pred[i,1:npreds])
+      pred[i,1:npreds]<- family(object)$linkinv(pred[i,1:npreds])
     }
   }
 

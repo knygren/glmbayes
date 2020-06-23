@@ -148,7 +148,7 @@ summary.rglmb<-function(object,...){
     y=object$y,
     x=object$x,
     model=model.frame(glm_temp),
-    call<-match.call(),
+    call<-object$call,
     formula=object$formula,
     data=object$data,
     famfunc=object$famfunc,

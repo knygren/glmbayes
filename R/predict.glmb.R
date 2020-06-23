@@ -86,12 +86,12 @@ predict.glmb<-function(object,newdata=NULL,type="link",
     ## Pull model frame from original model and olddata
     ## This can likely be remove and moved inside complete_newdata function
 
-    original_frame=object$glm$model
+    original_frame=object$model
     
     # This could fail so use try
     
     newdata_ok=1
-    newdata_frame=try(model.frame(formula(object$glm$model),newdata),silent=TRUE)
+    newdata_frame=try(model.frame(formula(object$model),newdata),silent=TRUE)
     
     #if(class(newdata_frame)=="data.frame") print("newdata built a model frame")    
     if(class(newdata_frame)=="try-error") newdata_ok=0    
@@ -107,7 +107,7 @@ predict.glmb<-function(object,newdata=NULL,type="link",
     if(newdata_ok==1){
         if(isTRUE(Compare_Model_Frames(original_frame,newdata_frame,Check_Rows = FALSE)))
     {
-      new_x=model.matrix(formula(object$glm$model),newdata_frame)
+      new_x=model.matrix(formula(object$model),newdata_frame)
 
       pred=generate_predictions(object,type=type,new_x,newdata_frame)  
       return(pred)

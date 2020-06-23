@@ -1,8 +1,7 @@
 #' The Bayesian Linear Model Distribution
 #'
-#' \code{rlmb} is used to generate iid samples from Bayesian Linear Models 
-#' with multivariate normal priors. The model is specified by providing a data vector, 
-#' a design matrix, and 2 prior constants.
+#' \code{rlmb} is used to generate iid samples from Bayesian Linear Models with multivariate normal priors. 
+#' The model is specified by providing a data vector, a design matrix, and at least 2 prior constants.
 #' @name 
 #' rlmb
 #' @aliases
@@ -19,7 +18,6 @@
 #' @param family a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
 #' @param offset2 this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
 #' @param start an optional argument providing starting values for the posterior mode optimization.
-#' @param Gridtype an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.
 #' @param digits the number of significant digits to use when printing.
 #' @param \ldots additional optional arguments.
 #' @return \code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
@@ -90,7 +88,7 @@
 #' @rdname rlmb
 #' @order 1
 
-rlmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=3)
+rlmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL)
   {
   
   if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
@@ -168,46 +166,12 @@ rlmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=gau
          domain = NA)
   }
   
-  
-  if(family$family=="poisson"||family$family=="binomial")dispersion2<-1
-  else dispersion2<-dispersion
-  
-  if(family$family=="gaussian"){
     dispersion2=dispersion
     if(is.null(dispersion)){dispersion2=0}
-    if(dispersion2>0){
-      
-#      outlist<-rnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)
-      outlist<-.rnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)
-      
-         }
+    if(dispersion2>0){outlist<-.rnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)}
+    else{outlist=rnorm_gamma_reg(n=n,y=y,x=x,mu=mu,P=P,shape=shape,rate=rate,offset2=offset2,wt=wt)    }
     
-    else{
-      
-      outlist=rnorm_gamma_reg(n=n,y=y,x=x,mu=mu,P=P,shape=shape,rate=rate,offset2=offset2,wt=wt)
-      
-    }
-    
-  }
-  
-  else{
-    if(is.null(dispersion)){dispersion2=1}
 
-    # f1, f2, and f3 passed here - Likely legacy of R code
-    ## Can eliminate and replace with calling of corresponding c++ functions
-#    outlist<-rnnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,
-#                                famfunc=famfunc,f1=f1,f2=f2,f3=f3,
-#                                start=start,family=family$family,link=family$link,Gridtype=Gridtype)
-    
-    outlist<-.rnnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,
-                            famfunc=famfunc,f1=f1,f2=f2,f3=f3,
-                            start=start,family=family$family,link=family$link,Gridtype=Gridtype)
-    
-    
-      }
-  
-
-  
   colnames(outlist$coefficients)<-colnames(x)
   
   outlist$call<-match.call()

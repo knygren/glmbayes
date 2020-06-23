@@ -25,8 +25,8 @@ complete_newdata<-function(object,newdata,olddata,type){
   if (missing(olddata)){ stop("no olddata available to complete newdata")}
 
   ## Pull original and "olddata" model frames  
-  original_frame=object$glm$model
-  olddata_frame=model.frame(formula(object$glm$model),olddata)
+  original_frame=object$model
+  olddata_frame=model.frame(formula(object$model),olddata)
   
   ## Validate olddata model frame
   if(isFALSE(Compare_Model_Frames(original_frame,olddata_frame))){
@@ -160,7 +160,7 @@ complete_newdata<-function(object,newdata,olddata,type){
   
   olddata_mod_frame=model.frame(mod_formula,olddata)
   olddata_mod_matrix=model.matrix(mod_formula,olddata_mod_frame)
-  x_old=object$glm$x
+  x_old=object$x
   x_new=olddata_mod_matrix
   
   if(isTRUE(all.equal(x_new,x_old))==FALSE) stop("olddata does not yield an x matrix consistent with that 
@@ -172,7 +172,7 @@ complete_newdata<-function(object,newdata,olddata,type){
   
   print("Entering get_x_matrix")
   
-  x_matrices=get_x_matrix(object$glm,olddata,newdata)
+  x_matrices=get_x_matrix(object,olddata,newdata)
   
   print("Exited get_x_matrix")
   return(x_matrices)
