@@ -188,7 +188,23 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,prior=NUL
          domain = NA)
   }
   
+  ## Use the prior list to set the prior elements if it is not missing
+  ## Error checking to verify that the correct elements are present
+  ## Add reformatting of priors into right format here
   
+  #if(missing(prior)) stop("Prior Specification Missing")
+  if(!missing(prior)){
+    if(!is.null(prior$mu)) mu=prior$mu
+    if(!is.null(prior$P)) P=prior$P
+    if(!is.null(prior$dispersion)) dispersion=prior$dispersion
+    else dispersion=NULL
+    if(!is.null(prior$shape)) shape=prior$shape
+    if(!is.null(prior$rate)) rate=prior$rate
+  }
+  
+  
+  
+    
   if(family$family=="poisson"||family$family=="binomial")dispersion2<-1
   else dispersion2<-dispersion
   
