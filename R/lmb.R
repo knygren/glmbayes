@@ -232,9 +232,12 @@ lmb<-function (n,formula, mu,Sigma,dispersion=NULL,shape=NULL,rate=NULL,
 
 ## Eliminate Gridtype from rlmb and lmb
 
-sim<-rlmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,dispersion=dispersion,shape=shape,rate=rate,offset2=offset,family=family,
+sim<-rlmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,
+          dispersion=dispersion,
+          shape=shape,rate=rate,
+          offset2=offset,
+          family=family,
            start=b)
-
 
 	dispersion2<-sim$dispersion
 	famfunc<-sim$famfunc

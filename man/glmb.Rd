@@ -14,6 +14,7 @@ glmb(
   Sigma,
   shape = NULL,
   rate = NULL,
+  prior = NULL,
   Gridtype = 1,
   data,
   weights,
@@ -57,6 +58,8 @@ a prior using the shape and rate parameters (see \code{\link{rnorm_gamma_reg}})}
 \item{shape}{Optional prior shape parameter for the dispersion parameter (gaussian and Gamma models only).}
 
 \item{rate}{Optional prior rate parameter for the dispersion parameter (gaussian and Gamma models only).}
+
+\item{prior}{A (currently optional) list with the prior constants used by the model.}
 
 \item{Gridtype}{an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.}
 

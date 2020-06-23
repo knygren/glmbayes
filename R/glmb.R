@@ -15,6 +15,7 @@
 #' @param Sigma a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior covariance matrix of the variables.
 #' @param shape Optional prior shape parameter for the dispersion parameter (gaussian and Gamma models only).
 #' @param rate Optional prior rate parameter for the dispersion parameter (gaussian and Gamma models only).
+#' @param prior A (currently optional) list with the prior constants used by the model.
 #' @param Gridtype an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.
 #' @param data an optional data frame, list or environment (or object coercible by \code{\link{as.data.frame}} to a data frame)
 #' containing the variables in the model. If not found in \code{data}, the variables are taken from 
@@ -141,7 +142,7 @@
 #' @exportClass glmb
 
 glmb<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,shape=NULL,rate=NULL,
-                 Gridtype=1,data, weights, subset2,na.action, start = NULL, etastart, 
+                 prior=NULL,Gridtype=1,data, weights, subset2,na.action, start = NULL, etastart, 
                  mustart, offset, control = list(...), model = TRUE, 
                  method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
                  ...) 
@@ -157,7 +158,8 @@ glmb<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,shape=NULL
         print(family)
         stop("'family' not recognized")
     }
-    if (missing(data)) 
+    
+        if (missing(data)) 
         data <- environment(formula)
     mf <- match.call(expand.dots = FALSE)
     m <- match(c("formula", "data", "subset2", "weights", "na.action", 
@@ -221,7 +223,21 @@ glmb<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,shape=NULL
     class(fit) <- c(fit$class, c("glm", "lm"))
     
     # Verify inputs and Initialize
+
+    ## Use the prior list to set the prior elements if it is not missing
+    ## Error checking to verify that the correct elements are present
+    if(!missing(prior)){
+      print("Setting prior using list")
+      if(!is.null(prior$mu)) mu=prior$mu
+      if(!is.null(prior$Sigma)) Sigma=prior$Sigma
+      if(!is.null(prior$dispersion)) dispersion=prior$dispersion
+      if(!is.null(prior$shape)) shape=prior$shape
+      if(!is.null(prior$rate)) rate=prior$rate
+      print(mu)
+      print(Sigma)
+    }
     
+        
     if(is.numeric(n)==FALSE||is.numeric(mu)==FALSE||is.numeric(Sigma)==FALSE) stop("non-numeric argument to numeric function")
     
     y<-fit$y	
