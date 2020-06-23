@@ -277,7 +277,9 @@ The below code performs the step creating the Model data frame and then submits 
 
 ```{r Run Logit,results = "hide"}
 Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,Menarche=menarche2$Menarche,Age2)
-glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
+prior=list(mu=mu1,Sigma=V1)
+#glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
+glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),prior=prior,data=Menarche_Model_Data)
 
 ```
 

@@ -210,7 +210,9 @@ print(V1)
 
 ```{r Run Logit,results = "hide",echo = FALSE}
 Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,Menarche=menarche2$Menarche,Age2)
-glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
+prior1=list(mu=mu1,Sigma=V1)
+#glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age2,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
+glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),prior=prior1,data=Menarche_Model_Data)
 
 ```
 

@@ -212,7 +212,9 @@ print(V1)
 
 ```{r Run Logit,results = "hide",echo = FALSE}
 Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,Menarche=menarche2$Menarche,Age2)
-glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
+prior1=list(mu=mu1,Sigma=V1)
+#glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age2,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
+glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),prior=prior1,data=Menarche_Model_Data)
 
 ```
 
@@ -321,7 +323,9 @@ Prior_Check(glm.out2,mu1,V1)
 Let's take a look what would have happened to our estimates if we would have proceeded with this model specification.
 
 ```{r Run wrong Age,results = "hide"}
-glmb.out2<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
+
+#glmb.out2<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
+glmb.out2<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),prior=prior1,data=Menarche_Model_Data)
 ```
 
 ```{r Summary Logit - Wrong Age}
@@ -354,7 +358,9 @@ Let's proceed with running the model to see how it compares to the original mode
 
 
 ```{r Run wrong mean,results = "hide"}
-glmb.out3<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu2,Sigma=V1,data=Menarche_Model_Data)
+prior2=list(mu=mu2,Sigma=V1)
+#glmb.out3<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age2,family=binomial(logit),mu=mu2,Sigma=V1,data=Menarche_Model_Data)
+glmb.out3<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),prior=prior2,data=Menarche_Model_Data)
 ```
 
 ```{r Summary Logit - 0 Slope}
@@ -370,8 +376,11 @@ Let's look at what would have happened to our results if we scaled up the prior 
 ```{r Run wrong mean-adjusted Variance,results = "hide"}
 V2=V1
 V2[2,2]=(Prior_Check_3[2,1]*sd_slope)^2
-glmb.out4<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu2,Sigma=V2,data=Menarche_Model_Data)
+prior3=list(mu=mu2,Sigma=V2)
+#glmb.out4<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age2,family=binomial(logit),mu=mu2,Sigma=V2,data=Menarche_Model_Data)
+glmb.out4<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),prior=prior3,data=Menarche_Model_Data)
 ```
+
 
 ```{r Summary Logit - 0 Slope - Adjusted Variance}
 summary(glmb.out4)
