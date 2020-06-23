@@ -8,28 +8,28 @@
 #' @param family a description of the error distribution and link function to be used in the model. For \code{glmb} 
 #' this can be a character string naming a family function, a family function or the result of a call to a family function. 
 #' (See \code{\link{family}} for details of family functions.)
-#' @param dispersion the dispersion parameter. Either a single numerical value or NULL 
-#' (the default). For the Gamma and gaussian families, the dispersion can optionally be given 
-#' a prior using the shape and rate parameters (see \code{\link{rnorm_gamma_reg}})
-#' @param mu a vector of length \code{p} giving the prior means of the variables in the design matrix.
-#' @param Sigma a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior covariance matrix of the variables.
-#' @param shape Optional prior shape parameter for the dispersion parameter (gaussian and Gamma models only).
-#' @param rate Optional prior rate parameter for the dispersion parameter (gaussian and Gamma models only).
-#' @param prior A (currently optional) list with the prior constants used by the model.
-#' @param Gridtype an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.
+#' @param prior A list with the prior constants used by the model. Typically will include a prior
+#' vector mu of length \code{p} giving the prior means of the variables in the
+#' design matrix and a positive-definite symmetric matrix Sigma of dimension \code{p*p} 
+#' specifying the prior covariance matrix of the variables. Optionally, prior constants 
+#' shape and rate can also be provided for the dispersion parameters in the gaussian
+#' and Gamma families (either together with or without the multivariate normal component). 
+#' If no prior is provided for the dispersion, then the dispersion must be assumed to 
+#' be a constant with the default for the Poisson and binomial families being a dispersion of 1. 
 #' @param data an optional data frame, list or environment (or object coercible by \code{\link{as.data.frame}} to a data frame)
 #' containing the variables in the model. If not found in \code{data}, the variables are taken from 
 #' \code{environment(formula)}, typically the environment from which \code{glmb} is called.
 #' @param subset2 an optional vector specifying a subset of observations to be used in the fitting process.
+#' @param offset this can be used to specify an \code{a priori} known component to be included in the 
+#' linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number 
+#' of cases. One or more \code{\link{offset}} terms can be included in the formula instead or as well, and if more than one 
+#' is specified their sum is used. See \code{model.offset}. 
 #' @param na.action a function which indicates what should happen when the data contain \code{NA}s.  The default is set by 
 #' the \code{na.action} setting of \code{\link{options}}, and is \code{\link[stats]{na.fail}} 
 #' if that is unset.  The \sQuote{factory-fresh} default is \code{stats{na.omit}}.  
 #' Another possible value is \code{NULL}, no action.  Value \code{stats{na.exclude}} 
 #' can be useful.
-#' @param offset this can be used to specify an \code{a priori} known component to be included in the 
-#' linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number 
-#' of cases. One or more \code{\link{offset}} terms can be included in the formula instead or as well, and if more than one 
-#' is specified their sum is used. See \code{model.offset}. 
+#' @param Gridtype an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.
 #' @param method the method to be used in fitting the classical model during a call to \code{\link{glm}}. The default method \code{glm.fit} 
 #' uses iteratively reweighted least squares (IWLS): the alternative \code{"model.frame"} returns the model frame and does no fitting.
 #' User-supplied fitting functions can be supplied either as a function or a character string naming a 
@@ -141,9 +141,9 @@
 #' @export glmb
 #' @exportClass glmb
 
-glmb<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,shape=NULL,rate=NULL,
-                 prior=NULL,Gridtype=1,data, weights, subset2,na.action, start = NULL, etastart, 
-                 mustart, offset, control = list(...), model = TRUE, 
+glmb<-function (n=1000,formula, family = binomial,prior,data, weights, subset2,
+                offset,na.action, Gridtype=1,start = NULL, etastart, 
+                 mustart,  control = list(...), model = TRUE, 
                  method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
                  ...) 
     {
@@ -231,6 +231,7 @@ glmb<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,shape=NULL
       if(!is.null(prior$mu)) mu=prior$mu
       if(!is.null(prior$Sigma)) Sigma=prior$Sigma
       if(!is.null(prior$dispersion)) dispersion=prior$dispersion
+      else dispersion=NULL
       if(!is.null(prior$shape)) shape=prior$shape
       if(!is.null(prior$rate)) rate=prior$rate
     }

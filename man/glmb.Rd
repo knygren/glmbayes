@@ -6,24 +6,19 @@
 \title{Fitting Bayesian Generalized Linear Models}
 \usage{
 glmb(
-  n,
+  n = 1000,
   formula,
   family = binomial,
-  dispersion = NULL,
-  mu,
-  Sigma,
-  shape = NULL,
-  rate = NULL,
-  prior = NULL,
-  Gridtype = 1,
+  prior,
   data,
   weights,
   subset2,
+  offset,
   na.action,
+  Gridtype = 1,
   start = NULL,
   etastart,
   mustart,
-  offset,
   control = list(...),
   model = TRUE,
   method = "glm.fit",
@@ -47,21 +42,14 @@ glmb(
 this can be a character string naming a family function, a family function or the result of a call to a family function. 
 (See \code{\link{family}} for details of family functions.)}
 
-\item{dispersion}{the dispersion parameter. Either a single numerical value or NULL 
-(the default). For the Gamma and gaussian families, the dispersion can optionally be given 
-a prior using the shape and rate parameters (see \code{\link{rnorm_gamma_reg}})}
-
-\item{mu}{a vector of length \code{p} giving the prior means of the variables in the design matrix.}
-
-\item{Sigma}{a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior covariance matrix of the variables.}
-
-\item{shape}{Optional prior shape parameter for the dispersion parameter (gaussian and Gamma models only).}
-
-\item{rate}{Optional prior rate parameter for the dispersion parameter (gaussian and Gamma models only).}
-
-\item{prior}{A (currently optional) list with the prior constants used by the model.}
-
-\item{Gridtype}{an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.}
+\item{prior}{A list with the prior constants used by the model. Typically will include a prior
+vector mu of length \code{p} giving the prior means of the variables in the
+design matrix and a positive-definite symmetric matrix Sigma of dimension \code{p*p} 
+specifying the prior covariance matrix of the variables. Optionally, prior constants 
+shape and rate can also be provided for the dispersion parameters in the gaussian
+and Gamma families (either together with or without the multivariate normal component). 
+If no prior is provided for the dispersion, then the dispersion must be assumed to 
+be a constant with the default for the Poisson and binomial families being a dispersion of 1.}
 
 \item{data}{an optional data frame, list or environment (or object coercible by \code{\link{as.data.frame}} to a data frame)
 containing the variables in the model. If not found in \code{data}, the variables are taken from 
@@ -72,22 +60,24 @@ containing the variables in the model. If not found in \code{data}, the variable
 
 \item{subset2}{an optional vector specifying a subset of observations to be used in the fitting process.}
 
+\item{offset}{this can be used to specify an \code{a priori} known component to be included in the 
+linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number 
+of cases. One or more \code{\link{offset}} terms can be included in the formula instead or as well, and if more than one 
+is specified their sum is used. See \code{model.offset}.}
+
 \item{na.action}{a function which indicates what should happen when the data contain \code{NA}s.  The default is set by 
 the \code{na.action} setting of \code{\link{options}}, and is \code{\link[stats]{na.fail}} 
 if that is unset.  The \sQuote{factory-fresh} default is \code{stats{na.omit}}.  
 Another possible value is \code{NULL}, no action.  Value \code{stats{na.exclude}} 
 can be useful.}
 
+\item{Gridtype}{an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.}
+
 \item{start}{starting values for the parameters in the linear predictor.}
 
 \item{etastart}{starting values for the linear predictor.}
 
 \item{mustart}{starting values for the vector of means.}
-
-\item{offset}{this can be used to specify an \code{a priori} known component to be included in the 
-linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number 
-of cases. One or more \code{\link{offset}} terms can be included in the formula instead or as well, and if more than one 
-is specified their sum is used. See \code{model.offset}.}
 
 \item{control}{a list of parameters for controlling the fitting
     process.  For \code{glm.fit} this is passed to

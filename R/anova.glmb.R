@@ -13,7 +13,8 @@
 #' @export
 #' @method anova glmb
 
-
+## Note: Currently only handles cased where 
+## prior is multivariate normal. Need update.
 
 anova.glmb<-function(object,...){
   
@@ -70,8 +71,8 @@ anova.glmb<-function(object,...){
     V2=matrix(V[1:nvar,1:nvar],nrow=nvar,ncol=nvar)
     
     # Run glmb model for smaller model
-    
-    object2<-glmb(n=n,newff, family = obj_family,mu=mu2,Sigma=V2,Gridtype=2)
+    prior=list(mu=mu2,Sigma=V2)
+    object2<-glmb(n=n,newff, family = obj_family,prior=prior,Gridtype=2)
     
     # Update anova_out table
     

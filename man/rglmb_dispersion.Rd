@@ -148,7 +148,8 @@ wt2=rep(1,length(y))
 
 ### Check
 prior=list(mu=mu,Sigma=solve(P),dispersion=v_old)
-outtemp1<-glmb(n = 1000, weight ~ group, prior=prior,family = gaussian(),  start =b_old, Gridtype = 3)
+outtemp1<-glmb(n = 1000, weight ~ group, prior=prior,family = gaussian(), 
+start =b_old, Gridtype = 3)
 ## Could use a residuals function here -- For now, maybe run the glmb function
 
 summary(outtemp1)
@@ -158,7 +159,7 @@ colMeans((outtemp1$coefficients))
 b_old
 
 outtemp2<-rglmb(n = 1000, y, x, mu=mu, P=P, wt = wt2, dispersion=v_old,
-                family = gaussian(), offset2 = rep(0, length(y)), start = b_old, Gridtype = 3)
+family = gaussian(), offset2 = rep(0, length(y)), start = b_old, Gridtype = 3)
 summary(outtemp2)
 colMeans((outtemp2$coefficients))
 b_old
