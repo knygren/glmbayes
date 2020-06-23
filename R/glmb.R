@@ -226,15 +226,13 @@ glmb<-function (n,formula, family = binomial,dispersion=NULL,mu,Sigma,shape=NULL
 
     ## Use the prior list to set the prior elements if it is not missing
     ## Error checking to verify that the correct elements are present
+    if(missing(prior)) stop("Prior Specification Missing")
     if(!missing(prior)){
-      print("Setting prior using list")
       if(!is.null(prior$mu)) mu=prior$mu
       if(!is.null(prior$Sigma)) Sigma=prior$Sigma
       if(!is.null(prior$dispersion)) dispersion=prior$dispersion
       if(!is.null(prior$shape)) shape=prior$shape
       if(!is.null(prior$rate)) rate=prior$rate
-      print(mu)
-      print(Sigma)
     }
     
         

@@ -69,9 +69,9 @@ P<-0.1*diag(2)
 wt2=rep(1,length(y))
 
 ### Check
-
-outtemp1<-glmb(n = 1000, weight ~ group, mu=mu, Sigma = solve(P), 
-               dispersion=v_old,family = gaussian(),  start =b_old, Gridtype = 3)
+prior=list(mu=mu,Sigma=solve(P),dispersion=v_old)
+outtemp1<-glmb(n = 1000, weight ~ group, prior=prior,family = gaussian(),
+start =b_old, Gridtype = 3)
 ## Could use a residuals function here -- For now, maybe run the glmb function
 
 summary(outtemp1)
@@ -86,8 +86,8 @@ summary(outtemp2)
 colMeans((outtemp2$coefficients))
 b_old
 
-
-outtemp3<-glmb(n = 10000, weight ~ group, mu=mu, Sigma = solve(P), shape=shape, rate=rate,
+prior=list(mu=mu,Sigma=solve(P),shape=shape,rate=rate)
+outtemp3<-glmb(n = 10000, weight ~ group, prior=prior,
                family = gaussian(),  start = b_old, Gridtype = 3)
 ## Could use a residuals function here -- For now, maybe run the glmb function
 

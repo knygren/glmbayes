@@ -9,7 +9,7 @@ mysd<-1
 
 mu<-matrix(0,5)
 V0<-((mysd)^2)*diag(5)
-
-glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),mu=mu,Sigma=V0,Gridtype=1)
+prior=list(mu=mu,Sigma=V0)
+glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),prior=prior)
 
 summary(glmb.D93)

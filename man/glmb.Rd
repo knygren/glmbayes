@@ -223,8 +223,8 @@ mysd<-1
 
 mu<-matrix(0,5)
 V0<-((mysd)^2)*diag(5)
-
-glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),mu=mu,Sigma=V0,Gridtype=1)
+prior=list(mu=mu,Sigma=V0)
+glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),prior=prior,Gridtype=1)
 
 summary(glmb.D93)
 
@@ -246,16 +246,15 @@ glm.out1<-glm(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit), data
 
 # temporarily edit out as it seems slow (adding back in - may need
 #to adjust prior)
-
+prior1=list(mu=mu,Sigma=V1)
 glmb.out1<-glmb(n=n,cbind(Menarche, Total-Menarche) ~ Age,family
-                =binomial(logit),mu=mu,Sigma=V1,Gridtype=1, data=menarche2)
+                =binomial(logit),prior=prior1,Gridtype=1, data=menarche2)
 
 summary(glm.out1)
 summary(glmb.out1)
-
 glm.out2<-glm(cbind(Menarche,Total-Menarche)~Age,family=binomial(probit), data=menarche2)
-glmb.out2<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age,family=binomial(probit),mu=mu,
-                Sigma=V1,Gridtype=1,data=menarche2)
+glmb.out2<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age,family=binomial(probit),prior=prior1
+                ,Gridtype=1,data=menarche2)
 
 summary(glm.out2)
 summary(glmb.out2)
@@ -263,7 +262,7 @@ summary(glmb.out2)
 glm.out3 <-glm(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(cloglog),
                data=menarche2)
 glmb.out3<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age,family=binomial(cloglog),
-                mu=mu,Sigma=V1,Gridtype=1,data=menarche2)
+                prior=prior1,Gridtype=1,data=menarche2)
 
 summary(glm.out3)
 summary(glmb.out3)
