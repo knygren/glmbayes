@@ -233,7 +233,9 @@ glmb<-function (n=1000,formula, family = binomial,prior,data, weights, subset2,
       if(!is.null(prior$dispersion)) dispersion=prior$dispersion
       else dispersion=NULL
       if(!is.null(prior$shape)) shape=prior$shape
+      else shape=NULL
       if(!is.null(prior$rate)) rate=prior$rate
+      else rate=NULL
     }
     
         
@@ -247,8 +249,11 @@ glmb<-function (n=1000,formula, family = binomial,prior,data, weights, subset2,
     P<-solve(Sigma) 
     wtin<-fit$prior.weights	
 
+prior2=list(mu=mu,P=P,dispersion=dispersion,shape=shape, rate=rate)    
 
-sim<-rglmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,dispersion=dispersion,shape=shape,rate=rate,offset2=offset,family=family,
+#sim<-rglmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,dispersion=dispersion,shape=shape,rate=rate,offset2=offset,family=family,
+#           start=b,Gridtype=Gridtype)
+sim<-rglmb(n=n,y=y,x=x,prior=prior2,wt=wtin,offset2=offset,family=family,
            start=b,Gridtype=Gridtype)
 
 

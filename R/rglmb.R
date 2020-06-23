@@ -107,9 +107,23 @@
 #' @order 1
 #' @export 
 
-rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,prior=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=3)
+rglmb<-function(n=1,y,x,mu=NULL,P=NULL,wt=1,dispersion=NULL,shape=NULL,rate=NULL,prior=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=3)
   {
   
+  if(!missing(prior)){
+    if(!is.null(prior$mu)) mu=prior$mu
+    if(!is.null(prior$P)){ P=prior$P}
+    else{ if(!is.null(prior$Sigma)){ P=solve(prior$Sigma)}}
+    if(!is.null(prior$dispersion)) dispersion=prior$dispersion
+    else dispersion=NULL
+    if(!is.null(prior$shape)) shape=prior$shape
+    else shape=NULL
+    if(!is.null(prior$rate)) rate=prior$rate
+    else rate=NULL
+  }
+  
+  
+    
   if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
      is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
   
@@ -193,15 +207,6 @@ rglmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,prior=NUL
   ## Add reformatting of priors into right format here
   
   #if(missing(prior)) stop("Prior Specification Missing")
-  if(!missing(prior)){
-    if(!is.null(prior$mu)) mu=prior$mu
-    if(!is.null(prior$P)) P=prior$P
-    if(!is.null(prior$dispersion)) dispersion=prior$dispersion
-    else dispersion=NULL
-    if(!is.null(prior$shape)) shape=prior$shape
-    if(!is.null(prior$rate)) rate=prior$rate
-  }
-  
   
   
     
