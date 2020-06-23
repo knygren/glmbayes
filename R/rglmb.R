@@ -110,6 +110,8 @@
 rglmb<-function(n=1,y,x,mu=NULL,P=NULL,wt=1,dispersion=NULL,shape=NULL,rate=NULL,prior=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=3)
   {
   
+  ## Use the prior list to set the prior elements if it is not missing
+  ## Error checking to verify that the correct elements are present
   if(!missing(prior)){
     if(!is.null(prior$mu)) mu=prior$mu
     if(!is.null(prior$P)){ P=prior$P}
