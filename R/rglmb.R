@@ -112,7 +112,8 @@ rglmb<-function(n=1,y,x,mu=NULL,P=NULL,wt=1,dispersion=NULL,shape=NULL,rate=NULL
   
   ## Use the prior list to set the prior elements if it is not missing
   ## Error checking to verify that the correct elements are present
-  if(!missing(prior)){
+  if(missing(prior)) stop("Prior Specification Missing")
+    if(!missing(prior)){
     if(!is.null(prior$mu)) mu=prior$mu
     if(!is.null(prior$P)){ P=prior$P}
     else{ if(!is.null(prior$Sigma)){ P=solve(prior$Sigma)}}
@@ -209,40 +210,19 @@ rglmb<-function(n=1,y,x,mu=NULL,P=NULL,wt=1,dispersion=NULL,shape=NULL,rate=NULL
   ## Add reformatting of priors into right format here
   
   #if(missing(prior)) stop("Prior Specification Missing")
-  
-  
-    
   if(family$family=="poisson"||family$family=="binomial")dispersion2<-1
   else dispersion2<-dispersion
+  
   
   if(family$family=="gaussian"){
     dispersion2=dispersion
     if(is.null(dispersion)){dispersion2=0}
-    if(dispersion2>0){
-      
-#      outlist<-rnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)
-      outlist<-.rnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)
-      
-         }
-    
+    if(dispersion2>0){outlist<-.rnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)}
+    else{             outlist=rnorm_gamma_reg(n=n,y=y,x=x,mu=mu,P=P,shape=shape,rate=rate,offset2=offset2,wt=wt)}
+      }
     else{
-      
-      outlist=rnorm_gamma_reg(n=n,y=y,x=x,mu=mu,P=P,shape=shape,rate=rate,offset2=offset2,wt=wt)
-      
-    }
-    
-  }
-  
-  else{
     if(is.null(dispersion)){dispersion2=1}
-    
-    # f1, f2, and f3 passed here - Likely legacy of R code
-    ## Can eliminate and replace with calling of corresponding c++ functions
-#    outlist<-rnnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,
-#                                famfunc=famfunc,f1=f1,f2=f2,f3=f3,
-#                                start=start,family=family$family,link=family$link,Gridtype=Gridtype)
-    
-    outlist<-.rnnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,
+                     outlist<-.rnnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,
                             famfunc=famfunc,f1=f1,f2=f2,f3=f3,
                             start=start,family=family$family,link=family$link,Gridtype=Gridtype)
     

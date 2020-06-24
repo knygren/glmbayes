@@ -79,8 +79,8 @@ mean(colMeans(residuals(outtemp1)^2))
 v_old
 colMeans((outtemp1$coefficients))
 b_old
-
-outtemp2<-rglmb(n = 1000, y, x, mu=mu, P=P, wt = wt2, dispersion=v_old,
+prior=list(mu=mu,P=P,dispersion=v_old)
+outtemp2<-rglmb(n = 1000, y, x, prior=prior, wt = wt2, 
 family = gaussian(), offset2 = rep(0, length(y)), start = b_old, Gridtype = 3)
 summary(outtemp2)
 colMeans((outtemp2$coefficients))
