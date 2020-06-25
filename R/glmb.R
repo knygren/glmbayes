@@ -253,6 +253,8 @@ prior2=list(mu=mu,P=P,dispersion=dispersion,shape=shape, rate=rate)
 
 #sim<-rglmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,dispersion=dispersion,shape=shape,rate=rate,offset2=offset,family=family,
 #           start=b,Gridtype=Gridtype)
+
+
 sim<-rglmb(n=n,y=y,x=x,prior=prior2,wt=wtin,offset2=offset,family=family,
            start=b,Gridtype=Gridtype)
 

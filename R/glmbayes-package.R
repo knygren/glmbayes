@@ -77,6 +77,7 @@
 #' @author Kjell Nygren
 #' @import stats Rcpp RcppArmadillo
 #' @importFrom Rcpp evalCpp
+#' @importFrom MASS mvrnorm
 #' @useDynLib glmbayes
 #' @name glmbayes-package
 #' 

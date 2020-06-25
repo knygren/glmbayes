@@ -65,6 +65,7 @@
 #' @example inst/examples/Ex_rnorm_gamma_reg.R
 
 
+
 rnorm_gamma_reg<-function(n,y,x,mu,P,shape,rate,offset2=NULL,wt=1){
 
 if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||

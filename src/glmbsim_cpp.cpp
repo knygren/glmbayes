@@ -540,16 +540,6 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
 }
 
 
-
-
-
-
-
-
-
-
-
-
 // [[Rcpp::export(".rnorm_reg_cpp")]]
 
 Rcpp::List rnorm_reg_cpp(int n,NumericVector y,NumericMatrix x, 

@@ -1,19 +1,19 @@
-#' Fitting Bayesian Generalized Linear Models
+#' Fitting Bayesian Linear Models
 #'
-#' \code{glmb} is used to fit Bayesian generalized linear models, specified by giving a symbolic description of the linear predictor, a description of the error distribution, and a multivariate normal prior.
+#' \code{lmb} is used to fit Bayesian generalized linear models, specified by giving a symbolic description of the linear predictor, a description of the error distribution, and a multivariate normal prior.
 #' @aliases
 #' lmb
 #' print.lmb
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
-#' @param mu a vector of length \code{p} giving the prior means of the variables in the design matrix.
-#' @param Sigma a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior covariance matrix of the variables.
-#' @param dispersion the dispersion parameter. Either a single numerical value or NULL 
-#' (the default). For families other than the Gamma and gaussian families, the dispersion
-#' must be a constant.  where a prior can be given by using the shape and rate parameters (see \code{\link{rnorm_gamma_reg}}
-#' for details
-#' @param shape Optional prior shape parameter for the dispersion parameter (gaussian model only).
-#' @param rate Optional prior rate parameter for the dispersion parameter (gaussian model only).
-#' @param subset2 an optional vector specifying a subset of observations to be used in the fitting process.
+#' @param prior A list with the prior constants used by the model. Typically will include a prior
+#' vector mu of length \code{p} giving the prior means of the variables in the
+#' design matrix and a positive-definite symmetric matrix Sigma of dimension \code{p*p} 
+#' specifying the prior covariance matrix of the variables. Optionally, prior constants 
+#' shape and rate can also be provided for the dispersion parameters in the gaussian
+#' and Gamma families (either together with or without the multivariate normal component). 
+#' If no prior is provided for the dispersion, then the dispersion must be assumed to 
+#' be a constant with the default for the Poisson and binomial families being a dispersion of 1. 
+#' @param subset an optional vector specifying a subset of observations to be used in the fitting process.
 #' @param na.action a function which indicates what should happen when the data contain \code{NA}s.  The default is set by 
 #' the \code{na.action} setting of \code{\link{options}}, and is \code{\link[stats]{na.fail}} 
 #' if that is unset.  The \sQuote{factory-fresh} default is \code{stats{na.omit}}.  
@@ -38,7 +38,7 @@
 #' \code{\link{coefficients}}, \code{\link{fitted.values}}, \code{\link{residuals}}, and \code{\link{extractAIC}} can be used 
 #' to extract various useful features of the value returned by code{\link{glmb}}.
 #' 
-#' An object of class \code{"glmb"} is a list containing at least the following components:
+#' An object of class \code{"lmb"} is a list containing at least the following components:
 
 #' \item{glm}{an object of class \code{"glm"} containing the output from a call to the function \code{\link{glm}}}
 #' \item{coefficients}{a matrix of dimension \code{n} by \code{length(mu)} with one sample in each row}
@@ -139,96 +139,103 @@
 #' @export lmb
 #' @exportClass lmb
 
-lmb<-function (n,formula, mu,Sigma,dispersion=NULL,shape=NULL,rate=NULL,
-                data,  subset2,weights,na.action, method = "qr", model = TRUE,  x = FALSE, y = FALSE,
-                qr=TRUE, singular.ok=TRUE, contrasts=NULL, offset, ...) 
-  
-  {
+
+lmb <- function (n, formula, prior, data, subset, weights, na.action,
+                  method = "qr", model = TRUE, x = TRUE, y = TRUE,
+                  qr = TRUE, singular.ok = TRUE, contrasts = NULL,
+                  offset, ...)
+
+    {
    # Note, renamed subset argument to subset2 as it caused conflict with subset function
 
-    call <- match.call()
-    if (is.character(family)) 
-        family <- get(family, mode = "function", envir = parent.frame())
-    if (is.function(family)) 
-        family <- family()
-    if (is.null(family$family)) {
-        print(family)
-        stop("'family' not recognized")
+  ret.x <- x
+  ret.y <- y
+  cl <- match.call()
+  mf <- match.call(expand.dots = FALSE)
+  m <- match(c("formula", "data", "subset", "weights", "na.action", "offset"),
+             names(mf), 0L)
+  mf <- mf[c(1L, m)]
+  mf$drop.unused.levels <- TRUE
+  ## need stats:: for non-standard evaluation
+  mf[[1L]] <- quote(stats::model.frame)
+  mf <- eval(mf, parent.frame())
+  if (method == "model.frame")
+    return(mf)
+  else if (method != "qr")
+    warning(gettextf("method = '%s' is not supported. Using 'qr'", method),
+            domain = NA)
+  mt <- attr(mf, "terms") # allow model.frame to update it
+  y <- model.response(mf, "numeric")
+  ## avoid any problems with 1D or nx1 arrays by as.vector.
+  w <- as.vector(model.weights(mf))
+  if(!is.null(w) && !is.numeric(w))
+    stop("'weights' must be a numeric vector")
+  offset <- as.vector(model.offset(mf))
+  if(!is.null(offset)) {
+    if(length(offset) != NROW(y))
+      stop(gettextf("number of offsets is %d, should equal %d (number of observations)",
+                    length(offset), NROW(y)), domain = NA)
+  }
+  
+  if (is.empty.model(mt)) {
+    x <- NULL
+    z <- list(coefficients = if (is.matrix(y))
+      matrix(,0,3) else numeric(), residuals = y,
+      fitted.values = 0 * y, weights = w, rank = 0L,
+      df.residual = if(!is.null(w)) sum(w != 0) else
+        if (is.matrix(y)) nrow(y) else length(y))
+    if(!is.null(offset)) {
+      z$fitted.values <- offset
+      z$residuals <- y - offset
     }
-    if (missing(data)) 
-        data <- environment(formula)
-    mf <- match.call(expand.dots = FALSE)
-    m <- match(c("formula", "data", "subset2", "weights", "na.action", 
-        "etastart", "mustart", "offset"), names(mf), 0L)
-    mf <- mf[c(1L, m)]
-    mf$drop.unused.levels <- TRUE
-    mf[[1L]] <- quote(stats::model.frame)
-    mf <- eval(mf, parent.frame())
-    if (identical(method, "model.frame")) 
-        return(mf)
-    if (!is.character(method) && !is.function(method)) 
-        stop("invalid 'method' argument")
-    if (identical(method, "glm.fit")) 
-        control <- do.call("glm.control", control)
-    mt <- attr(mf, "terms")
-    Y <- model.response(mf, "any")
-    if (length(dim(Y)) == 1L) {
-        nm <- rownames(Y)
-        dim(Y) <- NULL
-        if (!is.null(nm)) 
-            names(Y) <- nm
-    }
-    X <- if (!is.empty.model(mt)) 
-        model.matrix(mt, mf, contrasts)
-    else matrix(, NROW(Y), 0L)
-    weights <- as.vector(model.weights(mf))
-    if (!is.null(weights) && !is.numeric(weights)) 
-        stop("'weights' must be a numeric vector")
-    if (!is.null(weights) && any(weights < 0)) 
-        stop("negative weights not allowed")
-    offset <- as.vector(model.offset(mf))
-    if (!is.null(offset)) {
-        if (length(offset) != NROW(Y)) 
-            stop(gettextf("number of offsets is %d should equal %d (number of observations)", 
-                length(offset), NROW(Y)), domain = NA)
-    }
-    mustart <- model.extract(mf, "mustart")
-    etastart <- model.extract(mf, "etastart")
-    fit <- eval(call(if (is.function(method)) "method" else method, 
-        x = X, y = Y, weights = weights, start = start, etastart = etastart, 
-        mustart = mustart, offset = offset, family = family, 
-        control = control, intercept = attr(mt, "intercept") > 
-            0L))
-    if (length(offset) && attr(mt, "intercept") > 0L) {
-        fit2 <- eval(call(if (is.function(method)) "method" else method, 
-            x = X[, "(Intercept)", drop = FALSE], y = Y, weights = weights, 
-            offset = offset, family = family, control = control, 
-            intercept = TRUE))
-        if (!fit2$converged) 
-            warning("fitting to calculate the null deviance did not converge -- increase 'maxit'?")
-        fit$null.deviance <- fit2$deviance
-    }
-    if (model) 
-        fit$model <- mf
-    fit$na.action <- attr(mf, "na.action")
-        fit$x <- X
-     fit <- c(fit, list(call = call, formula = formula, terms = mt, 
-        data = data, offset = offset, control = control, method = method, 
-        contrasts = attr(X, "contrasts"), xlevels = .getXlevels(mt, 
-            mf)))
-    class(fit) <- c(fit$class, c("glm", "lm"))
-    
+  }
+  else {
+    x <- model.matrix(mt, mf, contrasts)
+    z <- if(is.null(w)) lm.fit(x, y, offset = offset,
+                               singular.ok=singular.ok, ...)
+    else lm.wfit(x, y, w, offset = offset, singular.ok=singular.ok, ...)
+  }
+  class(z) <- c(if(is.matrix(y)) "mlm", "lm")
+  
+  z$na.action <- attr(mf, "na.action")
+  z$offset <- offset
+  z$contrasts <- attr(x, "contrasts")
+  z$xlevels <- .getXlevels(mt, mf)
+  z$call <- cl
+  z$terms <- mt
+  if (model)
+    z$model <- mf
+  if (ret.x)
+    z$x <- x
+  if (ret.y)
+    z$y <- y
+  if (!qr) z$qr <- NULL
+  
+  ######   End of lm function
     # Verify inputs and Initialize
+    
+    ## Error checking to verify that the correct elements are present
+    if(missing(prior)) stop("Prior Specification Missing")
+    if(!missing(prior)){
+      if(!is.null(prior$mu)) mu=prior$mu
+      if(!is.null(prior$Sigma)) Sigma=prior$Sigma
+      if(!is.null(prior$dispersion)) dispersion=prior$dispersion
+      else dispersion=NULL
+      if(!is.null(prior$shape)) shape=prior$shape
+      else shape=NULL
+      if(!is.null(prior$rate)) rate=prior$rate
+      else rate=NULL
+    }
     
     if(is.numeric(n)==FALSE||is.numeric(mu)==FALSE||is.numeric(Sigma)==FALSE) stop("non-numeric argument to numeric function")
     
-    y<-fit$y	
-    x<-fit$x
-    b<-fit$coefficients
+    y<-z$y	
+    x<-z$x
+    b<-z$coefficients
     mu<-as.matrix(as.vector(mu))
     Sigma<-as.matrix(Sigma)    
     P<-solve(Sigma) 
-    wtin<-fit$prior.weights	
+    wtin<-z$prior.weights	
 
 ## Eliminate Gridtype from rlmb and lmb
 
@@ -243,9 +250,9 @@ sim<-rlmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,
 	famfunc<-sim$famfunc
 	
 	Prior<-list(mean=as.numeric(mu),Variance=Sigma)
-	names(Prior$mean)<-colnames(fit$x)
-	colnames(Prior$Variance)<-colnames(fit$x)
-	rownames(Prior$Variance)<-colnames(fit$x)
+	names(Prior$mean)<-colnames(z$x)
+	colnames(Prior$Variance)<-colnames(z$x)
+	rownames(Prior$Variance)<-colnames(z$x)
 
   
 if (!is.null(offset)) {
@@ -272,38 +279,34 @@ if (is.null(offset)) {
   linear.predictors<-t(x%*%t(sim$coefficients))
 
   }
-	linkinv<-fit$family$linkinv
-	fitted.values<-linkinv(linear.predictors)
-
-	
-	
+	#linkinv<-z$family$linkinv
 	outlist<-list(
-	  glm=fit,
+	  lm=z,
 	  coefficients=sim$coefficients,
 	  coef.means=colMeans(sim$coefficients),
     coef.mode=sim$coef.mode,
 	  dispersion=dispersion2,
 	  Prior=Prior,
 	  fitted.values=fitted.values,
-	  family=fit$family,
+	  #family=fit$family,
 	  linear.predictors=linear.predictors,
 	  deviance=DICinfo$Deviance,
 	  pD=DICinfo$pD,
 	  Dbar=DICinfo$Dbar,
 	  Dthetabar=DICinfo$Dthetabar,
 	  DIC=DICinfo$DIC,
-	  prior.weights=fit$prior.weights,
-	  y=fit$y,
-	  x=fit$x,
-	  model=fit$model,
-	  call=fit$call,
-	  formula=fit$formula,
-	  terms=fit$terms,
-	  data=fit$data,
+	  prior.weights=z$prior.weights,
+	  y=z$y,
+	  x=z$x,
+	  model=z$model,
+	  call=z$call,
+	  formula=z$formula,
+	  terms=z$terms,
+	  data=z$data,
     famfunc=famfunc,
 	  iters=sim$iters,
-	  contrasts=fit$contrasts,	  
-	  xlevels=fit$xlevels
+	  contrasts=z$contrasts,	  
+	  xlevels=z$xlevels
 	  )
 
 	outlist$call<-match.call()

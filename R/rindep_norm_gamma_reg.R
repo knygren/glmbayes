@@ -1,0 +1,266 @@
+#' The indendepent normal-gamma regression
+#'
+#' Generates iid samples from the posterior density for the 
+#' independent normal-gamma regression
+#' @param offset2 an offset parameter
+#' @param wt a weighting variable
+#' @inheritParams glmb
+#' @return Currently mainly the draws for the dispersion and the regression coefficients
+#' will be updated to return outputs consistent with other function
+#' @example inst/examples/Ex_confint.glmb.R
+#' @export 
+
+
+rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
+  
+  ### Initial implementation of Likelihood subgradient Sampling 
+  ### Currently uses as single point for conditional tangencis
+  ### (at conditional posterior modes)
+  ### Verify this yields correct results and then try to implement grid approach
+  
+  ## Use the prior list to set the prior elements if it is not missing
+  ## Error checking to verify that the correct elements are present
+  if(missing(prior)) stop("Prior Specification Missing")
+  if(!missing(prior)){
+    if(!is.null(prior$mu)) mu=prior$mu
+    if(!is.null(prior$Sigma)) Sigma=prior$Sigma
+    if(!is.null(prior$dispersion)) dispersion=prior$dispersion
+    else dispersion=NULL
+    if(!is.null(prior$shape)) shape=prior$shape
+    else shape=NULL
+    if(!is.null(prior$rate)) rate=prior$rate
+    else rate=NULL
+  }
+  
+  lm_out=lm(y ~ x-1) # run classical regression to get maximum likelhood estimate
+  RSS=sum(residuals(lm_out)^2)
+  n_obs=length(y)
+
+  ## Use passed dispersion to get a rough estimate for posterior mode
+  ## should really iterate
+  
+  prior=list(mu=mu,Sigma=Sigma, dispersion=dispersion)
+  glmb_out1=glmb(n=1,y~x-1,family=gaussian(),prior=prior)
+
+  ## Use this as betastar
+  
+  betastar=glmb_out1$coef.mode
+  
+  
+    
+  ## Set updated gamma parameters for the candidate generation
+  ## shape matches posterior while rate will be too low (adjusted using accept-rejecte)
+  
+  shape2= shape + n_obs/2
+  rate2 =rate + RSS/2
+  
+  # set up matrices to hold output
+  
+  disp_out<-matrix(0,nrow=n,ncol=1)
+  beta_out<-matrix(0,nrow=n,ncol=ncol(x))
+  test_out<-matrix(0,nrow=n,ncol=3)
+  iters_out<-matrix(0,nrow=n,ncol=1)
+  
+  # Internal function used below to determine acceptance rate
+  
+  testfun<-function(beta,betastar,p,y,x,RSS){
+    
+    beta=as.matrix(beta,ncol=1) ## Simulated candidate
+    betastar=as.matrix(betastar,ncol=1)   ## Conditional posterior mode
+    xbeta=x%*%beta
+    xbetastar=x%*%betastar
+    RSS2_test=t(y-xbeta)%*%(y-xbeta)  ## Residual SUM of SQUARES for test candidate
+    RSS2_post=t(y-xbetastar)%*%(y-xbetastar)  ## Residual SUM of SQUARES at post model
+    
+    # Log-Acceptance rate (test1)
+    
+    # 1)if we used the prior to generate candidate for beta, 
+    # we would have test1=-0.5*p*(RSS2_test-RSS)
+    # 
+    # 2) when we replace prior with likelihood sub-gradient density, we replace  
+    # RSS2_test with (RSS_post+2*t(y-xbetastar)%*%x%*%(beta-betastar))
+    
+    ## This would be test if sampled beta from prior
+    
+    test1=-p*0.5*(RSS2_test-RSS)
+    
+#    print("RSS-Main")
+#    print(RSS)
+##    print("RSS-test")
+##    print(RSS2_test)
+#    print("RSS2-post")
+#    print(RSS2_post)
+##    print("RSS2_post with slope should be lower bound on RSS2_test")
+##    print(RSS2_post-2*t(y-xbetastar)%*%x%*%(beta-betastar))
+    
+    ## This should be a concave function that obtains its max when beta=betastar
+    ## When beta=betastar, RSS2_test=RSS_Post and the slope term=0
+    ## So whole terms should be 0
+
+    test2=p*0.5*(RSS2_post-2*t(y-xbetastar)%*%x%*%(beta-betastar)-RSS2_test)
+
+    ## Can likely replace test 1 once test2 is in place with following
+    
+    test1=-p*0.5*(RSS2_post-RSS) 
+    
+    ## Maybe test could be just the first two terms and RSS
+    
+    ##test2=p*0.5*(RSS2_post-2*t(y-xbetastar)%*%x%*%(beta-betastar)-RSS2_test)
+    
+##     print("test1/p")
+##     print(test1/p)
+#    test1=-0.5*p*(RSS2_post+t(y-xbetastar)%*%x%*%(beta-betastar)-RSS)
+
+        # The second component of the log-acceptance rate adjusts the
+    # multivariate normal variance and penalizes draws away from
+    # the conditional posterior mode 
+    # The first two terms are (jointly) maximized at the conditional posterior modes
+    # The last term scales the term so that it is zero at the conditional posterior mode
+    # Need to check if test2 needs adjustment when prior is not Standard multivariate 
+    # normal
+    
+#    LL_post_mode=-Neg_logLik2(betastar,y,x,alpha=0,wt=sqrt(p),family=gaussian())
+#    LL_post_test=-Neg_logLik2(beta,y,x,alpha=0,wt=sqrt(p),family=gaussian())
+#    test2=-p*t(y-xbetastar)%*%x%*%(beta-betastar)+(LL_post_test-LL_post_mode) ## Likely missing a constant
+     test=test1+test2
+     
+#     print("combined test")
+#     print(test)
+#    test=test1
+    
+    return(list(test=test[1,1],test1=test1,test2=test2))
+  }
+  
+  
+  ## Look through iterations to generate candidates until acceptance
+  
+  for(i in 1:n){  
+    
+    # Initialize flag for acceptace to 0 and count of iters to 1
+    
+    a1=0  
+    iters_out[i,1]=1  
+    
+    while(a1==0){
+      
+      p=rgamma(1,shape=shape2,rate=rate2)  
+      dispersion=1/p
+      
+      ## Set prior list in order to get the conditional posterior mode from glmb function
+      ## inefficient but works for now.
+      
+      prior=list(mu=mu,Sigma=Sigma, dispersion=dispersion)
+      glmb_out1=glmb(n=1,y~x-1,family=gaussian(),prior=prior)
+      
+      ## Switch to using prior as betastar --> sampling should be from prior
+      ## This may further lower acceptance rate but hopefully will give
+      ## Correct results
+      ## Try switching to constant betastar for all values for p if this works
+      ## switched above 
+      ## moving prior seemed to cause issues so may need to switch back to mu to understand
+      ## why - could be because acceptance rate was so low
+      
+      #betastar=glmb_out1$coef.mode
+      #betastar=mu
+      
+      ## Temporarily use this in the testing to check acceptance procedure
+      #betatest=as.matrix(glmb_out1$coefficients[1,],ncol=1)
+      
+      ## Likelihood subgradient generated candidate - can try 
+      ## just candidate from conditional density
+      
+      betatest=as.matrix(mvrnorm(n = 1, mu=betastar, Sigma=Sigma, tol = 1e-6, empirical = FALSE),ncol=1)
+
+#      print("betatest")
+#      print(betatest)
+#      print("betastar")
+#      print(betastar)
+      
+      testtemp=testfun(betatest,betastar,p,as.matrix(y,ncol=1),x,RSS)
+      test=exp(testtemp$test)
+      
+      disp_out[i,1]=dispersion
+      
+      ## This had been wrong - set to output from glmb - now corrected
+      
+      beta_out[i,1:ncol(x)]=betatest 
+      test_out[i,1]=exp(testtemp$test)
+      test_out[i,2]=exp(testtemp$test1)
+      test_out[i,3]=exp(testtemp$test2)
+      
+#      print("dispout*test1")
+#      print(disp_out[i,1]*test)
+      # set a1 to 1 if draw was accepted to end while loop
+      
+      ## Temporarily accept all draws to see data
+#      print(test)
+      
+      #a1=1  
+      if(runif(1)<test) a1=1
+      ## increment iters count if candidate not accepted 
+      
+      iters_out[i,1]=iters_out[i,1]+1  
+      
+    }
+    
+  }
+  
+  return(list(disp_out=disp_out,beta_out=beta_out,test_out=test_out,iters_out=iters_out)  )
+}
+
+## This function is used by the above (not sure why Neg_logLik is not working)
+## Could be because it is not exported - replace with Neg_logLik
+#' @rdname Neg_logLik
+#' @export 
+
+Neg_logLik2<-function(b, y, x, alpha, wt,family){
+  
+  ## Add required checks on other inputs at the top
+  
+  if (is.character(family)) 
+    family <- get(family, mode = "function", envir = parent.frame())
+  if (is.function(family)) 
+    family <- family()
+  if (is.null(family$family)) {
+    print(family)
+    stop("'family' not recognized")
+  }
+  
+  okfamilies <- c("gaussian","poisson","binomial","quasipoisson","quasibinomial","Gamma")
+  if(family$family %in% okfamilies){
+    if(family$family=="gaussian") oklinks<-c("identity")
+    if(family$family=="poisson"||family$family=="quasipoisson") oklinks<-c("log")		
+    if(family$family=="binomial"||family$family=="quasibinomial") oklinks<-c("logit","probit","cloglog")		
+    if(family$family=="Gamma") oklinks<-c("log")		
+    if(family$link %in% oklinks){
+      
+      ## This may be the R version of these files so may not be using the efficiency of C++
+      ## This may be safer
+      
+      famfunc<-glmbfamfunc(family)
+      f1<-famfunc$f1
+      f2<-famfunc$f2
+      f3<-famfunc$f3
+      #      f5<-famfunc$f5
+      #      f6<-famfunc$f6
+    }
+    else{
+      stop(gettextf("link \"%s\" not available for selected family; available links are %s", 
+                    family$link , paste(sQuote(oklinks), collapse = ", ")), 
+           domain = NA)
+      
+    }	
+    
+  }		
+  else {
+    stop(gettextf("family \"%s\" not available in glmb; available families are %s", 
+                  family$family , paste(sQuote(okfamilies), collapse = ", ")), 
+         domain = NA)
+  }
+  
+  return(f1(b, y, x, alpha, wt)) 
+  
+}
+
+
+

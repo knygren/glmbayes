@@ -11,12 +11,7 @@
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
 #' @param y a vector of observations of length \code{m}.
 #' @param x a design matrix of dimension \code{m * p}.
-#' @param mu a vector of length \code{p} giving the prior means of the variables in the design matrix.
-#' @param P a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior precision matrix of the variable.
-#' @param wt an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
-#' @param dispersion the dispersion parameter. Either a single numerical value or NULL (the default). Must be provided here, use \code{\link{rnorm_gamma_reg}} to give the dispersion a prior.
-#' @param shape Prior shape parameter for the dispersion parameter (gaussian model only).
-#' @param rate Prior rate parameter for the dispersion parameter (gaussian model only).
+#' @param family a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
 #' @param prior A list with the prior constants used by the model. Typically will include a prior
 #' vector mu of length \code{p} giving the prior means of the variables in the
 #' design matrix and a positive-definite symmetric matrix Sigma of dimension \code{p*p} 
@@ -25,7 +20,7 @@
 #' and Gamma families (either together with or without the multivariate normal component). 
 #' If no prior is provided for the dispersion, then the dispersion must be assumed to 
 #' be a constant with the default for the Poisson and binomial families being a dispersion of 1. 
-#' @param family a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
+#' @param wt an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
 #' @param offset2 this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
 #' @param start an optional argument providing starting values for the posterior mode optimization.
 #' @param Gridtype an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.
@@ -107,7 +102,7 @@
 #' @order 1
 #' @export 
 
-rglmb<-function(n=1,y,x,mu=NULL,P=NULL,wt=1,dispersion=NULL,shape=NULL,rate=NULL,prior=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL,Gridtype=3)
+rglmb<-function(n=1,y,x,family=gaussian(),prior,wt=1,offset2=rep(0,nobs),start=NULL,Gridtype=3)
   {
   
   ## Use the prior list to set the prior elements if it is not missing

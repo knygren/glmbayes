@@ -3,24 +3,20 @@
 \name{lmb}
 \alias{lmb}
 \alias{print.lmb}
-\title{Fitting Bayesian Generalized Linear Models}
+\title{Fitting Bayesian Linear Models}
 \usage{
 lmb(
   n,
   formula,
-  mu,
-  Sigma,
-  dispersion = NULL,
-  shape = NULL,
-  rate = NULL,
+  prior,
   data,
-  subset2,
+  subset,
   weights,
   na.action,
   method = "qr",
   model = TRUE,
-  x = FALSE,
-  y = FALSE,
+  x = TRUE,
+  y = TRUE,
   qr = TRUE,
   singular.ok = TRUE,
   contrasts = NULL,
@@ -38,18 +34,14 @@ lmb(
     model to be fitted.  The details of model specification are given
     under \sQuote{Details}.}
 
-\item{mu}{a vector of length \code{p} giving the prior means of the variables in the design matrix.}
-
-\item{Sigma}{a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior covariance matrix of the variables.}
-
-\item{dispersion}{the dispersion parameter. Either a single numerical value or NULL 
-(the default). For families other than the Gamma and gaussian families, the dispersion
-must be a constant.  where a prior can be given by using the shape and rate parameters (see \code{\link{rnorm_gamma_reg}}
-for details}
-
-\item{shape}{Optional prior shape parameter for the dispersion parameter (gaussian model only).}
-
-\item{rate}{Optional prior rate parameter for the dispersion parameter (gaussian model only).}
+\item{prior}{A list with the prior constants used by the model. Typically will include a prior
+vector mu of length \code{p} giving the prior means of the variables in the
+design matrix and a positive-definite symmetric matrix Sigma of dimension \code{p*p} 
+specifying the prior covariance matrix of the variables. Optionally, prior constants 
+shape and rate can also be provided for the dispersion parameters in the gaussian
+and Gamma families (either together with or without the multivariate normal component). 
+If no prior is provided for the dispersion, then the dispersion must be assumed to 
+be a constant with the default for the Poisson and binomial families being a dispersion of 1.}
 
 \item{data}{an optional data frame, list or environment (or object
     coercible by \code{\link{as.data.frame}} to a data frame) containing
@@ -57,7 +49,7 @@ for details}
     variables are taken from \code{environment(formula)},
     typically the environment from which \code{lm} is called.}
 
-\item{subset2}{an optional vector specifying a subset of observations to be used in the fitting process.}
+\item{subset}{an optional vector specifying a subset of observations to be used in the fitting process.}
 
 \item{weights}{an optional vector of weights to be used in the fitting
     process.  Should be \code{NULL} or a numeric vector.
@@ -120,7 +112,7 @@ sum is used.  See \code{model.offset}.}
 \code{\link{coefficients}}, \code{\link{fitted.values}}, \code{\link{residuals}}, and \code{\link{extractAIC}} can be used 
 to extract various useful features of the value returned by code{\link{glmb}}.
 
-An object of class \code{"glmb"} is a list containing at least the following components:
+An object of class \code{"lmb"} is a list containing at least the following components:
 \item{glm}{an object of class \code{"glm"} containing the output from a call to the function \code{\link{glm}}}
 \item{coefficients}{a matrix of dimension \code{n} by \code{length(mu)} with one sample in each row}
 \item{coef.means}{a vector of \code{length(mu)} with the estimated posterior mean coefficients}
@@ -161,7 +153,7 @@ cases (factored by the supplied case weights) and the component of \code{y}
 of the result is the proportion of successes.
 }
 \description{
-\code{glmb} is used to fit Bayesian generalized linear models, specified by giving a symbolic description of the linear predictor, a description of the error distribution, and a multivariate normal prior.
+\code{lmb} is used to fit Bayesian generalized linear models, specified by giving a symbolic description of the linear predictor, a description of the error distribution, and a multivariate normal prior.
 }
 \details{
 The function \code{glmb} is a Bayesian version of the classical \code{\link{glm}} function.  Setup of
