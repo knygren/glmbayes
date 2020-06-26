@@ -67,7 +67,7 @@ prior=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,shape=shape,rate=rate)
 
 ## Using new function
 
-prior ## Currently standard normal so can't be cause of problem
+#prior ## Currently standard normal so can't be cause of problem
 
 ## Try prior mean moved by 1 posterior sd from maximum likelihood estimate
 ## Took a couple of minutes to run 1000 iterations
@@ -83,6 +83,8 @@ prior ## Currently standard normal so can't be cause of problem
 
 sim1=rindep_norm_gamma_reg(n=1000,y,x,prior,offset2=NULL,wt=1)
 
+#summary(sim1)
+
 ## Note, last ratio is a constant for test 1 determined by distance between
 ## prior and maximum likelihood estimate
 ## for priors one sd away, it was -0.885 ## Note, much, much lower when approximate
@@ -91,8 +93,9 @@ sim1=rindep_norm_gamma_reg(n=1000,y,x,prior,offset2=NULL,wt=1)
 ## for joint posterior mode used to center candidates for beta
 ## 
 
-qc1=cbind(sim1$disp_out,1/sim1$disp_out,sim1$test_out,
-log(sim1$test_out[,2])*sim1$disp_out)
+
+qc1=cbind(sim1$dispersion,1/sim1$dispersion,sim1$test_out,
+log(sim1$test_out[,2])*sim1$dispersion)
 
 #qc1[1:30,]
 #sim1$test_out[1:30,]
@@ -158,8 +161,8 @@ dispersion
 
 # New sampler (when prior=maximum likelihood estimate seemed to match Two-Block Gibbs)
 
-mean(sim1$disp_out)
-var(sim1$disp_out)
+mean(sim1$dispersion)
+var(sim1$dispersion)
 
 ## Two-block Gibbs
 
@@ -174,8 +177,8 @@ var(disp_out)
 
 # new sampler
 
-mean(1/sim1$disp_out)
-var(1/sim1$disp_out)
+mean(1/sim1$dispersion)
+var(1/sim1$dispersion)
 
 ##  Two-block Gibbs
 
@@ -198,7 +201,7 @@ t(glmb.D9$coef.means)
 ## Estimates seem to match those from sampler with fixed dispersion
 ## instead of those with variable dispersion from two-block Givvs
 
-colMeans(sim1$beta_out)
+colMeans(sim1$coefficients)
 
 ## mean for two-block Gibbs
 colMeans(beta_out)
@@ -210,27 +213,27 @@ colMeans(beta_out)
 ## and variance should be bounded from above by true density
 
 cov(glmb.D9$coefficients)  
-cov(sim1$beta_out)  
+cov(sim1$coefficients)  
 cov(beta_out)
 
 ## Look at implied precision -- Results closer to two-block than
 ## to those from fixed dispersion - could difference be due to chance?
 
 solve(cov(glmb.D9$coefficients) ) 
-solve(cov(sim1$beta_out)  )
+solve(cov(sim1$coefficients)  )
 solve(cov(beta_out))
 
 cor(beta_out[,1],disp_out[,1])  # -0.4168 
 cor(beta_out[,2],disp_out[,1])  # 0.2615
 
 sd1=sqrt(diag(cov(glmb.D9$coefficients)))
-sd2=sqrt(diag(cov(sim1$beta_out)))
+sd2=sqrt(diag(cov(sim1$coefficients)))
 sd3=sqrt(diag(cov(beta_out)))
 
 ## Standard deviation is a tiny bit too low...
 ## Suggests precision for data too high (or dispersion too low)
 
-rbind(colMeans(sim1$beta_out),sd2)
+rbind(colMeans(sim1$coefficients),sd2)
 rbind(colMeans(beta_out),sd3)
 
 ## t-test suggest difference not due to chance
@@ -239,12 +242,12 @@ rbind(colMeans(beta_out),sd3)
 ## Not sure why algorithm might require betastar to be at posterior mode
 ## to yield correct results
 
-t.test(sim1$beta_out[,1],beta_out[,1])
-t.test(sim1$beta_out[,2],beta_out[,2])
+t.test(sim1$coefficients[,1],beta_out[,1])
+t.test(sim1$coefficients[,2],beta_out[,2])
 
 #####################################################################3
 
 mean(sim1$test_out)
-mean(sim1$iters_out)  
-1/mean(sim1$iters_out)  ## 4.9% acceptance rate for current example - prior not too far
+mean(sim1$iters)  
+1/mean(sim1$iters)  ## 4.9% acceptance rate for current example - prior not too far
 

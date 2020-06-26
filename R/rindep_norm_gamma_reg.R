@@ -11,6 +11,22 @@
 #' @export 
 
 
+## Single Likelihood subgradient model below seems like it may be working but slow
+## To use Grid based approach for this model, try the Below
+##########################  Grid Approach ################################
+##
+##   1) Use betastar and pstar from single tangent as starting point
+##   2) Find Envelope for model where p is fixed at pstar 
+##   3) Find all the points of tangencies and compute RSS
+##   4) Find the smallest of all the RSS estimates (RSS_LB) and set
+##      pstar_UB = 1/(RSS_LB)
+##   5) Adjust the candidates for p to use RSS_LB instead of RSS_post to
+##      determine the shape
+##   6) When implementing accept-reject sampling using the grid, adjust the accept-reject
+##      by adding the test1 term back in with value test1=-0.5p(RSS_post-RSS_LB)
+##    Note 1: This should ensure that the accept-reject approach still is valie
+##    Note 2: Need to compare single point to grid to ensure validity
+
 rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
   
   ### Initial implementation of Likelihood subgradient Sampling 
@@ -20,6 +36,8 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
   
   ## Use the prior list to set the prior elements if it is not missing
   ## Error checking to verify that the correct elements are present
+  ## Shold be implemented
+    
   if(missing(prior)) stop("Prior Specification Missing")
   if(!missing(prior)){
     if(!is.null(prior$mu)) mu=prior$mu
@@ -37,11 +55,7 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
   n_obs=length(y)
 
   shape2= shape + n_obs/2
-  rate2 =rate + RSS/2
-  
-  
-  ## Use passed dispersion to get a rough estimate for posterior mode
-  ## should really iterate
+  #rate2 =rate + RSS/2
   
   dispersion2=dispersion
 
@@ -50,11 +64,6 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
   glmb_out1=glmb(n=1,y~x-1,family=gaussian(),prior=prior)
   b_old=glmb_out1$coef.mode
 
-#  print("First posterior mode estimate")
-#  print(b_old)
-  ## sample for dispersion given beta
-  ## How does this work without providing the dispersion shape and the rate?
- 
   xbetastar=x%*%b_old
   
   ## Residual SUM of SQUARES at current conditional posterior mode estimate
@@ -62,19 +71,6 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
   RSS2_post=t(y-xbetastar)%*%(y-xbetastar)  
   
   dispersion2=RSS2_post/n_obs
-  
-  
-  #disp_out1<-rglmb_dispersion(n=1000,y,x,b=b_old,wt=1,
-  #  shape=shape,rate=rate,alpha= rep(0, length(y)), family=gaussian())
- 
-  ## Maybe dispersion should be set to maximize log-likelihood given beta?
-  ## 
-  
-  ## Estimate mode by using formula for mean and mode for inverse gamma [using posterior shape]
-  ## https://en.wikipedia.org/wiki/Inverse-gamma_distribution
-  
-  ## Just use the mean as estimate for dispersion.
-  
   
     }
 
@@ -84,22 +80,19 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
   ## Use this as betastar
   
   betastar=glmb_out1$coef.mode
-  
-#  print("Final_betastar")
-#  print(betastar)
-  
   xbetastar=x%*%betastar
   RSS2_post=t(y-xbetastar)%*%(y-xbetastar)  ## Residual SUM of SQUARES at post model
 
-  ## Updated version
+  ## Updated version (when using the likelihood subgradient approach
+  ## The RSS at the tangent point gets shifted to the gamma distribution
   
   rate2 =rate + RSS2_post/2
-  
-    
+
 #  print("dispersion from optimization")
 #  print(dispersion2)
   
   disp_temp=RSS2_post/n_obs
+  
 #  print("dispersion that maximizes log-likelihood")
 #  print(disp_temp)
   
@@ -125,63 +118,37 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
     RSS2_test=t(y-xbeta)%*%(y-xbeta)  ## Residual SUM of SQUARES for test candidate
     RSS2_post=t(y-xbetastar)%*%(y-xbetastar)  ## Residual SUM of SQUARES at post model
     
-    # Log-Acceptance rate (test1)
+    # Log-Acceptance rate
     
     # 1)if we used the prior to generate candidate for beta, 
-    # we would have test1=-0.5*p*(RSS2_test-RSS)
+    # we would have test1=-0.5*p*(RSS2_test-RSS_ML) and 
+    ## RSS_ML would shift to gamma distribution
     # 
     # 2) when we replace prior with likelihood sub-gradient density, we replace  
     # RSS2_test with (RSS_post+2*t(y-xbetastar)%*%x%*%(beta-betastar))
+    # and replace RSS_ML with RSS_Post (which gets shifted to the gamma distribution)  
     
     ## This would be test if sampled beta from prior
     
-#    test1=-p*0.5*(RSS2_test-RSS)
+#    test1=-p*0.5*(RSS2_test-RSS_ML)
     test1=0
     
-#    print("RSS-Main")
-#    print(RSS)
-##    print("RSS-test")
-##    print(RSS2_test)
-#    print("RSS2-post")
-#    print(RSS2_post)
-##    print("RSS2_post with slope should be lower bound on RSS2_test")
-##    print(RSS2_post-2*t(y-xbetastar)%*%x%*%(beta-betastar))
-    
-    ## This should be a concave function that obtains its max when beta=betastar
+    ## The below should be a concave function that obtains its max when beta=betastar
     ## When beta=betastar, RSS2_test=RSS_Post and the slope term=0
     ## So whole terms should be 0
 
     test2=p*0.5*(RSS2_post-2*t(y-xbetastar)%*%x%*%(beta-betastar)-RSS2_test)
 
-    ## Can likely replace test 1 once test2 is in place with following
-    
+    ## This should likely be -p*0.5*(RSS2_post - RSS_LB)
+    ## when using grid where RSS_LB is lower bound among tangent points
+      
 #    test1=-p*0.5*(RSS2_post-RSS) 
     
-    ## Maybe test could be just the first two terms and RSS
-    
-    ##test2=p*0.5*(RSS2_post-2*t(y-xbetastar)%*%x%*%(beta-betastar)-RSS2_test)
-    
-##     print("test1/p")
-##     print(test1/p)
-#    test1=-0.5*p*(RSS2_post+t(y-xbetastar)%*%x%*%(beta-betastar)-RSS)
 
-        # The second component of the log-acceptance rate adjusts the
-    # multivariate normal variance and penalizes draws away from
-    # the conditional posterior mode 
-    # The first two terms are (jointly) maximized at the conditional posterior modes
-    # The last term scales the term so that it is zero at the conditional posterior mode
-    # Need to check if test2 needs adjustment when prior is not Standard multivariate 
-    # normal
-    
-#    LL_post_mode=-Neg_logLik2(betastar,y,x,alpha=0,wt=sqrt(p),family=gaussian())
-#    LL_post_test=-Neg_logLik2(beta,y,x,alpha=0,wt=sqrt(p),family=gaussian())
-#    test2=-p*t(y-xbetastar)%*%x%*%(beta-betastar)+(LL_post_test-LL_post_mode) ## Likely missing a constant
+
      test=test1+test2
      
-#     print("combined test")
-#     print(test)
-#    test=test1
-    
+
     return(list(test=test[1,1],test1=test1,test2=test2))
   }
   
@@ -206,50 +173,20 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
       prior=list(mu=mu,Sigma=Sigma, dispersion=dispersion)
       glmb_out1=glmb(n=1,y~x-1,family=gaussian(),prior=prior)
       
-      ## Switch to using prior as betastar --> sampling should be from prior
-      ## This may further lower acceptance rate but hopefully will give
-      ## Correct results
-      ## Try switching to constant betastar for all values for p if this works
-      ## switched above 
-      ## moving prior seemed to cause issues so may need to switch back to mu to understand
-      ## why - could be because acceptance rate was so low
-      
-      #betastar=glmb_out1$coef.mode
-      #betastar=mu
-      
-      ## Temporarily use this in the testing to check acceptance procedure
-      #betatest=as.matrix(glmb_out1$coefficients[1,],ncol=1)
-      
-      ## Likelihood subgradient generated candidate - can try 
-      ## just candidate from conditional density
-      
       betatest=as.matrix(mvrnorm(n = 1, mu=betastar, Sigma=Sigma, tol = 1e-6, empirical = FALSE),ncol=1)
 
-#      print("betatest")
-#      print(betatest)
-#      print("betastar")
-#      print(betastar)
-      
       testtemp=testfun(betatest,betastar,p,as.matrix(y,ncol=1),x,RSS)
       test=exp(testtemp$test)
       
       disp_out[i,1]=dispersion
-      
-      ## This had been wrong - set to output from glmb - now corrected
       
       beta_out[i,1:ncol(x)]=betatest 
       test_out[i,1]=exp(testtemp$test)
       test_out[i,2]=exp(testtemp$test1)
       test_out[i,3]=exp(testtemp$test2)
       
-#      print("dispout*test1")
-#      print(disp_out[i,1]*test)
       # set a1 to 1 if draw was accepted to end while loop
       
-      ## Temporarily accept all draws to see data
-#      print(test)
-      
-      #a1=1  
       if(runif(1)<test) a1=1
       ## increment iters count if candidate not accepted 
       
@@ -259,8 +196,33 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
     
   }
   
-  return(list(disp_out=disp_out,beta_out=beta_out,test_out=test_out,iters_out=iters_out)  )
+  # Return list with elements similar to the rnorm_gamma function
+  # For now, leave PostMode as NULL - Needs iterative procedure or
+  # customized optimization to determine accurately (betastar depends on dispersion)
+  # Also leave envelope, and loglike null for now 
+  # add test_out to list for now to assess accept-reject implementation
+  
+  famfunc=glmbfamfunc(gaussian())  
+  f1=famfunc$f1
+  
+    outlist=list(coefficients=beta_out, PostMode=NULL,
+Prior=list(mu=mu,Sigma=Sigma,shape=shape,rate=rate),
+iters=iters_out,
+famfunc=famfunc,
+Envelope=NULL,
+dispersion=disp_out,
+loglike=NULL,
+test_out=test_out)
+
+    colnames(outlist$coefficients)<-colnames(x)
+    outlist$call<-match.call()
+    class(outlist)<-c(outlist$class,"rglmb")
+    
+return(outlist)  
+
 }
+
+
 
 ## This function is used by the above (not sure why Neg_logLik is not working)
 ## Could be because it is not exported - replace with Neg_logLik
