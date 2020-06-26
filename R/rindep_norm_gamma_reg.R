@@ -36,23 +36,76 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
   RSS=sum(residuals(lm_out)^2)
   n_obs=length(y)
 
+  shape2= shape + n_obs/2
+  rate2 =rate + RSS/2
+  
+  
   ## Use passed dispersion to get a rough estimate for posterior mode
   ## should really iterate
   
-  prior=list(mu=mu,Sigma=Sigma, dispersion=dispersion)
-  glmb_out1=glmb(n=1,y~x-1,family=gaussian(),prior=prior)
+  dispersion2=dispersion
 
+  for(j in 1:10){
+  prior=list(mu=mu,Sigma=Sigma, dispersion=dispersion2)
+  glmb_out1=glmb(n=1,y~x-1,family=gaussian(),prior=prior)
+  b_old=glmb_out1$coef.mode
+
+#  print("First posterior mode estimate")
+  print(b_old)
+  ## sample for dispersion given beta
+  ## How does this work without providing the dispersion shape and the rate?
+ 
+  xbetastar=x%*%b_old
+  
+  ## Residual SUM of SQUARES at current conditional posterior mode estimate
+  
+  RSS2_post=t(y-xbetastar)%*%(y-xbetastar)  
+  
+  dispersion2=RSS2_post/n_obs
+  
+  
+  #disp_out1<-rglmb_dispersion(n=1000,y,x,b=b_old,wt=1,
+  #  shape=shape,rate=rate,alpha= rep(0, length(y)), family=gaussian())
+ 
+  ## Maybe dispersion should be set to maximize log-likelihood given beta?
+  ## 
+  
+  ## Estimate mode by using formula for mean and mode for inverse gamma [using posterior shape]
+  ## https://en.wikipedia.org/wiki/Inverse-gamma_distribution
+  
+  ## Just use the mean as estimate for dispersion.
+  
+  
+    }
+
+  prior=list(mu=mu,Sigma=Sigma, dispersion=dispersion2)
+  glmb_out1=glmb(n=1,y~x-1,family=gaussian(),prior=prior)
+  
   ## Use this as betastar
   
   betastar=glmb_out1$coef.mode
   
+  print("Final_betastar")
+  print(betastar)
+  
+  xbetastar=x%*%betastar
+  RSS2_post=t(y-xbetastar)%*%(y-xbetastar)  ## Residual SUM of SQUARES at post model
+
+  ## Updated version
+  
+  rate2 =rate + RSS2_post/2
   
     
+  print("dispersion from optimization")
+  print(dispersion2)
+  
+  disp_temp=RSS2_post/n_obs
+  print("dispersion that maximizes log-likelihood")
+  print(disp_temp)
+  
   ## Set updated gamma parameters for the candidate generation
   ## shape matches posterior while rate will be too low (adjusted using accept-rejecte)
   
-  shape2= shape + n_obs/2
-  rate2 =rate + RSS/2
   
   # set up matrices to hold output
   
@@ -82,7 +135,8 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
     
     ## This would be test if sampled beta from prior
     
-    test1=-p*0.5*(RSS2_test-RSS)
+#    test1=-p*0.5*(RSS2_test-RSS)
+    test1=0
     
 #    print("RSS-Main")
 #    print(RSS)
@@ -101,7 +155,7 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
 
     ## Can likely replace test 1 once test2 is in place with following
     
-    test1=-p*0.5*(RSS2_post-RSS) 
+#    test1=-p*0.5*(RSS2_post-RSS) 
     
     ## Maybe test could be just the first two terms and RSS
     
