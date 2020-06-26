@@ -7,7 +7,7 @@
 #' @inheritParams glmb
 #' @return Currently mainly the draws for the dispersion and the regression coefficients
 #' will be updated to return outputs consistent with other function
-#' @example inst/examples/Ex_confint.glmb.R
+#' @example inst/examples/Ex_rindep_norm_gamma_reg.R
 #' @export 
 
 
@@ -51,7 +51,7 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
   b_old=glmb_out1$coef.mode
 
 #  print("First posterior mode estimate")
-  print(b_old)
+#  print(b_old)
   ## sample for dispersion given beta
   ## How does this work without providing the dispersion shape and the rate?
  
@@ -85,8 +85,8 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
   
   betastar=glmb_out1$coef.mode
   
-  print("Final_betastar")
-  print(betastar)
+#  print("Final_betastar")
+#  print(betastar)
   
   xbetastar=x%*%betastar
   RSS2_post=t(y-xbetastar)%*%(y-xbetastar)  ## Residual SUM of SQUARES at post model
@@ -96,12 +96,12 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
   rate2 =rate + RSS2_post/2
   
     
-  print("dispersion from optimization")
-  print(dispersion2)
+#  print("dispersion from optimization")
+#  print(dispersion2)
   
   disp_temp=RSS2_post/n_obs
-  print("dispersion that maximizes log-likelihood")
-  print(disp_temp)
+#  print("dispersion that maximizes log-likelihood")
+#  print(disp_temp)
   
   ## Set updated gamma parameters for the candidate generation
   ## shape matches posterior while rate will be too low (adjusted using accept-rejecte)
