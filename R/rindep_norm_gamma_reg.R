@@ -1,4 +1,4 @@
-#' The indendepent normal-gamma regression
+#' The Bayesian Indendepent Normal-Gamma Regression Distribution
 #'
 #' Generates iid samples from the posterior density for the 
 #' independent normal-gamma regression
@@ -28,6 +28,8 @@
 ##    Note 2: Need to compare single point to grid to ensure validity
 
 rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
+
+  call<-match.call()
   
   ### Initial implementation of Likelihood subgradient Sampling 
   ### Currently uses as single point for conditional tangencis
@@ -205,17 +207,26 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
   famfunc=glmbfamfunc(gaussian())  
   f1=famfunc$f1
   
-    outlist=list(coefficients=beta_out, PostMode=NULL,
-Prior=list(mu=mu,Sigma=Sigma,shape=shape,rate=rate),
-iters=iters_out,
-famfunc=famfunc,
-Envelope=NULL,
+    outlist=list(
+coefficients=beta_out, 
+coef.mode=betastar,  ## For now, use the conditional mode (not universal)
 dispersion=disp_out,
+## For now, name items in list like this-eventually make format/names
+## consistent with true prior (current names needed by summary function)
+Prior=list(mean=mu,Sigma=Sigma,shape=shape,rate=rate,Precision=solve(Sigma)), 
+family=gaussian(),
+prior.weights=wt,
+y=y,
+x=x,
+call=call,
+famfunc=famfunc,
+iters=iters_out,
+Envelope=NULL,
 loglike=NULL,
 test_out=test_out)
 
     colnames(outlist$coefficients)<-colnames(x)
-    outlist$call<-match.call()
+    outlist$offset2<-offset2
     class(outlist)<-c(outlist$class,"rglmb")
     
 return(outlist)  

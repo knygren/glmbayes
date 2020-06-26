@@ -2,7 +2,7 @@
 % Please edit documentation in R/rindep_norm_gamma_reg.R
 \name{rindep_norm_gamma_reg}
 \alias{rindep_norm_gamma_reg}
-\title{The indendepent normal-gamma regression}
+\title{The Bayesian Indendepent Normal-Gamma Regression Distribution}
 \usage{
 rindep_norm_gamma_reg(n, y, x, prior, offset2 = NULL, wt = 1)
 }
@@ -116,7 +116,9 @@ n_data=length(y)
 shape=(n_prior/2)
 rate=n_prior*RSS/n_data
 
-prior=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,shape=shape,rate=rate)
+# For now, pass Precision as well as it is needed by the rglmb summary function
+prior=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,
+shape=shape,rate=rate,Precision=solve(Sigma_prior))
 
 ## Using new function
 
@@ -136,7 +138,7 @@ prior=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,shape=shape,rate=rate)
 
 sim1=rindep_norm_gamma_reg(n=1000,y,x,prior,offset2=NULL,wt=1)
 
-#summary(sim1)
+summary(sim1)
 
 ## Note, last ratio is a constant for test 1 determined by distance between
 ## prior and maximum likelihood estimate

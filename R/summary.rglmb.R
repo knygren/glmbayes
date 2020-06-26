@@ -70,7 +70,8 @@ summary.rglmb<-function(object,...){
   ## This should calculate but need to verify DIC is correct
   
   wtin=object$prior.weights  
-  
+
+
   ##############################################
   
   if (!is.null(offset)) {
@@ -97,9 +98,11 @@ summary.rglmb<-function(object,...){
     linear.predictors<-t(x%*%t(object$coefficients))
     
   }
+    
   linkinv<-object$family$linkinv
   fitted.values<-linkinv(linear.predictors)
-  
+
+
   ##################################################
   
   n<-length(object$coefficients[,1])  
@@ -111,6 +114,8 @@ summary.rglmb<-function(object,...){
   priorrank<-matrix(0,nrow=l1,ncol=1)
   pval1<-matrix(0,nrow=l1,ncol=1)
   pval2<-matrix(0,nrow=l1,ncol=1)
+  
+
   for(i in 1:l1){
     percentiles[i,]<-quantile(object$coefficients[,i],probs=c(0.01,0.025,0.05,0.5,0.95,0.975,0.99))
     test<-append(object$coefficients[,i],object$Prior$mean[i])
@@ -130,7 +135,7 @@ summary.rglmb<-function(object,...){
   
   glm_temp=glm(y~x-1,family=object$family)
   
-  res<-list(
+    res<-list(
     coefficients=object$coefficients,
     coef.means=colMeans(object$coefficients),
     coef.mode=object$mode,
