@@ -220,11 +220,7 @@ rglmb<-function(n=1,y,x,family=gaussian(),prior,wt=1,offset2=rep(0,nobs),start=N
                      outlist<-.rnnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion2,
                             famfunc=famfunc,f1=f1,f2=f2,f3=f3,
                             start=start,family=family$family,link=family$link,Gridtype=Gridtype)
-    
-    
       }
-  
-
   
   colnames(outlist$coefficients)<-colnames(x)
 
@@ -233,14 +229,12 @@ rglmb<-function(n=1,y,x,family=gaussian(),prior,wt=1,offset2=rep(0,nobs),start=N
   rglmb_f=DF2formula(rglmb_df)
   rglmb_mf=model.frame(rglmb_f,rglmb_df)
   
-  
   outlist$family=family  
   outlist$call<-match.call()
   outlist$offset2<-offset2
   outlist$formula<-rglmb_f
   outlist$model<-rglmb_mf
   outlist$data<-rglmb_df
-  
   
   class(outlist)<-c(outlist$class,c("rglmb","glmb","glm","lm"))
   outlist

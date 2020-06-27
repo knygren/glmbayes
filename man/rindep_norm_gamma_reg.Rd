@@ -136,6 +136,18 @@ shape=shape,rate=rate,Precision=solve(Sigma_prior))
 #> colMeans(beta_out) Column means for two-block Gibbs
 #[1]  4.73585593 -0.07061893
 
+#attr(prior,"Prior Type")=c("Normal")
+#if(attr(prior,"Prior Type")=="Normal") print("Prior Type was Normal")
+#attr(prior,"Prior Type")=c("Gamma")
+#if(attr(prior,"Prior Type")=="Normal") print("Prior Type was Normal")
+#if(attr(prior,"Prior Type")=="Gamma") print("Prior Type was Gamma")
+#attr(prior,"Prior Type")=c("Normal-Gamma")
+#if(attr(prior,"Prior Type")=="Normal") print("Prior Type was Normal")
+#if(attr(prior,"Prior Type")=="Gamma") print("Prior Type was Gamma")
+#if(attr(prior,"Prior Type")=="Normal-Gamma") print("Prior Type was Normal-Gamma")
+#attr(prior,"Prior Type")=c("Independent-Normal-Gamma")
+#print(paste("Prior Type was:",attr(prior,"Prior Type")))
+
 sim1=rindep_norm_gamma_reg(n=1000,y,x,prior,offset2=NULL,wt=1)
 
 summary(sim1)
