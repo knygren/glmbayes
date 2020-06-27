@@ -109,7 +109,7 @@ dNormal<-function(mu,Sigma,dispersion=NULL){
   attr(prior_list,"Prior Type")="Normal"  
 
   outlist=list(pfamily="dNormal",prior_list=prior_list,okfamilies=okfamilies,
-  simfun=.rnorm_reg_cpp)
+  simfun=rglmb_norm_reg)
   attr(outlist,"Prior Type")="dNormal"             
   class(outlist)="pfamily"
   outlist$call<-match.call()
