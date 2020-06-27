@@ -240,7 +240,7 @@ dIndependent_Normal_Gamma<-function(mu, Sigma,shape, rate){
   prior_list=list(mu=mu,Sigma=Sigma,shape=shape,rate=rate)
   attr(prior_list,"Prior Type")="dIndependent_Normal_Gamma"  
   outlist=list(pfamily="dIndependent_Normal_Gamma",prior_list=prior_list,
-  okfamilies=okfamilies,simfun=rnorm_gamma_reg)
+  okfamilies=okfamilies,simfun=rindependent_norm_gamma_reg)
   
   attr(outlist,"Prior Type")="dIndependent_Normal_Gamma"             
   class(outlist)="pfamily"

@@ -7,12 +7,11 @@
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
 #' @param y a vector of observations of length \code{m}.
 #' @param x a design matrix of dimension \code{m * p}.
-#' @param mu a vector of length \code{p} giving the prior means of the variables in the design matrix.
-#' @param P a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior precision matrix of the variable.
-#' @param shape Prior shape parameter for the dispersion parameter (gaussian model only).
-#' @param rate Prior rate parameter for the dispersion parameter (gaussian model only).
-#' @param offset2 this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
-#' @param wt an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
+#' @param prior_list a list with the prior parameters (mu, Sigma, shape and rate) for the 
+#' prior distribution.
+#' @param offset this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
+#' @param weights an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
+#' @inheritParams glmb
 #' @return \code{rnorm_gamma_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
@@ -66,8 +65,34 @@
 
 
 
-rnorm_gamma_reg<-function(n,y,x,mu,P,shape,rate,offset2=NULL,wt=1){
+rnorm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
 
+## Added for consistency with earlier verion of function
+  
+offset2=offset
+wt=weights
+
+## Below code used precision matrix (not Sigma)
+## Code checks for the presence of P in the prior
+## if not present, it imputes Precision by inverting the Sigma matrix
+
+if(missing(prior_list)) stop("Prior Specification Missing")
+if(!missing(prior_list)){
+  if(!is.null(prior_list$mu)) mu=prior_list$mu
+  if(!is.null(prior_list$Sigma)) Sigma=prior_list$Sigma
+  if(!is.null(prior_list$P)) P=prior_list$P
+  if(is.null(prior_list$P)) P=solve(prior_list$Sigma)
+  if(!is.null(prior_list$dispersion)) dispersion=prior_list$dispersion
+  else dispersion=NULL
+  if(!is.null(prior_list$shape)) shape=prior_list$shape
+  else shape=NULL
+  if(!is.null(prior_list$rate)) rate=prior_list$rate
+  else rate=NULL
+}
+
+  
+
+  
 if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
 is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
   
