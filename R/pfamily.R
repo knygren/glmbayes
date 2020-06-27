@@ -35,10 +35,22 @@
 #' for the associated posterior distribution.}
 #' @example inst/examples/Ex_confint.glmb.R
 #' @export 
+#' @exportClass pfamily 
 #' @rdname pfamily
 #' @order 1
 
 pfamily <- function(object, ...) UseMethod("pfamily")
+
+#' @export 
+#' @method pfamily default
+
+pfamily.default <- function(object, ...){
+
+  if(is.null(object$pfamily)) stop("no pfamily object found")
+  if(!class(object$pfamily)=="pfamily") stop("Object named pfamily is not of class pfamily")
+  return(object$pfamily)
+}
+
 
 #' @export 
 #' @method print pfamily
@@ -63,12 +75,41 @@ print.pfamily <- function(x, ...)
 
 dNormal<-function(mu,Sigma,dispersion=NULL){
   
+  ## Check that the inputs are numeric
+  
+  if(is.numeric(mu)==FALSE||is.numeric(Sigma)==FALSE) stop("non-numeric argument to numeric function")
+
+  mu=as.matrix(mu,ncol=1) ## Force mu to matrix
+  Sigma=as.matrix(Sigma)  ## Force Sigma to matrix 
+  
+  nvar=length(mu)
+  nvar1=nrow(Sigma)
+  nvar2=ncol(Sigma)
+  
+  if(!nvar==nvar1||!nvar==nvar2) stop("dimensions of mu and Sigma are not consistent")
+
+  ## Check for symmetry and positive definiteness
+  if(!isSymmetric(Sigma))stop("matrix Sigma must be symmetric")
+  
+  tol<- 1e-06 # Link this to Magnitude of P	
+  eS <- eigen(Sigma, symmetric = TRUE,only.values = FALSE)
+  ev <- eS$values
+  if (!all(ev >= -tol * abs(ev[1L]))) 
+    stop("'Sigma' is not positive definite")
+  
+  if(is.null(dispersion)) dispersion=1
+  if(!is.null(dispersion)){
+    if(!is.numeric(dispersion)) stop("non-numeric argument to numeric function")
+    if(!length(dispersion)==1) stop("dispersion has length>1")
+    if(!length(dispersion)>0) stop("dispersion must be >0")
+  }
+    
   okfamilies <- c("gaussian","poisson","binomial","quasipoisson","quasibinomial","Gamma")
   prior_list=list(mu=mu,Sigma=Sigma,dispersion=dispersion)
   attr(prior_list,"Prior Type")="Normal"  
 
   outlist=list(pfamily="dNormal",prior_list=prior_list,okfamilies=okfamilies,
-simfun=.rnorm_reg_cpp)
+  simfun=.rnorm_reg_cpp)
   attr(outlist,"Prior Type")="dNormal"             
   class(outlist)="pfamily"
   outlist$call<-match.call()
@@ -81,6 +122,15 @@ simfun=.rnorm_reg_cpp)
 
 dGamma<-function(shape,rate,beta){
 
+  if(is.numeric(shape)==FALSE||is.numeric(rate)==FALSE||is.numeric(beta)==FALSE) stop("non-numeric argument to numeric function")
+  
+  if(length(shape)>1) stop("shape is not of length 1")
+  if(length(shape)>1) stop("rate is not of length 1")
+  if(shape<=0) stop("shape must be>0")
+  if(rate<=0) stop("rate must be>0")
+  
+  beta=as.matrix(beta,ncol=1)
+  
   okfamilies <- c("gaussian","Gamma")
   prior_list=list(shape=shape,rate=rate,beta=beta)
   attr(prior_list,"Prior Type")="dGamma"  
@@ -101,6 +151,39 @@ dGamma<-function(shape,rate,beta){
 
 dNormal_Gamma<-function(mu, Sigma,shape, rate){
 
+  ############################################################  
+  
+  if(is.numeric(mu)==FALSE||is.numeric(Sigma)==FALSE) stop("non-numeric argument to numeric function")
+  if(is.numeric(shape)==FALSE||is.numeric(rate)==FALSE) stop("non-numeric argument to numeric function")
+  
+  if(length(shape)>1) stop("shape is not of length 1")
+  if(length(shape)>1) stop("rate is not of length 1")
+  if(shape<=0) stop("shape must be>0")
+  if(rate<=0) stop("rate must be>0")
+  
+  mu=as.matrix(mu,ncol=1) ## Force mu to matrix
+  Sigma=as.matrix(Sigma)  ## Force Sigma to matrix 
+
+  
+    
+  nvar=length(mu)
+  nvar1=nrow(Sigma)
+  nvar2=ncol(Sigma)
+  
+  if(!nvar==nvar1||!nvar==nvar2) stop("dimensions of mu and Sigma are not consistent")
+  
+  ## Check for symmetry and positive definiteness
+  if(!isSymmetric(Sigma))stop("matrix Sigma must be symmetric")
+  
+  tol<- 1e-06 # Link this to Magnitude of P	
+  eS <- eigen(Sigma, symmetric = TRUE,only.values = FALSE)
+  ev <- eS$values
+  if (!all(ev >= -tol * abs(ev[1L]))) 
+    stop("'Sigma' is not positive definite")
+  
+  
+  ############################################################
+  
   okfamilies <- c("gaussian") # Unclear if this could be used for Gamma  or quasi-families
   prior_list=list(mu=mu,Sigma=Sigma,shape=shape,rate=rate)
   attr(prior_list,"Prior Type")="dNormal_Gamma"  
@@ -120,6 +203,39 @@ dNormal_Gamma<-function(mu, Sigma,shape, rate){
 
 dIndependent_Normal_Gamma<-function(mu, Sigma,shape, rate){
 
+  ##############################################################
+  
+  if(is.numeric(mu)==FALSE||is.numeric(Sigma)==FALSE) stop("non-numeric argument to numeric function")
+  if(is.numeric(shape)==FALSE||is.numeric(rate)==FALSE) stop("non-numeric argument to numeric function")
+  
+  if(length(shape)>1) stop("shape is not of length 1")
+  if(length(shape)>1) stop("rate is not of length 1")
+  if(shape<=0) stop("shape must be>0")
+  if(rate<=0) stop("rate must be>0")
+  
+  mu=as.matrix(mu,ncol=1) ## Force mu to matrix
+  Sigma=as.matrix(Sigma)  ## Force Sigma to matrix 
+  
+  
+  
+  nvar=length(mu)
+  nvar1=nrow(Sigma)
+  nvar2=ncol(Sigma)
+  
+  if(!nvar==nvar1||!nvar==nvar2) stop("dimensions of mu and Sigma are not consistent")
+  
+  ## Check for symmetry and positive definiteness
+  if(!isSymmetric(Sigma))stop("matrix Sigma must be symmetric")
+  
+  tol<- 1e-06 # Link this to Magnitude of P	
+  eS <- eigen(Sigma, symmetric = TRUE,only.values = FALSE)
+  ev <- eS$values
+  if (!all(ev >= -tol * abs(ev[1L]))) 
+    stop("'Sigma' is not positive definite")
+  
+  
+  ##############################################################
+  
   okfamilies <- c("gaussian") # Unclear if this could be used for Gamma or quasi-families
   prior_list=list(mu=mu,Sigma=Sigma,shape=shape,rate=rate)
   attr(prior_list,"Prior Type")="dIndependent_Normal_Gamma"  

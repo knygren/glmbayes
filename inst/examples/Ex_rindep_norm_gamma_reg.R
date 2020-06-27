@@ -141,9 +141,10 @@ for(i in 1:1000){
 
   #shape=(n_prior/2)
   #rate=n_prior*RSS/n_data
+  prior3=list(shape=shape, rate=rate,beta=b_old)
   
-  disp_out1<-rglmb_dispersion(n=1,y,x,b_old,shape=shape,rate=rate,
-  alpha= rep(0, length(y)), family=gaussian())
+  disp_out1<-rglmb_dispersion(n=1,y,x,prior_list=prior3,
+  offset= rep(0, length(y)),family=gaussian())
   dispersion2=disp_out1$dispersion
   
 #  disp_out[i,1]=disp_out1$dispersion
@@ -160,9 +161,11 @@ b_old=glmb_out1$coefficients[1,]
 beta_out[i,1:2]=glmb_out1$coefficients[1,1:2]
 
 ## sample for dispersion given beta
+prior3=list(shape=shape, rate=rate,beta=b_old)
 
-disp_out1<-rglmb_dispersion(n=1,y,x,b_old,alpha= rep(0, length(y)),
-shape=shape,rate=rate,family=gaussian())
+disp_out1<-rglmb_dispersion(n=1,y,x,prior_list=prior3,
+offset= rep(0, length(y)),family=gaussian())
+
 dispersion2=disp_out1$dispersion
 
 disp_out[i,1]=disp_out1$dispersion

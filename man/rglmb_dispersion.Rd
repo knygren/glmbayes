@@ -10,11 +10,9 @@ rglmb_dispersion(
   n,
   y,
   x,
-  b,
-  alpha = 0,
-  wt = 1,
-  shape,
-  rate,
+  prior_list,
+  offset = NULL,
+  weights = 1,
   family = gaussian()
 )
 
@@ -29,21 +27,18 @@ rglmb_dispersion(
 
 \item{x}{a design matrix of dimension \code{m * p}.}
 
-\item{b}{a vector of estimated regression parameters. Typically the output of a single draw using \code{\link{rglmb}} during block-Gibbs sampling.}
+\item{prior_list}{a list with the prior parameters (shape and rate) for the 
+prior distribution and a vector with the assumed value (beta) for the regression coefficients.}
 
-\item{alpha}{this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.}
-
-\item{wt}{an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.}
-
-\item{shape}{Prior shape parameter for the dispersion parameter.}
-
-\item{rate}{Prior rate parameter for the dispersion parameter.}
+\item{offset}{this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.}
 
 \item{family}{a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)}
 
 \item{digits}{Number of significant digits to use for printed outpute}
 
 \item{object}{an object of class \code{"glmb_dispersion"} that is to be summarized}
+
+\item{wt}{an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.}
 
 \item{\ldots}{further arguments passed to or from other methods}
 }
@@ -132,8 +127,11 @@ rate/shape ## Should match v_prior (currently also v_old)
 ## We see that this currently matches 
 ### (test different v_prior with various prior observations below) 
 
-dispout<-rglmb_dispersion(n=n,y,x,b_old,alpha= rep(0, length(y)),
-                          shape=shape,rate=rate,family=gaussian())
+prior_list=list(beta=b_old,shape=shape,rate=rate)
+
+dispout<-rglmb_dispersion(n=n,y,x,prior_list=prior_list,
+offset= rep(0, length(y)),family=gaussian())
+
 mean(dispout$dispersion) 
 v_prior
 v_old

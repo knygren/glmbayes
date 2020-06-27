@@ -112,9 +112,10 @@ rate/shape ## Should match v_prior (currently also v_old)
 
 ## We see that this currently matches 
 ### (test different v_prior with various prior observations below) 
+prior_list=list(shape=shape,rate=rate,beta=b_old)
+dispout<-rglmb_dispersion(n=n,y,x,prior_list=prior_list,
+offset= rep(0, length(y)),family=gaussian())
 
-dispout<-rglmb_dispersion(n=n,y,x,b_old,alpha= rep(0, length(y)),
-                          shape=shape,rate=rate,family=gaussian())
 mean(dispout$dispersion) 
 v_prior
 v_old

@@ -8,11 +8,10 @@
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
 #' @param y a vector of observations of length \code{m}.
 #' @param x a design matrix of dimension \code{m * p}.
-#' @param b a vector of estimated regression parameters. Typically the output of a single draw using \code{\link{rglmb}} during block-Gibbs sampling.
-#' @param alpha this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
-#' @param wt an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
-#' @param shape Prior shape parameter for the dispersion parameter.
-#' @param rate  Prior rate parameter for the dispersion parameter.
+#' @param prior_list a list with the prior parameters (shape and rate) for the 
+#' prior distribution and a vector with the assumed value (beta) for the regression coefficients.
+#' @param offset this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
+#' @param weights an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
 #' @param family a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
 #' @param digits Number of significant digits to use for printed outpute
 #' @param object an object of class \code{"glmb_dispersion"} that is to be summarized
@@ -42,11 +41,21 @@
 #' @rdname rglmb_dispersion
 #' @order 1
 
+## Offset in this model may need to be handled better
 
 
-rglmb_dispersion<-function(n,y,x,b,alpha=0,wt=1,shape,rate,family=gaussian()){
+rglmb_dispersion<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
     
   call <- match.call()
+
+  ## Renaming for consistency with earlier version
+  
+  wt=weights
+  alpha=offset
+  
+  b=prior_list$beta
+  shape=prior_list$shape
+  rate=prior_list$rate
   
   if (is.character(family)) 
     family <- get(family, mode = "function", envir = parent.frame())
