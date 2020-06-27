@@ -2,8 +2,10 @@
 #'
 #' Generates iid samples from the posterior density for the 
 #' independent normal-gamma regression
-#' @param offset2 an offset parameter
-#' @param wt a weighting variable
+#' @param prior_list a list with the prior parameters (mu, Sigma, shape and rate) for the 
+#' prior distribution.
+#' @param offset an offset parameter
+#' @param weights a weighting variable
 #' @inheritParams glmb
 #' @return Currently mainly the draws for the dispersion and the regression coefficients
 #' will be updated to return outputs consistent with other function
@@ -27,9 +29,12 @@
 ##    Note 1: This should ensure that the accept-reject approach still is valie
 ##    Note 2: Need to compare single point to grid to ensure validity
 
-rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
+rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
 
   call<-match.call()
+  
+  offset2=offset
+  wt=weights
   
   ### Initial implementation of Likelihood subgradient Sampling 
   ### Currently uses as single point for conditional tangencis
@@ -40,15 +45,15 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
   ## Error checking to verify that the correct elements are present
   ## Shold be implemented
     
-  if(missing(prior)) stop("Prior Specification Missing")
-  if(!missing(prior)){
-    if(!is.null(prior$mu)) mu=prior$mu
-    if(!is.null(prior$Sigma)) Sigma=prior$Sigma
-    if(!is.null(prior$dispersion)) dispersion=prior$dispersion
+  if(missing(prior_list)) stop("Prior Specification Missing")
+  if(!missing(prior_list)){
+    if(!is.null(prior_list$mu)) mu=prior_list$mu
+    if(!is.null(prior_list$Sigma)) Sigma=prior_list$Sigma
+    if(!is.null(prior_list$dispersion)) dispersion=prior_list$dispersion
     else dispersion=NULL
-    if(!is.null(prior$shape)) shape=prior$shape
+    if(!is.null(prior_list$shape)) shape=prior_list$shape
     else shape=NULL
-    if(!is.null(prior$rate)) rate=prior$rate
+    if(!is.null(prior_list$rate)) rate=prior_list$rate
     else rate=NULL
   }
   
@@ -76,8 +81,8 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
   
     }
 
-  prior=list(mu=mu,Sigma=Sigma, dispersion=dispersion2)
-  glmb_out1=glmb(n=1,y~x-1,family=gaussian(),prior=prior)
+  prior_list2=list(mu=mu,Sigma=Sigma, dispersion=dispersion2)
+  glmb_out1=glmb(n=1,y~x-1,family=gaussian(),prior=prior_list2)
   
   ## Use this as betastar
   
@@ -172,8 +177,8 @@ rindep_norm_gamma_reg<-function(n,y,x,prior,offset2=NULL,wt=1){
       ## Set prior list in order to get the conditional posterior mode from glmb function
       ## inefficient but works for now.
       
-      prior=list(mu=mu,Sigma=Sigma, dispersion=dispersion)
-      glmb_out1=glmb(n=1,y~x-1,family=gaussian(),prior=prior)
+      prior_list3=list(mu=mu,Sigma=Sigma, dispersion=dispersion)
+      glmb_out1=glmb(n=1,y~x-1,family=gaussian(),prior=prior_list3)
       
       betatest=as.matrix(mvrnorm(n = 1, mu=betastar, Sigma=Sigma, tol = 1e-6, empirical = FALSE),ncol=1)
 

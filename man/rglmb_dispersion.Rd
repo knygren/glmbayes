@@ -32,13 +32,13 @@ prior distribution and a vector with the assumed value (beta) for the regression
 
 \item{offset}{this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.}
 
+\item{weights}{an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.}
+
 \item{family}{a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)}
 
 \item{digits}{Number of significant digits to use for printed outpute}
 
 \item{object}{an object of class \code{"glmb_dispersion"} that is to be summarized}
-
-\item{wt}{an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.}
 
 \item{\ldots}{further arguments passed to or from other methods}
 }

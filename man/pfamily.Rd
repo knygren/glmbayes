@@ -7,7 +7,7 @@
 \alias{dNormal_Gamma}
 \alias{dIndependent_Normal_Gamma}
 \alias{print.pfamily}
-\title{Priof Family Objects for Bayesian Models}
+\title{Prior Family Objects for Bayesian Models}
 \usage{
 pfamily(object, ...)
 

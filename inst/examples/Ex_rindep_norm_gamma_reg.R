@@ -64,7 +64,7 @@ shape=(n_prior/2)
 rate=n_prior*RSS/n_data
 
 # For now, pass Precision as well as it is needed by the rglmb summary function
-prior=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,
+prior_list=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,
 shape=shape,rate=rate,Precision=solve(Sigma_prior))
 
 ## Using new function
@@ -95,7 +95,8 @@ shape=shape,rate=rate,Precision=solve(Sigma_prior))
 #attr(prior,"Prior Type")=c("Independent-Normal-Gamma")
 #print(paste("Prior Type was:",attr(prior,"Prior Type")))
 
-sim1=rindep_norm_gamma_reg(n=1000,y,x,prior,offset2=NULL,wt=1)
+
+sim1=rindependent_norm_gamma_reg(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
 
 summary(sim1)
 

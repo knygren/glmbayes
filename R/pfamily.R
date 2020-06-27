@@ -1,4 +1,4 @@
-#' Priof Family Objects for Bayesian Models
+#' Prior Family Objects for Bayesian Models
 #'
 #' Prior family objects provide a convenient way to specify the details of the priors 
 #' used by functions such as \code{\link{glmb}}. See the documentation for \code{\link{glmb}}
