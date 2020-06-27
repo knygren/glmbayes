@@ -105,10 +105,20 @@ dNormal<-function(mu,Sigma,dispersion=NULL){
   }
     
   okfamilies <- c("gaussian","poisson","binomial","quasipoisson","quasibinomial","Gamma")
+
+  plinks<-function(family){
+    if(family$family=="gaussian") oklinks<-c("identity")
+    if(family$family=="poisson"||family$family=="quasipoisson") oklinks<-c("log")		
+    if(family$family=="binomial"||family$family=="quasibinomial") oklinks<-c("logit","probit","cloglog")		
+    if(family$family=="Gamma") oklinks<-c("log")	
+    return(oklinks)
+  }
+  
   prior_list=list(mu=mu,Sigma=Sigma,dispersion=dispersion)
   attr(prior_list,"Prior Type")="Normal"  
 
   outlist=list(pfamily="dNormal",prior_list=prior_list,okfamilies=okfamilies,
+  plinks=plinks,             
   simfun=rglmb_norm_reg)
   attr(outlist,"Prior Type")="dNormal"             
   class(outlist)="pfamily"
@@ -132,9 +142,19 @@ dGamma<-function(shape,rate,beta){
   beta=as.matrix(beta,ncol=1)
   
   okfamilies <- c("gaussian","Gamma")
+  
+  plinks<-function(family){
+    if(family$family=="gaussian") oklinks<-c("identity")
+    if(family$family=="poisson"||family$family=="quasipoisson") oklinks<-NULL		
+    if(family$family=="binomial"||family$family=="quasibinomial") oklinks<-NULL		
+    if(family$family=="Gamma") oklinks<-c("log")	
+    return(oklinks)
+  }
+  
   prior_list=list(shape=shape,rate=rate,beta=beta)
   attr(prior_list,"Prior Type")="dGamma"  
   outlist=list(pfamily="dGamma",prior_list=prior_list,okfamilies=okfamilies,
+               plinks=plinks,             
                simfun=rglmb_dispersion)
                
   attr(outlist,"Prior Type")="dGamma"
@@ -185,10 +205,19 @@ dNormal_Gamma<-function(mu, Sigma,shape, rate){
   ############################################################
   
   okfamilies <- c("gaussian") # Unclear if this could be used for Gamma  or quasi-families
+
+  plinks<-function(family){
+    if(family$family=="gaussian") oklinks<-c("identity")
+    if(family$family=="poisson"||family$family=="quasipoisson") oklinks<-NULL		
+    if(family$family=="binomial"||family$family=="quasibinomial") oklinks<-NULL		
+    if(family$family=="Gamma") oklinks<-NULL	
+    return(oklinks)
+  }
+  
   prior_list=list(mu=mu,Sigma=Sigma,shape=shape,rate=rate)
   attr(prior_list,"Prior Type")="dNormal_Gamma"  
-  outlist=list(pfamily="dNormal_Gamma",call=call,prior_list=prior_list,okfamilies=okfamilies,
-               simfun=rnorm_gamma_reg)
+  outlist=list(pfamily="dNormal_Gamma",call=call,prior_list=prior_list,
+    okfamilies=okfamilies,plinks=plinks,simfun=rnorm_gamma_reg)
   
   attr(outlist,"Prior Type")="dNormal_Gamma"             
   class(outlist)="pfamily"
@@ -237,10 +266,20 @@ dIndependent_Normal_Gamma<-function(mu, Sigma,shape, rate){
   ##############################################################
   
   okfamilies <- c("gaussian") # Unclear if this could be used for Gamma or quasi-families
+  
+  plinks<-function(family){
+    if(family$family=="gaussian") oklinks<-c("identity")
+    if(family$family=="poisson"||family$family=="quasipoisson") oklinks<-NULL		
+    if(family$family=="binomial"||family$family=="quasibinomial") oklinks<-NULL
+    if(family$family=="Gamma") oklinks<-NULL	
+    return(oklinks)
+  }
+  
+
   prior_list=list(mu=mu,Sigma=Sigma,shape=shape,rate=rate)
   attr(prior_list,"Prior Type")="dIndependent_Normal_Gamma"  
   outlist=list(pfamily="dIndependent_Normal_Gamma",prior_list=prior_list,
-  okfamilies=okfamilies,simfun=rindependent_norm_gamma_reg)
+  okfamilies=okfamilies,plinks=plinks,simfun=rindependent_norm_gamma_reg)
   
   attr(outlist,"Prior Type")="dIndependent_Normal_Gamma"             
   class(outlist)="pfamily"

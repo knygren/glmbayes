@@ -49,7 +49,7 @@ An object of class \code{"rglmb"} is a list containing at least the following co
 }
 \description{
 \code{rglmb_norm_reg} is used to generate iid samples from Bayesian Generalized linear 
-models with a prior. The model is specified by providing a data vector, a design matrix, 
+models with a normal prior. The model is specified by providing a data vector, a design matrix, 
 and 2 prior constants (mu and Sigma) for the normal prior.
 }
 \details{
@@ -191,3 +191,10 @@ Venables, W. N. and Ripley, B. D. (2002)
 \emph{Modern Applied Statistics with S.}
 New York: Springer.
 }
+\seealso{
+Other simulation functions
+\code{\link{rglmb_dispersion}()},
+\code{\link{rindependent_norm_gamma_reg}()},
+\code{\link{rnorm_gamma_reg}()}
+}
+\concept{simfuncs}

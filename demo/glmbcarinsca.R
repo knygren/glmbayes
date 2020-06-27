@@ -10,10 +10,6 @@ Merit=carinsca$Merit
 Class=carinsca$Class
 Cost=carinsca$Cost
 
-out <- glm(Claims/Insured~Merit+Class,family="poisson")
-summary(out,cor=FALSE)
-
-wt1<-out$prior.weights
 scale<-0.1275 # SAS estimate
 
 dispersion<-1/scale
@@ -43,21 +39,18 @@ mu<-matrix(0,8)
 P<-0.1*solve(diag(Like_std*Like_std))
 V0<-solve(P)
 
-Prior_Error_Checks=Prior_Likelihood_Check(mu,sqrt(diag(V0)),out$coefficients,Like_std)
-
-mu
-out$coefficients
-
 mu[1,1]=-1.1
 
-Prior_Error_Checks=Prior_Likelihood_Check(mu,sqrt(diag(V0)),out$coefficients,Like_std)
-Prior_Error_Checks
+prior_list=list(mu=mu,Sigma=solve(P),dispersion=dispersion)
+out2<-rglmb(n = 1000, out$y, out$x, prior=prior_list, wt = out$prior.weights, 
+family = Gamma(link="log"), offset2 = rep(0, 20), start = out$coefficients, Gridtype = 3) 
 
-out2<-rglmb(n = 1000, out$y, out$x, mu=mu, P=P, wt = out$prior.weights, dispersion = dispersion,
-            family = Gamma(link="log"), offset2 = rep(0, 20), start = out$coefficients, Gridtype = 3) 
 
 summary(out2)
 mean(out2$iters)
+
+
+################################################################################
 
 ## ~ 2.381 candidates per iid sample [Consistent with theory]
 

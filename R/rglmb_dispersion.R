@@ -36,6 +36,8 @@
 #' standard simulation procedures for gamma distributions. For the Gamma family,  
 #' , the samples are generated using accept-reject procedures by leveraging the 
 #' likelihood subgradient approach of Nygren and Nygren (2006). 
+#' @family simfuncs 
+#' @references A reference
 #' @example inst/examples/Ex_rglmb_dispersion.R
 #' @export 
 #' @rdname rglmb_dispersion
@@ -119,6 +121,8 @@ if(family$family=="Gamma")
   
   # Initialize vstar2
   vstar<-vstar1
+  
+  ## Optimize vstar?
   for(j in 1:20){
     vstar<-vout(vstar)
   }

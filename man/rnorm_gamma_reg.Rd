@@ -191,3 +191,18 @@ Venables, W. N. and Ripley, B. D. (2002)
 \emph{Modern Applied Statistics with S.}
 New York: Springer.
 }
+\seealso{
+\code{\link{pfamily}} for the list of available pfamilies and how 
+they are specified. Each pfamily has a specific assigned simulation function. This
+particular simulation function is the simulation function for the \code{\link{dNormal_Gamma}} 
+pfamily.
+
+\code{\link{rglmb}} and \code{\link{glmb}} for functions that depend on 
+simulation functions.
+
+Other simulation functions
+\code{\link{rglmb_dispersion}()},
+\code{\link{rglmb_norm_reg}()},
+\code{\link{rindependent_norm_gamma_reg}()}
+}
+\concept{simfuncs}

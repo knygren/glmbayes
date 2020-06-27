@@ -35,7 +35,13 @@
 #' matrix and a prior specification. The function returns the simulated Bayesian coefficients 
 #' and some associated outputs. The iid samples from the posterior density is genererated using 
 #' standard simulation procedures for multivariate normal and gamma distributions. 
-#' 
+#' @family simfuncs 
+#' @seealso \code{\link{pfamily}} for the list of available pfamilies and how 
+#' they are specified. Each pfamily has a specific assigned simulation function. This
+#' particular simulation function is the simulation function for the \code{\link{dNormal_Gamma}} 
+#' pfamily.
+#' @seealso \code{\link{rglmb}} and \code{\link{glmb}} for functions that depend on 
+#' simulation functions.
 #' @references 
 #' Dobson, A. J. (1990)
 #' \emph{An Introduction to Generalized Linear Models.}

@@ -1,7 +1,7 @@
 #' The Bayesian Generalized Linear Model with Normal Prior Distribution
 #'
 #' \code{rglmb_norm_reg} is used to generate iid samples from Bayesian Generalized linear 
-#' models with a prior. The model is specified by providing a data vector, a design matrix, 
+#' models with a normal prior. The model is specified by providing a data vector, a design matrix, 
 #' and 2 prior constants (mu and Sigma) for the normal prior.
 #'
 #' 
@@ -35,7 +35,8 @@
 #' matrix and a prior specification. The function returns the simulated Bayesian coefficients 
 #' and some associated outputs. The iid samples from the posterior density is genererated using 
 #' standard simulation procedures for multivariate normal and gamma distributions. 
-#' 
+#' @family simfuncs 
+
 #' @references 
 #' Dobson, A. J. (1990)
 #' \emph{An Introduction to Generalized Linear Models.}
