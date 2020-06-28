@@ -334,7 +334,10 @@ Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterV
       testll=f2_gamma(btemp,y, x,mu,P,alpha,wt);
       }
 
-
+      if(family2=="gaussian"){  
+        testll=f2_gaussian(btemp,y, x,mu,P,alpha,wt);
+      }
+      
       test=LLconst(J(i))+testtemp(0,0)-log(U2)-testll(0);
 
       if(test>=0) a1=1;
