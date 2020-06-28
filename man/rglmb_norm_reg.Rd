@@ -194,6 +194,7 @@ New York: Springer.
 \seealso{
 Other simulation functions
 \code{\link{rglmb_dispersion}()},
+\code{\link{rindependent_norm_gamma_reg_temp_v2}()},
 \code{\link{rindependent_norm_gamma_reg_temp}()},
 \code{\link{rindependent_norm_gamma_reg}()},
 \code{\link{rnorm_gamma_reg}()}

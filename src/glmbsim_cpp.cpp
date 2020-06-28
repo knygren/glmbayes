@@ -4,13 +4,13 @@
 #include "RcppArmadillo.h"
 #include "famfuncs.h"
 #include "Envelopefuncs.h"
+#include <math.h>
 
 using namespace Rcpp;
 
-// Putside Function declarations (move or delete)
+// Outside Function declarations (move or delete)
 
 void  f4_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL, NumericMatrix cbars, int progbar=0);
-
 
 
 double ctrnorm_cpp(double lgrt,double lglt,double mu,double sigma){
@@ -22,6 +22,7 @@ double ctrnorm_cpp(double lgrt,double lglt,double mu,double sigma){
   
   if(lgrt>=lglt){
     U=R::runif(0.0, 1.0);
+    
     double  u1=1-exp(lgrt);
 		double lgu1=log(u1);
     lgU2=log(U)+lglt+log(1-exp(lgu1-lglt));

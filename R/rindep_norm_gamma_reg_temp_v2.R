@@ -30,7 +30,7 @@
 ##    Note 1: This should ensure that the accept-reject approach still is valie
 ##    Note 2: Need to compare single point to grid to ensure validity
 
-rindependent_norm_gamma_reg_temp<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
+rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
 
   call<-match.call()
   
@@ -101,9 +101,88 @@ rindependent_norm_gamma_reg_temp<-function(n,y,x,prior_list,offset=NULL,weights=
 #  print("dispersion from optimization")
 #  print(dispersion2)
   
-  disp_temp=RSS2_post/n_obs
+  dispstar=RSS2_post/n_obs
 
-  return(list(betastar=betastar,dispstar=disp_temp,RSS2_post=RSS2_post))
+  ## Get family functions for gaussian()  
+    
+  famfunc<-glmbfamfunc(gaussian())
+  
+  f1<-famfunc$f1
+  f2<-famfunc$f2
+  f3<-famfunc$f3
+  f5<-famfunc$f5
+  f6<-famfunc$f6
+  
+  start <- mu
+  
+  if(is.null(offset2))  offset2=rep(as.numeric(0.0),length(y))
+  P=solve(Sigma)
+  #n=1000
+  
+  
+  ###### Adjust weight for dispersion
+  dispersion2=dispersion
+  
+  dispersion2=dispstar
+  
+  if(is.null(wt))  wt=rep(1,length(y))
+  if(length(wt)==1)  wt=rep(wt,length(y))
+
+  wt2=wt/rep(dispersion2,length(y))
+
+  ######################### Shift mean vector to offset so that adjusted model has 0 mean
+  
+  alpha=x%*%as.vector(mu)+offset2
+  mu2=0*as.vector(mu)
+  P2=P
+  x2=x
+  
+  parin=start-mu
+  
+  opt_out=optim(parin,f2,f3,y=as.vector(y),x=as.matrix(x2),mu=as.vector(mu2),
+                P=as.matrix(P),alpha=as.vector(alpha),wt=as.vector(wt2),
+                method="BFGS",hessian=TRUE
+  )
+  
+  bstar=opt_out$par  ## Posterior mode for adjusted model
+#  bstar
+#  bstar+as.vector(mu)  # mode for actual model
+  A1=opt_out$hessian # Approximate Precision at mode
+  
+
+  Standard_Mod=glmb_Standardize_Model(y=as.vector(y), x=as.matrix(x2),
+  P=as.matrix(P2),bstar=as.matrix(bstar,ncol=1), A1=as.matrix(A1))
+  
+  bstar2=Standard_Mod$bstar2  
+  A=Standard_Mod$A
+  x2=Standard_Mod$x2
+  mu2=Standard_Mod$mu2
+  P2=Standard_Mod$P2
+  L2Inv=Standard_Mod$L2Inv
+  L3Inv=Standard_Mod$L3Inv
+  
+  #return(list(bstar2=as.vector(bstar2),A=as.matrix(A),y=y,
+  #            x2=as.matrix(x2),mu2=as.matrix(mu2,ncol=1),
+  #            P2=as.matrix(P2),alpha=as.vector(alpha),
+  #            wt2=as.vector(wt2),family="gaussian",
+  #            link="identity", Gridtype=as.integer(3),
+  #            n=as.integer(n)
+  #            ))
+  
+  #return(list(as.vector(bstar2),as.matrix(A),y,as.matrix(x2),
+  #            as.matrix(mu2,ncol=1),as.matrix(P2),
+  #            as.vector(alpha),as.vector(wt2)))
+  
+  Env2=EnvelopeBuild(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
+                     as.matrix(mu2,ncol=1),as.matrix(P2),as.vector(alpha),
+                     as.vector(wt2),
+                     family="gaussian",link="identity",
+                     Gridtype=as.integer(3), n=as.integer(n),
+                     sortgrid=TRUE)
+  
+  
+  return(Env2)
+  
   
     
 #  print("dispersion that maximizes log-likelihood")
