@@ -11,8 +11,7 @@ rglmb_temp(
   family = gaussian(),
   pfamily,
   offset = NULL,
-  weights = 1,
-  control2 = list(...)
+  weights = 1
 )
 }
 \arguments{
@@ -47,8 +46,6 @@ this can be a character string naming a family function, a family function or th
 \item{offset}{an offset parameter}
 
 \item{weights}{a weighting variable}
-
-\item{control2}{a list of parameters for controlling the Bayesian fitting process.}
 }
 \value{
 Currently mainly the draws for the dispersion and the regression coefficients

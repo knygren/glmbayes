@@ -223,19 +223,12 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
 
   int i;  
   
-  //  bStar_2.print("bstar part of Grid calculation");
-  
   a_2=arma::diagvec(A2);
   arma::vec omega=(sqrt(2)-arma::exp(-1.20491-0.7321*sqrt(0.5+a_2)))/arma::sqrt(1+a_2);
   G1b=xx_1b*arma::trans(bStar_2)+xx_2b*arma::trans(omega);
   Lint=yy_1b*arma::trans(bStar_2)+yy_2b*arma::trans(omega);
   
   // Second row in G1b here is the posterior mode
-  
-  //  G1b.print("G1b part of Grid calculation"); 
-  //  Lint.print("Lint b part of Grid calculation");
-  
-  
   
   NumericVector gridindex(l1);
   
@@ -303,8 +296,6 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
   arma::mat G3b(G3.begin(), G3.nrow(), G3.ncol(), false);
   arma::mat G4b(G4.begin(), G4.nrow(), G4.ncol(), false);
   
-  //    G3b.print("expanded Grid - Should have info from G1b");
-  
   G4b=trans(G3b);
   
   NumericMatrix cbars(l2,l1);
@@ -331,113 +322,87 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
   Rcpp::Rcout << "Number of Variables in model are :"  << l1 << std::endl;
   Rcpp::Rcout << "Number of points in Grid are :"  << l2 << std::endl;
   
-  //    Rcpp::Rcout << "mu passed to LL and Gradient Functions:" << std::flush << mu << std::endl;
-  
   if( family=="binomial" && link=="logit"){
-    //      Rcpp::Rcout << "Finding Values of Log-posteriors and Gradients - New function:" << std::endl;
-    
-    //    f4_binomial_logit(G4,y, x,mu,P,alpha,wt,NegLL,cbars,1);
-    //    cbars2.print("Value of cbars2 after f4_binomial_logit");  
-    
-    //    NegLL_2.print("Value of NegLL_2 after f4_binomial_logit");  
-    
-        Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
     NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,progbar);  
-    
-    //    NegLL_2.print("Value of NegLL_2 after f2_binomial_logit");  
-    
-    
-            Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-    
-    // This might point cbars2 to a different part of memory so cbars does not get updated
+    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
     cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,progbar);
   }
   if(family=="binomial"  && link=="probit"){
-    Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+  //  Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
     NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt,progbar);  
-    Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+  //  Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
     cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt,progbar);
   }
   if(family=="binomial"   && link=="cloglog"){
-    Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+  //  Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
     NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt,progbar);  
-    Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-    
+  //  Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
     cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt,progbar);
   }
   
   if(family=="quasibinomial"  && link=="logit"){
-    Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
     NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,progbar);  
-    Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
     cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,progbar);
   }
   if(family=="quasibinomial" && link=="probit"){
-    Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
     NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt,progbar);  
-    Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
     cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt,progbar);
   }
   if(family=="quasibinomial" && link=="cloglog"){
-    Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
     NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt,progbar);  
-    Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
     cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt,progbar);
   }
   
   if(family=="poisson" ){
-    Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
     NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt,progbar);  
-    Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
     cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt,progbar);
   }
   
   if(family=="quasipoisson" ){
-    Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
     NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt,progbar);  
-    Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
     cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt,progbar);
   }
   
   if(family=="Gamma" ){
-    Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
     NegLL=f2_gamma(G4,y, x, mu, P, alpha, wt,progbar);  
-    Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
     cbars2=f3_gamma(G4,y, x,mu,P,alpha,wt,progbar);
   }
   
-  // 
+  if(family=="gaussian" ){
+    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    NegLL=f2_gaussian(G4,y, x, mu, P, alpha, wt);  
+    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    cbars2=f3_gaussian(G4,y, x,mu,P,alpha,wt);
+  }
   
-  //    cbars2.print("cbars2 out of Gradient Valuations");
-  //    Rcpp::Rcout << "Negative Log-likelihood at tangents:" << std::endl << NegLL << std::endl;
   
-  Rcpp::Rcout << "Finished Log-posterior evaluations:" << std::endl;
+  //  Rcpp::Rcout << "Finished Log-posterior evaluations:" << std::endl;
   
   // Do a temporary correction here cbars3 should point to correct memory
   // See if this sets cbars
-  
-  
+
   cbars3=cbars2;
   
-  // why aren't cbars being passed correctly?
-  
-  //    Rcpp::Rcout << "cbars being passed to Set_Grid_C2 :" << std::endl << cbars << std::endl;
-  
-  
   Set_Grid_C2(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
-  
-  // Earlier version of this did not pass LLconst --> Did not carry it along
-  // 
   
   setlogP_C2(logP,NegLL,cbars,G3,LLconst);
   
   NumericMatrix::Column logP2 = logP( _, 1);
   
-  //    logP.print("logP matrix - before and after setlogP_C2");
-  
-  //    Rcpp::Rcout << "logP - before and after setlogP_C2 :" << std::endl << logP << std::endl;
-  //    Rcpp::Rcout << "LLconst - after setlogP_C2 :" << std::endl << LLconst << std::endl;
-  
+
   double  maxlogP=max(logP2);
   
   NumericVector PLSD=exp(logP2-maxlogP);
@@ -445,8 +410,6 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
   double sumP=sum(PLSD);
   
   PLSD=PLSD/sumP;
-  
-  //    Rcpp::Rcout << "PLSD Vector - probabilities:" << std::endl << PLSD << std::endl;
   
   if(sortgrid==true){
     

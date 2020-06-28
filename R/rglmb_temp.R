@@ -7,7 +7,6 @@
 #' @param pfamily the prior family to use for the model (including the constants passed to prior). 
 #' @param offset an offset parameter
 #' @param weights a weighting variable
-#' @param control2 a list of parameters for controlling the Bayesian fitting process.
 #' @inheritParams glmb
 #' @return Currently mainly the draws for the dispersion and the regression coefficients
 #' will be updated to return outputs consistent with other function
@@ -16,7 +15,7 @@
 
 
 
-rglmb_temp<-function(n=1,y,x,family=gaussian(),pfamily,offset=NULL,weights=1,control2=list(...)){
+rglmb_temp<-function(n=1,y,x,family=gaussian(),pfamily,offset=NULL,weights=1){
   
   ## Pull in information from the pfamily  
   pf=pfamily$pfamily
