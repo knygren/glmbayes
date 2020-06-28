@@ -191,7 +191,7 @@ arma::mat  f3_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericM
     xb2=alpha2+ x2 * b2-y2;
     //out2=P2 * bmu2-x2.t() * Ptemp2 * xb2;
     //outtempb2=trans(P2 * bmu2-x2.t() * Ptemp2 * xb2);
-    outtemp2= P2 * bmu2-x2.t() * Ptemp2 * xb2;
+    outtemp2= P2 * bmu2+x2.t() * Ptemp2 * xb2;
   }
   
   // return  b;

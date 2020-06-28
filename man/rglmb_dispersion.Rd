@@ -181,6 +181,7 @@ A reference
 \seealso{
 Other simulation functions
 \code{\link{rglmb_norm_reg}()},
+\code{\link{rindependent_norm_gamma_reg_temp}()},
 \code{\link{rindependent_norm_gamma_reg}()},
 \code{\link{rnorm_gamma_reg}()}
 }

@@ -54,8 +54,8 @@ if(family$family=="gaussian")
       Ptemp<-diag(wt)      
       }
       xb<-alpha+x%*%b-y
-			yXb2<-P%*%(b-mu)-t(x)%*%(Ptemp%*%xb)
-      yxb2
+			yXb2<-P%*%(b-mu)+t(x)%*%(Ptemp%*%xb)
+      yXb2
 		}
 	f4<-function(b,y,x,alpha=0,wt=1,dispersion=1){
 		dispersion*(2*f1(b,y,x,alpha,wt)+2*sum(dnorm(y, mean=y,sd=sqrt(1/wt),log=TRUE)))
