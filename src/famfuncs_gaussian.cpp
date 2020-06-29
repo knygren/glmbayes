@@ -5,9 +5,12 @@ using namespace Rcpp;
 
 NumericVector dnorm_glmb( NumericVector x, NumericVector means, NumericVector sds,int lg)
 {
+  
+  
   int n = x.size() ;
   NumericVector res(n) ;
   for( int i=0; i<n; i++) res[i] = R::dnorm( x[i], means[i], sds[i],lg ) ;
+
   return res ;
 }
 
@@ -117,10 +120,6 @@ NumericVector  f1_gaussian(NumericMatrix b,NumericVector y,NumericMatrix x,Numer
   return res;      
 }
 
-//  f2<-function(b,y,x,mu,P,alpha=0,wt=1){
-//  		Xb<-alpha+x%*%b
-//			-sum(dnorm(y, mean=Xb,sd=sqrt(1/wt),log=TRUE))+0.5*t((b-mu))%*%P%*%(b-mu)
-//		}
 
 
 
@@ -158,9 +157,10 @@ NumericVector  f2_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,Nume
   
   arma::mat mu2(mu.begin(), l2, 1, false); 
   arma::mat bmu2(bmu.begin(), l2, 1, false); 
-  
+
+
   double res1=0;
-  
+
   
   for(int i=0;i<m1;i++){
     b2temp=b(Range(0,l2-1),Range(i,i));
@@ -174,7 +174,7 @@ NumericVector  f2_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,Nume
     xb2=alpha2+ x2 * b2;
     
     yy=-dnorm_glmb(y,xb,invwt,true);
-    
+  
     res(i) =std::accumulate(yy.begin(), yy.end(), res1);
     
   }

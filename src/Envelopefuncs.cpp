@@ -824,6 +824,7 @@ List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar,NumericMatrix A,
   NumericMatrix LLconst(l2,1);
   NumericVector NegLL(l2);    
   NumericVector NegLL_slope(l2);    
+  NumericVector RSS_Out(l2);
   arma::mat cbars2(cbars.begin(), l2, l1, false); 
   arma::mat cbars3(cbars.begin(), l2, l1, false); 
   
@@ -856,6 +857,8 @@ List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar,NumericMatrix A,
     //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
     cbars2=f3_gaussian(G4,y, x,mu,P,alpha,wt);
     cbars_slope2=f3_gaussian(G4,y, x,mu,0*P,alpha,wt);
+    RSS_Out=RSS(y, x,G4,alpha,wt); // Note currenly includes the dispersion in the weight
+    
   }
   
   
@@ -898,6 +901,7 @@ List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar,NumericMatrix A,
                             Rcpp::Named("NegLL")=NegLL,
                             Rcpp::Named("NegLL_slope")=NegLL_slope,
                             Rcpp::Named("Lint1")=Lint1,
+                            Rcpp::Named("RSS_Out")=RSS_Out,
                             Rcpp::Named("logU")=logU,
                             Rcpp::Named("logrt")=logrt,
                             Rcpp::Named("loglt")=loglt,

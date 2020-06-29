@@ -62,7 +62,6 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
   RSS=sum(residuals(lm_out)^2)
   n_obs=length(y)
 
-  shape2= shape + n_obs/2
   #rate2 =rate + RSS/2
   
   dispersion2=dispersion
@@ -96,6 +95,7 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
   ## Updated version (when using the likelihood subgradient approach
   ## The RSS at the tangent point gets shifted to the gamma distribution
   
+  shape2= shape + n_obs/2
   rate2 =rate + RSS2_post/2
 
 #  print("dispersion from optimization")
@@ -172,7 +172,90 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
   ## Return list needed by standard simulation function
   ## Standard simulation function may need to be modified to generate samples
   ## for the gaussian
-   
+
+  RSS=Env2$RSS*dispstar[1,1]
+  RSS_Min=min(RSS)  ## This should likely be moved to the gamma distribution rate parameter
+  
+  ## Set the updated shape and rate parameters - may or may not coincide with RSS2_post
+  
+  shape2= shape + n_obs/2
+  rate2 =rate + RSS_Min/2
+
+  ## These can be initialized here or even at the top of the function
+  
+  disp_out<-matrix(0,nrow=n,ncol=1)
+  beta_out<-matrix(0,nrow=n,ncol=ncol(x))
+  test_out<-matrix(0,nrow=n,ncol=3)
+  iters_out<-matrix(0,nrow=n,ncol=1)
+  
+  # Copy Envelope into temporarily envelope (that is modifed based on the simulated dispersion)
+  
+  Env2$cbars_int=Env2$cbars-Env2$cbars_slope
+  
+  Env_temp=Env2
+
+  ## This Should correspond to the intercept terms for the LL (from prior)
+  
+  NegLL_temp_part1=Env2$NegLL-Env2$NegLL_slope
+
+  print("NegLL_temp_part1")
+  print(NegLL_temp_part1)  
+
+  ## This part comes from the likelihood function - may want to eventually
+  ## only calculate the part that depends on beta here.....
+  
+  NegLL_temp_part2=0.5*RSS*(1/dispstar[1,1])+rep((n_obs/2)*log(2*pi),length(RSS))-rep((n_obs/2)*log(1/dispstar[1,1]),length(RSS) )
+ 
+  print("NegLL_temp_part2")
+  print(NegLL_temp_part2)  
+  
+  print("NegLL_temp_total")
+  print(NegLL_temp_part1+NegLL_temp_part2)  
+  
+  print("NegLL from Optimized Envelope call")
+  print(Env2$NegLL)
+  
+## For now, just loop through n and accept all candidates
+  
+  
+  for(i in 1:n){  
+    a1=0  
+    while(a1==0){
+      p=rgamma(1,shape=shape2,rate=rate2)  
+      dispersion=1/p
+      
+      ## Calculations of updated Grid to here
+      
+      # Update cbars and wt2 also need to update LL and all related constants
+
+      disp_ratio=(dispstar/dispersion)
+      temp=disp_ratio[1,1]*Env2$cbars_slope
+      
+      Env_temp$cbars=Env2$cbars_int+temp
+      wt2=wt/rep(dispersion,length(y))
+      
+            
+      ## Verify envelope with updated cbars and dispersion can be sampled 
+      ### (should not be the final sampling as envelope must be updated each iteration)
+      
+      ## As this uses "incorrect" envelope, simulation could be slow....
+      
+      sim=rnnorm_reg_std(n=1,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt2,
+                         f2=f2,Envelope=Env_temp,family="gaussian",link="identity",as.integer(0))
+      
+      
+      disp_out[i,1]=dispersion
+      beta_out[i,1:ncol(x)]=sim$out[1,1:ncol(x)]
+      iters_out[i]=sim$draws[1]
+      ## Simulation from updated grid goes here (including rejection calculation)
+      
+  
+      a1=1
+            }
+  }
+  
+  return(list(coefficients=beta_out,dispersion=disp_out,iters=iters_out))
+  
   return(list(n=as.integer(n),y=as.vector(y),x2=as.matrix(x2),
               mu2=as.matrix(mu2,ncol=1),P2=as.matrix(P2),
               alpha=as.vector(alpha),wt2=as.vector(wt2),f2=f2,
