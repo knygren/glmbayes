@@ -301,38 +301,38 @@ Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterV
     
       if(family2=="binomial"){
       if(link2=="logit"){  
-          testll=f2_binomial_logit(btemp,y, x,mu,P,alpha,wt);
+          testll=f2_binomial_logit(btemp,y, x,mu,P,alpha,wt,0);
             }
       if(link2=="probit"){  
-          testll=f2_binomial_probit(btemp,y, x,mu,P,alpha,wt);
+          testll=f2_binomial_probit(btemp,y, x,mu,P,alpha,wt,0);
             }
       if(link2=="cloglog"){  
-          testll=f2_binomial_cloglog(btemp,y, x,mu,P,alpha,wt);
+          testll=f2_binomial_cloglog(btemp,y, x,mu,P,alpha,wt,0);
             }
       }
       
       if(family2=="quasibinomial"){
       if(link2=="logit"){  
-          testll=f2_binomial_logit(btemp,y, x,mu,P,alpha,wt);
+          testll=f2_binomial_logit(btemp,y, x,mu,P,alpha,wt,0);
             }
       if(link2=="probit"){  
-          testll=f2_binomial_probit(btemp,y, x,mu,P,alpha,wt);
+          testll=f2_binomial_probit(btemp,y, x,mu,P,alpha,wt,0);
             }
       if(link2=="cloglog"){  
-          testll=f2_binomial_cloglog(btemp,y, x,mu,P,alpha,wt);
+          testll=f2_binomial_cloglog(btemp,y, x,mu,P,alpha,wt,0);
             }
       }
 
 
       if(family2=="poisson"){  
-      testll=f2_poisson(btemp,y, x,mu,P,alpha,wt);
+      testll=f2_poisson(btemp,y, x,mu,P,alpha,wt,0);
       }
        if(family2=="quasipoisson"){  
-      testll=f2_poisson(btemp,y, x,mu,P,alpha,wt);
+      testll=f2_poisson(btemp,y, x,mu,P,alpha,wt,0);
       }
 
       if(family2=="Gamma"){  
-      testll=f2_gamma(btemp,y, x,mu,P,alpha,wt);
+      testll=f2_gamma(btemp,y, x,mu,P,alpha,wt,0);
       }
 
       if(family2=="gaussian"){  

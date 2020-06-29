@@ -217,6 +217,7 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
   
 ## For now, just loop through n and accept all candidates
   
+  print("Looping and printing calculated NegLL_temp")
   
   for(i in 1:n){  
     a1=0  
@@ -234,7 +235,11 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
       Env_temp$cbars=Env2$cbars_int+temp
       wt2=wt/rep(dispersion,length(y))
       
-            
+      NegLL_temp_part2=0.5*RSS*(1/dispersion)+rep((n_obs/2)*log(2*pi),length(RSS))-rep((n_obs/2)*log(1/dispersion),length(RSS) )
+      
+      NegLL_temp=NegLL_temp_part1+NegLL_temp_part2
+      print(NegLL_temp)
+      
       ## Verify envelope with updated cbars and dispersion can be sampled 
       ### (should not be the final sampling as envelope must be updated each iteration)
       
