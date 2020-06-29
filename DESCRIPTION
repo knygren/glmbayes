@@ -1,7 +1,7 @@
 Package: glmbayes
 Type: Package
 Title: Bayesian Generalized Linear Models (iid Samples)
-Version: 1.0
+Version: 0.0.1.9000
 Date: 2020-06-05
 Author: Kjell Nygren
 Maintainer: Kjell Nygren <kjell.a.nygren@gmail.com>
