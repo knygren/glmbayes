@@ -12,6 +12,63 @@ NumericVector dnorm_glmb( NumericVector x, NumericVector means, NumericVector sd
 }
 
 
+NumericVector RSS(NumericVector y, NumericMatrix x,NumericMatrix b,NumericVector alpha,NumericVector wt)
+{
+  // Step 1: Set up dimensions
+  
+  int l1 = x.nrow(), l2 = x.ncol(); // Dimensions of x matrix (dims for y,alpha, and wt needs to be consistent) 
+  int m1 = b.ncol();                // Number of columns for which output is needed
+  
+  // Step 2: Initialize b2temp and other Rcpp and arma objects used in calculations
+  
+  Rcpp::NumericMatrix b2temp(l2,1);
+  Rcpp::NumericMatrix restemp(1,1);
+  arma::mat y2(y.begin(), l1, 1, false);
+  arma::mat x2(x.begin(), l1, l2, false); 
+  arma::mat alpha2(alpha.begin(), l1, 1, false); 
+  
+  Rcpp::NumericVector xb(l1);
+  arma::colvec xb2(xb.begin(),l1,false); // Reuse memory - update both below
+
+  NumericVector sqrt_wt=sqrt(wt);
+  arma::mat sqrt_wt2(sqrt_wt.begin(), l1, 1, false); 
+  
+  //  NumericVector invwt=1/sqrt(wt);
+  
+  // Moving Loop inside the function is key for speed
+  
+  NumericVector yy(l1);
+  NumericVector res(m1);
+  arma::colvec res2(res.begin(),m1,false); // Reuse memory - update both below
+  
+  for(int i=0;i<m1;i++){
+    
+  // Grab one column at a time from b and one row at a time from res
+  
+    b2temp=b(Range(0,l2-1),Range(i,i));
+
+  // Point b2 to memory for that column
+  
+    arma::mat b2(b2temp.begin(), l2, 1, false); 
+    arma::mat restemp(res.begin()+i, 1, 1, false); 
+    
+  // calculate weighted residuals (element by element multiplication with weights)
+  
+    xb2=(y2-alpha2- x2 * b2)%sqrt_wt2;
+  
+  // This is where RSS should be calculated
+  // Not sure if this will complain about type differences
+    
+    restemp=trans(xb2)*xb2;
+
+  }
+  
+  return res;      
+
+  }
+
+
+
 NumericVector  f1_gaussian(NumericMatrix b,NumericVector y,NumericMatrix x,NumericVector alpha,NumericVector wt)
 {
   

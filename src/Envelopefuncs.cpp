@@ -12,7 +12,8 @@
 
 using namespace Rcpp;
 
-void Set_Grid_C2(Rcpp::NumericMatrix GIndex,  Rcpp::NumericMatrix cbars, 
+void Set_Grid_C2(Rcpp::NumericMatrix GIndex,  
+                 Rcpp::NumericMatrix cbars, 
                  Rcpp::NumericMatrix Lint,
                  Rcpp::NumericMatrix Down,
                  Rcpp::NumericMatrix Up,
@@ -148,6 +149,9 @@ void Set_Grid_C2(Rcpp::NumericMatrix GIndex,  Rcpp::NumericMatrix cbars,
   
   
 }
+
+
+
 
 
 void setlogP_C2(NumericMatrix logP,NumericVector NegLL,NumericMatrix cbars,NumericMatrix G3,NumericMatrix LLconst){
@@ -840,6 +844,13 @@ List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar,NumericMatrix A,
 
   if(family=="gaussian" ){
     //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+
+    // Adjust the slope calculations to split into several terms:
+    // (i) Terms from shifted "prior" that does not depend on the dispersion
+    // (ii) Constant terms from the actual LL that do not depend on dispersion or beta
+    // (iii) Term from the LL that depends on the dispersion but not beta
+    // (iv) Term from the LL that depends on beta and the dispersion (scaled RSS)
+    
     NegLL=f2_gaussian(G4,y, x, mu, P, alpha, wt);  
     NegLL_slope=f2_gaussian(G4,y, x, mu, 0*P, alpha, wt);  
     //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
@@ -886,6 +897,7 @@ List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar,NumericMatrix A,
                             Rcpp::Named("cbars_slope")=cbars_slope,
                             Rcpp::Named("NegLL")=NegLL,
                             Rcpp::Named("NegLL_slope")=NegLL_slope,
+                            Rcpp::Named("Lint1")=Lint1,
                             Rcpp::Named("logU")=logU,
                             Rcpp::Named("logrt")=logrt,
                             Rcpp::Named("loglt")=loglt,
