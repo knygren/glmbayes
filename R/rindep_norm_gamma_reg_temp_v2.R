@@ -161,17 +161,6 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
   L2Inv=Standard_Mod$L2Inv
   L3Inv=Standard_Mod$L3Inv
   
-  #return(list(bstar2=as.vector(bstar2),A=as.matrix(A),y=y,
-  #            x2=as.matrix(x2),mu2=as.matrix(mu2,ncol=1),
-  #            P2=as.matrix(P2),alpha=as.vector(alpha),
-  #            wt2=as.vector(wt2),family="gaussian",
-  #            link="identity", Gridtype=as.integer(3),
-  #            n=as.integer(n)
-  #            ))
-  
-  #return(list(as.vector(bstar2),as.matrix(A),y,as.matrix(x2),
-  #            as.matrix(mu2,ncol=1),as.matrix(P2),
-  #            as.vector(alpha),as.vector(wt2)))
   
   Env2=EnvelopeBuild(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
                      as.matrix(mu2,ncol=1),as.matrix(P2),as.vector(alpha),
@@ -179,9 +168,18 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
                      family="gaussian",link="identity",
                      Gridtype=as.integer(3), n=as.integer(n),
                      sortgrid=TRUE)
+ 
+  ## Return list needed by standard simulation function
+  ## Standard simulation function may need to be modified to generate samples
+  ## for the gaussian
+   
+  return(list(n=as.integer(n),y=as.vector(y),x2=as.matrix(x2),
+              mu2=as.matrix(mu2,ncol=1),P2=as.matrix(P2),
+              alpha=as.vector(alpha),wt2=as.vector(wt2),f2=f2,
+              Env=Env2))
   
   
-  return(Env2)
+#  return(Env2)
   
   
     

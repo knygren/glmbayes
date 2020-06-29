@@ -29,6 +29,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// EnvelopeBuild_Ind_Normal_Gamma
+List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar, NumericMatrix A, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, std::string family, std::string link, int Gridtype, int n, bool sortgrid);
+RcppExport SEXP _glmbayes_EnvelopeBuild_Ind_Normal_Gamma(SEXP bStarSEXP, SEXP ASEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP, SEXP nSEXP, SEXP sortgridSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type bStar(bStarSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type A(ASEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
+    Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
+    Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< bool >::type sortgrid(sortgridSEXP);
+    rcpp_result_gen = Rcpp::wrap(EnvelopeBuild_Ind_Normal_Gamma(bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid));
+    return rcpp_result_gen;
+END_RCPP
+}
 // glmb_Standardize_Model
 Rcpp::List glmb_Standardize_Model(NumericVector y, NumericMatrix x, NumericMatrix P, NumericMatrix bstar, NumericMatrix A1);
 RcppExport SEXP _glmbayes_glmb_Standardize_Model(SEXP ySEXP, SEXP xSEXP, SEXP PSEXP, SEXP bstarSEXP, SEXP A1SEXP) {
@@ -121,6 +144,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_EnvelopeBuild_c", (DL_FUNC) &_glmbayes_EnvelopeBuild_c, 13},
+    {"_glmbayes_EnvelopeBuild_Ind_Normal_Gamma", (DL_FUNC) &_glmbayes_EnvelopeBuild_Ind_Normal_Gamma, 13},
     {"_glmbayes_glmb_Standardize_Model", (DL_FUNC) &_glmbayes_glmb_Standardize_Model, 5},
     {"_glmbayes_rnnorm_reg_std_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_std_cpp, 12},
     {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 16},

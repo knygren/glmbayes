@@ -5,6 +5,10 @@
     .Call('_glmbayes_EnvelopeBuild_c', PACKAGE = 'glmbayes', bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid)
 }
 
+.EnvelopeBuild_Ind_Normal_Gamma <- function(bStar, A, y, x, mu, P, alpha, wt, family = "binomial", link = "logit", Gridtype = 2L, n = 1L, sortgrid = FALSE) {
+    .Call('_glmbayes_EnvelopeBuild_Ind_Normal_Gamma', PACKAGE = 'glmbayes', bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid)
+}
+
 .glmb_Standardize_Model_cpp <- function(y, x, P, bstar, A1) {
     .Call('_glmbayes_glmb_Standardize_Model', PACKAGE = 'glmbayes', y, x, P, bstar, A1)
 }
