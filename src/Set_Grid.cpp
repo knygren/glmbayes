@@ -12,6 +12,12 @@
 
 using namespace Rcpp;
 
+// Set_Grid creates new objects and returns them is a list
+// Set_Grid_C is likely an intermediate implementation that takes objects as inputs 
+// and the returns them
+// Set_Grid_C2 take exising allocated objects and populates them
+// In cases where the function is called repeatedly the last approach is preferred
+
 void Set_Grid_C2(Rcpp::NumericMatrix GIndex,  
                  Rcpp::NumericMatrix cbars, 
                  Rcpp::NumericMatrix Lint,
