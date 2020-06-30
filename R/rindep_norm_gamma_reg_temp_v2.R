@@ -175,7 +175,11 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
 
   RSS=Env2$RSS*dispstar[1,1]
   RSS_Min=min(RSS)  ## This should likely be moved to the gamma distribution rate parameter
+
+  ## This should likely adjust PLSD, be part of rejection, or both
   
+  RSS_Diff=RSS-RSS_Min   
+    
   ## Set the updated shape and rate parameters - may or may not coincide with RSS2_post
   
   shape2= shape + n_obs/2
@@ -237,6 +241,9 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
   
   PLSD=PLSD/sum(PLSD)
   
+#  print("PLSD_Original")
+#  print(PLSD)
+  
   ########################  End of test ############################
   
   
@@ -294,16 +301,33 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
       ## Compute final constants
       ## Be careful with if brining back to *.cpp --> Index is one less
       
+      ## Check if correction can be made here - difference form Normal case (be careful)!
+      ## Unclear if type of objects are the same (length should match)
+
       logP2 = logP_temp2[,2]
+      #logP2 = logP_temp2[,2]-0.5*p*RSS_Diff
       
       maxlogP=max(logP2)
       
       PLSD=exp(logP2-maxlogP)
-      
+
       ## Be careful with if brining back to *.cpp --> Index is one less
 
       Env_temp$logP=logP_temp2[,1]
       Env_temp$PLSD=PLSD/sum(PLSD)
+  
+##      print("precision for candidate")
+##      print(p)
+##      print("PLSD Inside loop")
+##      print(Env_temp$PLSD)
+
+##      logP2_alt = logP_temp2[,2]-0.5*p*RSS_Diff
+##      maxlogP_alt=max(logP2_alt)
+##      PLSD_alt=exp(logP2_alt-maxlogP_alt)
+##      PLSD_alt=PLSD_alt/sum(PLSD_alt)
+      
+##      print("PLSD Alternative Inside loop")
+##      print(PLSD_alt)
       
       ## Last constant is likely not changed (or used in sampling)  
       
@@ -313,20 +337,48 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
       ## This now likely uses the correct envelope but should only generate one candidate
       ## and not continue on until acceptance
       
+##      print("thetabars used by envelope")
+##      print(Env_temp$thetabars)
+      
+      
+      ### Do away with adjusted evelope use original
+      
+      #sim=.rindep_norm_gamma_reg_std_cpp(n=1,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt2,
+      #                                   f2=f2,Envelope=Env_temp,family="gaussian",link="identity",
+      #                                  as.integer(0))
       sim=.rindep_norm_gamma_reg_std_cpp(n=1,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt2,
-                                         f2=f2,Envelope=Env_temp,family="gaussian",link="identity",
-                                         as.integer(0))
-      #sim=rnnorm_reg_std(n=1,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt2,
-      #                   f2=f2,Envelope=Env_temp,family="gaussian",link="identity",as.integer(0))
+                         f2=f2,Envelope=Env2,family="gaussian",link="identity",as.integer(0))
       
       
+      ## Add 1 here becasuse arrays in *.cpp start with 0 instead of 1
+      J_out=sim$J+1
+      log_U2=sim$log_U2
+      
+      #print("Selected component")
+      #print(J_out)
       
       disp_out[i,1]=dispersion
       beta_out[i,1:ncol(x)]=sim$out[1,1:ncol(x)]
       #iters_out[i]=sim$draws[1]
-      ## Simulation from updated grid goes here (including rejection calculation)
       
-      test=sim$test
+      ## Simulation from updated grid goes here (including rejection calculation)
+      ## Update test to include penalty for high dispersion
+      ## we need to pass element of grid for this to work
+      
+      # This might penalize too much - mean gets shifted to the prior mean
+      
+      test1=-0.5*p*RSS_Diff[J_out]
+
+      #print("Implied RSS penalty")
+      #print(test1)
+      
+      ## Just scale the test by the dispersion ratio and add test1
+      ## This would likely be correct if there was no prior component part of the test
+      
+      #test=disp_ratio*sim$test +test1-log_U2
+      test=disp_ratio*sim$test -log_U2
+      #test=sim$test+test1
+      
       if(test>=0) a1=1
       else{iters_out[i]=iters_out[i]+1}        
       
@@ -334,7 +386,18 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
   }
 
  ## Undo standardization
-   
+
+  ## implied mean corresponding to mu2
+  
+#  thetabars_real=L2Inv%*%L3Inv%*%t(Env_temp$thetabars)
+  
+#  for(i in 1:9){
+#    thetabars_real[,i]=thetabars_real[,i]+mu
+#  }
+  
+#  print("thetabars_real")
+#  print(thetabars_real)
+     
   out=L2Inv%*%L3Inv%*%t(beta_out)
   
   for(i in 1:n){

@@ -141,10 +141,14 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
         testll=f2_gaussian(btemp,y, x,mu,P,alpha,wt);
       }
       
-      test=LLconst(J(i))+testtemp(0,0)-log(U2)-testll(0);
-
+      // Exlude U2 from this calculation but add back after scaling test
       
-      return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("test")=test);      
+      
+      //test=LLconst(J(i))+testtemp(0,0)-log(U2)-testll(0);
+      test=LLconst(J(i))+testtemp(0,0)-testll(0);
+      
+      return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("test")=test,Rcpp::Named("J")=J,
+                                            Rcpp::Named("log_U2")=log(U2));      
       
       if(test>=0) a1=1;
       if(test<0) draws(i)=draws(i)+1;
