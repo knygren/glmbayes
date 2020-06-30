@@ -193,6 +193,8 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
   iters_out<-matrix(0,nrow=n,ncol=1)
   
   # Copy Envelope into temporarily envelope (that is modifed based on the simulated dispersion)
+  # Added Env2$cbars_int and Env2$cbars_slope
+  
   
   Env2$cbars_int=Env2$cbars-Env2$cbars_slope
   
@@ -200,7 +202,7 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
 
   ## This Should correspond to the intercept terms for the LL (from prior)
   
-  NegLL_temp_part1=Env2$NegLL-Env2$NegLL_slope
+  NegLL_int=Env2$NegLL-Env2$NegLL_slope
 
 ##  print("NegLL_temp_part1")
 ##  print(NegLL_temp_part1)  
@@ -221,18 +223,40 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
   cbars_temp=Env2$cbars
   Lint=Env2$Lint1
   
+  
   outgrid=.Set_Grid_cpp(GIndex, cbars_temp, Lint)
+  outgrid_int=.Set_Grid_cpp(GIndex, Env2$cbars_int, Lint)
   
   logP_temp=outgrid$logP
-  NegLL_temp=NegLL_temp_part1+NegLL_temp_part2
+  logP_int=outgrid_int$logP
+  
+  NegLL_temp=NegLL_int+NegLL_temp_part2
   G3_temp=Env2$thetabars
   
   #outlogP=.setlogP_cpp(logP, NegLL, cbars, G3)
-  outlogP=.setlogP_cpp(logP_temp, NegLL_temp, cbars_temp, G3_temp)
-
-  logP_temp2=outlogP$logP
-  LLconst_temp=outlogP$LLconst
   
+  # compute this for the intercept as well to get LLconst_int
+  
+  outlogP=.setlogP_cpp(logP_temp, NegLL_temp, cbars_temp, G3_temp)
+  outlogP_int=.setlogP_cpp(logP_int, NegLL_int, Env2$cbars_int, G3_temp)
+  
+  logP_temp2=outlogP$logP
+  #logP2_int=outlogP_int$logP
+  
+  
+  LLconst_temp=outlogP$LLconst
+  LLconst_int=outlogP_int$LLconst
+
+  Env2$LLconst_int=outlogP_int$LLconst
+  
+  
+#  print("LL Const- full")
+#  print(LLconst_temp)
+# print("LL Const- intercept")
+#  print(LLconst_int)
+  
+  
+      
   logP2 = logP_temp2[,2]
   
   maxlogP=max(logP2)
@@ -272,7 +296,7 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
       Env_temp$cbars=Env2$cbars_int+temp
       
       NegLL_temp_part2=0.5*RSS*(1/dispersion)+rep((n_obs/2)*log(2*pi),length(RSS))-rep((n_obs/2)*log(1/dispersion),length(RSS) )
-      NegLL_temp=NegLL_temp_part1+NegLL_temp_part2
+      NegLL_temp=NegLL_int+NegLL_temp_part2
 
       Env_temp$NegLL=NegLL_temp
         
@@ -297,7 +321,9 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
       
       logP_temp2=outlogP$logP
       Env_temp$LLconst=outlogP$LLconst
+
       
+            
       ## Compute final constants
       ## Be careful with if brining back to *.cpp --> Index is one less
       

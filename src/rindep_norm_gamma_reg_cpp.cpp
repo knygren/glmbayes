@@ -47,17 +47,32 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
   NumericMatrix loglt=Envelope["loglt"];
   NumericMatrix logrt=Envelope["logrt"];
   NumericMatrix cbars=Envelope["cbars"];
+  NumericMatrix cbars_int=Envelope["cbars_int"];
   NumericVector LLconst=Envelope["LLconst"]; 
+  NumericVector LLconst_int=Envelope["LLconst_int"]; 
   
   NumericVector outtemp=out(0,_);
   arma::rowvec outtemp2(outtemp.begin(),l1,false);
   NumericVector cbartemp=cbars(0,_);
   arma::rowvec cbartemp2(cbartemp.begin(),l1,false);
-  NumericMatrix testtemp(1,1);
+
+  // Add Corresponding prior terms here
+  
+  NumericVector cbartemp_int=cbars_int(0,_);
+  arma::rowvec cbartemp_int2(cbartemp_int.begin(),l1,false);
+  
+  
+    NumericMatrix testtemp(1,1);
   arma::mat testtemp2(testtemp.begin(),1,1,false);
-  NumericMatrix btemp(l1,1);
+
+  NumericMatrix testtemp_int(1,1);
+  arma::mat testtemp_int2(testtemp_int.begin(),1,1,false);
+  
+  
+    NumericMatrix btemp(l1,1);
   arma::mat btemp2(btemp.begin(),l1,1,false); 
   NumericVector testll(1);
+  NumericVector testll_data(1);
   
   if(progbar==1){ Rcpp::Rcout << "Starting Simulation:" << std::endl;  };
   for(int i=0;i<n;i++){
@@ -91,9 +106,13 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
         
         
       }
-      outtemp=out(i,_);
+      
+      // cbars_int2 holds the intercept part
+      
+      outtemp=out(i,_);   // Hopefully this doew not break link to outtemp2
       cbartemp=cbars(J(i),_);
       testtemp2=outtemp2 * trans(cbartemp2);
+      testtemp_int2=outtemp2 * trans(cbartemp_int2);
       U2=R::runif(0.0, 1.0);
       btemp2=trans(outtemp2);    
       
@@ -139,12 +158,21 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
       
       if(family2=="gaussian"){  
         testll=f2_gaussian(btemp,y, x,mu,P,alpha,wt);
+        testll_data=f1_gaussian(btemp,y, x,alpha,wt);
       }
       
       // Exlude U2 from this calculation but add back after scaling test
       
+    
+      // Need to split test into prior vs. likelihood components of the the terms
+      
+      // testll_data   --> Should hold data part of testll
+      // testtemp_int -->  Should hold prior part of testtemp
+      // LLconst_int   --> Should hold prior part of LLconst
       
       //test=LLconst(J(i))+testtemp(0,0)-log(U2)-testll(0);
+      
+      
       test=LLconst(J(i))+testtemp(0,0)-testll(0);
       
       return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("test")=test,Rcpp::Named("J")=J,
