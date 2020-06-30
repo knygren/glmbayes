@@ -157,9 +157,9 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
   
   //    G4b.print("tangent points");
   
-  Rcpp::Rcout << "Gridtype is :"  << Gridtype << std::endl;
-  Rcpp::Rcout << "Number of Variables in model are :"  << l1 << std::endl;
-  Rcpp::Rcout << "Number of points in Grid are :"  << l2 << std::endl;
+//  Rcpp::Rcout << "Gridtype is :"  << Gridtype << std::endl;
+//  Rcpp::Rcout << "Number of Variables in model are :"  << l1 << std::endl;
+//  Rcpp::Rcout << "Number of points in Grid are :"  << l2 << std::endl;
   
   if( family=="binomial" && link=="logit"){
     //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
@@ -429,9 +429,9 @@ List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar,NumericMatrix A,
   
   //    G4b.print("tangent points");
   
-  Rcpp::Rcout << "Gridtype is :"  << Gridtype << std::endl;
-  Rcpp::Rcout << "Number of Variables in model are :"  << l1 << std::endl;
-  Rcpp::Rcout << "Number of points in Grid are :"  << l2 << std::endl;
+//  Rcpp::Rcout << "Gridtype is :"  << Gridtype << std::endl;
+//  Rcpp::Rcout << "Number of Variables in model are :"  << l1 << std::endl;
+//  Rcpp::Rcout << "Number of points in Grid are :"  << l2 << std::endl;
   
 
   if(family=="gaussian" ){

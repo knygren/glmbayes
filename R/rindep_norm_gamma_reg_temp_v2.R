@@ -198,21 +198,19 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
   
   NegLL_temp_part1=Env2$NegLL-Env2$NegLL_slope
 
-  print("NegLL_temp_part1")
-  print(NegLL_temp_part1)  
+##  print("NegLL_temp_part1")
+##  print(NegLL_temp_part1)  
 
   ## This part comes from the likelihood function - may want to eventually
   ## only calculate the part that depends on beta here.....
   
+  ##################################################################
+
+    ### Test .set_Grid_Cpp and .setlogP_cpp functions to be removed once confirmed 
+    ## Everything is working
+
   NegLL_temp_part2=0.5*RSS*(1/dispstar[1,1])+rep((n_obs/2)*log(2*pi),length(RSS))-rep((n_obs/2)*log(1/dispstar[1,1]),length(RSS) )
- 
-  print("NegLL_temp_part2")
-  print(NegLL_temp_part2)  
   
-  print("NegLL_temp_total")
-  print(NegLL_temp_part1+NegLL_temp_part2)  
-  
-  ### Test Set_Grid_Cpp function
   #Set_Grid_cpp(GIndex, cbars, Lint)
   
   GIndex=Env2$GridIndex
@@ -239,10 +237,11 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
   
   PLSD=PLSD/sum(PLSD)
   
-## For now, just loop through and and accept all candidates
+  ########################  End of test ############################
   
-  print("Looping and printing calculated NegLL_temp")
   
+## Loop through and accept/reject based on test from internal function
+
   for(i in 1:n){  
     a1=0  
     
@@ -333,133 +332,22 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
       
     }        
   }
-  
-  return(list(coefficients=beta_out,dispersion=disp_out,iters=iters_out))
-  
-  return(list(n=as.integer(n),y=as.vector(y),x2=as.matrix(x2),
-              mu2=as.matrix(mu2,ncol=1),P2=as.matrix(P2),
-              alpha=as.vector(alpha),wt2=as.vector(wt2),f2=f2,
-              Env=Env2))
-  
-  
-#  return(Env2)
-  
-  
-    
-#  print("dispersion that maximizes log-likelihood")
-#  print(disp_temp)
-  
-  ## Set updated gamma parameters for the candidate generation
-  ## shape matches posterior while rate will be too low (adjusted using accept-rejecte)
-  
-  
-  # set up matrices to hold output
-  
-  disp_out<-matrix(0,nrow=n,ncol=1)
-  beta_out<-matrix(0,nrow=n,ncol=ncol(x))
-  test_out<-matrix(0,nrow=n,ncol=3)
-  iters_out<-matrix(0,nrow=n,ncol=1)
-  
-  # Internal function used below to determine acceptance rate
-  
-  testfun<-function(beta,betastar,p,y,x,RSS){
-    
-    beta=as.matrix(beta,ncol=1) ## Simulated candidate
-    betastar=as.matrix(betastar,ncol=1)   ## Conditional posterior mode
-    xbeta=x%*%beta
-    xbetastar=x%*%betastar
-    RSS2_test=t(y-xbeta)%*%(y-xbeta)  ## Residual SUM of SQUARES for test candidate
-    RSS2_post=t(y-xbetastar)%*%(y-xbetastar)  ## Residual SUM of SQUARES at post model
-    
-    # Log-Acceptance rate
-    
-    # 1)if we used the prior to generate candidate for beta, 
-    # we would have test1=-0.5*p*(RSS2_test-RSS_ML) and 
-    ## RSS_ML would shift to gamma distribution
-    # 
-    # 2) when we replace prior with likelihood sub-gradient density, we replace  
-    # RSS2_test with (RSS_post+2*t(y-xbetastar)%*%x%*%(beta-betastar))
-    # and replace RSS_ML with RSS_Post (which gets shifted to the gamma distribution)  
-    
-    ## This would be test if sampled beta from prior
-    
-#    test1=-p*0.5*(RSS2_test-RSS_ML)
-    test1=0
-    
-    ## The below should be a concave function that obtains its max when beta=betastar
-    ## When beta=betastar, RSS2_test=RSS_Post and the slope term=0
-    ## So whole terms should be 0
 
-    test2=p*0.5*(RSS2_post-2*t(y-xbetastar)%*%x%*%(beta-betastar)-RSS2_test)
-
-    ## This should likely be -p*0.5*(RSS2_post - RSS_LB)
-    ## when using grid where RSS_LB is lower bound among tangent points
-      
-#    test1=-p*0.5*(RSS2_post-RSS) 
-    
-
-
-     test=test1+test2
-     
-
-    return(list(test=test[1,1],test1=test1,test2=test2))
+ ## Undo standardization
+   
+  out=L2Inv%*%L3Inv%*%t(beta_out)
+  
+  for(i in 1:n){
+    out[,i]=out[,i]+mu
   }
   
-  
-  ## Look through iterations to generate candidates until acceptance
-  
-  for(i in 1:n){  
-    
-    # Initialize flag for acceptace to 0 and count of iters to 1
-    
-    a1=0  
-    iters_out[i,1]=1  
-    
-    while(a1==0){
-      
-      p=rgamma(1,shape=shape2,rate=rate2)  
-      dispersion=1/p
-      
-      ## Set prior list in order to get the conditional posterior mode from glmb function
-      ## inefficient but works for now.
-      
-      prior_list3=list(mu=mu,Sigma=Sigma, dispersion=dispersion)
-      glmb_out1=glmb(n=1,y~x-1,family=gaussian(),prior=prior_list3)
-      
-      betatest=as.matrix(mvrnorm(n = 1, mu=betastar, Sigma=Sigma, tol = 1e-6, empirical = FALSE),ncol=1)
-
-      testtemp=testfun(betatest,betastar,p,as.matrix(y,ncol=1),x,RSS)
-      test=exp(testtemp$test)
-      
-      disp_out[i,1]=dispersion
-      
-      beta_out[i,1:ncol(x)]=betatest 
-      test_out[i,1]=exp(testtemp$test)
-      test_out[i,2]=exp(testtemp$test1)
-      test_out[i,3]=exp(testtemp$test2)
-      
-      # set a1 to 1 if draw was accepted to end while loop
-      
-      if(runif(1)<test) a1=1
-      ## increment iters count if candidate not accepted 
-      
-      iters_out[i,1]=iters_out[i,1]+1  
-      
-    }
-    
-  }
-  
-  # Return list with elements similar to the rnorm_gamma function
-  # For now, leave PostMode as NULL - Needs iterative procedure or
-  # customized optimization to determine accurately (betastar depends on dispersion)
-  # Also leave envelope, and loglike null for now 
-  # add test_out to list for now to assess accept-reject implementation
+#    return(list(coefficients=out,dispersion=disp_out,iters=iters_out))
   
   famfunc=glmbfamfunc(gaussian())  
   f1=famfunc$f1
   
     outlist=list(
-coefficients=beta_out, 
+coefficients=t(out), 
 coef.mode=betastar,  ## For now, use the conditional mode (not universal)
 dispersion=disp_out,
 ## For now, name items in list like this-eventually make format/names

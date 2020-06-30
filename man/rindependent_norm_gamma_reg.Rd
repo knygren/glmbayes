@@ -128,36 +128,13 @@ shape=shape,rate=rate,Precision=solve(Sigma_prior))
 
 ## Using new function
 
-#prior ## Currently standard normal so can't be cause of problem
-
-## Try prior mean moved by 1 posterior sd from maximum likelihood estimate
-## Took a couple of minutes to run 1000 iterations
-## Seemed to simulate too close to the prior mean and not adequately penalize
-## for being away from maximum likelihood estimate
-
-#> t(glmb.D9$coef.means) Column means for fixed dispersion (from maximum likelihood)
-#(Intercept)   groupTrt
-#[1,]     4.7923 -0.1084
-
-#> colMeans(beta_out) Column means for two-block Gibbs
-#[1]  4.73585593 -0.07061893
-
-#attr(prior,"Prior Type")=c("Normal")
-#if(attr(prior,"Prior Type")=="Normal") print("Prior Type was Normal")
-#attr(prior,"Prior Type")=c("Gamma")
-#if(attr(prior,"Prior Type")=="Normal") print("Prior Type was Normal")
-#if(attr(prior,"Prior Type")=="Gamma") print("Prior Type was Gamma")
-#attr(prior,"Prior Type")=c("Normal-Gamma")
-#if(attr(prior,"Prior Type")=="Normal") print("Prior Type was Normal")
-#if(attr(prior,"Prior Type")=="Gamma") print("Prior Type was Gamma")
-#if(attr(prior,"Prior Type")=="Normal-Gamma") print("Prior Type was Normal-Gamma")
-#attr(prior,"Prior Type")=c("Independent-Normal-Gamma")
-#print(paste("Prior Type was:",attr(prior,"Prior Type")))
-
 
 sim1=rindependent_norm_gamma_reg(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
-
 summary(sim1)
+
+sim2=rindependent_norm_gamma_reg_temp_v2(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
+summary(sim2)
+
 
 ## Note, last ratio is a constant for test 1 determined by distance between
 ## prior and maximum likelihood estimate
@@ -241,12 +218,16 @@ dispersion
 mean(sim1$dispersion)
 var(sim1$dispersion)
 
+mean(sim2$dispersion)
+var(sim2$dispersion)
+
 ## Two-block Gibbs
 
 mean(disp_out)
 var(disp_out)
 
-## Look at data precision
+## Look at data precision [Grid currently seems to produce estimates that are too high]
+## Likely need the penalty term for the higher RSS term in rejection method
 
 # maximum likelihood
 
@@ -256,6 +237,10 @@ var(disp_out)
 
 mean(1/sim1$dispersion)
 var(1/sim1$dispersion)
+
+
+mean(1/sim2$dispersion)
+var(1/sim2$dispersion)
 
 ##  Two-block Gibbs
 
@@ -279,6 +264,7 @@ t(glmb.D9$coef.means)
 ## instead of those with variable dispersion from two-block Givvs
 
 colMeans(sim1$coefficients)
+colMeans(sim2$coefficients)
 
 ## mean for two-block Gibbs
 colMeans(beta_out)
@@ -291,6 +277,7 @@ colMeans(beta_out)
 
 cov(glmb.D9$coefficients)  
 cov(sim1$coefficients)  
+cov(sim2$coefficients)  
 cov(beta_out)
 
 ## Look at implied precision -- Results closer to two-block than
