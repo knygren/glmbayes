@@ -245,6 +245,9 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
   
   for(i in 1:n){  
     a1=0  
+    
+    iters_out[i]=1
+    
     while(a1==0){
       p=rgamma(1,shape=shape2,rate=rate2)  
       dispersion=1/p
@@ -311,18 +314,24 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
       ## This now likely uses the correct envelope but should only generate one candidate
       ## and not continue on until acceptance
       
-      sim=rnnorm_reg_std(n=1,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt2,
-                         f2=f2,Envelope=Env_temp,family="gaussian",link="identity",as.integer(0))
+      sim=.rindep_norm_gamma_reg_std_cpp(n=1,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt2,
+                                         f2=f2,Envelope=Env_temp,family="gaussian",link="identity",
+                                         as.integer(0))
+      #sim=rnnorm_reg_std(n=1,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt2,
+      #                   f2=f2,Envelope=Env_temp,family="gaussian",link="identity",as.integer(0))
+      
       
       
       disp_out[i,1]=dispersion
       beta_out[i,1:ncol(x)]=sim$out[1,1:ncol(x)]
-      iters_out[i]=sim$draws[1]
+      #iters_out[i]=sim$draws[1]
       ## Simulation from updated grid goes here (including rejection calculation)
       
-  
-      a1=1
-            }
+      test=sim$test
+      if(test>=0) a1=1
+      else{iters_out[i]=iters_out[i]+1}        
+      
+    }        
   }
   
   return(list(coefficients=beta_out,dispersion=disp_out,iters=iters_out))

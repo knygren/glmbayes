@@ -142,6 +142,9 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
       }
       
       test=LLconst(J(i))+testtemp(0,0)-log(U2)-testll(0);
+
+      
+      return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("test")=test);      
       
       if(test>=0) a1=1;
       if(test<0) draws(i)=draws(i)+1;
