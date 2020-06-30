@@ -402,7 +402,15 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
       ## This would likely be correct if there was no prior component part of the test
       
       #test=disp_ratio*sim$test +test1-log_U2
-      test=disp_ratio*sim$test -log_U2
+
+#      print("Test components")
+#      print(sim$test)
+#      print(sim$test_int)
+#      print(sim$test_data)
+      
+      #test=disp_ratio*sim$test -log_U2
+      test=sim$test_int+disp_ratio*sim$test_data -log_U2
+      
       #test=sim$test+test1
       
       if(test>=0) a1=1

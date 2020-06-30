@@ -39,6 +39,8 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
   double a2=0;
   double U=0;
   double test=0;
+  double test_int=0;
+  double test_data=0;
   double U2=0;
   
   //out(0,0)=1;
@@ -175,8 +177,13 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
       
       test=LLconst(J(i))+testtemp(0,0)-testll(0);
       
+      test_int=LLconst_int(J(i))+testtemp_int(0,0)-(testll(0)-testll_data(0));
+      test_data=test-test_int;
+      
       return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("test")=test,Rcpp::Named("J")=J,
-                                            Rcpp::Named("log_U2")=log(U2));      
+                                            Rcpp::Named("log_U2")=log(U2),
+                                            Rcpp::Named("test_int")=test_int,
+                                            Rcpp::Named("test_data")=test_data);      
       
       if(test>=0) a1=1;
       if(test<0) draws(i)=draws(i)+1;
