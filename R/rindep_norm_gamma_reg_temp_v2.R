@@ -216,32 +216,30 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
   #Set_Grid_cpp(GIndex, cbars, Lint)
   
   GIndex=Env2$GridIndex
+  cbars_temp=Env2$cbars
   Lint=Env2$Lint1
-  cbars=Env2$cbars
   
-  outgrid=.Set_Grid_cpp(GIndex, cbars, Lint)
+  outgrid=.Set_Grid_cpp(GIndex, cbars_temp, Lint)
   
-  print("loglt comparison")
+  logP_temp=outgrid$logP
+  NegLL_temp=NegLL_temp_part1+NegLL_temp_part2
+  G3_temp=Env2$thetabars
   
-  print(list(Env2$loglt,outgrid$lglt))
-  print("logrt comparison")
-  print(list(Env2$logrt,outgrid$lgrt))
+  #outlogP=.setlogP_cpp(logP, NegLL, cbars, G3)
+  outlogP=.setlogP_cpp(logP_temp, NegLL_temp, cbars_temp, G3_temp)
 
-  # lgct is not in final envelope - not sure why
-  #  print("lgct comparison")
-#  print(list(Env2$logct,outgrid$lgct))
-  print("logU comparison")
-  print(list(Env2$logU,outgrid$logU))
+  logP_temp2=outlogP$logP
+  LLconst_temp=outlogP$LLconst
   
-
-  print()
+  logP2 = logP_temp2[,2]
   
-  return(outgrid)
+  maxlogP=max(logP2)
   
-  print("NegLL from Optimized Envelope call")
-  print(Env2$NegLL)
+  PLSD=exp(logP2-maxlogP)
   
-## For now, just loop through n and accept all candidates
+  PLSD=PLSD/sum(PLSD)
+  
+## For now, just loop through and and accept all candidates
   
   print("Looping and printing calculated NegLL_temp")
   
@@ -251,25 +249,67 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
       p=rgamma(1,shape=shape2,rate=rate2)  
       dispersion=1/p
       
-      ## Calculations of updated Grid to here
+      ## Update wt2
+
+      wt2=wt/rep(dispersion,length(y))
+
       
-      # Update cbars and wt2 also need to update LL and all related constants
+      ## Update the Grid
+      
+      # Step 1: Update Cbars and NegLL
 
       disp_ratio=(dispstar/dispersion)
       temp=disp_ratio[1,1]*Env2$cbars_slope
-      
       Env_temp$cbars=Env2$cbars_int+temp
-      wt2=wt/rep(dispersion,length(y))
       
       NegLL_temp_part2=0.5*RSS*(1/dispersion)+rep((n_obs/2)*log(2*pi),length(RSS))-rep((n_obs/2)*log(1/dispersion),length(RSS) )
-      
       NegLL_temp=NegLL_temp_part1+NegLL_temp_part2
-      print(NegLL_temp)
+
+      Env_temp$NegLL=NegLL_temp
+        
+      ## Step 2:  Call Set_Grid using revised cbars but original GIndex and Lint (intervals)
+      ##          and update some parts of Envelope using the results
+      
+      GIndex=Env_temp$GridIndex
+      Lint=Env_temp$Lint1
+      
+      outgrid=.Set_Grid_cpp(GIndex, Env_temp$cbars, Env_temp$Lint1)
+      
+      Env_temp$loglt=outgrid$lglt
+      Env_temp$logrt=outgrid$lgrt
+      Env_temp$logU=outgrid$logU
+      
+      ## Step 3:  Call set_logP
+      
+      logP_temp=outgrid$logP
+
+      #outlogP=.setlogP_cpp(logP, NegLL, cbars, G3)
+      outlogP=.setlogP_cpp(logP_temp, Env_temp$NegLL, Env_temp$cbars, Env_temp$thetabars)
+      
+      logP_temp2=outlogP$logP
+      Env_temp$LLconst=outlogP$LLconst
+      
+      ## Compute final constants
+      ## Be careful with if brining back to *.cpp --> Index is one less
+      
+      logP2 = logP_temp2[,2]
+      
+      maxlogP=max(logP2)
+      
+      PLSD=exp(logP2-maxlogP)
+      
+      ## Be careful with if brining back to *.cpp --> Index is one less
+
+      Env_temp$logP=logP_temp2[,1]
+      Env_temp$PLSD=PLSD/sum(PLSD)
+      
+      ## Last constant is likely not changed (or used in sampling)  
       
       ## Verify envelope with updated cbars and dispersion can be sampled 
       ### (should not be the final sampling as envelope must be updated each iteration)
       
-      ## As this uses "incorrect" envelope, simulation could be slow....
+      ## This now likely uses the correct envelope but should only generate one candidate
+      ## and not continue on until acceptance
       
       sim=rnnorm_reg_std(n=1,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt2,
                          f2=f2,Envelope=Env_temp,family="gaussian",link="identity",as.integer(0))
