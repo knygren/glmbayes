@@ -40,6 +40,9 @@ void setlogP_C2(NumericMatrix logP,NumericVector NegLL,NumericMatrix cbars,Numer
 }
 
 
+// [[Rcpp::export(".setlogP_cpp")]]
+
+
 Rcpp::List   setlogP(NumericMatrix logP,NumericVector NegLL,NumericMatrix cbars,NumericMatrix G3) {
   
   int n = logP.nrow(), k = logP.ncol();

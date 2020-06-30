@@ -212,6 +212,32 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
   print("NegLL_temp_total")
   print(NegLL_temp_part1+NegLL_temp_part2)  
   
+  ### Test Set_Grid_Cpp function
+  #Set_Grid_cpp(GIndex, cbars, Lint)
+  
+  GIndex=Env2$GridIndex
+  Lint=Env2$Lint1
+  cbars=Env2$cbars
+  
+  outgrid=.Set_Grid_cpp(GIndex, cbars, Lint)
+  
+  print("loglt comparison")
+  
+  print(list(Env2$loglt,outgrid$lglt))
+  print("logrt comparison")
+  print(list(Env2$logrt,outgrid$lgrt))
+
+  # lgct is not in final envelope - not sure why
+  #  print("lgct comparison")
+#  print(list(Env2$logct,outgrid$lgct))
+  print("logU comparison")
+  print(list(Env2$logU,outgrid$logU))
+  
+
+  print()
+  
+  return(outgrid)
+  
   print("NegLL from Optimized Envelope call")
   print(Env2$NegLL)
   
