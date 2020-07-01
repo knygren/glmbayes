@@ -254,7 +254,10 @@ arma::mat  f3_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericM
   return trans(out2);      
 }
 
-arma::mat  Invf3_gaussian(NumericMatrix cbars,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
+// [[Rcpp::export(".Inv_f3_gaussian")]]
+
+
+arma::mat  Inv_f3_gaussian(NumericMatrix cbars,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
 {
   
   // Get dimensions of x - Note: should match dimensions of
@@ -309,7 +312,7 @@ arma::mat  Invf3_gaussian(NumericMatrix cbars,NumericVector y, NumericMatrix x,N
 
     xb2=alpha2 -y2;
     
-    outtemp2=inv_sympd(P2+x2.t() * Ptemp2*x2)*(cbars2+x2.t() * Ptemp2 *xb2+P2*mu2);
+    outtemp2=-inv_sympd(P2+x2.t() * Ptemp2*x2)*(-cbars2+x2.t() * Ptemp2 *xb2+P2*mu2);
     
   }
   

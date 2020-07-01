@@ -165,7 +165,7 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
 
   ## Note, use Gridtype =4 here temporarily (Single Likelihood subgradient)
   
-  Gridtype=as.integer(4)
+  Gridtype=as.integer(3)
   
   ## Note: At the posterior mode only, thetabaras and cbars are just the opposite sign of each other
   
@@ -176,9 +176,18 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
                      Gridtype=Gridtype, n=as.integer(n),
                      sortgrid=TRUE)
  
-  print(Env2)
   
-  stop("This is the Envelope")
+#  t(Env2$cbars)
+  print(Original_thetabars)
+
+    print(Env2$thetabars)
+  
+  New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), as.vector(alpha), as.vector(wt2))
+
+    
+#  print(Env2)
+  
+#  stop("This is the Envelope")
   
   ## Return list needed by standard simulation function
   ## Standard simulation function may need to be modified to generate samples
@@ -320,6 +329,15 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
 
       wt2=wt/rep(dispersion,length(y))
 
+      # calculate new_thetabars for new dispersion - should be similar
+      # but slightly different from original thetabars
+      
+      New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), as.vector(alpha), as.vector(wt2))
+
+      
+      print(New_thetabars)
+      
+      stop("Called the inverse function and produced new thetabars")
       
       ## Update the Grid
       
