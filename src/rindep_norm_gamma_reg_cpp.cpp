@@ -104,6 +104,8 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
       }
       for(int j=0;j<l1;j++){  
         
+        // Switch to using thetabars here
+        
         out(i,j)=ctrnorm_cpp(logrt(J(i),j),loglt(J(i),j),-cbars(J(i),j),1.0);    
         
         
@@ -120,39 +122,6 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
       
       // Need to modify to call correct f2 function based on family and link
       
-      
-      
-      if(family2=="binomial"){
-        if(link2=="logit"){  
-          testll=f2_binomial_logit(btemp,y, x,mu,P,alpha,wt,0);
-        }
-        if(link2=="probit"){  
-          testll=f2_binomial_probit(btemp,y, x,mu,P,alpha,wt,0);
-        }
-        if(link2=="cloglog"){  
-          testll=f2_binomial_cloglog(btemp,y, x,mu,P,alpha,wt,0);
-        }
-      }
-      
-      if(family2=="quasibinomial"){
-        if(link2=="logit"){  
-          testll=f2_binomial_logit(btemp,y, x,mu,P,alpha,wt,0);
-        }
-        if(link2=="probit"){  
-          testll=f2_binomial_probit(btemp,y, x,mu,P,alpha,wt,0);
-        }
-        if(link2=="cloglog"){  
-          testll=f2_binomial_cloglog(btemp,y, x,mu,P,alpha,wt,0);
-        }
-      }
-      
-      
-      if(family2=="poisson"){  
-        testll=f2_poisson(btemp,y, x,mu,P,alpha,wt,0);
-      }
-      if(family2=="quasipoisson"){  
-        testll=f2_poisson(btemp,y, x,mu,P,alpha,wt,0);
-      }
       
       if(family2=="Gamma"){  
         testll=f2_gamma(btemp,y, x,mu,P,alpha,wt,0);

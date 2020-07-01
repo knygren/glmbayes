@@ -153,7 +153,7 @@ rindependent_norm_gamma_reg_v1<-function(n,y,x,prior_list,offset=NULL,weights=1,
     ## KN Note (7/1-2020): Because p is part of linear term that is added to the normal,
     ## it likely needs to be accounted for. Should subtract a term from test2 as below
     
-    #test2=p*0.5*(RSS2_post-2*t(y-xbetastar)%*%x%*%(beta-betastar)-RSS2_test)
+    test2=p*0.5*(RSS2_post-2*t(y-xbetastar)%*%x%*%(beta-betastar)-RSS2_test)
     test2= test2 - 0.5*p* t(y-xbetastar)%*%x%*% t(x) %*%(y-xbetastar) *p 
     
     ## This should likely be -p*0.5*(RSS2_post - RSS_LB)

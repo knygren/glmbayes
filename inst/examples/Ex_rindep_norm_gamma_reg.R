@@ -73,9 +73,11 @@ shape=shape,rate=rate,Precision=solve(Sigma_prior))
 sim1=rindependent_norm_gamma_reg_v1(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
 summary(sim1)
 
-sim2=rindependent_norm_gamma_reg_temp_v2(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
+sim2=rindependent_norm_gamma_reg_v2(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
 summary(sim2)
 
+#sim2=rindependent_norm_gamma_reg_temp_v2(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
+#summary(sim2)
 
 ## Note, last ratio is a constant for test 1 determined by distance between
 ## prior and maximum likelihood estimate

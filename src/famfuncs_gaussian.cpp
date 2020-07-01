@@ -246,8 +246,6 @@ arma::mat  f3_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericM
     
     bmu2=b2-mu2;
     xb2=alpha2+ x2 * b2-y2;
-    //out2=P2 * bmu2-x2.t() * Ptemp2 * xb2;
-    //outtempb2=trans(P2 * bmu2-x2.t() * Ptemp2 * xb2);
     outtemp2= P2 * bmu2+x2.t() * Ptemp2 * xb2;
   }
   
@@ -256,3 +254,65 @@ arma::mat  f3_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericM
   return trans(out2);      
 }
 
+arma::mat  Invf3_gaussian(NumericMatrix cbars,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
+{
+  
+  // Get dimensions of x - Note: should match dimensions of
+  //  y, b, alpha, and wt (may add error checking)
+  
+  // May want to add method for dealing with alpha and wt when 
+  // constants instead of vectors
+  
+  int l1 = x.nrow(), l2 = x.ncol();
+  int m1 = cbars.ncol();  // Check if this makes sense or if it is better to pass the rows
+  
+  //    int lalpha=alpha.nrow();
+  //    int lwt=wt.nrow();
+  
+  Rcpp::NumericMatrix cbars2temp(l2,1);
+  
+  arma::mat y2(y.begin(), l1, 1, false);
+  arma::mat x2(x.begin(), l1, l2, false); 
+  arma::mat alpha2(alpha.begin(), l1, 1, false); 
+  
+  Rcpp::NumericVector xb(l1);
+  arma::colvec xb2(xb.begin(),l1,false); // Reuse memory - update both below
+  
+  NumericMatrix Ptemp(l1,l1);  
+  
+  for(int i=0;i<l1;i++){
+    Ptemp(i,i)=wt(i); 
+  }  
+  
+  // Moving Loop inside the function is key for speed
+  
+  NumericVector yy(l1);
+  NumericMatrix out(l2,m1);
+  
+  arma::mat cbars2(cbars.begin(), l2, 1, false); 
+  
+  arma::mat mu2(mu.begin(), l2, 1, false); 
+  arma::mat P2(P.begin(), l2, l2, false); 
+  arma::mat Ptemp2(Ptemp.begin(), l1, l1, false);
+  arma::mat out2(out.begin(), l2, m1, false);
+  
+  NumericMatrix::Column outtemp=out(_,0);
+
+  arma::mat outtemp2(outtemp.begin(),1,l2,false);
+
+  for(int i=0;i<m1;i++){
+    cbars2temp=cbars(Range(0,l2-1),Range(i,i));
+    arma::mat cbars2(cbars2temp.begin(), l2, 1, false); 
+    
+    NumericMatrix::Column outtemp=out(_,i);
+    arma::mat outtemp2(outtemp.begin(),1,l2,false);
+
+    xb2=alpha2 -y2;
+    
+    outtemp2=inv_sympd(P2+x2.t() * Ptemp2*x2)*(cbars2+x2.t() * Ptemp2 *xb2+P2*mu2);
+    
+  }
+  
+
+  return trans(out2);      
+}
