@@ -380,7 +380,7 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   arma::vec wt3(wt2.begin(), x.nrow());
   
   // Step 1: Shifts mean and offset to alpha --> Modified offset - Set inputs for optimization
-  // Transforme Model now has prior mean 0
+  // Transformed Model now has prior mean 0
   
   alpha2=x2*mu2+offset2b; 
   NumericVector parin=start-mu;  // Starting value for optimization is now start - mu
@@ -411,7 +411,7 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   if(conver1>0){Rcpp::stop("Posterior Optimization failed");}
   
-  // Standardize the model 
+  // Step 3: Standardize the model 
   
   Rcpp::Rcout << "Standardizing the model:" << std::endl;
   
@@ -441,6 +441,8 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   // There are likely to be few instances where someone runs a small 
   // number of samples greater than 1
   
+  // Step 4: Build the Envelope required to simulate from the Standardized Model
+  
   Rcpp::Rcout << "Starting Envelope Creation:" << std::endl;
   
   Rcpp::List Envelope; // Can move this towards top of the function
@@ -458,7 +460,7 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
   
-  // Run simulation 
+  // Step 5: Run the simulation 
   
   int progbar=0;
   
@@ -466,7 +468,7 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
                                     f2,Envelope,family,link,progbar);
   
   
-  //  Post processing
+  //  Step 6: Undo standaridzation and do some post processing
   
   //  1) Undo-Standardization of Posterior Precision
   //  2) Undo shifting of prior mean to offset

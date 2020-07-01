@@ -27,14 +27,52 @@
 #' \item{dispersion}{an \code{n} by \code{1} matrix with simulated values for the dispersion}
 #' \item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
 #' @details The \code{rglmb_norm_reg} function produces iid samples for Bayesian generalized linear 
-#' models from the gaussian family (identity link) with a conjugate multivariate normal-gamma prior
-#' for the regression coefficients and the dispersion (variance).
-#' See Raiffa and Schlaifer (1961) for details on conjugate priors. 
+#' models. with multivariate-normal priors. Core required inputs for the function include the data vector, 
+#' the design matrix and a prior specification (provided in a list when this function is called directly). Specifying
+#' the \code{\link{pfamily}} as \code{\link{dNormal}} in the \code{\link{lmb}} or \code{\link{glmb}} is equivalent
+#' to calling this function directly.
 #' 
-#' Core required inputs for the function include the data vector, the design  
-#' matrix and a prior specification. The function returns the simulated Bayesian coefficients 
-#' and some associated outputs. The iid samples from the posterior density is genererated using 
-#' standard simulation procedures for multivariate normal and gamma distributions. 
+#' The function returns the simulated Bayesian coefficients and some associated outputs. While it is possible to 
+#' call this function directly, it is generally recommended that the \code{\link{lmb}}, \code{\link{rlmb}}, \code{\link{glmb}} or \code{\link{rglmb}} functions be used 
+#' instead as those functions have more documentation and the resulting objects come with more methods.
+#' 
+#' When the specified family is gaussian, the multivariate normal is the conjugate prior distribution for the 
+#' likelihood function and the posterior distribution is therefore also a multivariate normal density. Fairly
+#' standard procedures are applied in order to generate samples in that case. Currently, this includes using a Cholesky 
+#' decomposition. Later implementations may switch to a QR decomposition to increase consistency with the 
+#' \code{\link{lm}} function and to increase associated numerical accuracy.
+#' 
+#' When the specified \code{\link{family}} is any log-concave non-gaussian family, then the estimation uses the Likelihood
+#' subgradient density approach of Nygren and Nygren (2006).  This approaches uses tangencies to the 
+#' log-likelihood function in order to construct an enveloping function from which candidate draws are 
+#' generated and then either accepted/rejected using accept/reject methods. The core C function performing
+#' this simulation essentially goes through the following steps: 
+#'  
+#' 
+#' 1) The model is standardized to have prior mean vector equal to 0 (i.e., offsets and any prior mean are combined
+#' into a constant term).
+#' 
+#' 
+#' 2) The posterior mode for this transformed model is found. Currently this uses the \code{\link{optim}} function. 
+#' Later implementations may replace this with iteratively reweighted least squares (IWLS) to increase 
+#' consistency with the \code{\link{glm}} function and to enhance numerical accuracy.
+#' 
+#' 
+#' 3) The model is further standardized so that (a) the precision matrix at the posterior mode is diagonal and (b)
+#' the prior variance-covariance matrix is the identity matrix (see \code{\link{glmb_Standardize_Model}} for details).
+#' 
+#' 
+#' 4) An enveloping function is built for the the standardized model, containing constants needed during simulation (see
+#' \code{\link{EnvelopeBuild}} for details).
+#' 
+#' 
+#' 5) Samples for the standardized model are generated using accept-reject methods (see \code{\link{rnnorm_reg_std}} for
+#' details).
+#' 
+#' 
+#' 6) The output from the standardized model are transformed back to the original scale by reversing the two 
+#' eigenvalue decompositions and by adding back the prior mean.  
+#' 
 #' @family simfuncs 
 
 #' @references 

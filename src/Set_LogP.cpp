@@ -94,6 +94,12 @@ Rcpp::List   setlogP_C(NumericMatrix logP,NumericVector NegLL,NumericMatrix cbar
   for(int i=0;i<n;i++){
     cbartemp=cbars(i,_);  
     G3temp=G3(i,_);  
+
+    // Remark 6 in Nygren and Nygren (2006)
+    // logP is log_density for component
+    // -NegLL (is g())
+    // last term is log of denominator 
+    // 3rd term is MGF from Claim1
     
     logP(i,1)=logP(i,0)-NegLL(i)+0.5*arma::as_scalar(cbarrow.t() * cbarrow)+arma::as_scalar(G3row.t() * cbarrow);
     

@@ -130,7 +130,7 @@ shape=shape,rate=rate,Precision=solve(Sigma_prior))
 ## Using new function
 
 
-sim1=rindependent_norm_gamma_reg(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
+sim1=rindependent_norm_gamma_reg_v1(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
 summary(sim1)
 
 sim2=rindependent_norm_gamma_reg_temp_v2(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)

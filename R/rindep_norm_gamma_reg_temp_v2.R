@@ -410,6 +410,13 @@ rindependent_norm_gamma_reg_temp_v2<-function(n,y,x,prior_list,offset=NULL,weigh
       
       #test=disp_ratio*sim$test -log_U2
       test=sim$test_int+disp_ratio*sim$test_data -log_U2
+   
+      ## We should subtract squared term here that is added to the normal
+      
+      
+         
+      # See what adding test 1 would do
+      #test=sim$test_int+disp_ratio*sim$test_data +test1 -log_U2
       
       #test=sim$test+test1
       

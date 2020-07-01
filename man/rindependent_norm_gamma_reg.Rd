@@ -129,7 +129,7 @@ shape=shape,rate=rate,Precision=solve(Sigma_prior))
 ## Using new function
 
 
-sim1=rindependent_norm_gamma_reg(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
+sim1=rindependent_norm_gamma_reg_v1(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
 summary(sim1)
 
 sim2=rindependent_norm_gamma_reg_temp_v2(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
@@ -322,6 +322,7 @@ Other simulation functions
 \code{\link{rglmb_norm_reg}()},
 \code{\link{rindependent_norm_gamma_reg_temp_v2}()},
 \code{\link{rindependent_norm_gamma_reg_temp}()},
+\code{\link{rindependent_norm_gamma_reg_v1}()},
 \code{\link{rnorm_gamma_reg}()}
 }
 \concept{simfuncs}

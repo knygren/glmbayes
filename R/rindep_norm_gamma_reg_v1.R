@@ -1,7 +1,7 @@
 #' The Bayesian Indendepent Normal-Gamma Regression Distribution
 #'
 #' Generates iid samples from the posterior density for the 
-#' independent normal-gamma regression
+#' independent normal-gamma regression using a single Likelihood subgradient density.
 #' @param prior_list a list with the prior parameters (mu, Sigma, shape and rate) for the 
 #' prior distribution.
 #' @param offset an offset parameter
@@ -9,6 +9,12 @@
 #' @inheritParams glmb
 #' @return Currently mainly the draws for the dispersion and the regression coefficients
 #' will be updated to return outputs consistent with other function
+#' @details This function simulates from the posterior density for the independent normal-gamma regression using
+#' a single likelihood-subgradient density. Based on the Dobson linear regression example, the results
+#' appear to match those from the two-block Gibbs sampler.  The simulation is not fast so a 
+#' grid based approach would be preferred if it can be confirmed to exists and it can be implemented
+#' correctly.   This function is left here as a reference and comparator. It would still need some 
+#' adjustment to correctly handle weighting and offsets.
 #' @family simfuncs 
 #' @example inst/examples/Ex_rindep_norm_gamma_reg.R
 #' @export 
@@ -30,7 +36,7 @@
 ##    Note 1: This should ensure that the accept-reject approach still is valie
 ##    Note 2: Need to compare single point to grid to ensure validity
 
-rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
+rindependent_norm_gamma_reg_v1<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
 
   call<-match.call()
   
@@ -147,21 +153,16 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     ## KN Note (7/1-2020): Because p is part of linear term that is added to the normal,
     ## it likely needs to be accounted for. Should subtract a term from test2 as below
     
-    test2=p*0.5*(RSS2_post-2*t(y-xbetastar)%*%x%*%(beta-betastar)-RSS2_test)
-
+    #test2=p*0.5*(RSS2_post-2*t(y-xbetastar)%*%x%*%(beta-betastar)-RSS2_test)
     test2= test2 - 0.5*p* t(y-xbetastar)%*%x%*% t(x) %*%(y-xbetastar) *p 
-    
     
     ## This should likely be -p*0.5*(RSS2_post - RSS_LB)
     ## when using grid where RSS_LB is lower bound among tangent points
       
 #    test1=-p*0.5*(RSS2_post-RSS) 
     
-
-
      test=test1+test2
      
-
     return(list(test=test[1,1],test1=test1,test2=test2))
   }
   

@@ -70,6 +70,41 @@ that to the left of the upper bound)}
 Builds an Enveloping function for simulation using a grid and tangencies for 
 the posterior density
 }
+\details{
+To construct an enveloping function, we follow the approach in Nygren and Nygren (2006)
+which involves the following steps when a maximally sized grid is constructed 
+(if the prior for some dimensions is relatively strong, this may not be needed)
+
+
+1) For each dimension, a constant \code{omega_i} is found that depends on the 
+corresponding diagonal element in the precision matrix.
+
+ 
+2) Corresponding intervals \code{(thetastar_i-0.5 *omega,thetastar_i-0.5 *omega)} 
+ are constructed around the posterior mode thetastar for each dimension
+ 
+ 
+3) The mode as well as the points \code{thetastar_i-omega_i} and \code{thetastar_i+omega_i}
+are selected as the components of the points at which tangencies will be found for each of 
+the dimensions.  
+
+
+4) A Grid is constructed with all possible combinations of points and 
+negative log-likelihood and gradient for the negative log-likelihood are evaluated (see the
+EnvelopeBuild_c.cpp function source code for details)
+
+
+5) The \code{\link{Set_Grid}} function is called in order to evaluate the log of the density associated
+with each of the resulting restricted multivariate normals by evaluating the differences between the cummulative 
+density for each dimension between its lower and upper bound.
+
+
+6)  The Set_LogP is called in order to help set the probabilities with which each of the components
+of the grid should be sampled (see remark 6 in Nygren and Nygren (2006)).
+
+
+Any constants needed by the sampling are added to a list and returned by the function.
+}
 \examples{
 data(menarche2)
 
