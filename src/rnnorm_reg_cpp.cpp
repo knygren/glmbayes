@@ -125,8 +125,7 @@ Rcpp::List glmb_Standardize_Model(
 
     // Find scaled matrix epsilon
 
-    P3.print("P3 matrix before epsilon removed");
-    
+
     while(check==0){
       epsilon=scale*P3Diag;  // scaled version of diagonal matrix
   

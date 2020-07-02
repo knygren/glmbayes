@@ -35,7 +35,7 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
   NumericVector J(n);
   NumericVector draws(n);
   NumericMatrix out(n,l1);
-  double a1=0;
+  //double a1=0;
   double a2=0;
   double U=0;
   double test=0;
@@ -77,8 +77,7 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
   NumericVector testll_data(1);
   
   if(progbar==1){ Rcpp::Rcout << "Starting Simulation:" << std::endl;  };
-  for(int i=0;i<n;i++){
-    
+
     Rcpp::checkUserInterrupt();
     if(progbar==1){
 //      progress_bar2(i, n-1);
@@ -86,18 +85,16 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
     }
     
     
-    a1=0;
-    draws(i)=1;
-    while(a1==0){
-      
+    //a1=0;
+
       U=R::runif(0.0, 1.0);
       a2=0;
-      J(i)=0;    
+      J(0)=0;    
       while(a2==0){
-        if(U<=PLSD(J(i))) a2=1;
-        if(U>PLSD(J(i))){ 
-          U=U-PLSD(J(i));
-          J(i)=J(i)+1;
+        if(U<=PLSD(J(0))) a2=1;
+        if(U>PLSD(J(0))){ 
+          U=U-PLSD(J(0));
+          J(0)=J(0)+1;
           
         }
         //a2=1; 
@@ -106,15 +103,15 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
         
         // Switch to using thetabars here
         
-        out(i,j)=ctrnorm_cpp(logrt(J(i),j),loglt(J(i),j),-cbars(J(i),j),1.0);    
+        out(0,j)=ctrnorm_cpp(logrt(J(0),j),loglt(J(0),j),-cbars(J(0),j),1.0);    
         
         
       }
       
       // cbars_int2 holds the intercept part
       
-      outtemp=out(i,_);   // Hopefully this doew not break link to outtemp2
-      cbartemp=cbars(J(i),_);
+      outtemp=out(0,_);   // Hopefully this doew not break link to outtemp2
+      cbartemp=cbars(J(0),_);
       testtemp2=outtemp2 * trans(cbartemp2);
       testtemp_int2=outtemp2 * trans(cbartemp_int2);
       U2=R::runif(0.0, 1.0);
@@ -132,38 +129,17 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
         testll_data=f1_gaussian(btemp,y, x,alpha,wt);
       }
       
-      // Exlude U2 from this calculation but add back after scaling test
+
+      test=LLconst(J(0))+testtemp(0,0)-testll(0);
       
-    
-      // Need to split test into prior vs. likelihood components of the the terms
-      
-      // testll_data   --> Should hold data part of testll
-      // testtemp_int -->  Should hold prior part of testtemp
-      // LLconst_int   --> Should hold prior part of LLconst
-      
-      //test=LLconst(J(i))+testtemp(0,0)-log(U2)-testll(0);
-      
-      
-      test=LLconst(J(i))+testtemp(0,0)-testll(0);
-      
-      test_int=LLconst_int(J(i))+testtemp_int(0,0)-(testll(0)-testll_data(0));
+      test_int=LLconst_int(J(0))+testtemp_int(0,0)-(testll(0)-testll_data(0));
       test_data=test-test_int;
-      
-      return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("test")=test,Rcpp::Named("J")=J,
-                                            Rcpp::Named("log_U2")=log(U2),
-                                            Rcpp::Named("test_int")=test_int,
-                                            Rcpp::Named("test_data")=test_data);      
-      
-      if(test>=0) a1=1;
-      if(test<0) draws(i)=draws(i)+1;
-      
-    }
+
     
-    
-  }
-  
-  //return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("J")=J,Rcpp::Named("PLSD")=PLSD,Rcpp::Named("famout")=family);
-  return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws);
+  return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("test")=test,Rcpp::Named("J")=J,
+                                        Rcpp::Named("log_U2")=log(U2),
+                                        Rcpp::Named("test_int")=test_int,
+                                        Rcpp::Named("test_data")=test_data);      
   
 }
 
