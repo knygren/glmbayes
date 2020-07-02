@@ -121,6 +121,7 @@ NumericVector  f1_gaussian(NumericMatrix b,NumericVector y,NumericMatrix x,Numer
 }
 
 
+// [[Rcpp::export(".f2_gaussian_vector")]]
 
 
 NumericVector  f2_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)

@@ -125,12 +125,16 @@ Rcpp::List glmb_Standardize_Model(
 
     // Find scaled matrix epsilon
 
+    P3.print("P3 matrix before epsilon removed");
+    
     while(check==0){
       epsilon=scale*P3Diag;  // scaled version of diagonal matrix
   
       // Checks if difference between Prior precision and diagonal matrix
       // is positive definite
       // is positive definite - to be added to likelihood 
+      
+      
   
       P4=P3-epsilon;				
       eig_sym(eigval_2, eigvec_2, P4);
@@ -143,6 +147,7 @@ Rcpp::List glmb_Standardize_Model(
       }
       else{scale=scale/2;}
     }
+
 
       // Setup prior to Eigenvalue decomposition
 
@@ -157,6 +162,9 @@ Rcpp::List glmb_Standardize_Model(
     
     // Apply second transformation
 
+      
+    
+    
     arma::mat L3= arma::sqrt(D2)*trans(eigvec_2);
     L3Inv=eigvec_2*sqrt(inv_sympd(D2));
     b4=L3*b3; 
@@ -166,7 +174,7 @@ Rcpp::List glmb_Standardize_Model(
     P5=trans(L3Inv)*P4*L3Inv;  // Should be precision matrix without epsilon
     P6Temp=P5+ident;           // Should be precision matrix for posterior (may not be used)
 
-    // "Oddball extra steps due to legacy code 
+        // "Oddball extra steps due to legacy code 
     
     NumericVector b5=asVec(b4_1); // Maybe this causes error?
     

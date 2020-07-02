@@ -17,6 +17,10 @@
     .Call('_glmbayes_setlogP', PACKAGE = 'glmbayes', logP, NegLL, cbars, G3)
 }
 
+.f2_gaussian_vector <- function(b, y, x, mu, P, alpha, wt) {
+    .Call('_glmbayes_f2_gaussian', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt)
+}
+
 .Inv_f3_gaussian <- function(cbars, y, x, mu, P, alpha, wt) {
     .Call('_glmbayes_Inv_f3_gaussian', PACKAGE = 'glmbayes', cbars, y, x, mu, P, alpha, wt)
 }

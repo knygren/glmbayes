@@ -64,6 +64,9 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   
   lm_out=lm(y ~ x-1) # run classical regression to get maximum likelhood estimate
   RSS=sum(residuals(lm_out)^2)
+
+  RSS_ML=sum(residuals(lm_out)^2)
+  
   n_obs=length(y)
 
   #rate2 =rate + RSS/2
@@ -163,7 +166,7 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   L2Inv=Standard_Mod$L2Inv
   L3Inv=Standard_Mod$L3Inv
 
-  ## Note, use Gridtype =4 here temporarily (Single Likelihood subgradient)
+    ## Note, use Gridtype =4 here temporarily (Single Likelihood subgradient)
   
   Gridtype=as.integer(3)
   
@@ -177,26 +180,79 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
                      sortgrid=TRUE)
  
   
-#  t(Env2$cbars)
-  print(Original_thetabars)
-
-    print(Env2$thetabars)
   
-  New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), as.vector(alpha), as.vector(wt2))
+  
+  
+#  print("Original_thetabars")
+#  print(Env2$thetabars)
+  
+  
+  ll_Check=f2_gaussian_vector(t(Env2$thetabars), y, as.matrix(x2), as.matrix(mu2,ncol=1),
+                              as.matrix(P2), as.vector(alpha), as.vector(wt2))
+  
+  
+  
+  #print("NegLL - Original")
+  #print(Env2$NegLL)
 
+#  print("RSS2_post")
+#  print(RSS2_post)
+  
+#  print("0.5*RSS2_post/dispstar")
+#  print(0.5*RSS2_post/dispstar)
+  
+  #  Just the Log-Likelihood
+  
+  test_const1=-Env2$NegLL   
+  
+  ## Removing normalizing constant and shifting log p to gamma
+  
+  test_const2=-Env2$NegLL+(n_obs/2)*log(dispstar)-(n_obs/2)*log(2*pi)
+  
+
+  
     
-#  print(Env2)
+  print("Env2")
   
-#  stop("This is the Envelope")
+  print(Env2)
   
-  ## Return list needed by standard simulation function
-  ## Standard simulation function may need to be modified to generate samples
-  ## for the gaussian
+  ## Not sure why Env2$RSS is present - list seemingly only returns RSS_Out [from lm it seems perhaps]
+  
+  print("RSS")
+  
+  print(RSS)
+  print(Env2$RSS)
 
+  
+  print("RSS_Out")
+  print(Env2$RSS_Out)
+
+  
+  #stop("This was the envelope")
+  
   RSS=Env2$RSS*dispstar[1,1]
   RSS_Min=min(RSS)  ## This should likely be moved to the gamma distribution rate parameter
+  RSS_Diff=RSS-RSS_Min   
+  
 
-#  print("RSS_post")
+  test_const3=test_const2+0.5*(1/dispstar[1,1])*RSS_Min
+  
+  # remaining differencees are now from the prior components and do no depend on dispersion
+  
+  test_const4=test_const3+0.5*(1/dispstar[1,1])*RSS_Diff  
+  
+  
+  
+  print(Env2$thetabars)
+  print(P2)
+  
+  print("Test constant candidates")
+  print(test_const1)
+  print(test_const2)
+  print(test_const3)
+  print(test_const4)
+  
+  #  print("RSS_post")
 #  print(RSS2_post)
   
 #  print("RSS_Min")
@@ -208,8 +264,10 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   
   ## This should likely adjust PLSD, be part of rejection, or both
   
-  RSS_Diff=RSS-RSS_Min   
-    
+
+  #  print("RSS_Diff")
+    print(RSS_Diff)
+  
   ## Set the updated shape and rate parameters - may or may not coincide with RSS2_post
   
   shape2= shape + n_obs/2
@@ -304,6 +362,7 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   
   Env_temp=Env2
 
+#  print("Difference from old Neg_LL")
   
 ## Note: If the mean of the likelihood subgradient densities are to be kept constant, then one likely needs the 
 ##       following process
@@ -333,11 +392,63 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       # but slightly different from original thetabars
       
       New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), as.vector(alpha), as.vector(wt2))
+      Env_temp$thetabars=New_thetabars
 
       
-      print(New_thetabars)
       
-      stop("Called the inverse function and produced new thetabars")
+      
+      ## This may have been the problem (was using the old thetabars) 
+      NegLL_New=f2_gaussian_vector(t(Env_temp$thetabars), y, as.matrix(x2), as.matrix(mu2,ncol=1),
+                                   as.matrix(P2), as.vector(alpha), as.vector(wt2))
+      
+
+      
+            
+      test_const1=-NegLL_New   
+      
+      ## Removing normalizing constant and shifting log p to gamma
+      
+      test_const2=-NegLL_New+(n_obs/2)*log(dispersion)-(n_obs/2)*log(2*pi)
+      
+      
+      
+      
+      #RSS=Env2$RSS*dispstar[1,1]
+      #RSS_Min=min(RSS)  ## This should likely be moved to the gamma distribution rate parameter
+      #RSS_Diff=RSS-RSS_Min   
+      
+      
+      #test_const3=test_const2+0.5*(1/dispstar[1,1])*RSS_Min
+      
+      # remaining differencees are now from the prior components and do no depend on dispersion
+      
+      #test_const4=test_const3+0.5*(1/dispstar[1,1])*RSS_Diff  
+      
+      
+      
+      
+      
+#      print("NegLL_New - Original")
+      print("p")
+      
+      print(p)
+ #     print(NegLL_New-Env2$NegLL)
+      
+      #   print("ll_Check")
+      #  print(ll_Check)
+      
+            
+#      print("New_thetabars")
+#      print(New_thetabars)
+      
+#      stop("Comparison of old and new thetabars above")
+      
+      
+      # Next update NegLL so that the setlogP fuction can be called with updated values
+      # Set_Grid is does likely not need to be called as original output should still be valid
+      
+      
+#      stop("Called the inverse function and produced new thetabars")
       
       ## Update the Grid
       
@@ -352,9 +463,6 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       Env_temp$NegLL=NegLL_temp
         
 
-      
-      
-              
       ## In single likelihood subgradient case, we likely don't need to call the Set_Grid 
       ## and Set_logP function but can turn directly to the simulation
       
@@ -370,6 +478,7 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       
     
       
+      
       ## Add 1 here becasuse arrays in *.cpp start with 0 instead of 1
       J_out=sim$J+1
       log_U2=sim$log_U2
@@ -377,7 +486,140 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       disp_out[i,1]=dispersion
       beta_out[i,1:ncol(x)]=sim$out[1,1:ncol(x)]
 
-      test1=-0.5*p*RSS_Diff[J_out]
+      
+      
+      NegLL_New=f2_gaussian_vector(t(Env_temp$thetabars), y, as.matrix(x2), as.matrix(mu2,ncol=1),
+                                   as.matrix(P2), as.vector(alpha), as.vector(wt2))
+      
+      
+      LL_Test=-f2_gaussian_vector(as.matrix(beta_out[i,1:ncol(x)],ncol=1), y, as.matrix(x2), as.matrix(mu2,ncol=1),
+                                  as.matrix(P2), as.vector(alpha), as.vector(wt2))
+      
+
+      # RSS got replaced somewhere along the way above so use RSS_ML 
+      # UB1 uses only terms that can be shifted to the Gamma distribution and the constant with pi
+
+      f3=famfunc$f3
+      
+      cbars_new=f3(as.matrix(New_thetabars[J_out,],ncol=1), y, as.matrix(x2), as.matrix(mu2,ncol=1),
+                                  as.matrix(P2), as.vector(alpha), as.vector(wt2))
+      
+            
+      print("cbars original")
+      print(Env2$cbars[J_out,])
+      
+      print("cbars new")
+      print(cbars_new)
+
+      betadiff=as.matrix(sim$out[1,1:ncol(x)],ncol=1)-as.matrix(New_thetabars[J_out,1:ncol(x)],ncol=1)
+      
+      ## UB1 --> Should be test if we are using prior for beta but shift the two components to gamm
+      ## UB2 --> Should be test if we were sampling for the conditional density using the grid positioned at betastar, dispstar
+      ## UB3 --> Should be test if we are sampling from the density with different variances but keeping mean of
+      ##         normal densities fixed 
+      ##         unclear if/how the probabilities of visiting different parts of the grid should be adjusted based on what the dipserson
+      ##         is. Next step is to figure this part out
+      
+      UB1=-0.5*(1/dispersion)*RSS_ML-(n_obs/2)*log(dispersion)-(n_obs/2)*log(2*pi)  
+      UB2=-NegLL_New[J_out]-t(cbars_new)%*%(betadiff)
+      UB3=UB1-t(cbars_new)%*%(betadiff)
+      
+      Diff1=LL_Test-UB1
+      Diff2=LL_Test-UB2
+      Diff3=LL_Test-UB3
+      
+      print("bounds and test - UB1, UB2, UB3")
+      
+      print(UB1)
+      print(UB2)
+      print(UB3)
+      
+      print("LL Test")
+      print(LL_Test)   # The log-likelihood function returned by f2_gaussian_vector
+
+      print("Diff1, Diff2,Diff3")
+      
+      print(Diff1)
+      print(Diff2)
+      print(Diff3)
+      
+      
+#      print("cbar_beta_diff")
+#      print(cbar_beta_diff)
+      
+            
+      print("cbars")  # The goal is to keep this unchanged across dispersion numbers
+      print(Env2$cbars[J_out,1:ncol(x)])
+      
+      ## print 
+      
+      
+      print("thetabars and beta_candidate")
+      print(New_thetabars[J_out,1:ncol(x)])
+      print(sim$out[1,1:ncol(x)])
+
+      print("betadiff")
+      print(betadiff)
+      
+      
+      
+      
+      stop("This was the first test")
+ 
+      print("Corresponding test values")
+
+
+      #  Just the Log-Likelihood
+
+            
+      test_val1=-Neg_LL_Test   
+      
+      ## Removing normalizing constant and shifting log p to gamma
+      
+      test_val2=-Neg_LL_Test+(n_obs/2)*log(dispersion)-(n_obs/2)*log(2*pi)
+      
+      # Remove part of RSS that can be shifted to the gamma (does not depend on betw)
+      
+      test_val3=test_val2+0.5*(1/dispersion)*RSS_Min
+
+      ## Remove part of RSS that is present for 
+
+      test_val4=test_val3-0.5*(1/dispersion)*RSS_Diff[J_out]
+      
+      
+      print("Simulated candidate")
+      print(sim$out[1,1:ncol(x)])            
+
+      print("Associated alpha")
+      print(alpha)
+      
+      print("Test constants for sampled part of grid (original)")
+
+      print(test_const1[J_out])
+      print(test_const2[J_out])
+      print(test_const3[J_out])
+      
+      print("Test  candidates")
+      
+      print(test_val1)
+      print(test_val2)
+      print(test_val3)
+      
+      test_diff1=test_val1-test_const1[J_out]
+      test_diff2=test_val2-test_const2[J_out]
+      test_diff3=test_val3-test_const3[J_out]
+      test_diff4=test_val4-test_const3[J_out]
+      
+      print("Test  differences")
+      print(test_diff1)
+      print(test_diff2)
+      print(test_diff3)
+      print(test_diff4)
+      
+            
+      stop("Finished LL_Test Call")
+      
+            test1=-0.5*p*RSS_Diff[J_out]
 
 
       #test=disp_ratio*sim$test -log_U2
