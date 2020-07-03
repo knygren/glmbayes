@@ -202,11 +202,6 @@ simulation functions.
 
 Other simulation functions
 \code{\link{rglmb_dispersion}()},
-\code{\link{rglmb_norm_reg}()},
-\code{\link{rindependent_norm_gamma_reg_temp_v2}()},
-\code{\link{rindependent_norm_gamma_reg_temp}()},
-\code{\link{rindependent_norm_gamma_reg_v1}()},
-\code{\link{rindependent_norm_gamma_reg_v2}()},
-\code{\link{rindependent_norm_gamma_reg}()}
+\code{\link{rglmb_norm_reg}()}
 }
 \concept{simfuncs}

@@ -17,16 +17,16 @@
     .Call('_glmbayes_setlogP', PACKAGE = 'glmbayes', logP, NegLL, cbars, G3)
 }
 
+.RSS <- function(y, x, b, alpha, wt) {
+    .Call('_glmbayes_RSS', PACKAGE = 'glmbayes', y, x, b, alpha, wt)
+}
+
 .f2_gaussian_vector <- function(b, y, x, mu, P, alpha, wt) {
     .Call('_glmbayes_f2_gaussian', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt)
 }
 
 .Inv_f3_gaussian <- function(cbars, y, x, mu, P, alpha, wt) {
     .Call('_glmbayes_Inv_f3_gaussian', PACKAGE = 'glmbayes', cbars, y, x, mu, P, alpha, wt)
-}
-
-.rindep_norm_gamma_reg_std_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar = 1L) {
-    .Call('_glmbayes_rindep_norm_gamma_reg_std_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
 }
 
 .glmb_Standardize_Model_cpp <- function(y, x, P, bstar, A1) {

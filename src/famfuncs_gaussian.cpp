@@ -15,6 +15,9 @@ NumericVector dnorm_glmb( NumericVector x, NumericVector means, NumericVector sd
 }
 
 
+// [[Rcpp::export(".RSS")]]
+
+
 NumericVector RSS(NumericVector y, NumericMatrix x,NumericMatrix b,NumericVector alpha,NumericVector wt)
 {
   // Step 1: Set up dimensions
@@ -320,3 +323,4 @@ arma::mat  Inv_f3_gaussian(NumericMatrix cbars,NumericVector y, NumericMatrix x,
 
   return trans(out2);      
 }
+
