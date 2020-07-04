@@ -8,7 +8,7 @@
 lmb(
   n,
   formula,
-  prior,
+  pfamily,
   data,
   subset,
   weights,
@@ -34,14 +34,7 @@ lmb(
     model to be fitted.  The details of model specification are given
     under \sQuote{Details}.}
 
-\item{prior}{A list with the prior constants used by the model. Typically will include a prior
-vector mu of length \code{p} giving the prior means of the variables in the
-design matrix and a positive-definite symmetric matrix Sigma of dimension \code{p*p} 
-specifying the prior covariance matrix of the variables. Optionally, prior constants 
-shape and rate can also be provided for the dispersion parameters in the gaussian
-and Gamma families (either together with or without the multivariate normal component). 
-If no prior is provided for the dispersion, then the dispersion must be assumed to 
-be a constant with the default for the Poisson and binomial families being a dispersion of 1.}
+\item{pfamily}{the prior family to use for the model (including the constants passed to prior).}
 
 \item{data}{an optional data frame, list or environment (or object
     coercible by \code{\link{as.data.frame}} to a data frame) containing

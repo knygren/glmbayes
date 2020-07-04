@@ -9,18 +9,13 @@
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
 #' @param y a vector of observations of length \code{m}.
 #' @param x a design matrix of dimension \code{m * p}.
-#' @param mu a vector of length \code{p} giving the prior means of the variables in the design matrix.
-#' @param P a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior precision matrix of the variable.
-#' @param wt an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
-#' @param dispersion the dispersion parameter. Either a single numerical value or NULL (the default). Must be provided here, use \code{\link{rnorm_gamma_reg}} to give the dispersion a prior.
-#' @param shape Prior shape parameter for the dispersion parameter (gaussian model only).
-#' @param rate Prior rate parameter for the dispersion parameter (gaussian model only).
 #' @param family a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
-#' @param offset2 this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
-#' @param start an optional argument providing starting values for the posterior mode optimization.
+#' @param pfamily the prior family to use for the model (including the constants passed to prior). 
+#' @param offset an offset parameter
+#' @param weights a weighting variable
 #' @param digits the number of significant digits to use when printing.
 #' @param \ldots additional optional arguments.
-#' @return \code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
+#' @return \code{rlmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
 #' \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
@@ -88,13 +83,22 @@
 #' @rdname rlmb
 #' @order 1
 
-rlmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=gaussian(),offset2=rep(0,nobs),start=NULL)
+
+rlmb<-function(n=1,y,x,family=gaussian(),pfamily,
+               offset=rep(0,nobs),weights=1)
   {
 
+  ## Pull in information from the pfamily  
+  pf=pfamily$pfamily
+  #okfamilies=pfamily$okfamilies  
+  okfamilies <- c("gaussian")    # Only gaussian okfamily for rlmb
+  plinks=pfamily$plinks
+  prior_list=pfamily$prior_list 
+  simfun=pfamily$simfun
   
     
-  if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
-     is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
+#  if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
+#     is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
   
   x <- as.matrix(x)
   mu<-as.matrix(as.vector(mu))
@@ -142,48 +146,48 @@ rlmb<-function(n=1,y,x,mu,P,wt=1,dispersion=NULL,shape=NULL,rate=NULL,family=gau
     stop("'family' not recognized")
   }
   
-  okfamilies <- c("gaussian")
+  #  if(family$family %in% okfamilies){
+  #    if(family$family=="gaussian") oklinks<-c("identity")
+  
   if(family$family %in% okfamilies){
-    if(family$family=="gaussian") oklinks<-c("identity")
-    if(family$link %in% oklinks){
-      
-      famfunc<-glmbfamfunc(family)
-      f1<-famfunc$f1
-      f2<-famfunc$f2
-      f3<-famfunc$f3
-#      f5<-famfunc$f5
-#      f6<-famfunc$f6
-    }
-    else{
+    oklinks<-c("identity")
+    if(!family$link %in% oklinks){      
       stop(gettextf("link \"%s\" not available for selected family; available links are %s", 
                     family$link , paste(sQuote(oklinks), collapse = ", ")), 
            domain = NA)
-      
-    }	
-    
-  }		
-  else {
-    stop(gettextf("family \"%s\" not available in glmb; available families are %s", 
+    }
+  }
+  else{
+    stop(gettextf("family \"%s\" not available for current pfamily; available families are %s", 
                   family$family , paste(sQuote(okfamilies), collapse = ", ")), 
          domain = NA)
+    
   }
   
-    dispersion2=dispersion
-    if(is.null(dispersion)){dispersion2=0}
-    if(dispersion2>0){outlist<-.rnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)}
-    else{
-      ## For now, build list here - will be created by pfamily
-      prior_list2=list(mu=mu,Sigma=solve(P),P=P,shape=shape,rate=rate)        
-      outlist=rnorm_gamma_reg(n=n,y=y,x=x,prior_list=prior_list2,offset=offset2,weights=wt)  
-      }
+  
+  ## Call relevant simulation function (for now without control2 list)
+  
+  outlist=simfun(n=n,y=y,x=x,prior_list=prior_list,offset=offset,weights=weights,family=family)
+  
+  return(outlist)
+  
+
+#    dispersion2=dispersion
+#    if(is.null(dispersion)){dispersion2=0}
+#    if(dispersion2>0){outlist<-.rnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)}
+#    else{
+#      ## For now, build list here - will be created by pfamily
+#      prior_list2=list(mu=mu,Sigma=solve(P),P=P,shape=shape,rate=rate)        
+#      outlist=rnorm_gamma_reg(n=n,y=y,x=x,prior_list=prior_list2,offset=offset2,weights=wt)  
+#      }
     
 
-  colnames(outlist$coefficients)<-colnames(x)
+#  colnames(outlist$coefficients)<-colnames(x)
   
-  outlist$call<-match.call()
+#  outlist$call<-match.call()
   
-  class(outlist)<-c(outlist$class,"rlmb")
-  outlist
+#  class(outlist)<-c(outlist$class,"rlmb")
+#  outlist
   
 }
 

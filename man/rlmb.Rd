@@ -9,15 +9,10 @@ rlmb(
   n = 1,
   y,
   x,
-  mu,
-  P,
-  wt = 1,
-  dispersion = NULL,
-  shape = NULL,
-  rate = NULL,
   family = gaussian(),
-  offset2 = rep(0, nobs),
-  start = NULL
+  pfamily,
+  offset = rep(0, nobs),
+  weights = 1
 )
 
 \method{print}{rlmb}(x, digits = max(3, getOption("digits") - 3), ...)
@@ -29,30 +24,20 @@ rlmb(
 
 \item{x}{a design matrix of dimension \code{m * p}.}
 
-\item{mu}{a vector of length \code{p} giving the prior means of the variables in the design matrix.}
-
-\item{P}{a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior precision matrix of the variable.}
-
-\item{wt}{an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.}
-
-\item{dispersion}{the dispersion parameter. Either a single numerical value or NULL (the default). Must be provided here, use \code{\link{rnorm_gamma_reg}} to give the dispersion a prior.}
-
-\item{shape}{Prior shape parameter for the dispersion parameter (gaussian model only).}
-
-\item{rate}{Prior rate parameter for the dispersion parameter (gaussian model only).}
-
 \item{family}{a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)}
 
-\item{offset2}{this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.}
+\item{pfamily}{the prior family to use for the model (including the constants passed to prior).}
 
-\item{start}{an optional argument providing starting values for the posterior mode optimization.}
+\item{offset}{an offset parameter}
+
+\item{weights}{a weighting variable}
 
 \item{digits}{the number of significant digits to use when printing.}
 
 \item{\ldots}{additional optional arguments.}
 }
 \value{
-\code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
+\code{rlmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
 (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
 \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract

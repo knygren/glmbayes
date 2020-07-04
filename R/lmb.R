@@ -5,14 +5,7 @@
 #' lmb
 #' print.lmb
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
-#' @param prior A list with the prior constants used by the model. Typically will include a prior
-#' vector mu of length \code{p} giving the prior means of the variables in the
-#' design matrix and a positive-definite symmetric matrix Sigma of dimension \code{p*p} 
-#' specifying the prior covariance matrix of the variables. Optionally, prior constants 
-#' shape and rate can also be provided for the dispersion parameters in the gaussian
-#' and Gamma families (either together with or without the multivariate normal component). 
-#' If no prior is provided for the dispersion, then the dispersion must be assumed to 
-#' be a constant with the default for the Poisson and binomial families being a dispersion of 1. 
+#' @param pfamily the prior family to use for the model (including the constants passed to prior). 
 #' @param subset an optional vector specifying a subset of observations to be used in the fitting process.
 #' @param na.action a function which indicates what should happen when the data contain \code{NA}s.  The default is set by 
 #' the \code{na.action} setting of \code{\link{options}}, and is \code{\link[stats]{na.fail}} 
@@ -140,13 +133,12 @@
 #' @exportClass lmb
 
 
-lmb <- function (n, formula, prior, data, subset, weights, na.action,
+lmb <- function (n, formula, pfamily, data, subset, weights, na.action,
                   method = "qr", model = TRUE, x = TRUE, y = TRUE,
                   qr = TRUE, singular.ok = TRUE, contrasts = NULL,
                   offset, ...)
 
     {
-   # Note, renamed subset argument to subset2 as it caused conflict with subset function
 
   ret.x <- x
   ret.y <- y
@@ -214,37 +206,21 @@ lmb <- function (n, formula, prior, data, subset, weights, na.action,
   ######   End of lm function
     # Verify inputs and Initialize
     
-    ## Error checking to verify that the correct elements are present
-    if(missing(prior)) stop("Prior Specification Missing")
-    if(!missing(prior)){
-      if(!is.null(prior$mu)) mu=prior$mu
-      if(!is.null(prior$Sigma)) Sigma=prior$Sigma
-      if(!is.null(prior$dispersion)) dispersion=prior$dispersion
-      else dispersion=NULL
-      if(!is.null(prior$shape)) shape=prior$shape
-      else shape=NULL
-      if(!is.null(prior$rate)) rate=prior$rate
-      else rate=NULL
-    }
-    
-    if(is.numeric(n)==FALSE||is.numeric(mu)==FALSE||is.numeric(Sigma)==FALSE) stop("non-numeric argument to numeric function")
+
+#    if(is.numeric(n)==FALSE||is.numeric(mu)==FALSE||is.numeric(Sigma)==FALSE) stop("non-numeric argument to numeric function")
     
     y<-z$y	
     x<-z$x
     b<-z$coefficients
-    mu<-as.matrix(as.vector(mu))
-    Sigma<-as.matrix(Sigma)    
-    P<-solve(Sigma) 
+#    mu<-as.matrix(as.vector(mu))
+#    Sigma<-as.matrix(Sigma)    
+#    P<-solve(Sigma) 
     wtin<-z$prior.weights	
 
 ## Eliminate Gridtype from rlmb and lmb
 
-sim<-rlmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,
-          dispersion=dispersion,
-          shape=shape,rate=rate,
-          offset2=offset,
-          family=family,
-           start=b)
+sim<-rlmb(n=n,y=y,x=x,family=family,pfamily=pfamily,weights=wtin,
+            offset=offset)
 
 	dispersion2<-sim$dispersion
 	famfunc<-sim$famfunc
