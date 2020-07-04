@@ -43,10 +43,9 @@ mu[1,1]=log(mean(counts))
 ## Prior standard deviation and Variance
 mysd<-1           
 V=((mysd)^2)*diag(5)  
-prior=list(mu=mu,Sigma=V)
 ## Call to glmb
 glmb.D93<-glmb(n=1000,counts ~ outcome + treatment,
-               family = poisson(),prior=prior)
+               family = poisson(),pfamily=dNormal(mu=mu,Sigma=V))
 
 
 ## ----glmb confint-------------------------------------------------------------

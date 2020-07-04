@@ -21,9 +21,9 @@ V1<-1*diag(as.numeric(2.0))
 
 V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
 V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
-prior=list(mu=mu,P=solve(V1))
-out<-rglmb(n = 1000, y=y, x=x, prior=prior, wt = wt, 
-           family = binomial(logit), Gridtype = 3) 
+
+out<-rglmb(n = 1000, y=y, x=x, pfamily=dNormal(mu=mu,Sigma=V1), weights = wt, 
+           family = binomial(logit)) 
 summary(out)
 
 alpha<-matrix(rep(0,length(y)),ncol=1)

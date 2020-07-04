@@ -71,8 +71,8 @@ wt2=rep(1,length(y))
 
 ### Check
 prior=list(mu=mu,Sigma=solve(P),dispersion=v_old)
-outtemp1<-glmb(n = 1000, weight ~ group, prior=prior,family = gaussian(),
-start =b_old, Gridtype = 3)
+outtemp1<-glmb(n = 1000, weight ~ group, family = gaussian(),
+pfamily=dNormal(mu=mu,Sigma=solve(P),dispersion=v_old))
 ## Could use a residuals function here -- For now, maybe run the glmb function
 
 summary(outtemp1)
@@ -81,16 +81,15 @@ v_old
 colMeans((outtemp1$coefficients))
 b_old
 prior=list(mu=mu,P=P,dispersion=v_old)
-outtemp2<-rglmb(n = 1000, y, x, prior=prior, wt = wt2,
-                family = gaussian(), offset2 = rep(0, length(y)), start = b_old, Gridtype = 3)
+outtemp2<-rglmb(n = 1000, y, x, family = gaussian(),pfamily=dNormal(mu=mu,Sigma=solve(P),dispersion=v_old),
+offset = rep(0, length(y)), weights = wt2)
 summary(outtemp2)
 colMeans((outtemp2$coefficients))
 b_old
 
 prior=list(mu=mu,Sigma=solve(P),shape=shape,rate=rate)
-outtemp3<-glmb(n = 10000, weight ~ group, prior=prior,
-               family = gaussian(),  start = b_old, Gridtype = 3)
-## Could use a residuals function here -- For now, maybe run the glmb function
+outtemp3<-glmb(n = 10000, weight ~ group,family = gaussian(),  
+dNormal_Gamma(mu=mu,Sigma=solve(P),shape=shape,rate=rate))
 
 summary(outtemp3)
 mean(colMeans(residuals(outtemp3)^2))

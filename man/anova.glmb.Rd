@@ -43,7 +43,7 @@ V=((mysd)^2)*diag(5)
 prior=list(mu=mu,Sigma=V)
 ## Call to glmb
 glmb.D93<-glmb(n=1000,counts ~ outcome + treatment,
-               family = poisson(),prior=prior)
+               family = poisson(),pfamily=dNormal(mu=mu,Sigma=V))
 
 
 ## ----glmb residuals-----------------------------------------------------------

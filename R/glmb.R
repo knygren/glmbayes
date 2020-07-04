@@ -8,14 +8,7 @@
 #' @param family a description of the error distribution and link function to be used in the model. For \code{glmb} 
 #' this can be a character string naming a family function, a family function or the result of a call to a family function. 
 #' (See \code{\link{family}} for details of family functions.)
-#' @param prior A list with the prior constants used by the model. Typically will include a prior
-#' vector mu of length \code{p} giving the prior means of the variables in the
-#' design matrix and a positive-definite symmetric matrix Sigma of dimension \code{p*p} 
-#' specifying the prior covariance matrix of the variables. Optionally, prior constants 
-#' shape and rate can also be provided for the dispersion parameters in the gaussian
-#' and Gamma families (either together with or without the multivariate normal component). 
-#' If no prior is provided for the dispersion, then the dispersion must be assumed to 
-#' be a constant with the default for the Poisson and binomial families being a dispersion of 1. 
+#' @param pfamily the prior family to use for the model (including the constants passed to prior). 
 #' @param data an optional data frame, list or environment (or object coercible by \code{\link{as.data.frame}} to a data frame)
 #' containing the variables in the model. If not found in \code{data}, the variables are taken from 
 #' \code{environment(formula)}, typically the environment from which \code{glmb} is called.
@@ -141,7 +134,7 @@
 #' @export glmb
 #' @exportClass glmb
 
-glmb<-function (n=1000,formula, family = binomial,prior,data, weights, subset2,
+glmb<-function (n=1000,formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1),data, weights, subset2,
                 offset,na.action, Gridtype=1,start = NULL, etastart, 
                  mustart,  control = list(...), model = TRUE, 
                  method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
@@ -226,43 +219,34 @@ glmb<-function (n=1000,formula, family = binomial,prior,data, weights, subset2,
 
     ## Use the prior list to set the prior elements if it is not missing
     ## Error checking to verify that the correct elements are present
-    if(missing(prior)) stop("Prior Specification Missing")
-    if(!missing(prior)){
-      if(!is.null(prior$mu)) mu=prior$mu
-      if(!is.null(prior$Sigma)) Sigma=prior$Sigma
-      if(!is.null(prior$dispersion)) dispersion=prior$dispersion
-      else dispersion=NULL
-      if(!is.null(prior$shape)) shape=prior$shape
-      else shape=NULL
-      if(!is.null(prior$rate)) rate=prior$rate
-      else rate=NULL
-    }
     
-        
-    if(is.numeric(n)==FALSE||is.numeric(mu)==FALSE||is.numeric(Sigma)==FALSE) stop("non-numeric argument to numeric function")
-    
+  
+
     y<-fit$y	
     x<-fit$x
     b<-fit$coefficients
-    mu<-as.matrix(as.vector(mu))
-    Sigma<-as.matrix(Sigma)    
-    P<-solve(Sigma) 
+
+    prior_list=pfamily$prior_list 
+    
+    mu<-as.matrix(as.vector(prior_list$mu))
+    Sigma<-as.matrix(prior_list$Sigma)    
+    P<-solve(prior_list$Sigma) 
     wtin<-fit$prior.weights	
 
-prior2=list(mu=mu,P=P,dispersion=dispersion,shape=shape, rate=rate)    
 
 #sim<-rglmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,dispersion=dispersion,shape=shape,rate=rate,offset2=offset,family=family,
 #           start=b,Gridtype=Gridtype)
 
 
-sim<-rglmb(n=n,y=y,x=x,prior=prior2,wt=wtin,offset2=offset,family=family,
-           start=b,Gridtype=Gridtype)
+
+sim<-rglmb(n=n,y=y,x=x,family=family,pfamily=pfamily,offset=offset,weights=wtin)
+
 
 
 	dispersion2<-sim$dispersion
 	famfunc<-sim$famfunc
 	
-	Prior<-list(mean=as.numeric(mu),Variance=Sigma)
+	Prior<-list(mean=prior_list$mu,Variance=prior_list$Sigma)
 	names(Prior$mean)<-colnames(fit$x)
 	colnames(Prior$Variance)<-colnames(fit$x)
 	rownames(Prior$Variance)<-colnames(fit$x)

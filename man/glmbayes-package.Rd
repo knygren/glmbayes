@@ -70,7 +70,7 @@ glm.D93 <- glm(counts ~ outcome + treatment,
                family = poisson())
 ## Call to glmb
 glmb.D93<-glmb(n=1000,counts ~ outcome + treatment,
-               family = poisson(),prior=prior)
+               family = poisson(),pfamily=dNormal(mu=mu,Sigma=V))
 
 ## ----Printed_Views------------------------------------------------------------
 ## Printed view of the output from the glm function 

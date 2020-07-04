@@ -9,7 +9,7 @@ glmb(
   n = 1000,
   formula,
   family = binomial,
-  prior,
+  pfamily = dNormal(mu, Sigma, dispersion = 1),
   data,
   weights,
   subset2,
@@ -42,14 +42,7 @@ glmb(
 this can be a character string naming a family function, a family function or the result of a call to a family function. 
 (See \code{\link{family}} for details of family functions.)}
 
-\item{prior}{A list with the prior constants used by the model. Typically will include a prior
-vector mu of length \code{p} giving the prior means of the variables in the
-design matrix and a positive-definite symmetric matrix Sigma of dimension \code{p*p} 
-specifying the prior covariance matrix of the variables. Optionally, prior constants 
-shape and rate can also be provided for the dispersion parameters in the gaussian
-and Gamma families (either together with or without the multivariate normal component). 
-If no prior is provided for the dispersion, then the dispersion must be assumed to 
-be a constant with the default for the Poisson and binomial families being a dispersion of 1.}
+\item{pfamily}{the prior family to use for the model (including the constants passed to prior).}
 
 \item{data}{an optional data frame, list or environment (or object coercible by \code{\link{as.data.frame}} to a data frame)
 containing the variables in the model. If not found in \code{data}, the variables are taken from 
@@ -214,7 +207,7 @@ mysd<-1
 mu<-matrix(0,5)
 V0<-((mysd)^2)*diag(5)
 prior=list(mu=mu,Sigma=V0)
-glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),prior=prior,Gridtype=1)
+glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu,Sigma=V0))
 
 summary(glmb.D93)
 
@@ -232,27 +225,29 @@ V1<-1*diag(2)
 V1[1,1]<-100
 V1[2,2]<-1
 
-glm.out1<-glm(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit), data=menarche2)
+glm.out1<-glm(cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,
+              family=binomial(logit), data=menarche2)
 
 # temporarily edit out as it seems slow (adding back in - may need
 #to adjust prior)
 prior1=list(mu=mu,Sigma=V1)
 glmb.out1<-glmb(n=n,cbind(Menarche, Total-Menarche) ~ Age,family
-                =binomial(logit),prior=prior1,Gridtype=1, data=menarche2)
+                =binomial(logit),pfamily=dNormal(mu=mu,Sigma=V1), data=menarche2)
 
 summary(glm.out1)
 summary(glmb.out1)
-glm.out2<-glm(cbind(Menarche,Total-Menarche)~Age,family=binomial(probit), data=menarche2)
-glmb.out2<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age,family=binomial(probit),prior=prior1
-                ,Gridtype=1,data=menarche2)
+glm.out2<-glm(cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,family=binomial(probit), 
+              data=menarche2)
+glmb.out2<-glmb(n=n,cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,
+                family=binomial(probit),pfamily=dNormal(mu=mu,Sigma=V1),data=menarche2)
 
 summary(glm.out2)
 summary(glmb.out2)
 
-glm.out3 <-glm(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(cloglog),
+glm.out3 <-glm(cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,family=binomial(cloglog),
                data=menarche2)
-glmb.out3<-glmb(n=n,cbind(Menarche,Total-Menarche)~Age,family=binomial(cloglog),
-                prior=prior1,Gridtype=1,data=menarche2)
+glmb.out3<-glmb(n=n,cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,family=binomial(cloglog),
+                pfamily=dNormal(mu=mu,Sigma=V1))
 
 summary(glm.out3)
 summary(glmb.out3)

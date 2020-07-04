@@ -55,8 +55,7 @@ mysd<-1
 
 mu<-matrix(0,5)
 V0<-((mysd)^2)*diag(5)
-prior=list(mu=mu,Sigma=V0)
-glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),prior=prior)
+glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu,Sigma=V0))
 
 summary(glmb.D93)
 }
