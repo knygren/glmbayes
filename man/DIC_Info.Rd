@@ -73,7 +73,7 @@ famfunc<-out$famfunc
 f1=out$famfunc$f1
 f4=out$famfunc$f4
 
-glmbdic(out$coefficients,y=y,x=x,alpha=alpha,
+DIC_Info(out$coefficients,y=y,x=x,alpha=alpha,
         f1=f1,f4=f4,wt=wtin/dispersion2,
         dispersion=dispersion2)
 

@@ -2,12 +2,58 @@
 % Please edit documentation in R/Prior_Setup.R
 \name{Prior_Setup}
 \alias{Prior_Setup}
+\alias{Prior_Setup_v2}
 \title{Setup Prior Objects}
 \usage{
 Prior_Setup(object)
+
+Prior_Setup_v2(
+  formula,
+  data,
+  subset = NULL,
+  na.action = na.fail,
+  drop.unused.levels = FALSE,
+  xlev = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{a fitted model object of class \code{"glm"}. Typically the result of a call to \link{glm}.}
+
+\item{formula}{a model \code{\link[stats]{formula}} or \code{\link[stats]{terms}}
+    object or an \R object.}
+
+\item{data}{a data.frame, list or environment (or object
+    coercible by \code{\link{as.data.frame}} to a data.frame),
+    containing the variables in \code{formula}.  Neither a matrix nor an
+    array will be accepted.}
+
+\item{subset}{a specification of the rows to be used: defaults to all
+    rows. This can be any valid indexing vector (see
+    \code{\link{[.data.frame}}) for the rows of \code{data} or if that is not
+    supplied, a data frame made up of the variables used in \code{formula}.}
+
+\item{na.action}{how \code{NA}s are treated.  The default is first,
+    any \code{na.action} attribute of \code{data}, second
+    a \code{na.action} setting of \code{\link{options}}, and third
+    \code{\link[stats]{na.fail}} if that is unset.  The \sQuote{factory-fresh}
+    default is \code{\link[stats]{na.omit}}.  Another possible value is \code{NULL}.}
+
+\item{drop.unused.levels}{should factors have unused levels dropped?
+    Defaults to \code{FALSE}.}
+
+\item{xlev}{a named list of character vectors giving the full set of levels
+    to be assumed for each factor.}
+
+\item{...}{for \code{model.frame} methods, a mix of further
+    arguments such as \code{data}, \code{na.action}, \code{subset} to pass
+    to the default method.  Any additional arguments (such as
+    \code{offset} and \code{weights} or other named arguments) which
+    reach the default method are used to create further columns in the
+    model frame, with parenthesised names such as \code{"(offset)"}.
+
+    For \code{get_all_vars}, further named columns to include
+    in the model frame.}
 }
 \value{
 A list with items related to the prior.
