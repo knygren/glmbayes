@@ -9,11 +9,10 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-The *glmbayes* package produces iid samples for Bayesian Linear and Bayesian Genereralized Linear Models by providing
-Bayesian versions of the *lmb* and *glm* functions for classical models. Extensive efforts have been made to make the new functions, *lmb* and *glmb*, as similar as possible to their classical equivalents. To that end, the functions require two argument (n and pfamily) in addition to those typically used by the classical functions. The Bayesian functions also generally inherit and/or provide implemented methods for nearly all of the methods available for the *lm* and *glm* functions so that the same type of outputs as from the classical functions can be readily produced.   
+The *glmbayes* package produces iid samples for Bayesian Linear Models and Bayesian Genereralized Linear Models by providing Bayesian versions of the *lmb* and *glm* functions for classical models. Extensive efforts have been made to make the new functions, *lmb* and *glmb*, as similar as possible to their classical equivalents. To that end, the functions add a single required argument (pfamily) and one optional argument (n) to those typically used by the classical functions. The Bayesian functions also generally inherit and/or provide implemented methods for nearly all of the methods available for the *lm* and *glm* functions so that the same type of outputs as from the classical functions can be readily produced.   
 
 In addition to the two main functions and their methods, there are also a number of additional functions provided with the package. The purpose of this chapter is to provide a overview of the types of functions provided and what 
-the intended use is. Each section discusses a sub-category of functions in general terms. Details on how to use specific functions are provided in later chapters.
+their intended use is. Most of the sections below discuss a specific sub-category of functions in general terms. Details on how to use specific functions are provided in later chapters and in the help pages.
 
 # Loading the package 
 
@@ -24,11 +23,17 @@ knitr::opts_chunk$set(
 )
 ```
 
+To use the package, the user must first load the package. Currently, the package requires the MASS package so it aso needs to be installed and gets loaded as part of the loading of the glmbayes package.
+
 ```{r setup,results = "hide"}
 library(glmbayes)
 ```
 
 # Accessing package information, general documentation, and demos
+
+To access information for the package outside of the information contained in these vignettes, we suggest users review three sets of help pages. A call to help(glmbayes) yields a page with a detailed discussion of the package with an example at the bottom.   Calling help(package="glmbayes") brings the user to a list of Help pages for specific functions as well as links to a general description file, code demos, and these vignettes. Part of the objective of this vignette is to provide more organized layout of the functions than the general list of help pages provided on the documentation page.
+
+A call to demo(package="glmbayes"), finally, brings up a list of available demos for the package. A useful start for users might be to go through the specific demos as they are set up to illustrate the functionality of the package.
 
 ```{r help,results = "hide"}
 help(glmbayes)
@@ -44,10 +49,12 @@ demo(package="glmbayes")
 
 # The *lmb* and *glmb* functions
 
-As noted at the top of this chapter, the *lmb* and *glmb* functions provide Bayesian versions of the *lm* and *glmb* functions respectively. More extensive side-by-side comparisons of the functions with their classical equivalents and their methods are provided in separate vignettes. Here we simply note the formatting of the required arguments for the functions.
+As noted at the top of this chapter, the *lmb* and *glmb* functions provide Bayesian versions of the *lm* and *glmb* functions respectively. More extensive side-by-side comparisons of the functions with their classical equivalents and their methods are provided in separate vignettes. Here we simply note that both functions can be called by simply adding a single argument (pfamily) to the typical calls to *lm* and *glm* as seen in the two code snippets below.  The pfamily argument provides the prior specification (type of distribution and parameters). We dedicate a separate vignette to a discussion of how to set specify the required priors.  
 
 [NEED TO MODIFY Prior_Setup PRINT FUNCTION AND HOW IT HANDLES CASE WHERE X IS MISSING]
+[MAY ALSO WANT TO HAVE IT INITIALIZE SHAPE AND RATE PARAMETERS]
 
+*Calling lm vs. calling lmb*
 ```{r lm and lmb,results = "hide"}
 # Annette Dobson (1990) "An Introduction to Generalized Linear Models".
 ## Page 9: Plant Weight Data.
@@ -57,18 +64,140 @@ group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
 weight <- c(ctl, trt)
 lm.D9 <- lm(weight ~ group)
 
+# Prior_Setup function used here to initialize the priors 
+# Priors can be set without a prior call to lmb
+## and should generally be modified prior to call to lmb
 p_info=Prior_Setup(lm.D9)
+mu1=p_info$mu    
+Sigma1=p_info$Sigma
 
-# Note: mu Initialized to 0 vector and Sigma to Identity - Not recommended
-mu=p_info$mu    
-Sigma=p_info$Sigma
-
-lmb.D9 <- lmb(n=1000,weight ~ group,pfamily=dNormal_Gamma(mu,Sigma,shape=4,rate=0.1))
-
-
-
+lmb.D9 <- lmb(weight ~ group,pfamily=dNormal_Gamma(mu1,Sigma1,shape=4,rate=0.1))
 ```
 
+*Calling glm vs. calling glmb*
+
+```{r glm and glmb,results = "hide"}
+## Dobson (1990) Page 93: Randomized Controlled Trial :
+counts <- c(18,17,15,20,10,20,25,13,12)
+outcome <- gl(3,1,9)
+treatment <- gl(3,3)
+data.frame(treatment, outcome, counts) # showing data
+glm.D93 <- glm(counts ~ outcome + treatment, family = poisson())
+
+p_info=Prior_Setup(glm.D93)
+mu2=p_info$mu    
+Sigma2=p_info$Sigma
+
+glmb.D93<-glmb(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu2,Sigma=Sigma2))
+
+```
+# Prior Family Functions
+
+As we saw above, calling the *lmb* and *glmb* functions requires providing a *pfamily* function specifying the prior distribution and corresponding arguments.  As these are functions, they can also be called directly as seen below, where they return lists with items related to the prior (see documentation of the functions for details). These functions are also discussed in more detail in a latter chapter. 
+
+While the current package only provides the 3 implemented priors, this is actually not a severe limitations as users easily can write their own prior families and call those from he *lmb* and *glmb* functions.  One of our exaxmple includes and illustration of this and this approach is discussed more extensively in one of our other vignettes.
+
+NOTE: IMPLEMENT THE EXAMPLE DISCUSSED ABOVE AND WRITE A SEPARATE VIGNETTE TO ACCOMPANY THE EXAMPLE.
+
+*Calling the dNormal prior family*
+
+This prior is typically used as a prior for the Poisson and Binomial families when calling either the
+*glmb* or *rglm* functions.
+
+```{r Calling dNormal,results = "hide"}
+dNormal(mu=mu2,Sigma=Sigma2,dispersion=NULL)
+```
+*Calling the dNormal_Gamma prior family
+
+This prior is typically used as a prior when calling either the *lmb* or *rglmb* functions or when using the *gaussian()* family in the *glm* and *rglmb* functions. 
+
+```{r Calling dNormal_Gamma,results = "hide"}
+
+dNormal_Gamma(mu=mu1,Sigma=Sigma1,shape=4,rate=0.1)
+```
+
+*Calling the dGamma prior family
+
+This prior is typically used when giving a prior for the dispersion parameter in the *lmb*, *rlmb*, *glmb*, and *rglmb* functions (in the latter case for the *gaussian()* and *Gamma()* families). Typicall this would be done as
+part of Block-Gibbs sampling where the regression coefficients are updated in a separate block.
+
+```{r Calling dGamma,results = "hide"}
+b=lm.D9$coefficients
+dGamma(shape=4,rate=0.1,beta=b)
+```
+
+
+# Other Prior Related Functions 
+
+Three additional functions related to the prior specification and are useful when either specifying the prior or 
+to extract the prior used by an existing model object.
+
+*The Prior_Setup function
+
+This function can be used to set up the prior arguments so they have the correct dimensions. The function also returns the model frame and design matrix as a reference (the latter when it was requested from the underlying model). It is worth noting that this function is intended as a tool for initializig the prior objects and not for setting them to the final values used in the estimation. How to populate the arguments with sensible values is discussed in a separate vignette.
+
+NOTE: ADD A PRINT METHOD FOR THIS FUNCTION SO THAT THE OUTPUT CAN BE CONTROLLED
+
+```{r Calling Prior_Setup,results = "hide"}
+lm.D9 <- lm(weight ~ group,x=TRUE)
+Prior_Setup(lm.D9)
+```
+*The Prior_Check function
+
+The Prior Check function provides a utility for checking whether the data appears to be consistent with the prior. Essentially, consistency here means that the maximum likelihood estimate are within the credible intervals implied by the prior. If the data appears inconsistent with the data, it is possible that the data was generated from a different process than that implied by the model or that the prior was not well thought out.  Specifying a good prior is usually important and we dedicate a separate vignette to this topic.
+
+
+```{r Calling Prior_Check,results = "hide"}
+Prior_Check(glm.D93,mu2,Sigma2)
+```
+
+
+*The pfamily function
+
+This function can be used to extract a pfamily object from an existing object and is useful post-modeling in order
+to verify the prior used in the modeling process. It is also used by some of the methods during post-processing
+to extract information about the prior.
+
+```{r Calling pfamily,results = "hide"}
+pfamily(glmb.D93)
+```
+
+
+# Method functions 
+
+The *lmb* and *glmb* functions come with an extensive set of method functions that can be used to conduct supplemental analysis (typically during the post-modeling phase). Because the *lmb* and *glmb* functions are structured to return many of the same items as the classical functions and because they inherit methods from *glm* and *lm*, many of the methods available for the classical functions are directly available for the *glmb* and *lmb* functions. As some of the output does tend to be different (in particular, coefficients are returned as random draws as opposed to a single maximum likelihood estimate), we have implemented specific methods for the "glmb" and "lmb" classes of objects.  The current set of methods for all four classes of objects are displayed below. 
+
+Two separate vignettes illustrate how calls to these methods can be used to replicate the output from the classical models. It is worth noting that a smaller subset of the classical methods are not yet implemented (although plans are in place to replicate some of those as well). Those are discussed the separate vignette's as well.
+
+[NOTE: AS NEEDED, ADD ADDITIONAL METHODS FOR lmb. THE LIST OF METHODS FOR glmb SHOULD BE FAIRLY COMPLETE]
+
+*Methods for class="lm"* 
+```{r lm methods}
+methods(class="lm")
+```
+
+*Methods for class="glm"* 
+
+```{r glm methods}
+methods(class="glm")
+```
+*Methods for class="glmb"* 
+
+While most of the methods for the *glm* class (when it has its own method) or the *lm* class (when it does not) work properly for objects of class *glmb*, some methods do not. For that reason, we have implemented the below methods specifically for the *glmb* class of objects.  Future enhancements to this package may enhance these methods.  There are also additional methods for *lm* and/or *glm* that do not currently have functioning methods
+for the *glmb* class. This includes the *add1*, *drop1*, and *dropterm* functions (which should be implementable fairly easily) and the various influence.measure methods (influence, rstandard, rstudent, dfbeta, dfbetas, cooks.distance, and hatvalues) which may require more work. Plans do exist to add the former and perhaps the latter (which likely would look at influence on posterior modes and not on posterior means).   
+
+```{r glmb methods}
+methods(class="glmb")
+```
+
+
 # The *rlmb* and *rglmb* functions
+
+Because the functions *lmb* and *glmb* are set up to mirror their corresponding classical functions, they include a great deal of overhead in terms of pre-and post processing that could make them unsuitable for repetitive calls (say during Block-Gibbs sampling).  To faciliate Block-Gibbs sampling and other simulation, we provide more minimalistic interfaces to the simulation procedures in the form of corresponding functions *rlmb* and *rglmb*. 
+
+The functions are called internally by *lmb* and *glmb* in much the same way that *lm.fit* and *glm.fit* are called by the *lm* and *glm* functions so in a way they are Bayesian versions of those functions. We choose the r prefix for these functions to symbolize that they also represent random draws from probability distributions in much the same way that *rnorm*, *rgamma*, and other functions in the *stats* package do.
+
+Instead of passing a formula to these functions, the user instead passes the dependent and independent variables as a dependent variable vector *y* and as an independent variable design matrix *x* respectively.
+
 
 

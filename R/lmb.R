@@ -133,7 +133,7 @@
 #' @exportClass lmb
 
 
-lmb <- function (n=1, formula, pfamily, data, subset, weights, na.action,method = "qr", model = TRUE, x = TRUE, 
+lmb <- function ( formula, pfamily, n=1000,data, subset, weights, na.action,method = "qr", model = TRUE, x = TRUE, 
 y = TRUE,qr = TRUE, singular.ok = TRUE, contrasts = NULL,offset, ...)
     {
 
@@ -205,25 +205,27 @@ y = TRUE,qr = TRUE, singular.ok = TRUE, contrasts = NULL,offset, ...)
     
 
 #    if(is.numeric(n)==FALSE||is.numeric(mu)==FALSE||is.numeric(Sigma)==FALSE) stop("non-numeric argument to numeric function")
-    
+  ## Pull in information from the pfamily  
+  prior_list=pfamily$prior_list 
+
+  
     y<-z$y	
     x<-z$x
     b<-z$coefficients
-#    mu<-as.matrix(as.vector(mu))
-#    Sigma<-as.matrix(Sigma)    
-#    P<-solve(Sigma) 
+    mu<-as.matrix(as.vector(prior_list$mu))
+    Sigma<-as.matrix(prior_list$Sigma)    
+    P<-solve(prior_list$Sigma) 
     wtin<-z$prior.weights	
 
-    
-    
 ## Eliminate Gridtype from rlmb and lmb
 
 sim<-rlmb(n=n,y=y,x=x,pfamily=pfamily,weights=wtin,
             offset=offset)
 
+
+
 	dispersion2<-sim$dispersion
 	famfunc<-sim$famfunc
-	
 	Prior<-list(mean=as.numeric(mu),Variance=Sigma)
 	names(Prior$mean)<-colnames(z$x)
 	colnames(Prior$Variance)<-colnames(z$x)
@@ -281,7 +283,9 @@ if (is.null(offset)) {
     famfunc=famfunc,
 	  iters=sim$iters,
 	  contrasts=z$contrasts,	  
-	  xlevels=z$xlevels
+	  xlevels=z$xlevels,
+	  pfamily=pfamily
+	  
 	  )
 
 	outlist$call<-match.call()

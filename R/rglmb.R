@@ -55,6 +55,9 @@ rglmb<-function(n=1,y,x,family=gaussian(),pfamily,offset=NULL,weights=1){
   ## Call relevant simulation function (for now without control2 list)
   
   outlist=simfun(n=n,y=y,x=x,prior_list=prior_list,offset=offset,weights=weights,family=family)
+
+  
+  outlist$pfamily=pfamily
   
   return(outlist)
   

@@ -420,7 +420,7 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   // Step 3: Standardize the model 
   
-  Rcpp::Rcout << "Standardizing the model:" << std::endl;
+//  Rcpp::Rcout << "Standardizing the model:" << std::endl;
   
   Rcpp::List Standard_Mod=glmb_Standardize_Model(
     y, 
@@ -450,7 +450,7 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   // Step 4: Build the Envelope required to simulate from the Standardized Model
   
-  Rcpp::Rcout << "Starting Envelope Creation:" << std::endl;
+//  Rcpp::Rcout << "Starting Envelope Creation:" << std::endl;
   
   Rcpp::List Envelope; // Can move this towards top of the function
   
@@ -465,7 +465,7 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
                              P2_temp,alpha,wt2,family,link,Gridtype, n,true);
   }
   
-  Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
+//  Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
   
   // Step 5: Run the simulation 
   

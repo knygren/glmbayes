@@ -6,9 +6,9 @@
 \title{Fitting Bayesian Linear Models}
 \usage{
 lmb(
-  n = 1,
   formula,
   pfamily,
+  n = 1000,
   data,
   subset,
   weights,
@@ -27,14 +27,14 @@ lmb(
 \method{print}{lmb}(x, digits = max(3, getOption("digits") - 3), ...)
 }
 \arguments{
-\item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
-
 \item{formula}{an object of class \code{"\link[stats]{formula}"} (or one that
     can be coerced to that class): a symbolic description of the
     model to be fitted.  The details of model specification are given
     under \sQuote{Details}.}
 
 \item{pfamily}{the prior family to use for the model (including the constants passed to prior).}
+
+\item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
 
 \item{data}{an optional data frame, list or environment (or object
     coercible by \code{\link{as.data.frame}} to a data frame) containing

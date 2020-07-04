@@ -6,10 +6,10 @@
 \title{Fitting Bayesian Generalized Linear Models}
 \usage{
 glmb(
-  n = 1000,
   formula,
   family = binomial,
   pfamily = dNormal(mu, Sigma, dispersion = 1),
+  n = 1000,
   data,
   weights,
   subset2,
@@ -31,8 +31,6 @@ glmb(
 \method{print}{glmb}(x, digits = max(3, getOption("digits") - 3), ...)
 }
 \arguments{
-\item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
-
 \item{formula}{an object of class \code{"\link[stats]{formula}"} (or one that
     can be coerced to that class): a symbolic description of the
     model to be fitted.  The details of model specification are given
@@ -43,6 +41,8 @@ this can be a character string naming a family function, a family function or th
 (See \code{\link{family}} for details of family functions.)}
 
 \item{pfamily}{the prior family to use for the model (including the constants passed to prior).}
+
+\item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
 
 \item{data}{an optional data frame, list or environment (or object coercible by \code{\link{as.data.frame}} to a data frame)
 containing the variables in the model. If not found in \code{data}, the variables are taken from 

@@ -134,7 +134,7 @@
 #' @export glmb
 #' @exportClass glmb
 
-glmb<-function (n=1000,formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1),data, weights, subset2,
+glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1),n=1000,data, weights, subset2,
                 offset,na.action, Gridtype=1,start = NULL, etastart, 
                  mustart,  control = list(...), model = TRUE, 
                  method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
@@ -306,7 +306,8 @@ if (is.null(offset)) {
     famfunc=famfunc,
 	  iters=sim$iters,
 	  contrasts=fit$contrasts,	  
-	  xlevels=fit$xlevels
+	  xlevels=fit$xlevels,
+	  pfamily=pfamily
 	  )
 
 	outlist$call<-match.call()

@@ -5,7 +5,7 @@
 \alias{print.rlmb}
 \title{The Bayesian Linear Model Distribution}
 \usage{
-rlmb(n = 1, y, x, pfamily, offset = rep(0, nobs), weights = 1)
+rlmb(n = 1, y, x, pfamily, offset = rep(0, nobs), weights = NULL)
 
 \method{print}{rlmb}(x, digits = max(3, getOption("digits") - 3), ...)
 }

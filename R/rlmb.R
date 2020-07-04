@@ -83,8 +83,7 @@
 #' @order 1
 
 
-rlmb<-function(n=1,y,x,pfamily,
-               offset=rep(0,nobs),weights=1)
+rlmb<-function(n=1,y,x,pfamily,offset=rep(0,nobs),weights=NULL)
   {
 
   ## Pull in information from the pfamily  
@@ -102,8 +101,10 @@ rlmb<-function(n=1,y,x,pfamily,
 
   P=solve(prior_list$Sigma)
     
+  
+  
   x <- as.matrix(x)
-  mu<-as.matrix(as.vector(mu))
+  mu<-as.matrix(as.vector(prior_list$mu))
   P<-as.matrix(P)    
   xnames <- dimnames(x)[[2L]]
   ynames <- if (is.matrix(y)) 
@@ -168,7 +169,10 @@ rlmb<-function(n=1,y,x,pfamily,
   
 
 
+  
   outlist=simfun(n=n,y=y,x=x,prior_list=prior_list,offset=offset,weights=weights,family=family)
+
+  outlist$pfamily=pfamily
 
   return(outlist)
   

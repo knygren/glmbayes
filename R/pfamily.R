@@ -115,7 +115,7 @@ dNormal<-function(mu,Sigma,dispersion=NULL){
   }
   
   prior_list=list(mu=mu,Sigma=Sigma,dispersion=dispersion)
-  attr(prior_list,"Prior Type")="Normal"  
+  attr(prior_list,"Prior Type")="dNormal"  
 
   outlist=list(pfamily="dNormal",prior_list=prior_list,okfamilies=okfamilies,
   plinks=plinks,             
