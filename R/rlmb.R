@@ -77,7 +77,7 @@
 #' \emph{Modern Applied Statistics with S.}
 #' New York: Springer.
 #' 
-#' @example inst/examples/Ex_rglmb.R
+#' @example inst/examples/Ex_rlmb.R
 #' @export
 #' @rdname rlmb
 #' @order 1

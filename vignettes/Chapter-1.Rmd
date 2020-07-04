@@ -190,8 +190,13 @@ for the *glmb* class. This includes the *add1*, *drop1*, and *dropterm* function
 methods(class="glmb")
 ```
 
+NOTE: CHECK WHICH METHODS FOR lmb that are inherited and functions vs. those that may require additional development.
 
-# The *rlmb* and *rglmb* functions
+```{r lmb methods}
+methods(class="lmb")
+```
+
+# The *rlmb* and *rglmb* functions and their summary functions
 
 Because the functions *lmb* and *glmb* are set up to mirror their corresponding classical functions, they include a great deal of overhead in terms of pre-and post processing that could make them unsuitable for repetitive calls (say during Block-Gibbs sampling).  To faciliate Block-Gibbs sampling and other simulation, we provide more minimalistic interfaces to the simulation procedures in the form of corresponding functions *rlmb* and *rglmb*. 
 
@@ -199,5 +204,125 @@ The functions are called internally by *lmb* and *glmb* in much the same way tha
 
 Instead of passing a formula to these functions, the user instead passes the dependent and independent variables as a dependent variable vector *y* and as an independent variable design matrix *x* respectively.
 
+NOTE 1: SHORTEN THIS CODE
+NOTE 2: The SUMMARY FUNCTION IS CURRENTLY NOT WORKING FOR rlmb
+```{r calling lmb,results = "hide"}
+## Annette Dobson (1990) "An Introduction to Generalized Linear Models".
+## Page 9: Plant Weight Data.
+ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
+trt <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
+weight <- c(ctl, trt)
+lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
 
+lm_summary=summary(lm.D9)
+
+lm_summary
+lm.D9$coefficients
+
+n<-10000
+y<-lm.D9$y
+x<-as.matrix(lm.D9$x)
+
+### Set old regression and dispersion coefficients
+
+b_old=lm.D9$coefficients
+v_old=lm_summary$sigma^2
+
+#### Set up for rglmb_dispersion
+
+n0=0.1
+shape=n0/2
+rate=shape*v_old
+
+rate/(shape-1)
+rate/shape
+
+#a1<-shape+n1/2
+#b1<-rate+sum(SS)/2
+
+#out<-1/rgamma(n,shape=a1,rate=b1)
+## v0=sum(SS)/n1 ~ (2*rate+sum(SS))/(2*shape+n1)=[(2*rate+sum(SS))/2]/((2*shape+n1)/2) 
+n1=length(y)
+SS=v_old*n1
+
+n1 # This is equal to 20
+
+
+n0=2 # Prior observations
+v_prior=v_old  # Prior point estimate for variance (the mean of (1/dispersion=1/v_prior))
+wt0=(n0/n1)  
+
+## set shape=0.01*(n1/2)
+## set rate= 0.01*SS/2
+
+shape=wt0*(n1/2)   ###  Shape is prior observations /2
+rate=shape*v_prior  ### rate is essentiall prior SS - V in rmultireg should be this
+rate/shape ## Should match v_prior (currently also v_old)
+
+mu<-c(0,0)
+mu=b_old  ### For testing purposes, set prior=b_old
+P<-0.1*diag(2)
+
+outtemp4=rlmb(n=1000,y=y,x=x,pfamily=dNormal_Gamma(mu=mu,Sigma=solve(P),shape=shape,rate=rate))
+
+#summary(outtemp4)
+
+```
+
+```{r calling rglmb}
+data(menarche2)
+Age2=menarche2$Age-13
+
+y=menarche2$Menarche/menarche2$Total
+wt=menarche2$Total
+
+## Use model.frame and model.matrix to derive x
+#mf=model.frame(formula)
+#x=model.matrix(formula,mf)
+
+x<-matrix(as.numeric(1.0),nrow=length(Age2),ncol=2)
+x[,2]=Age2
+
+## Modify Prior_Setup so it can take a model matrix as well as an model object
+mu<-matrix(as.numeric(0.0),nrow=2,ncol=1)
+V1<-1*diag(as.numeric(2.0))
+mu[2,1]=(log(0.9/0.1)-log(0.5/0.5))/3
+
+# 2 standard deviations for prior estimate at age 13 between 0.1 and 0.9
+## Specifies uncertainty around the point estimates
+
+V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
+V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
+
+out<-rglmb(n = 1000, y=y, x=x, pfamily=dNormal(mu=mu,Sigma=V1), weights = wt, 
+           family = binomial(logit)) 
+
+summary(out)
+```
+
+
+# Methods for The *rlmb*, *rglmb*, and their summary functions
+
+To allow for the output from the rglmb and rlmb functions to benefit from the wide range of methods available 
+for their *lmb* and *glmb* cousins, we implement a few additional methods for these functions that enable most of the methods to also work for these objects post modeling.
+
+```{r rglmb methods}
+methods(class="rglmb")
+```
+
+```{r summary.rglmb methods}
+methods(class="summary.rglmb")
+```
+
+
+```{r rlmb methods}
+methods(class="rlmb")
+```
+
+## Advanced Topics
+
+# Simulation Functions
+
+# Envelope Related Functions
 

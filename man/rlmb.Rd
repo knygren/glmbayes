@@ -73,36 +73,64 @@ during the simulation process may vary. The returned value \code{iters} contains
 number of candidates generated before acceptance for each draw.
 }
 \examples{
-data(menarche2)
+## Annette Dobson (1990) "An Introduction to Generalized Linear Models".
+## Page 9: Plant Weight Data.
+ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
+trt <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
+weight <- c(ctl, trt)
+lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
 
-summary(menarche2)
-plot(Menarche/Total ~ Age, data=menarche2)
+lm_summary=summary(lm.D9)
 
-Age2=menarche2$Age-13
+lm_summary
+lm.D9$coefficients
 
-x<-matrix(as.numeric(1.0),nrow=length(Age2),ncol=2)
-x[,2]=Age2
+n<-10000
+y<-lm.D9$y
+x<-as.matrix(lm.D9$x)
 
-y=menarche2$Menarche/menarche2$Total
-wt=menarche2$Total
+### Set old regression and dispersion coefficients
 
-mu<-matrix(as.numeric(0.0),nrow=2,ncol=1)
-mu[2,1]=(log(0.9/0.1)-log(0.5/0.5))/3
+b_old=lm.D9$coefficients
+v_old=lm_summary$sigma^2
 
-V1<-1*diag(as.numeric(2.0))
+#### Set up for rglmb_dispersion
 
-# 2 standard deviations for prior estimate at age 13 between 0.1 and 0.9
-## Specifies uncertainty around the point estimates
+n0=0.1
+shape=n0/2
+rate=shape*v_old
 
-V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
-V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
+rate/(shape-1)
+rate/shape
 
-out<-rglmb(n = 1000, y=y, x=x, pfamily=dNormal(mu=mu,Sigma=V1), weights = wt, 
-           family = binomial(logit)) 
-summary(out)
+#a1<-shape+n1/2
+#b1<-rate+sum(SS)/2
 
-# Add mean(out$iters to rglmb summary function)
-mean(out$iters)
+#out<-1/rgamma(n,shape=a1,rate=b1)
+## v0=sum(SS)/n1 ~ (2*rate+sum(SS))/(2*shape+n1)=[(2*rate+sum(SS))/2]/((2*shape+n1)/2) 
+n1=length(y)
+SS=v_old*n1
+
+n1 # This is equal to 20
+
+
+n0=2 # Prior observations
+v_prior=v_old  # Prior point estimate for variance (the mean of (1/dispersion=1/v_prior))
+wt0=(n0/n1)  
+
+## set shape=0.01*(n1/2)
+## set rate= 0.01*SS/2
+
+shape=wt0*(n1/2)   ###  Shape is prior observations /2
+rate=shape*v_prior  ### rate is essentiall prior SS - V in rmultireg should be this
+rate/shape ## Should match v_prior (currently also v_old)
+
+mu<-c(0,0)
+mu=b_old  ### For testing purposes, set prior=b_old
+P<-0.1*diag(2)
+
+outtemp4=rlmb(n=1000,y=y,x=x,pfamily=dNormal_Gamma(mu=mu,Sigma=solve(P),shape=shape,rate=rate))
 }
 \references{
 Dobson, A. J. (1990)

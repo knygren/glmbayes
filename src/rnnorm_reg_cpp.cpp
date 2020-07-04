@@ -14,8 +14,6 @@ using namespace Rcpp;
 void  f4_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, NumericVector NegLL, NumericMatrix cbars, int progbar=0);
 
 
-
-
 void progress_bar2(double x, double N)
 {
   // how wide you want the progress meter to be
