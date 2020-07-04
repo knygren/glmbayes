@@ -9,7 +9,6 @@
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
 #' @param y a vector of observations of length \code{m}.
 #' @param x a design matrix of dimension \code{m * p}.
-#' @param family a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
 #' @param pfamily the prior family to use for the model (including the constants passed to prior). 
 #' @param offset an offset parameter
 #' @param weights a weighting variable
@@ -84,22 +83,25 @@
 #' @order 1
 
 
-rlmb<-function(n=1,y,x,family=gaussian(),pfamily,
+rlmb<-function(n=1,y,x,pfamily,
                offset=rep(0,nobs),weights=1)
   {
 
   ## Pull in information from the pfamily  
   pf=pfamily$pfamily
   #okfamilies=pfamily$okfamilies  
-  okfamilies <- c("gaussian")    # Only gaussian okfamily for rlmb
+  okfamilies <- c("gaussian")    # Only gaussian is okfamily for rlmb (different from rglmb)
   plinks=pfamily$plinks
   prior_list=pfamily$prior_list 
   simfun=pfamily$simfun
   
-    
+  family=gaussian()
+  
 #  if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
 #     is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
-  
+
+  P=solve(prior_list$Sigma)
+    
   x <- as.matrix(x)
   mu<-as.matrix(as.vector(mu))
   P<-as.matrix(P)    
@@ -111,18 +113,20 @@ rlmb<-function(n=1,y,x,family=gaussian(),pfamily,
   nobs <- NROW(y)
   nvars <- ncol(x)
   EMPTY <- nvars == 0
-  if (is.null(offset2)) 
-    offset2 <- rep(0, nobs)
+  if (is.null(offset)) 
+    offset <- rep(0, nobs)
   nvars2<-length(mu)	
   if(!nvars==nvars2) stop("incompatible dimensions")
   if (!all(dim(P) == c(nvars2, nvars2))) 
     stop("incompatible dimensions")
   if(!isSymmetric(P))stop("matrix P must be symmetric")
   
-  if(length(wt)==1) wt=rep(wt,nobs)
-  nobs2=NROW(wt)
+  if(is.null(weights)) weights=rep(1,nobs)
+  if(length(weights)==1) weights=rep(weights,nobs)
+  nobs2=length(weights)
   nobs3=NROW(x)
-  nobs4=NROW(offset2)
+  nobs4=NROW(offset)
+  
   if(nobs2!=nobs) stop("weighting vector must have same number of elements as y")
   if(nobs3!=nobs) stop("matrix X must have same number of rows as y")
   if(nobs4!=nobs) stop("offset vector must have same number of rows as y")
@@ -132,11 +136,11 @@ rlmb<-function(n=1,y,x,family=gaussian(),pfamily,
   ev <- eS$values
   if (!all(ev >= -tol * abs(ev[1L]))) 
     stop("'P' is not positive definite")
-  
+
   if (is.null(start)) 
     start <- mu
-  if (is.null(offset2)) 
-    offset2 <- rep.int(0, nobs)
+  if (is.null(offset)) 
+    offset <- rep.int(0, nobs)
   if (is.character(family)) 
     family <- get(family, mode = "function", envir = parent.frame())
   if (is.function(family)) 
@@ -146,9 +150,7 @@ rlmb<-function(n=1,y,x,family=gaussian(),pfamily,
     stop("'family' not recognized")
   }
   
-  #  if(family$family %in% okfamilies){
-  #    if(family$family=="gaussian") oklinks<-c("identity")
-  
+
   if(family$family %in% okfamilies){
     oklinks<-c("identity")
     if(!family$link %in% oklinks){      
@@ -164,11 +166,10 @@ rlmb<-function(n=1,y,x,family=gaussian(),pfamily,
     
   }
   
-  
-  ## Call relevant simulation function (for now without control2 list)
-  
+
+
   outlist=simfun(n=n,y=y,x=x,prior_list=prior_list,offset=offset,weights=weights,family=family)
-  
+
   return(outlist)
   
 

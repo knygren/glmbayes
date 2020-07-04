@@ -133,11 +133,8 @@
 #' @exportClass lmb
 
 
-lmb <- function (n, formula, pfamily, data, subset, weights, na.action,
-                  method = "qr", model = TRUE, x = TRUE, y = TRUE,
-                  qr = TRUE, singular.ok = TRUE, contrasts = NULL,
-                  offset, ...)
-
+lmb <- function (n=1, formula, pfamily, data, subset, weights, na.action,method = "qr", model = TRUE, x = TRUE, 
+y = TRUE,qr = TRUE, singular.ok = TRUE, contrasts = NULL,offset, ...)
     {
 
   ret.x <- x
@@ -217,9 +214,11 @@ lmb <- function (n, formula, pfamily, data, subset, weights, na.action,
 #    P<-solve(Sigma) 
     wtin<-z$prior.weights	
 
+    
+    
 ## Eliminate Gridtype from rlmb and lmb
 
-sim<-rlmb(n=n,y=y,x=x,family=family,pfamily=pfamily,weights=wtin,
+sim<-rlmb(n=n,y=y,x=x,pfamily=pfamily,weights=wtin,
             offset=offset)
 
 	dispersion2<-sim$dispersion
@@ -234,22 +233,22 @@ sim<-rlmb(n=n,y=y,x=x,family=family,pfamily=pfamily,weights=wtin,
 if (!is.null(offset)) {
   if(length(dispersion2)==1){
     
-    DICinfo<-glmbdic(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
+    DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
   }
   
   if(length(dispersion2)>1){
-    DICinfo<-glmbdic(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+    DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
   }
   
   linear.predictors<-t(offset+x%*%t(sim$coefficients))}
 if (is.null(offset)) {
   if(length(dispersion2)==1){
         
-    DICinfo<-glmbdic(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
+    DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
   }
   
   if(length(dispersion2)>1){
-    DICinfo<-glmbdic(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+    DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
   }
   
   linear.predictors<-t(x%*%t(sim$coefficients))

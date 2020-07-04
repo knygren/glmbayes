@@ -6,7 +6,7 @@
 \title{Fitting Bayesian Linear Models}
 \usage{
 lmb(
-  n,
+  n = 1,
   formula,
   pfamily,
   data,

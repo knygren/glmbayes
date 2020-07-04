@@ -1,13 +1,21 @@
 ---
-title: "Chapter 1: Generalized Linear Models-A General Overview"
+title: "Chapter 1: The glmbayes package-A General Overview"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 1: Generalized Linear Models-A General Overview}
+  %\VignetteIndexEntry{Chapter 1: The glmbayes package-A General Overview}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+The *glmbayes* package produces iid samples for Bayesian Linear and Bayesian Genereralized Linear Models by providing
+Bayesian versions of the *lmb* and *glm* functions for classical models. Extensive efforts have been made to make the new functions, *lmb* and *glmb*, as similar as possible to their classical equivalents. To that end, the functions require two argument (n and pfamily) in addition to those typically used by the classical functions. The Bayesian functions also generally inherit and/or provide implemented methods for nearly all of the methods available for the *lm* and *glm* functions so that the same type of outputs as from the classical functions can be readily produced.   
+
+In addition to the two main functions and their methods, there are also a number of additional functions provided with the package. The purpose of this chapter is to provide a overview of the types of functions provided and what 
+the intended use is. Each section discusses a sub-category of functions in general terms. Details on how to use specific functions are provided in later chapters.
+
+# Loading the package 
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -16,6 +24,51 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup,results = "hide"}
 library(glmbayes)
 ```
+
+# Accessing package information, general documentation, and demos
+
+```{r help,results = "hide"}
+help(glmbayes)
+```
+
+```{r documentation,results = "hide"}
+help(package="glmbayes")
+```
+
+```{r demos,results = "hide"}
+demo(package="glmbayes")
+```
+
+# The *lmb* and *glmb* functions
+
+As noted at the top of this chapter, the *lmb* and *glmb* functions provide Bayesian versions of the *lm* and *glmb* functions respectively. More extensive side-by-side comparisons of the functions with their classical equivalents and their methods are provided in separate vignettes. Here we simply note the formatting of the required arguments for the functions.
+
+[NEED TO MODIFY Prior_Setup PRINT FUNCTION AND HOW IT HANDLES CASE WHERE X IS MISSING]
+
+```{r lm and lmb,results = "hide"}
+# Annette Dobson (1990) "An Introduction to Generalized Linear Models".
+## Page 9: Plant Weight Data.
+ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
+trt <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
+weight <- c(ctl, trt)
+lm.D9 <- lm(weight ~ group)
+
+p_info=Prior_Setup(lm.D9)
+
+# Note: mu Initialized to 0 vector and Sigma to Identity - Not recommended
+mu=p_info$mu    
+Sigma=p_info$Sigma
+
+lmb.D9 <- lmb(n=1000,weight ~ group,pfamily=dNormal_Gamma(mu,Sigma,shape=4,rate=0.1))
+
+
+
+```
+
+# The *rlmb* and *rglmb* functions
+
+

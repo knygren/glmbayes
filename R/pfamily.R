@@ -183,8 +183,6 @@ dNormal_Gamma<-function(mu, Sigma,shape, rate){
   
   mu=as.matrix(mu,ncol=1) ## Force mu to matrix
   Sigma=as.matrix(Sigma)  ## Force Sigma to matrix 
-
-  
     
   nvar=length(mu)
   nvar1=nrow(Sigma)

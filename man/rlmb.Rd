@@ -5,15 +5,7 @@
 \alias{print.rlmb}
 \title{The Bayesian Linear Model Distribution}
 \usage{
-rlmb(
-  n = 1,
-  y,
-  x,
-  family = gaussian(),
-  pfamily,
-  offset = rep(0, nobs),
-  weights = 1
-)
+rlmb(n = 1, y, x, pfamily, offset = rep(0, nobs), weights = 1)
 
 \method{print}{rlmb}(x, digits = max(3, getOption("digits") - 3), ...)
 }
@@ -23,8 +15,6 @@ rlmb(
 \item{y}{a vector of observations of length \code{m}.}
 
 \item{x}{a design matrix of dimension \code{m * p}.}
-
-\item{family}{a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)}
 
 \item{pfamily}{the prior family to use for the model (including the constants passed to prior).}
 
