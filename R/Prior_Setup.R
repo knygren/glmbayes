@@ -34,9 +34,9 @@ Prior_Setup<-function(object){
 #' @rdname Prior_Setup
 #' @order 2
 
+
 Prior_Setup_v2<-function(formula,data, subset = NULL, na.action = na.fail, 
                          drop.unused.levels = FALSE, xlev = NULL, ...){
-  
   
   mf<-model.frame(formula)
   x<-model.matrix(formula,mf)
@@ -52,7 +52,6 @@ Prior_Setup_v2<-function(formula,data, subset = NULL, na.action = na.fail,
   rownames(Sigma)=var_names
   colnames(Sigma)=var_names
   
-  return(list(mu=mu,Sigma=Sigma,model=as.data.frame(object$model),x=as.matrix(object$x)))    
+  return(list(mu=mu,Sigma=Sigma,model=mf,x=x))    
   
 }
-
