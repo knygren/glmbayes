@@ -9,6 +9,7 @@ lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
 lm_summary=summary(lm.D9)
 
 lm_summary
+
 lm.D9$coefficients
 
 n<-10000
@@ -40,7 +41,7 @@ SS=v_old*n1
 n1 # This is equal to 20
 
 
-n0=2 # Prior observations
+n0=1 # Prior observations
 v_prior=v_old  # Prior point estimate for variance (the mean of (1/dispersion=1/v_prior))
 wt0=(n0/n1)  
 
@@ -54,11 +55,8 @@ rate/shape ## Should match v_prior (currently also v_old)
 ## We see that this currently matches 
 ### (test different v_prior with various prior observations below) 
 
-prior_list=list(beta=b_old,shape=shape,rate=rate)
-
-dispout<-rglmb_dispersion(n=n,y,x,prior_list=prior_list,
-offset= rep(0, length(y)),family=gaussian())
-
+dispout<-rglmb_dispersion(n=n,y,x,b_old,alpha= rep(0, length(y)),
+shape=shape,rate=rate,family=gaussian())
 mean(dispout$dispersion) 
 v_prior
 v_old
@@ -72,9 +70,9 @@ P<-0.1*diag(2)
 wt2=rep(1,length(y))
 
 ### Check
-prior=list(mu=mu,Sigma=solve(P),dispersion=v_old)
-outtemp1<-glmb(n = 1000, weight ~ group, family = gaussian(),
-pfamily=dNormal(mu=mu,Sigma=solve(P),dispersion=v_old))
+
+outtemp1<-glmb(n = 1000, weight ~ group, mu=mu, Sigma = solve(P), 
+               dispersion=v_old,family = gaussian(),  start =b_old, Gridtype = 3)
 ## Could use a residuals function here -- For now, maybe run the glmb function
 
 summary(outtemp1)
@@ -82,18 +80,26 @@ mean(colMeans(residuals(outtemp1)^2))
 v_old
 colMeans((outtemp1$coefficients))
 b_old
-prior=list(mu=mu,P=P,dispersion=v_old)
-outtemp2<-rglmb(n = 1000, y, x, family = gaussian(),
-pfamily=dNormal(mu=mu,Sigma=solve(P),dispersion=v_old),
-offset = rep(0, length(y)), weights = wt2)
+
+outtemp2<-rglmb(n = 1000, y, x, mu=mu, P=P, wt = wt2, dispersion=v_old,
+family = gaussian(), offset2 = rep(0, length(y)), start = b_old, Gridtype = 3)
 summary(outtemp2)
 colMeans((outtemp2$coefficients))
 b_old
 
-prior=list(mu=mu,Sigma=solve(P),shape=shape,rate=rate)
-outtemp3<-glmb(n = 10000, weight ~ group,family = gaussian(),  
-               dNormal_Gamma(mu=mu,Sigma=solve(P),shape=shape,rate=rate))
+
+outtemp3<-rglmb(n = 1000, y, x, mu=mu, P=P, wt = wt2, shape=shape, rate=rate,
+                family = gaussian(), offset2 = rep(0, length(y)), start = b_old, Gridtype = 3)
+summary(outtemp2)
+colMeans((outtemp2$coefficients))
+b_old
+
+
+outtemp3<-glmb(n = 10000, weight ~ group, mu=mu, Sigma = solve(P), shape=shape, rate=rate,
+family = gaussian(),  start = b_old, Gridtype = 3)
 ## Could use a residuals function here -- For now, maybe run the glmb function
+
+
 
 summary(outtemp3)
 mean(colMeans(residuals(outtemp3)^2))
@@ -102,3 +108,9 @@ colMeans((outtemp3$coefficients))
 b_old
 mean(outtemp3$dispersion)  ## Seems slightly smaller --> Needs qc
 v_old
+var(outtemp3$dispersion) 
+## 0.0083622  -->n0=40 --->n0+n1=60
+## 0.02685044 -->n0=2 --> n0+n1=22
+## 0.02760717 -->n0=1 --> n0+n1=21
+
+rm(dispersion)

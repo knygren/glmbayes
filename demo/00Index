@@ -1,5 +1,7 @@
-glmbmenarche   Binomial models for age of menarche in Warsaw data
-glmbcarinsca   Gamma Regression models for Canadian Car Insurance Data
-Dobsonlinreg   Two-Block Gibbs Sampling for Dobson plant weight data
-DobsonPoisson  Poisson Regression
-Glmbmethods    Illustrates the methods used in building the envelope
+Ex_01_DobsonPoisson   Poisson Regression for Randomized Controlled Data
+Ex_02_Menarche        Binomial Models for age of menarche in Warsaw data
+Ex_03_Dobsonlinreg    Bayesian Linear Regression for Dobson plant weight data
+Ex_04_Dobsonlinreg_BG Two-Block Gibbs Sampling for Bayesian Linear Regression
+Ex_05_MultiReg        Multivariate Multiple Regression for AMI Overdose Data
+Ex_06_Carinsca        Gamma Regression models for Canadian Car Insurance Data
+Ex_A1_Methods         Illustrates the methods used in building the envelope

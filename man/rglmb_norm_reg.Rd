@@ -184,7 +184,8 @@ v_old
 colMeans((outtemp1$coefficients))
 b_old
 prior=list(mu=mu,P=P,dispersion=v_old)
-outtemp2<-rglmb(n = 1000, y, x, family = gaussian(),pfamily=dNormal(mu=mu,Sigma=solve(P),dispersion=v_old),
+outtemp2<-rglmb(n = 1000, y, x, family = gaussian(),
+pfamily=dNormal(mu=mu,Sigma=solve(P),dispersion=v_old),
 offset = rep(0, length(y)), weights = wt2)
 summary(outtemp2)
 colMeans((outtemp2$coefficients))

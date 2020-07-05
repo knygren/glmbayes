@@ -18,7 +18,6 @@ print(d.AD <- data.frame(treatment, outcome, counts))
 glm.D93 <- glm(counts ~ outcome + treatment, family = poisson(),x=TRUE)
 
 anova(glm.D93)
-
 summary(glm.D93)
 predict(glm.D93,newdata=d.AD)
 

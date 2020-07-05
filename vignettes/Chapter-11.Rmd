@@ -1,8 +1,8 @@
 ---
-title: "Chapter 6: Estimating Bayesian Linear Models"
+title: "Chapter 11: An overview of the glmbayes examples"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 7: Specifying Priors for Dispersion (variance) Parameters}
+  %\VignetteIndexEntry{Chapter 11: An overview of the glmbayes examples}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

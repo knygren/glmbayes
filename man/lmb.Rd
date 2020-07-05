@@ -219,18 +219,18 @@ glmb.out1<-glmb(n=n,cbind(Menarche, Total-Menarche) ~ Age,family
 
 summary(glm.out1)
 summary(glmb.out1)
-glm.out2<-glm(cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,family=binomial(probit), 
-              data=menarche2)
+glm.out2<-glm(cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,
+family=binomial(probit), data=menarche2)
 glmb.out2<-glmb(n=n,cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,
-                family=binomial(probit),pfamily=dNormal(mu=mu,Sigma=V1),data=menarche2)
+family=binomial(probit),pfamily=dNormal(mu=mu,Sigma=V1),data=menarche2)
 
 summary(glm.out2)
 summary(glmb.out2)
 
-glm.out3 <-glm(cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,family=binomial(cloglog),
-               data=menarche2)
-glmb.out3<-glmb(n=n,cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,family=binomial(cloglog),
-                pfamily=dNormal(mu=mu,Sigma=V1))
+glm.out3 <-glm(cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,
+family=binomial(cloglog),data=menarche2)
+glmb.out3<-glmb(n=n,cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,
+family=binomial(cloglog),pfamily=dNormal(mu=mu,Sigma=V1))
 
 summary(glm.out3)
 summary(glmb.out3)

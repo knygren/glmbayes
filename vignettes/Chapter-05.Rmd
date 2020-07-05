@@ -81,7 +81,7 @@ weight <- c(ctl, trt)
 lm.D9 <- lm(weight ~ group)
 
 # Bayesian Prior Setup and Call-Prior Should Generally be Customized
-p_info=Prior_Setup_v2(weight~group)
+p_info=Prior_Setup(weight~group)
 mu1=p_info$mu    
 Sigma1=p_info$Sigma
 
@@ -101,7 +101,7 @@ treatment <- gl(3,3)
 glm.D93 <- glm(counts ~ outcome + treatment, family = poisson())
 
 # Bayesian Prior Setup and Call-Prior Should Generally be Customized
-p_info2=Prior_Setup_v2(counts ~ outcome + treatment)
+p_info2=Prior_Setup(counts ~ outcome + treatment)
 mu2=p_info2$mu    
 Sigma2=p_info2$Sigma
 
@@ -159,7 +159,7 @@ This function can be used to set up the prior arguments so they have the correct
 NOTE: ADD A PRINT METHOD FOR THIS FUNCTION SO THAT THE OUTPUT CAN BE CONTROLLED
 
 ```{r Calling Prior_Setup,results = "hide"}
-Prior_Setup_v2(weight ~ group)
+Prior_Setup(weight ~ group)
 ```
 *The Prior_Check function
 
@@ -285,7 +285,7 @@ mu<-c(0,0)
 mu=b_old  ### For testing purposes, set prior=b_old
 P<-0.1*diag(2)
 # Bayesian Prior Setup and Call-Prior Should Generally be Customized
-p_info=Prior_Setup_v2(weight~group)
+p_info=Prior_Setup(weight~group)
 x=p_info$x
 outtemp4=rlmb(n=1000,y=y,x=x,pfamily=dNormal_Gamma(mu=mu,Sigma=solve(P),shape=shape,rate=rate))
 

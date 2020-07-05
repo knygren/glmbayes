@@ -2,12 +2,9 @@
 % Please edit documentation in R/Prior_Setup.R
 \name{Prior_Setup}
 \alias{Prior_Setup}
-\alias{Prior_Setup_v2}
 \title{Setup Prior Objects}
 \usage{
-Prior_Setup(object)
-
-Prior_Setup_v2(
+Prior_Setup(
   formula,
   data,
   subset = NULL,
@@ -18,8 +15,6 @@ Prior_Setup_v2(
 )
 }
 \arguments{
-\item{object}{a fitted model object of class \code{"glm"}. Typically the result of a call to \link{glm}.}
-
 \item{formula}{a model \code{\link[stats]{formula}} or \code{\link[stats]{terms}}
     object or an \R object.}
 
@@ -33,11 +28,9 @@ Prior_Setup_v2(
     \code{\link{[.data.frame}}) for the rows of \code{data} or if that is not
     supplied, a data frame made up of the variables used in \code{formula}.}
 
-\item{na.action}{how \code{NA}s are treated.  The default is first,
-    any \code{na.action} attribute of \code{data}, second
-    a \code{na.action} setting of \code{\link{options}}, and third
-    \code{\link[stats]{na.fail}} if that is unset.  The \sQuote{factory-fresh}
-    default is \code{\link[stats]{na.omit}}.  Another possible value is \code{NULL}.}
+\item{na.action}{how \code{NAs} are treated. The default is first, any \code{\link{na.action}} attribute of 
+data, second a \code{na.action} setting of \link{options}, and third \code{na.fail} if that is unset. 
+The \code{factory-fresh} default is \code{na.omit}. Another possible value is \code{NULL}.}
 
 \item{drop.unused.levels}{should factors have unused levels dropped?
     Defaults to \code{FALSE}.}
