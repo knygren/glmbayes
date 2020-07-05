@@ -1,111 +1,28 @@
 ---
-title: "Chapter 5: Checking Prior Specifications"
+title: "Chapter 5: A detailed overview of the glmbayes package"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 5: Checking Prior Specifications}
+  %\VignetteIndexEntry{Chapter 5: A detailed overview of the glmbayes package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
----
-references:
-- id: nygren2006
-  title: Likelihood Subgradient Densities
-  author:
-  - family: Nygren
-    given: Kjell
-  - family: Nygren
-    given: Lan Ma
-  container-title: Journal of the American Statistical Association
-  volume: 101
-  URL: 'https://doi.org/10.1198/016214506000000357'
-  DOI: 10.1198/016214506000000357
-  issue: 475
-  publisher: Taylor and Francis, Ltd
-  page: 1144-1156
-  type: article-journal
-  issued:
-    year: 2006
-    month: 9
+# Introduction
 
-- id: Venables2002
-  title: Modern Applied Statistics with S.
-  author:
-  - family: Venables
-    given: W. N.
-  - family: Ripley
-    given: B. D.
-  URL: 'https://www.springer.com/gp/book/9780387954578'
-  DOI: 10.1007/978-0-387-21706-2
-  publisher: Springer-Verlag New York
-  page: 1-498
-  type: book
-  issued:
-    year: 2002
-    
-- id: Hamilton2004
-  title: Lecture notes obstetrics and gynaecology
-  author:
-  - family: Hamilton-Fairley
-    given: Diana
-  URL: 'https://www.bookdepository.com/Lecture-Notes-Obstetrics-Gynaecology-Diana-Hamilton-Fairley/9781405120661'
-  publisher: Blackwell Pub.
-  type: book
-  issued:
-    year: 2004
-    month: 11
+The *glmbayes* package produces iid samples for Bayesian Linear Models and Bayesian Genereralized Linear Models by providing Bayesian versions of the *lmb* and *glm* functions for classical models. Extensive efforts have been made to make the new functions, *lmb* and *glmb*, as similar as possible to their classical cousins. To that end, the functions add a single required argument (pfamily) and one optional argument (n) to those typically used by the classical functions. The Bayesian functions also generally inherit and/or provide implemented methods for nearly all of the methods available for the *lm* and *glm* functions so that the same type of outputs as from the classical functions can be readily produced.   
 
-- id: Evans2006
-  title: Checking for Prior-Data Conflict
-  author:
-  - family: Evans
-    given: Michael
-  - family: Moshonov
-    given: Hadas
-  container-title: Bayesian Analysis
-  volume: 1
-  URL: 'http://dx.doi.org/10.1214/06-BA129'
-  DOI: 10.1214/06-BA129
-  issue: 4
-  page: 893-914
-  type: article-journal
-  issued:
-    year: 2006
-    month: 
+This vignette is designed to provide users a detailed overview of the package and the various functionalities available. In the rest of this introduction, we briefly touch on the basics of loading the package and accessings various help resources and demos (which we recommend as a next step for users after they read this vignette).    The next section then gives an overview of all the core functions that most users are likely to use. This includes
+the two aforementioned functions, functions used to specify and check prior distributions, and methods available for the two functions. Most users can likely stop after that section and can then turn to either the help pages or the next set of vignettes that go into a more detailed comparisons of how the methods are used for these Bayesian functions vs. for their classical cousins.
 
-- id: Spiegelhalter2002
-  title: Bayesian measures of model complexity and fit
-  author:
-  - family: Spiegelhalter
-    given: David J.
-  - family: Best
-    given: Nicola G.
-  - family: Carlin
-    given: Bradley P.
-  - family: Van Der Linde
-    given: Angelika
-  container-title: Journal of the Royal Statistical Society Series B (Statistical Methodology)
-  volume: 64
-  URL: 'https://doi.org/10.1111/1467-9868.00353'
-  DOI: 10.1111/1467-9868.00353
-  issue: 4
-  page: 583-639
-  type: article-journal
-  issued:
-    year: 2002
-    month: 9
+For advanced users who are interested in implementing Block-Gibbs sampling procedures or in doing simulation for other more complex models, we recommend continuing on to the third section in this vignette that covers the two functions *rlmb* and *rglmb* and are designed for implementation of precisely that type of sampling. The third section discusses how those functions can be called, references some examples/demos where they are used, and describes how to use the output from the functions to access similar output to that produced by the *lmb* and *glmb* functions.
 
-    
----
-
----
-nocite: | 
-  @nygren2006
-...
+For users who are interested in the details of how the simulation is performed there is the final section that contains a discussion of the various simulation functions that are used to sample from the posterior distributions.  This includes a discussion of three core function that simuate for the currently implemented prior families and a couple of functions related to what we call the Central Normal distribution (the normal distribution between a lower and an upper bound). It also includes a discussion of a set of functions that are used in order to utilize the enveloping functions needed to get iid samples for some of the posterior distributions. That material is rather technical and we refer the user to the Nygren and Nygren (2006) paper that forms the foundation for the simulation procedure. 
 
 
+
+## Loading the package 
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -114,292 +31,364 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup,echo = FALSE}
+The package curently requires the MASS package so it also needs to be installed and gets loaded as part of the loading of the glmbayes package (see below).
+
+```{r setup,results = "hide"}
 library(glmbayes)
 ```
 
+## Accessing package information, general documentation, and demos
 
-```{r menarche data,results = "hide",echo = FALSE}
-## Load menarche data
-data(menarche2)
-head(menarche2, 5)
+To access information for the package outside of the information contained in these vignettes, we suggest users review three sets of help pages. A call to help(glmbayes) yields a page with a detailed discussion of the package with an example at the bottom.   Calling help(package="glmbayes") brings the user to a list of Help pages for specific functions as well as links to a general description file, code demos, and these vignettes. Part of the objective of this vignette is to provide more organized layout of the functions than the general list of help pages provided on the documentation page.
 
+A call to demo(package="glmbayes"), finally, brings up a list of available demos for the package. A useful start for users might be to go through the specific demos as they are set up to illustrate the functionality of the package.
+
+```{r help,results = "hide"}
+help(glmbayes)
 ```
 
-
-```{r Analysis Setup,results = "hide",echo = FALSE}
-## Number of variables in model
-Age=menarche2$Age
-nvars=2
-set.seed(333)
-
-## Reference Ages for setting of priors and Age_Difference
-ref_age1=13  # user can modify this
-ref_age2=15  ## user can modify this
-
-## Define variables used later in analysis
-Age2=Age-ref_age1
-Age_Diff=ref_age2-ref_age1
-
+```{r documentation,results = "hide"}
+help(package="glmbayes")
 ```
 
-
-```{r Prior Info,results = "hide",echo = FALSE}
-
-## Point estimates at reference ages
-m1=0.5  
-m2=0.9
-
-## Lower bound of prior credible intervals for point estimates
-m1_lower=0.3
-m2_lower=0.7
-
-## Assumed correlation between the two (on link scale)
-m_corr=0.4
+```{r demos,results = "hide"}
+demo(package="glmbayes")
 ```
 
+# Using the *lmb* and *glmb* functions and their methods
 
-```{r Logit: set up link function info and initialize prior matrices,results = "hide",echo = FALSE}
+As noted above, the *lmb* and *glmb* functions are the two core functions in this package. More detailed side-by-side comparisons of the use of methods for these functions and their classical cousins are provided in the next two vignettes. Here we provide a brief overview of supporting functions available to facilitate the use of the core functions. In the first subsection, we show how the core functions are called (and how this compares to calls for the classical functions). We then give a brief discussion of how priors are specified and some related functions designed to assist with that task as well as with the task of viewiw prior specifications after the modeling is completed.   
 
-## Set up link function and initialize prior mean and Variance-Covariance matrices
-bi_logit <- binomial(link="logit")
-mu1<-matrix(0,nrow=nvars,ncol=1)
-rownames(mu1)=c("Intercept","Age2")
-colnames(mu1)=c("Prior Mean")
-V1<-1*diag(nvars)
-rownames(V1)=c("Intercept","Age2")
-colnames(V1)=c("Intercept","Age2")
+## The *lmb* and *glmb* functions
+
+The code snippets below illustrates how model specification for these models can be done by simply providind an additional argument, a pfamily, that provides information on the type of prior distribution that has been selected and the parameter values that are desired. A separate vignette is provided to give guidance to users on how to select appropriate prior parameters (and some standardization steps that may be useful as part of that).
+
+[NEED TO MODIFY Prior_Setup PRINT FUNCTION AND HOW IT HANDLES CASE WHERE X IS MISSING]
+[MAY ALSO WANT TO HAVE IT INITIALIZE SHAPE AND RATE PARAMETERS]
+
+*Calling lm vs. calling lmb*
+
+Here is the call for the lmb function and how it compares to the call to the classical lm function. The recommended prior here is the dNormal_Gamma pfamily which requires four parameters (2 for he Normal component, and 2 for the Gamma component).
+
+```{r lm and lmb,results = "hide"}
+# Annette Dobson (1990) "An Introduction to Generalized Linear Models".
+## Page 9: Plant Weight Data.
+ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
+trt <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
+weight <- c(ctl, trt)
+##Classical model-call
+lm.D9 <- lm(weight ~ group)
+
+# Bayesian Prior Setup and Call-Prior Should Generally be Customized
+p_info=Prior_Setup_v2(weight~group)
+mu1=p_info$mu    
+Sigma1=p_info$Sigma
+
+lmb.D9 <- lmb(weight ~ group,pfamily=dNormal_Gamma(mu1,Sigma1,shape=4,rate=0.1))
 ```
 
+*Calling glm vs. calling glmb*
 
-```{r Logit:set prior means,results = "hide",echo = FALSE}
-## Prior mean for intercept is set to point estimate 
-## at reference age1 (on logit scale)
-mu1[1,1]=bi_logit$linkfun(m1)
+The call for the glmb function is quite similar and is here compared to the corresponding call for the glm function. For the binomial and Poisson families, the recommended prior here is the dNormal pfamily which requires 2 parameters (a prior mean vector and a prior Variance-Covariance matrix).
 
-## Prior mean for slope is set to difference in point estimates
-## on logit scale divided by Age_Diff
-
-mu1[2,1]=(bi_logit$linkfun(m2) -bi_logit$linkfun(m1))/Age_Diff 
-print(mu1)
-
-```
-
-
-```{r Logit:set prior Variance Covariance matrix,results = "hide",echo = FALSE}
-## Implied standard deviations for point estimates on logit scale
-
-sd_m1= (bi_logit$linkfun(m1) -bi_logit$linkfun(m1_lower))/1.96
-sd_m2= (bi_logit$linkfun(m2) -bi_logit$linkfun(m2_lower))/1.96
-
-## Implied Standard deviation for slope (using variance formula for difference between two variables)
-a=(1/Age_Diff)
-sd_slope=sqrt((a*sd_m1)^2+(a*sd_m2)^2-2*a*a*(sd_m1*sd_m2*m_corr))
-
-#Cov(m1,slope)=cov(m1, a*(m2-m1)) =a*E[(m1-E[m1])((m2-m1)-E[m2-m1])]
-#   =a*E[(m1-E[m1])(m2-E[m2])]- a* E[(m1-E[m1])(m1-E[m1])]
-##   =a*Cov[m1,m2] - a*Var[m1]
-##  =a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
-cov_V1=a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
-
-# Set covariance matrix
-V1[1,1]=sd_m1^2
-V1[2,2]=sd_slope^2
-V1[1,2]=cov_V1
-V1[2,1]=V1[1,2]
-print(V1)
-```
-
-```{r Run Logit,results = "hide",echo = FALSE}
-Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,Menarche=menarche2$Menarche,Age2)
-prior1=list(mu=mu1,Sigma=V1)
-#glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age2,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
-glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamily=dNormal(mu=mu1,Sigma=V1),data=Menarche_Model_Data)
-
-```
-
-
-```{r Print Logit,results = "hide",echo = FALSE}
-
-# Print model output
-print(glmb.out1)
-
-# Print prior mean as comparison
-print(t(mu1))
-
-```
-
-```{r Summary Logit,results = "hide",echo = FALSE}
-summary(glmb.out1)
-```
-
-# General Discussion
-
-In the previous chapter, we dealt with a relatively simple case where it was obvious that the model of interest had two coefficients that were to be estimated (an intercept and a slope tied to the Age variable). For more complex models, it is common for the flexibility of the *glm* and *glmb* formula setup to make it difficult for the analyst to know the number of coefficients in the model prior to actually running the model. This is particularly true in cases where some variables are factors or if the formula involves interaction terms.
-
-Once a prior has been set, it can also be difficult to judge whether it will have the kind of impact on the model the analyst may have intended. This is particularly true if particular coefficients are hard to interpret and the analyst is looking to provide what amounts to *non-informative priors". In some cases, a poorly formulated prior can lead to conflicts between the prior and the data (i.e., cases where the prior implies a very low prior probability of observing the observed data).
-
-To make it easier for the analyst to know the variable for which a prior specification is needed and to allow him/her to flag potentially problematic prior specifications, we provide a function *Check_Prior" that can help with both sets of issues. 
-
-# Identifying the Variables that Need a Prior Specification
-
-
-#Model With Factors#
-
-```{r Dobson Poisson Data}
+```{r glm and glmb,results = "hide"}
 ## Dobson (1990) Page 93: Randomized Controlled Trial :
 counts <- c(18,17,15,20,10,20,25,13,12)
 outcome <- gl(3,1,9)
 treatment <- gl(3,3)
-print(d.AD <- data.frame(treatment, outcome, counts))
-```
+##Classical model-call
+glm.D93 <- glm(counts ~ outcome + treatment, family = poisson())
 
-```{r Dobson Check_Prior}
-glm.D93 <- glm(counts ~ outcome + treatment, family = poisson(),x=TRUE)
-Setup.D93=Prior_Setup(glm.D93)
-```
+# Bayesian Prior Setup and Call-Prior Should Generally be Customized
+p_info2=Prior_Setup_v2(counts ~ outcome + treatment)
+mu2=p_info2$mu    
+Sigma2=p_info2$Sigma
 
-Will add a print method to Prior_Check to give a better view of this information that also works if there are large numbers of observations.
-
-```{r Dobson Print Check_Prior}
-print(Setup.D93)
-```
-
-#Model With Factors and Interactions#
-
-
-```{r Venables Check_Prior}
-## example from Venables and Ripley (2002, pp. 190-2.)
-ldose <- rep(0:5, 2)
-numdead <- c(1, 4, 9, 13, 18, 20, 0, 2, 6, 10, 12, 16)
-sex <- factor(rep(c("M", "F"), c(6, 6)))
-SF <- cbind(numdead, numalive = 20-numdead)
-budworm.lg <- glm(SF ~ sex*ldose, family = binomial,x=TRUE)
-Setup.budworm=Prior_Setup(budworm.lg)
-```
-
-```{r Venables Print Check_Prior}
-print(Setup.budworm)
-```
-
-# Checking For Prior-Data Conflicts Ahead of Model Estimation
-
-As we noted in the previous chapter in the section titled "Variable Transformation and Preliminary Setup", it is critical for coefficients to the interpretable in order foranalysts to be able to provide sensible priors.
-In some cases, efforts aimed at enhancing interpretation through model transformations or efforts aimed at gathering meaningful prior information can be difficult and/or time consuming. Unfortunately, this leaves open the possibility for analysts to specify priors that end up having more influence on the posterior estimates than they may have intended. This is particularly problematic in cases where the anayst is attempting to use what might best be described as a "non-informative prior".  
-
-To catch some of these cases without influencing potentially good prior specifiations un-necessarily we propose an approach that involes running a classical model with the same specification as the Bayesian model without directly viewing the coefficient estimates and then passing information related to the classical estimates together with the prior specification to our function to check if the maximum likelihood estimates seem to conflict with the prior. In particular, we check if the prior Bayesian credible interval has overlap with the confidence interval based on the maximum likelihood estimate.
-
-Conceptually, this approach is similar to that described in [@Evans2006]. Here are a few examples implementing this approach:
-
-*Our prior Specification From Chapter 4*
-
-We first run the checks for our original specification (this assumes code in Chapter 4 has been run). The resulting check just indicates that the maximum likelihood estimates are roughly consistent with the prior. This is mainly because the maximum likelihood estimate for the slope, while different from our prior estimate, was still well within the prior credible interval.
-
-```{r Check Old Prior}
-glm.out1<-glm(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),data=Menarche_Model_Data)
-
-Like_std=summary(glm.out1)$coefficients[,2]
-
-#D93_Prior_Error_Checks=
-Prior_Check(glm.out1,mu1,V1)
-
+glmb.D93<-glmb(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu2,Sigma=Sigma2))
 
 ```
+## Specifying Priors
 
-*Same prior but original Age variable *
+### Prior Family Functions
 
-Here we run a model with the same prior but with the original Age variable. This now indicates a potential problem. A prior point estimate for half of all girls having had their first period is clearly non-sensical, but it would clearly be difficult to provide any kind of sensible prior point estimate that far out or the range of the data.
+The *pfamily* arguments described above are actually functions that provide needed information to the *lmb* and *glmb* functions.  Since they are are functions, they can also be called directly, as seen below, where they return lists with items related to the prior (see documentation of these pfamily functions for details). These functions are also discussed in more detail in a latter chapter. 
 
-```{r Check Old Age}
-glm.out2<-glm(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),data=Menarche_Model_Data)
+While the current package only provides 3 implemented pfamiles, this is actually not a severe limitations as users easily can write their own prior families and pass those to the *lmb* and *glmb* functions.  One of our exaxmple includes an illustration of this and this approach is discussed more extensively in one of our other vignettes. Below, we simply illustrate how the functions can be called directly.
 
-Like_std=summary(glm.out2)$coefficients[,2]
+NOTE: IMPLEMENT THE EXAMPLE DISCUSSED ABOVE AND WRITE A SEPARATE VIGNETTE TO ACCOMPANY THE EXAMPLE.
 
-#D93_Prior_Error_Checks=
-Prior_Check(glm.out2,mu1,V1)
+*Calling the dNormal prior family*
 
+This prior is typically used as a prior for the Poisson and Binomial families when calling either the
+*glmb* or *rglm* functions. Calling it directly provides a list with, among other items, the prior specification.  the documentation for the *pfamilies* provides additional information on what the returned list contains and what
+required and optional arguments are.
+
+```{r Calling dNormal,results = "hide"}
+dNormal(mu=mu2,Sigma=Sigma2,dispersion=NULL)
+```
+*Calling the dNormal_Gamma prior family
+
+This prior is typically used as a prior when calling either the *lmb* or *rglmb* functions or when using the *gaussian()* family in the *glm* and *rglmb* functions. Calling it directly 
+
+```{r Calling dNormal_Gamma,results = "hide"}
+
+dNormal_Gamma(mu=mu1,Sigma=Sigma1,shape=4,rate=0.1)
 ```
 
-Let's take a look what would have happened to our estimates if we would have proceeded with this model specification.
+*Calling the dGamma prior family
 
-```{r Run wrong Age,results = "hide"}
+This prior is typically used when giving a prior for the dispersion parameter in the *lmb*, *rlmb*, *glmb*, and *rglmb* functions (in the latter case for the *gaussian()* and *Gamma()* families). Typicall this would be done as
+part of Block-Gibbs sampling where the regression coefficients are updated in a separate block.
 
-#glmb.out2<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
-glmb.out2<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),pfamily=dNormal(mu=mu1,Sigma=V1),data=Menarche_Model_Data)
-```
-
-```{r Summary Logit - Wrong Age}
-summary(glmb.out2)
-```
-
-Under this specification, the Intercept standard deviation was much higher than under the original specification, and as a result the posterior estimates (mode and mean) end up somewhere in between the prior mean and maximum likelihood estimates. However, the posterior credible interval suggests that both the prior and the maximum likelihood estimates are inconsistent with the posterior distribution.  Because the posterior estimates for the intercept are much higher than the very negative) maximum likelihood estimate, the posterior coefficients for the Age variable is cut roughly in half relative to our other original model and the Deviance residuals are much larger than those we see if we go back to review the output from the original model.  Clearly, this would not be a model that should be run so catching potential issues ahead of the fact (as we did using our above approach) would be important.
-
-
-*Same Age and Variance but 0 mean vector *
-
-Here we run a model with the same Age variable as in our original specification but with a 0 prior mean vector combined with the original Variance-Covariance matrix. This now also indicates a potential problem. Looking at the details from the summary function, we see that the issue now is with the slope parameter instead of the mean but the magnitude of the issue appears to be less as the ratio is smaller.
-
-
-```{r Check 0 mean}
-glm.out3<-glm(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),data=Menarche_Model_Data)
-
-Like_std=summary(glm.out3)$coefficients[,2]
-
-mu2=mu1
-mu2[2,1]=0
-
-#D93_Prior_Error_Checks=
-Prior_Check_3=Prior_Check(glm.out3,mu2,V1)
-
-Prior_Check_3
-
-```
-Let's proceed with running the model to see how it compares to the original model.
-
-
-```{r Run wrong mean,results = "hide"}
-prior2=list(mu=mu2,Sigma=V1)
-#glmb.out3<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age2,family=binomial(logit),mu=mu2,Sigma=V1,data=Menarche_Model_Data)
-glmb.out3<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamily=dNormal(mu=mu2,Sigma=V1),data=Menarche_Model_Data)
-```
-
-```{r Summary Logit - 0 Slope}
-summary(glmb.out3)
-```
-
-In reviewing the output, we can now see that the impact of this specification on the results relative to the original model is relatively small. Because the prior mean for the slope is so far away from the maximum likelihood estimate, the posterior estimate for the slope does get pulled away a bit more from the maximum likelihood estimate than under the original specification (about one standard deviation if we use the posterior standard deviation) but in relation to the overall magnitude of the coefficient, this is not all that big of an impact. 
-
-In this case of this particular model, we had some (although imprecise) prior insight into the fact that the slope should be positive and of a somewhat reasonable magnitude. In other applications, the analyst may indeed not have any clear insight into the magnitude or even the sign of some of the coefficients. In such cases, specifying a prior with 0 mean can indeed make some sense. Setting the prior standard deviation/variance sufficiently large can in such cases present some challenges. Using our Prior check to see if the prior standard deviation/variance is sufficiently large can in such cases be a sensible alternative that can facilitate adjustments to the prior.
-
-Let's look at what would have happened to our results if we scaled up the prior standard deviation for the slope based on the ratio from our model check.
-
-```{r Run wrong mean-adjusted Variance,results = "hide"}
-V2=V1
-V2[2,2]=(Prior_Check_3[2,1]*sd_slope)^2
-prior3=list(mu=mu2,Sigma=V2)
-#glmb.out4<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age2,family=binomial(logit),mu=mu2,Sigma=V2,data=Menarche_Model_Data)
-glmb.out4<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamily=dNormal(mu=mu2,Sigma=V2),data=Menarche_Model_Data)
+```{r Calling dGamma,results = "hide"}
+b=lm.D9$coefficients
+dGamma(shape=4,rate=0.1,beta=b)
 ```
 
 
-```{r Summary Logit - 0 Slope - Adjusted Variance}
-summary(glmb.out4)
+### Other Prior Related Functions 
+
+Three additional functions relate to the prior specification and are useful when either specifying the prior or 
+when extracting the information about the prior used by an existing model object.
+
+*The Prior_Setup function
+
+This function can be used to set up the prior arguments so they have the correct dimensions and so that the various dimensions have names that correspond to those in the model. In addition to initialized prior structrues, these functions also return the model frame and the model matrix as a reference (the latter when it was requested from the underlying model). It is worth noting that this function is intended as a tool for initializig the prior objects and not for setting them to the final values used in the estimation. How to populate the arguments with sensible values is discussed in a separate vignette.
+
+NOTE: ADD A PRINT METHOD FOR THIS FUNCTION SO THAT THE OUTPUT CAN BE CONTROLLED
+
+```{r Calling Prior_Setup,results = "hide"}
+Prior_Setup_v2(weight ~ group)
+```
+*The Prior_Check function
+
+The Prior Check function provides a utility for checking whether the data appears to be consistent with the prior. Essentially, consistency here means that the maximum likelihood estimate are within the credible intervals implied by the prior. If the data appears inconsistent with the data, it is possible that the data was generated from a different process than that implied by the model or that the prior was not well thought out.  Specifying a good prior is usually important and we dedicate a separate vignette to this topic.
+
+
+```{r Calling Prior_Check,results = "hide"}
+Prior_Check(glm.D93,mu2,Sigma2)
 ```
 
-While we will leave a formal discussion of the DIC [@Spiegelhalter2002] to a later chapter, we here produce a summary of how the models fitted so far compare on the measure (generally, a smaller DIC tends to be preferred). We can see below that the model using the Regular Age variable by this crteria peforms particularly poorly. We can also see that our last model with an ajusted variance term perfoms better than the one with a stronger prior centered away from the maximum likelihood estimate.  The original model specifications just beats out the last model with the lowest overall DIC.   
 
-```{r DIC Comparison}
-DIC_Info=rbind(extractAIC(glmb.out1),
-extractAIC(glmb.out2),
-extractAIC(glmb.out3),
-extractAIC(glmb.out4))
+*The pfamily function
 
-colnames(DIC_Info)=c("pD","DIC")
-rownames(DIC_Info)=c("Original Specification","Regular Age","Slope Mean=0 - No Var Adjustment",
-                     "Slope Mean=0 - Var Adjustment")
-print(DIC_Info)
+This function can be used to extract a pfamily object from an existing object and is useful post-modeling in order
+to verify the prior used in the modeling process. It is also used by some of the methods during post-processing
+to extract information about the prior.
 
+```{r Calling pfamily,results = "hide"}
+pfamily(glmb.D93)
 ```
 
 
-# References
+## Method functions 
+
+The *lm* and *glm* functions come with an extensive set of method functions that can be used to conduct supplemental analysis (typically during the post-modeling phase). Because the *lmb* and *glmb* functions are structured to return many of the same items as the classical functions and because they inherit methods from *glm* and *lm*, many of the methods available for the classical functions are directly available for the *glmb* and *lmb* functions. As some of the output does tend to be different (in particular, coefficients are returned as random draws as opposed to a single maximum likelihood estimate), we have implemented specific methods for the "glmb" and "lmb" classes of objects.  The current set of methods for all four classes of objects are displayed below. 
+
+Two separate vignettes illustrate how calls to these methods can be used to replicate the output from the classical models. It is worth noting that a smaller subset of the classical methods are not yet implemented (although plans are in place to replicate some of those as well). Those are discussed in the separate vignette's as well. Here we provide lists of the methods available for classical *lm* and *glm* functions (many of which are inherited by *lmb* and *glmb*) as well as methods that have been developed specifically for *glmb* and *rglmb*.
+
+[NOTE: AS NEEDED, ADD ADDITIONAL METHODS FOR lmb. THE LIST OF METHODS FOR glmb SHOULD BE FAIRLY COMPLETE]
+
+*Methods for class="lm"* 
+```{r lm methods}
+methods(class="lm")
+```
+
+*Methods for class="glm"* 
+
+```{r glm methods}
+methods(class="glm")
+```
+*Methods for class="glmb"* 
+
+While most of the methods for the *glm* class (when it has its own method) or the *lm* class (when it does not) work properly for objects of class *glmb*, some methods do not. For that reason, we have implemented the below methods specifically for the *glmb* class of objects.  Future enhancements to this package may enhance these methods.  There are also additional methods for *lm* and/or *glm* that do not currently have functioning methods
+for the *glmb* class. This includes the *add1*, *drop1*, and *dropterm* functions (which should be implementable fairly easily) and the various influence.measure methods (influence, rstandard, rstudent, dfbeta, dfbetas, cooks.distance, and hatvalues) which may require more work. Plans do exist to add the former and perhaps the latter (which likely would look at influence on posterior modes and not on posterior means).   
+
+```{r glmb methods}
+methods(class="glmb")
+```
+
+NOTE: CHECK WHICH METHODS FOR lmb that are inherited and functions vs. those that may require additional development.
+
+```{r lmb methods}
+methods(class="lmb")
+```
+
+
+# The *rlmb* and *rglmb* functions and their summary functions
+
+Because the functions *lmb* and *glmb* are set up to mirror their corresponding classical cousins, they include a great deal of overhead for pre and post processing that are unsuitable if the functions need to be called repetitively (say during Block-Gibbs sampling).  To faciliate Block-Gibbs sampling and other simulation, we provide more minimalistic interfaces to the simulation procedures in the form of the corresponding functions *rlmb* and *rglmb*. 
+
+These functions are called internally by *lmb* and *glmb* in much the same way that *lm.fit* and *glm.fit* are called by the *lm* and *glm* functions so in a way they are Bayesian versions of those functions. We choose the r prefix for these functions to symbolize that they also represent random draws from probability distributions in much the same way that *rnorm*, *rgamma*, and other functions in the *stats* package do.
+
+## Calling the *rlmb* and *rglmb* functions
+
+Instead of passing a formula to these functions, the user instead passes the dependent and independent variables as a dependent variable vector *y* and as an independent variable design matrix *x* respectively. A useful approach that can help the user specify the design matrix involves sequential calls to *model.frame* and *model.matrix* as seen below.
+
+NOTE 1: SHORTEN THIS CODE
+NOTE 2: The SUMMARY FUNCTION IS CURRENTLY NOT WORKING FOR rlmb
+
+*Calling the rlmb function*
+```{r calling lmb,results = "hide"}
+## Annette Dobson (1990) "An Introduction to Generalized Linear Models".
+## Page 9: Plant Weight Data.
+ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
+trt <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
+weight <- c(ctl, trt)
+## Classical call
+lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
+lm_summary=summary(lm.D9)
+## Bayesian Call
+n<-10000
+y<-lm.D9$y
+#x<-as.matrix(lm.D9$x)
+
+### Set old regression and dispersion coefficients
+
+b_old=lm.D9$coefficients
+v_old=lm_summary$sigma^2
+
+#### Set up for rglmb_dispersion
+
+n0=0.1
+shape=n0/2
+rate=shape*v_old
+
+rate/(shape-1)
+rate/shape
+
+#a1<-shape+n1/2
+#b1<-rate+sum(SS)/2
+
+#out<-1/rgamma(n,shape=a1,rate=b1)
+## v0=sum(SS)/n1 ~ (2*rate+sum(SS))/(2*shape+n1)=[(2*rate+sum(SS))/2]/((2*shape+n1)/2) 
+n1=length(y)
+SS=v_old*n1
+
+n1 # This is equal to 20
+
+
+n0=2 # Prior observations
+v_prior=v_old  # Prior point estimate for variance (the mean of (1/dispersion=1/v_prior))
+wt0=(n0/n1)  
+
+## set shape=0.01*(n1/2)
+## set rate= 0.01*SS/2
+
+shape=wt0*(n1/2)   ###  Shape is prior observations /2
+rate=shape*v_prior  ### rate is essentiall prior SS - V in rmultireg should be this
+rate/shape ## Should match v_prior (currently also v_old)
+
+mu<-c(0,0)
+mu=b_old  ### For testing purposes, set prior=b_old
+P<-0.1*diag(2)
+# Bayesian Prior Setup and Call-Prior Should Generally be Customized
+p_info=Prior_Setup_v2(weight~group)
+x=p_info$x
+outtemp4=rlmb(n=1000,y=y,x=x,pfamily=dNormal_Gamma(mu=mu,Sigma=solve(P),shape=shape,rate=rate))
+
+#summary(outtemp4)
+
+```
+
+*Calling the rglmb function*
+
+```{r calling rglmb}
+data(menarche2)
+Age2=menarche2$Age-13
+
+y=menarche2$Menarche/menarche2$Total
+wt=menarche2$Total
+
+## Use model.frame and model.matrix to derive x
+#mf=model.frame(formula)
+#x=model.matrix(formula,mf)
+
+x<-matrix(as.numeric(1.0),nrow=length(Age2),ncol=2)
+x[,2]=Age2
+
+## Modify Prior_Setup so it can take a model matrix as well as an model object
+mu<-matrix(as.numeric(0.0),nrow=2,ncol=1)
+V1<-1*diag(as.numeric(2.0))
+mu[2,1]=(log(0.9/0.1)-log(0.5/0.5))/3
+
+# 2 standard deviations for prior estimate at age 13 between 0.1 and 0.9
+## Specifies uncertainty around the point estimates
+
+V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
+V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
+
+out<-rglmb(n = 1000, y=y, x=x, pfamily=dNormal(mu=mu,Sigma=V1), weights = wt, 
+           family = binomial(logit)) 
+
+summary(out)
+```
+
+
+## Methods for The *rlmb*, *rglmb*, and their summary functions
+
+To allow for the output from the rglmb and rlmb functions to benefit from the wide range of methods available 
+for their *lmb* and *glmb* cousins, we implement a few additional methods for these functions that enable most of the methods to also work for these objects post modeling.
+
+```{r rglmb methods}
+methods(class="rglmb")
+```
+
+```{r summary.rglmb methods}
+methods(class="summary.rglmb")
+```
+
+
+```{r rlmb methods}
+methods(class="rlmb")
+```
+
+# Advanced Topics
+
+In this section, we cover additional functions included in the package that most users likely would not call directly but which provide visibility to the simulation methods utilized as part of the package. These functions can be broadly broken down into four distinct categories:. 
+
+* A set of simulation functions (one for each pfamily) that gets called during the estimation process when the respective pfamily is specified.
+* Two functions for the Central Normal Distribution that play a key role in generating candidates for the envelope used to estimate some of the models 
+* A set of functions related to the envelope construction and simulation from a model in Standard form that uses the envelope as part of the simulation process
+* A set of utility functions used by various method functions to produce the desired outputs
+
+## Simulation Functions
+
+One of the key items returned by the *pfamily* functions is an assigned simulation function to be called during the estimation process (one for each pfamily).  These functions can also be called directly (though we don't recommend it). The Function documentation for each of these underlying functions contains information on the type of algorihm used to generate the sample. We refer the reader to the documentation for each of these functions but note the following relationship:
+
+* The *rglmb_norm_reg* function is used for the *dNormal* *pfamily*
+* The *rglmb_dispersion* function is used for the *dGamma* *pfamily*
+* The *rnorm_gamma_reg* function is used for the *dNormal_Gamma* *pfamily*
+
+## Normal_ct Functions
+
+For estimation of Bayesian generalized linear models with Normal Priors but non-gaussian families, accept-reject 
+procedures are used where candidates are generated from mixtures of restricted multivariate normal distributions. Two functions for univariate restricted normal distributions (*rnorm_ct* and *pnorm_ct*) play a key role during this process and can be viewed as generalizations of the rnorm and pnorm functions.
+
+## Envelope Related Functions
+
+For estimation of Bayesian generalized linear models with Normal Priors but with non-gaussian families, there are a number of functions that are used in order to generate the samples and that all in one-way-or another are related to the Enveloping functions used. The below is a list of these functions (we refer the reader to the respective function documentation for details).
+
+* *glmb_Standardize_Model* standardizes a Bayesian Generalized Linear Model so it can be sampled using an Enveloping function
+* *EnvelopeBuild* builds the enveloping function used during the simulation 
+* *EnvelopeOpt* selects an "optimal" size for the Grid used during Envelope construction
+* *EnvelopeSort* sorts the envelope after construction to increade efficiency of the simulation
+* *Set_Grid*  calculates log-densities associated with the restricted normals used to generate candidated
+* *set_logP* calculates constans used during sampling from the constructed envelope
+* *rnnorm_reg_std* simulates from a standardized Bayesian Generalized linear model using an Enveloping function
+* *Neg_logLik*  returns the Negative log-likelihood for a Generalized Linear Model
+* *Neg_logPost* returns the negative log-posterior for a Bayesian Generalized Linear Model
+* *Neg_logPost_Gradient* returns the Gradient for the Negative Log-posteror of a Bayesian Generalized Linear Model
+
+## Utility Functions 
+
+Finally, the package contains a small set of functions that are used by various method functions. While these are currently exported, we may in the future choose not to export them as they are unlikely to be useful for users of the package as standalone functions.
+
+* Compare_Model_Frames
+* complete_newdata
+* generate_predictions
+* get_x_matrix
+* glmbdic
+

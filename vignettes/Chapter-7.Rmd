@@ -1,8 +1,8 @@
 ---
-title: "Chapter 7: Specifying Priors for Dispersion (variance) Parameters"
+title: "Chapter 7: Using Custom Prior Families"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 7: Specifying Priors for Dispersion (variance) Parameters}
+  %\VignetteIndexEntry{Chapter 7: Using Custom Prior Families}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

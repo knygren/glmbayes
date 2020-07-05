@@ -1,8 +1,8 @@
 ---
-title: "Chapter 8: A Selection of Bayesian Generalized Linear Models"
+title: "Chapter 8: Working with the Gamma regression Model"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 8: A Selection of Bayesian Generalized Linear Models}
+  %\VignetteIndexEntry{Chapter 8: Working with the Gamma regression Model}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

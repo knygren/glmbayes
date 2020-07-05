@@ -1,13 +1,111 @@
 ---
-title: "Chapter 3: A Side by Side Comparison of glm and glmb"
+title: "Chapter 3: Checking for prior-data conflicts"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 3: A Side by Side Comparison of glm and glmb}
+  %\VignetteIndexEntry{Chapter 3: Checking for prior-data conflicts}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+---
+references:
+- id: nygren2006
+  title: Likelihood Subgradient Densities
+  author:
+  - family: Nygren
+    given: Kjell
+  - family: Nygren
+    given: Lan Ma
+  container-title: Journal of the American Statistical Association
+  volume: 101
+  URL: 'https://doi.org/10.1198/016214506000000357'
+  DOI: 10.1198/016214506000000357
+  issue: 475
+  publisher: Taylor and Francis, Ltd
+  page: 1144-1156
+  type: article-journal
+  issued:
+    year: 2006
+    month: 9
+
+- id: Venables2002
+  title: Modern Applied Statistics with S.
+  author:
+  - family: Venables
+    given: W. N.
+  - family: Ripley
+    given: B. D.
+  URL: 'https://www.springer.com/gp/book/9780387954578'
+  DOI: 10.1007/978-0-387-21706-2
+  publisher: Springer-Verlag New York
+  page: 1-498
+  type: book
+  issued:
+    year: 2002
+    
+- id: Hamilton2004
+  title: Lecture notes obstetrics and gynaecology
+  author:
+  - family: Hamilton-Fairley
+    given: Diana
+  URL: 'https://www.bookdepository.com/Lecture-Notes-Obstetrics-Gynaecology-Diana-Hamilton-Fairley/9781405120661'
+  publisher: Blackwell Pub.
+  type: book
+  issued:
+    year: 2004
+    month: 11
+
+- id: Evans2006
+  title: Checking for Prior-Data Conflict
+  author:
+  - family: Evans
+    given: Michael
+  - family: Moshonov
+    given: Hadas
+  container-title: Bayesian Analysis
+  volume: 1
+  URL: 'http://dx.doi.org/10.1214/06-BA129'
+  DOI: 10.1214/06-BA129
+  issue: 4
+  page: 893-914
+  type: article-journal
+  issued:
+    year: 2006
+    month: 
+
+- id: Spiegelhalter2002
+  title: Bayesian measures of model complexity and fit
+  author:
+  - family: Spiegelhalter
+    given: David J.
+  - family: Best
+    given: Nicola G.
+  - family: Carlin
+    given: Bradley P.
+  - family: Van Der Linde
+    given: Angelika
+  container-title: Journal of the Royal Statistical Society Series B (Statistical Methodology)
+  volume: 64
+  URL: 'https://doi.org/10.1111/1467-9868.00353'
+  DOI: 10.1111/1467-9868.00353
+  issue: 4
+  page: 583-639
+  type: article-journal
+  issued:
+    year: 2002
+    month: 9
+
+    
+---
+
+---
+nocite: | 
+  @nygren2006
+...
+
+
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -20,13 +118,135 @@ knitr::opts_chunk$set(
 library(glmbayes)
 ```
 
-The **glmb** function and related *method functions* that handle the output are designed to be Bayesian versions of the **glm** function and many of its *method functions*. This vignette shows how the basic setup/calling of the functions compare and then walks through how the method functions for glmb can be called to generate similar outputs to those from the glm functions.
 
-**Dobson Randomized Control Data**
+```{r menarche data,results = "hide",echo = FALSE}
+## Load menarche data
+data(menarche2)
+head(menarche2, 5)
 
-To understand how the outputs of the glmb function mirrors those for the glm function, it is useful to take a look at the first portion of the example that is provided with the glm function. The data is based on Randomized Controlled Trial data from Dobson (1990). Here is a view of the data:
+```
 
-```{r dobson}
+
+```{r Analysis Setup,results = "hide",echo = FALSE}
+## Number of variables in model
+Age=menarche2$Age
+nvars=2
+set.seed(333)
+
+## Reference Ages for setting of priors and Age_Difference
+ref_age1=13  # user can modify this
+ref_age2=15  ## user can modify this
+
+## Define variables used later in analysis
+Age2=Age-ref_age1
+Age_Diff=ref_age2-ref_age1
+
+```
+
+
+```{r Prior Info,results = "hide",echo = FALSE}
+
+## Point estimates at reference ages
+m1=0.5  
+m2=0.9
+
+## Lower bound of prior credible intervals for point estimates
+m1_lower=0.3
+m2_lower=0.7
+
+## Assumed correlation between the two (on link scale)
+m_corr=0.4
+```
+
+
+```{r Logit: set up link function info and initialize prior matrices,results = "hide",echo = FALSE}
+
+## Set up link function and initialize prior mean and Variance-Covariance matrices
+bi_logit <- binomial(link="logit")
+mu1<-matrix(0,nrow=nvars,ncol=1)
+rownames(mu1)=c("Intercept","Age2")
+colnames(mu1)=c("Prior Mean")
+V1<-1*diag(nvars)
+rownames(V1)=c("Intercept","Age2")
+colnames(V1)=c("Intercept","Age2")
+```
+
+
+```{r Logit:set prior means,results = "hide",echo = FALSE}
+## Prior mean for intercept is set to point estimate 
+## at reference age1 (on logit scale)
+mu1[1,1]=bi_logit$linkfun(m1)
+
+## Prior mean for slope is set to difference in point estimates
+## on logit scale divided by Age_Diff
+
+mu1[2,1]=(bi_logit$linkfun(m2) -bi_logit$linkfun(m1))/Age_Diff 
+print(mu1)
+
+```
+
+
+```{r Logit:set prior Variance Covariance matrix,results = "hide",echo = FALSE}
+## Implied standard deviations for point estimates on logit scale
+
+sd_m1= (bi_logit$linkfun(m1) -bi_logit$linkfun(m1_lower))/1.96
+sd_m2= (bi_logit$linkfun(m2) -bi_logit$linkfun(m2_lower))/1.96
+
+## Implied Standard deviation for slope (using variance formula for difference between two variables)
+a=(1/Age_Diff)
+sd_slope=sqrt((a*sd_m1)^2+(a*sd_m2)^2-2*a*a*(sd_m1*sd_m2*m_corr))
+
+#Cov(m1,slope)=cov(m1, a*(m2-m1)) =a*E[(m1-E[m1])((m2-m1)-E[m2-m1])]
+#   =a*E[(m1-E[m1])(m2-E[m2])]- a* E[(m1-E[m1])(m1-E[m1])]
+##   =a*Cov[m1,m2] - a*Var[m1]
+##  =a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+cov_V1=a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+
+# Set covariance matrix
+V1[1,1]=sd_m1^2
+V1[2,2]=sd_slope^2
+V1[1,2]=cov_V1
+V1[2,1]=V1[1,2]
+print(V1)
+```
+
+```{r Run Logit,results = "hide",echo = FALSE}
+Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,Menarche=menarche2$Menarche,Age2)
+prior1=list(mu=mu1,Sigma=V1)
+#glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age2,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
+glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamily=dNormal(mu=mu1,Sigma=V1),data=Menarche_Model_Data)
+
+```
+
+
+```{r Print Logit,results = "hide",echo = FALSE}
+
+# Print model output
+print(glmb.out1)
+
+# Print prior mean as comparison
+print(t(mu1))
+
+```
+
+```{r Summary Logit,results = "hide",echo = FALSE}
+summary(glmb.out1)
+```
+
+# General Discussion
+
+In the previous chapter, we dealt with a relatively simple case where it was obvious that the model of interest had two coefficients that were to be estimated (an intercept and a slope tied to the Age variable). For more complex models, it is common for the flexibility of the *glm* and *glmb* formula setup to make it difficult for the analyst to know the number of coefficients in the model prior to actually running the model. This is particularly true in cases where some variables are factors or if the formula involves interaction terms.
+
+Once a prior has been set, it can also be difficult to judge whether it will have the kind of impact on the model the analyst may have intended. This is particularly true if particular coefficients are hard to interpret and the analyst is looking to provide what amounts to *non-informative priors". In some cases, a poorly formulated prior can lead to conflicts between the prior and the data (i.e., cases where the prior implies a very low prior probability of observing the observed data).
+
+To make it easier for the analyst to know the variable for which a prior specification is needed and to allow him/her to flag potentially problematic prior specifications, we provide a function *Check_Prior" that can help with both sets of issues. 
+
+# Identifying the Variables that Need a Prior Specification
+
+
+#Model With Factors#
+
+```{r Dobson Poisson Data}
 ## Dobson (1990) Page 93: Randomized Controlled Trial :
 counts <- c(18,17,15,20,10,20,25,13,12)
 outcome <- gl(3,1,9)
@@ -34,267 +254,152 @@ treatment <- gl(3,3)
 print(d.AD <- data.frame(treatment, outcome, counts))
 ```
 
-**Calling the two functions**
-
-The example code for the glm function specifies a Poisson regression model for this data. The below shows how the glmb function can be used in much the same fashion but with some extra requirements. In particular, we need to specify prior Mean and Variance-Covariance matrices for the coefficients of interest and we also need to tell the function how many draws to make from the posterior distribution (in this case, we generate 1000 iid draws).
-
-```{r Prior_and_Calls,results = "hide"}
-## Prior mean vector 
-mu<-matrix(0,5)           
-mu[1,1]=log(mean(counts)) 
-## Prior standard deviation and Variance
-mysd<-1           
-V=((mysd)^2)*diag(5)  
-prior=list(mu=mu,Sigma=V)
-## Call to glm
-glm.D93 <- glm(counts ~ outcome + treatment, 
-              family = poisson())
-## Call to glmb
-
-glmb.D93<-glmb(n=1000,counts ~ outcome + treatment, family=poisson(), pfamily=dNormal(mu=mu,Sigma=V))
+```{r Dobson Check_Prior}
+glm.D93 <- glm(counts ~ outcome + treatment, family = poisson(),x=TRUE)
+Setup.D93=Prior_Setup(glm.D93)
 ```
 
-**Printing the output**
+Will add a print method to Prior_Check to give a better view of this information that also works if there are large numbers of observations.
 
-Taking a look at the basic printed output, we can see that the two closely mirror each other with the glmb posterior means replacing the glm maximum likelihood estimates.
-
-
-```{r Printed_Views}
-## Printed view of the output from the glm function 
-print(glm.D93)
-## Printed view of the output from the glmb function 
-print(glmb.D93)
+```{r Dobson Print Check_Prior}
+print(Setup.D93)
 ```
 
-**Methods Available**
+#Model With Factors and Interactions#
 
-In addition to the basic print function output, the glmb function returns an object with an assigned class "glmb" for which a number of generic functions (or methods) are available. Below we can compare the available methods for class "glmb" to those available for class "glm" (the returned objects for the glm function).
 
-```{r glm_Methods}
-## Methods for class "glm""
-methods(class="glm")
+```{r Venables Check_Prior}
+## example from Venables and Ripley (2002, pp. 190-2.)
+ldose <- rep(0:5, 2)
+numdead <- c(1, 4, 9, 13, 18, 20, 0, 2, 6, 10, 12, 16)
+sex <- factor(rep(c("M", "F"), c(6, 6)))
+SF <- cbind(numdead, numalive = 20-numdead)
+budworm.lg <- glm(SF ~ sex*ldose, family = binomial,x=TRUE)
+Setup.budworm=Prior_Setup(budworm.lg)
+```
+
+```{r Venables Print Check_Prior}
+print(Setup.budworm)
+```
+
+# Checking For Prior-Data Conflicts Ahead of Model Estimation
+
+As we noted in the previous chapter in the section titled "Variable Transformation and Preliminary Setup", it is critical for coefficients to the interpretable in order foranalysts to be able to provide sensible priors.
+In some cases, efforts aimed at enhancing interpretation through model transformations or efforts aimed at gathering meaningful prior information can be difficult and/or time consuming. Unfortunately, this leaves open the possibility for analysts to specify priors that end up having more influence on the posterior estimates than they may have intended. This is particularly problematic in cases where the anayst is attempting to use what might best be described as a "non-informative prior".  
+
+To catch some of these cases without influencing potentially good prior specifiations un-necessarily we propose an approach that involes running a classical model with the same specification as the Bayesian model without directly viewing the coefficient estimates and then passing information related to the classical estimates together with the prior specification to our function to check if the maximum likelihood estimates seem to conflict with the prior. In particular, we check if the prior Bayesian credible interval has overlap with the confidence interval based on the maximum likelihood estimate.
+
+Conceptually, this approach is similar to that described in [@Evans2006]. Here are a few examples implementing this approach:
+
+*Our prior Specification From Chapter 4*
+
+We first run the checks for our original specification (this assumes code in Chapter 4 has been run). The resulting check just indicates that the maximum likelihood estimates are roughly consistent with the prior. This is mainly because the maximum likelihood estimate for the slope, while different from our prior estimate, was still well within the prior credible interval.
+
+```{r Check Old Prior}
+glm.out1<-glm(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),data=Menarche_Model_Data)
+
+Like_std=summary(glm.out1)$coefficients[,2]
+
+#D93_Prior_Error_Checks=
+Prior_Check(glm.out1,mu1,V1)
+
 
 ```
 
-```{r glmb_Methods}
-## Methods for class "glmb"
-methods(class="glmb")
+*Same prior but original Age variable *
+
+Here we run a model with the same prior but with the original Age variable. This now indicates a potential problem. A prior point estimate for half of all girls having had their first period is clearly non-sensical, but it would clearly be difficult to provide any kind of sensible prior point estimate that far out or the range of the data.
+
+```{r Check Old Age}
+glm.out2<-glm(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),data=Menarche_Model_Data)
+
+Like_std=summary(glm.out2)$coefficients[,2]
+
+#D93_Prior_Error_Checks=
+Prior_Check(glm.out2,mu1,V1)
+
 ```
 
+Let's take a look what would have happened to our estimates if we would have proceeded with this model specification.
 
-**The summary functions**
+```{r Run wrong Age,results = "hide"}
 
-Let's take a closer look at the outputs of the summary functions.
-
-*glm summary output*
-
-In turn, we see the Call, a list of Deviance residuals, and the estimated coefficients. The coefficients are then followed by some additional model related information. 
-
-```{r glm_summary}
-## summary output for the "glm" class
-summary(glm.D93)
+#glmb.out2<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
+glmb.out2<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),pfamily=dNormal(mu=mu1,Sigma=V1),data=Menarche_Model_Data)
 ```
 
-*glmb summary output*
-
-The summary for the glmb function follow a similar structure but adds a table containing information related to the prior and the maximum likelihood in a table above a table with the means for the estimated Bayesian coefficients. The output below the main table with coefficients is also modified to contain similar (but slightly different) pieces of information (the details of which are discussed elsewhere). 
-```{r glmb_summary}
-## summary output for the "glm" class
-summary(glmb.D93)
+```{r Summary Logit - Wrong Age}
+summary(glmb.out2)
 ```
 
-**Model Fit, Predictions, Deviance Residuals, Covariance Matrix, and Confidence/Credible Intervals**
+Under this specification, the Intercept standard deviation was much higher than under the original specification, and as a result the posterior estimates (mode and mean) end up somewhere in between the prior mean and maximum likelihood estimates. However, the posterior credible interval suggests that both the prior and the maximum likelihood estimates are inconsistent with the posterior distribution.  Because the posterior estimates for the intercept are much higher than the very negative) maximum likelihood estimate, the posterior coefficients for the Age variable is cut roughly in half relative to our other original model and the Deviance residuals are much larger than those we see if we go back to review the output from the original model.  Clearly, this would not be a model that should be run so catching potential issues ahead of the fact (as we did using our above approach) would be important.
 
-Let's next take a look at the outputs from these summary methods to see how they compare. Note that the Bayesian version of these contain random draws tied to the underlying distributions so the column means are used in these comparisons.
 
-*Fitted values*
+*Same Age and Variance but 0 mean vector *
 
-```{r glm fitted outputs}
-## fitted outputs for the glm function
-fitted(glm.D93)
+Here we run a model with the same Age variable as in our original specification but with a 0 prior mean vector combined with the original Variance-Covariance matrix. This now also indicates a potential problem. Looking at the details from the summary function, we see that the issue now is with the slope parameter instead of the mean but the magnitude of the issue appears to be less as the ratio is smaller.
+
+
+```{r Check 0 mean}
+glm.out3<-glm(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),data=Menarche_Model_Data)
+
+Like_std=summary(glm.out3)$coefficients[,2]
+
+mu2=mu1
+mu2[2,1]=0
+
+#D93_Prior_Error_Checks=
+Prior_Check_3=Prior_Check(glm.out3,mu2,V1)
+
+Prior_Check_3
+
+```
+Let's proceed with running the model to see how it compares to the original model.
+
+
+```{r Run wrong mean,results = "hide"}
+prior2=list(mu=mu2,Sigma=V1)
+#glmb.out3<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age2,family=binomial(logit),mu=mu2,Sigma=V1,data=Menarche_Model_Data)
+glmb.out3<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamily=dNormal(mu=mu2,Sigma=V1),data=Menarche_Model_Data)
 ```
 
-
-```{r glmb fitted outputs}
-## mean of fitted outputs for the glm function
-## works without a "glmb" class specific generic function
-colMeans(fitted(glmb.D93))
+```{r Summary Logit - 0 Slope}
+summary(glmb.out3)
 ```
 
-*Predictions(linear predictors)*
+In reviewing the output, we can now see that the impact of this specification on the results relative to the original model is relatively small. Because the prior mean for the slope is so far away from the maximum likelihood estimate, the posterior estimate for the slope does get pulled away a bit more from the maximum likelihood estimate than under the original specification (about one standard deviation if we use the posterior standard deviation) but in relation to the overall magnitude of the coefficient, this is not all that big of an impact. 
 
-```{r glm predictions}
-## predictions for the glm function
-predict(glm.D93)
-```
+In this case of this particular model, we had some (although imprecise) prior insight into the fact that the slope should be positive and of a somewhat reasonable magnitude. In other applications, the analyst may indeed not have any clear insight into the magnitude or even the sign of some of the coefficients. In such cases, specifying a prior with 0 mean can indeed make some sense. Setting the prior standard deviation/variance sufficiently large can in such cases present some challenges. Using our Prior check to see if the prior standard deviation/variance is sufficiently large can in such cases be a sensible alternative that can facilitate adjustments to the prior.
 
-```{r glmb predictions}
-## predictions for the glmb function
-colMeans(glmb.D93$linear.predictors) # no current predict function
-colMeans(predict(glmb.D93)) 
-```
+Let's look at what would have happened to our results if we scaled up the prior standard deviation for the slope based on the ratio from our model check.
 
-*Residuals*
-
-```{r glm residuals}
-## residuals for the glm function
-residuals(glm.D93)
-```
-
-```{r glmb residuals}
-## residuals for the glmb function
-colMeans(residuals(glmb.D93))
-```
-
-*vcov*
-
-```{r glm vcov}
-## vcov for the glm function
-vcov(glm.D93)
-```
-
-```{r glmb vcov}
-## vcov for the glm function
-vcov(glmb.D93)
-```
-
-*confint*
-
-Confidence intervals
-```{r glm confint}
-## confint for the glm function
-confint(glm.D93)
-```
-
-```{r glmb confint}
-## confint for the glm function
-confint(glmb.D93)
+```{r Run wrong mean-adjusted Variance,results = "hide"}
+V2=V1
+V2[2,2]=(Prior_Check_3[2,1]*sd_slope)^2
+prior3=list(mu=mu2,Sigma=V2)
+#glmb.out4<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age2,family=binomial(logit),mu=mu2,Sigma=V2,data=Menarche_Model_Data)
+glmb.out4<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamily=dNormal(mu=mu2,Sigma=V2),data=Menarche_Model_Data)
 ```
 
 
-**AIC/DIC, Deviance, and the Log-Likelihood**
-
-These model statistics are useful when comparing different model specifications. The Bayesian versions of these will be discussed in greater detail in a separate Vignette.
-
-*AIC/DIC*
-
-```{r glm AIC}
-## AIC for the glm function (equivalent degrees of freedom and the AIC)
-extractAIC(glm.D93)
+```{r Summary Logit - 0 Slope - Adjusted Variance}
+summary(glmb.out4)
 ```
 
-```{r glmb DIC}
-## DIC for the glmb function (estimated effective number of parameters and the DIC)
-extractAIC(glmb.D93)
-```
+While we will leave a formal discussion of the DIC [@Spiegelhalter2002] to a later chapter, we here produce a summary of how the models fitted so far compare on the measure (generally, a smaller DIC tends to be preferred). We can see below that the model using the Regular Age variable by this crteria peforms particularly poorly. We can also see that our last model with an ajusted variance term perfoms better than the one with a stronger prior centered away from the maximum likelihood estimate.  The original model specifications just beats out the last model with the lowest overall DIC.   
 
-*Deviance*
+```{r DIC Comparison}
+DIC_Info=rbind(extractAIC(glmb.out1),
+extractAIC(glmb.out2),
+extractAIC(glmb.out3),
+extractAIC(glmb.out4))
 
-```{r glm Deviance}
-## Deviance for the glm function
-deviance(glm.D93)
-```
+colnames(DIC_Info)=c("pD","DIC")
+rownames(DIC_Info)=c("Original Specification","Regular Age","Slope Mean=0 - No Var Adjustment",
+                     "Slope Mean=0 - Var Adjustment")
+print(DIC_Info)
 
-```{r glmb Deviance}
-## Deviance for the glmb function
-## works without a "glmb" class specific generic function
-mean(deviance(glmb.D93))
-```
-
-*Log-Likelihoods*
-
-```{r glm logLik}
-## Deviance for the glm function
-logLik(glm.D93)
-```
-
-```{r glmb logLik}
-## Deviance for the glmb function
-mean(logLik(glmb.D93))
-```
-
-**Model Frame, formula, family, and nobs**
-
-These are mostly useful for understanding various aspects of the model.
-
-*Model Frames*
-
-```{r glm Model Frame}
-## Model Frame for the glm function
-model.frame(glm.D93)
-```
-
-```{r glmb Model Frame}
-## Model Frame for the glmb function
-model.frame(glmb.D93$glm)
-```
-
-*formula*
-
-```{r glm formula}
-## formula for the glm function
-formula(glm.D93)
-```
-
-```{r glmb formula}
-## formula for the glmb function
-formula(glmb.D93)
-```
-
-*nobs*
-
-```{r glm nobs}
-## nobs for the glm function
-nobs(glm.D93)
-```
-
-```{r glmb nobs}
-## nobs for the glmb function
-nobs(glmb.D93)
 ```
 
 
-*family*
-
-```{r glm family}
-## family for the glm function
-family(glm.D93)
-```
-
-```{r glmb family}
-## family for the glmb function
-family(glmb.D93$glm)
-```
-
-
-*show*
-
-This appears to be just the same as the print function (reference in that section)
-
-```{r glm show}
-## show for the glm function
-show(glm.D93)
-```
-
-```{r glmb show}
-## show for the glm function
-## works without a "glmb" class specific generic function
-show(glmb.D93)
-```
-
-
-
-**Maybe implementable**
-
-effects - seems to just involve a QR decomposition of 
-weights (not sure what these weights are)
-
-**Not easily implementable methods**
-
-Methods Category 1: influence, cooks.distance, rstudent, rstandard
-
-Methods Category 2: add1, drop 1
-
-Methods Category 3: anova - Analysis of deviance table - Likely not possible
-
-Methods category 4: initialize (don't know what this does), slotsFromS3
+# References
