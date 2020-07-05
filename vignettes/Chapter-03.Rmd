@@ -301,7 +301,7 @@ glm.out1<-glm(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),data
 Like_std=summary(glm.out1)$coefficients[,2]
 
 #D93_Prior_Error_Checks=
-Prior_Check(glm.out1,mu1,V1)
+Prior_Check(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamily=dNormal(mu1,V1),data=Menarche_Model_Data)
 
 
 ```
@@ -316,7 +316,9 @@ glm.out2<-glm(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),data=
 Like_std=summary(glm.out2)$coefficients[,2]
 
 #D93_Prior_Error_Checks=
-Prior_Check(glm.out2,mu1,V1)
+Prior_Check(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),pfamily=dNormal(mu1,V1)
+,data=Menarche_Model_Data)
+
 
 ```
 
@@ -348,10 +350,9 @@ Like_std=summary(glm.out3)$coefficients[,2]
 mu2=mu1
 mu2[2,1]=0
 
-#D93_Prior_Error_Checks=
-Prior_Check_3=Prior_Check(glm.out3,mu2,V1)
-
-Prior_Check_3
+pc=Prior_Check(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamily=dNormal(mu2,V1)
+,data=Menarche_Model_Data)
+pc[2,1]
 
 ```
 Let's proceed with running the model to see how it compares to the original model.
@@ -371,11 +372,11 @@ In reviewing the output, we can now see that the impact of this specification on
 
 In this case of this particular model, we had some (although imprecise) prior insight into the fact that the slope should be positive and of a somewhat reasonable magnitude. In other applications, the analyst may indeed not have any clear insight into the magnitude or even the sign of some of the coefficients. In such cases, specifying a prior with 0 mean can indeed make some sense. Setting the prior standard deviation/variance sufficiently large can in such cases present some challenges. Using our Prior check to see if the prior standard deviation/variance is sufficiently large can in such cases be a sensible alternative that can facilitate adjustments to the prior.
 
-Let's look at what would have happened to our results if we scaled up the prior standard deviation for the slope based on the ratio from our model check.
+Let's look at what would have happened to our results if we scaled the prior standard deviation for the slope up based on the ratio from our model check.
 
 ```{r Run wrong mean-adjusted Variance,results = "hide"}
 V2=V1
-V2[2,2]=(Prior_Check_3[2,1]*sd_slope)^2
+V2[2,2]=(pc[2,1]*sd_slope)^2
 prior3=list(mu=mu2,Sigma=V2)
 #glmb.out4<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age2,family=binomial(logit),mu=mu2,Sigma=V2,data=Menarche_Model_Data)
 glmb.out4<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamily=dNormal(mu=mu2,Sigma=V2),data=Menarche_Model_Data)

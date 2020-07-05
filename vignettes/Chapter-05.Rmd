@@ -43,17 +43,10 @@ To access information for the package outside of the information contained in th
 
 A call to demo(package="glmbayes"), finally, brings up a list of available demos for the package. A useful start for users might be to go through the specific demos as they are set up to illustrate the functionality of the package.
 
-```{r help,results = "hide"}
-help(glmbayes)
-```
-
-```{r documentation,results = "hide"}
-help(package="glmbayes")
-```
-
-```{r demos,results = "hide"}
-demo(package="glmbayes")
-```
+* help(glmbayes)
+* help(package="glmbayes")
+* demo(package="glmbayes")
+* data(package="glmbayes)
 
 # Using the *lmb* and *glmb* functions and their methods
 
@@ -167,7 +160,10 @@ The Prior Check function provides a utility for checking whether the data appear
 
 
 ```{r Calling Prior_Check,results = "hide"}
-Prior_Check(glm.D93,mu2,Sigma2)
+glm.D93 <- glm(counts ~ outcome + treatment, family = poisson())
+
+
+Prior_Check(counts ~ outcome + treatment, family = poisson(),dNormal(mu2,Sigma2))
 ```
 
 

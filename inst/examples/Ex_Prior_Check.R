@@ -27,9 +27,10 @@ sqrt(diag(V0))
 
 
 Like_std=summary(glm.D93)$coefficients[,2]
-D93_Prior_Error_Checks=Prior_Check(glm.D93,mu,V0)
+Prior_Check(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu,Sigma=V0))
 
-D93_Prior_Error_Checks
+#D93_Prior_Error_Checks=Prior_Check(glm.D93,mu,V0)
+
 
 
 mu[1,1]=0+4*sqrt(diag(V0)[1])
@@ -37,7 +38,7 @@ mu[1,1]=0+15*Like_std[1]
 mu[1,1]=log(mean(counts))
 mu
 
-D93_Prior_Error_Checks=Prior_Check(glm.D93,mu,V0)
+Prior_Check(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu,Sigma=V0))
 
 #glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),mu=mu,Sigma=V0,Gridtype=3)
 #summary(glmb.D93)

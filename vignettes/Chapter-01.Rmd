@@ -57,10 +57,10 @@ ps=Prior_Setup(counts ~ outcome + treatment)
 mu=ps$mu
 V=ps$Sigma
 
-Prior_Check_v2(counts ~ outcome + treatment,family = poisson(),
+Prior_Check(counts ~ outcome + treatment,family = poisson(),
 pfamily=dNormal(mu=mu,Sigma=V))
 mu[1,1]=log(mean(counts))
-Prior_Check_v2(counts ~ outcome + treatment,family = poisson(),
+Prior_Check(counts ~ outcome + treatment,family = poisson(),
 pfamily=dNormal(mu=mu,Sigma=V))
 
 glmb.D93<-glmb(n=1000,counts ~ outcome + treatment, family=poisson(), pfamily=dNormal(mu=mu,Sigma=V))
@@ -296,17 +296,3 @@ show(glmb.D93)
 
 
 
-**Maybe implementable**
-
-effects - seems to just involve a QR decomposition of 
-weights (not sure what these weights are)
-
-**Not easily implementable methods**
-
-Methods Category 1: influence, cooks.distance, rstudent, rstandard
-
-Methods Category 2: add1, drop 1
-
-Methods Category 3: anova - Analysis of deviance table - Likely not possible
-
-Methods category 4: initialize (don't know what this does), slotsFromS3

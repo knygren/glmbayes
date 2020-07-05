@@ -2,22 +2,11 @@
 % Please edit documentation in R/Prior_Check.R
 \name{Prior_Check}
 \alias{Prior_Check}
-\alias{Prior_Check_v2}
 \title{Checks for Prior-data conflicts}
 \usage{
-Prior_Check(object, mu = NULL, Sigma = NULL, level = 0.95)
-
-Prior_Check_v2(formula, family, pfamily, level = 0.95, data = NULL)
+Prior_Check(formula, family, pfamily, level = 0.95, data = NULL)
 }
 \arguments{
-\item{object}{a fitted model object of class \code{"glm"}. Typically the result of a call to \link{glm}.}
-
-\item{mu}{a vector of length \code{p} giving the prior means of the variables in the design matrix.}
-
-\item{Sigma}{a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior covariance matrix of the variables.}
-
-\item{level}{the confidence level at which the Prior-data conflict should be checked.}
-
 \item{formula}{an object of class \code{"\link[stats]{formula}"} (or one that
     can be coerced to that class): a symbolic description of the
     model to be fitted.  The details of model specification are given
@@ -32,11 +21,17 @@ Prior_Check_v2(formula, family, pfamily, level = 0.95, data = NULL)
 
 \item{pfamily}{the prior family to use for the model (including the constants passed to prior).}
 
+\item{level}{the confidence level at which the Prior-data conflict should be checked.}
+
 \item{data}{an optional data frame, list or environment (or object
     coercible by \code{\link{as.data.frame}} to a data frame) containing
     the variables in the model.  If not found in \code{data}, the
     variables are taken from \code{environment(formula)},
     typically the environment from which \code{glm} is called.}
+
+\item{mu}{a vector of length \code{p} giving the prior means of the variables in the design matrix.}
+
+\item{Sigma}{a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior covariance matrix of the variables.}
 }
 \value{
 A vector where each item provided the ratio of the absolue value for the difference between the 
@@ -77,9 +72,10 @@ sqrt(diag(V0))
 
 
 Like_std=summary(glm.D93)$coefficients[,2]
-D93_Prior_Error_Checks=Prior_Check(glm.D93,mu,V0)
+Prior_Check(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu,Sigma=V0))
 
-D93_Prior_Error_Checks
+#D93_Prior_Error_Checks=Prior_Check(glm.D93,mu,V0)
+
 
 
 mu[1,1]=0+4*sqrt(diag(V0)[1])
@@ -87,7 +83,7 @@ mu[1,1]=0+15*Like_std[1]
 mu[1,1]=log(mean(counts))
 mu
 
-D93_Prior_Error_Checks=Prior_Check(glm.D93,mu,V0)
+Prior_Check(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu,Sigma=V0))
 
 #glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),mu=mu,Sigma=V0,Gridtype=3)
 #summary(glmb.D93)
