@@ -1,10 +1,10 @@
 ---
-title: "Chapter 3: Checking for prior-data conflicts"
+title: "Chapter 3: Using the Prior_Setup and Prior_Check Functions"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 3: Checking for prior-data conflicts}
+  %\VignetteIndexEntry{Chapter 3: Using the Prior_Setup and Prior_Check Functions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -239,12 +239,21 @@ In the previous chapter, we dealt with a relatively simple case where it was obv
 
 Once a prior has been set, it can also be difficult to judge whether it will have the kind of impact on the model the analyst may have intended. This is particularly true if particular coefficients are hard to interpret and the analyst is looking to provide what amounts to *non-informative priors". In some cases, a poorly formulated prior can lead to conflicts between the prior and the data (i.e., cases where the prior implies a very low prior probability of observing the observed data).
 
-To make it easier for the analyst to know the variable for which a prior specification is needed and to allow him/her to flag potentially problematic prior specifications, we provide a function *Check_Prior" that can help with both sets of issues. 
+To make it easier for the analyst to know the variable for which a prior specification is needed and to allow him/her to flag potentially problematic prior specifications, we provide two helper functions.
+
+* *Prior_Setup()* helps the analyst set up the proper dimensions for the prior and provides a list of the variables in the model that will require a prior specification 
+* *Prior_Check()* allows the analyst to examine if the data is consistent with the prior specification
+
+We already used these briefly in the first chapter but now turn to a more extensive discussion.
 
 # Identifying the Variables that Need a Prior Specification
 
+When a model is using just numeric (non-factor) variables without interaction effects, the analys can usually tell directly from the model formula what the set of coefficients will be. However, when factors are includes and/or when interaction effects are included, this becomes harder to know. The *Prior_Setup* functions helps with this by pulling in the required information about the model variables and by setting up the appropriate dimensions for the prior mean and variance-covariance objects.
 
 #Model With Factors#
+
+Let's return to the Dobson Poisson data from the first chapter. Both the outcome and treatment variables were coded as factors using the gl function.
+
 
 ```{r Dobson Poisson Data}
 ## Dobson (1990) Page 93: Randomized Controlled Trial :
@@ -254,18 +263,33 @@ treatment <- gl(3,3)
 print(d.AD <- data.frame(treatment, outcome, counts))
 ```
 
+Using the Prior_Setup function for the model formula shows us that the model we are 
+looking to estimate will have 5 coefficients. There is an intercept, two coefficients related 
+to the outcome variable, and two coefficients related to the treatment variable.
+
 ```{r Dobson Check_Prior}
-glm.D93 <- glm(counts ~ outcome + treatment, family = poisson(),x=TRUE)
-Setup.D93=Prior_Setup(glm.D93)
+#glm.D93 <- glm(counts ~ outcome + treatment, family = poisson(),x=TRUE)
+
+
+Setup.D93=Prior_Setup(counts ~ outcome + treatment)
 ```
 
-Will add a print method to Prior_Check to give a better view of this information that also works if there are large numbers of observations.
+Printing the output from the Prior_Check function gives us a printed view of the initialized prior as
+well as the model.frame and model.matrix (see below). From the latter two, we can that the first level of outcome and treatment (in this case the factor level=1) has been used as a reference category
+and that the other two levels have been given dummy variables in the model.  
+
+In terms of the prior specification, the above has the implication that the prior means for variables 2 and 3 in the model should represent prior point estimate for how much larger (or smaller) we believe the counts would be for categories 2 and 3 relative to category 1 (on the log scale). If our prior point estimates on the other hand were 0, we could leave the prior at the initialized levels of 0 and instead give it reasonable prior credible sets for how large the differenced might be. Since we are working on the log-scale, it if worth noting that our prior really is a point estimate for how much larger (or smaller) in percentage terms we expect the counts to be.
+
 
 ```{r Dobson Print Check_Prior}
 print(Setup.D93)
 ```
 
+
 #Model With Factors and Interactions#
+
+Let's now take a look at a model with factors and interactions from Venables and Ripley (2002). The classcal model specified by Venables and Ripley specified a two-factor *sex* variable and interacts *sex* with an *ldose* variable. We again use the Prior_Setup function to see that the resulting *model.matrix* has 4 columns, labeled as "(Intercept)", "sexM", "ldose", and "sexM:ldose". 
+
 
 
 ```{r Venables Check_Prior}
@@ -274,9 +298,14 @@ ldose <- rep(0:5, 2)
 numdead <- c(1, 4, 9, 13, 18, 20, 0, 2, 6, 10, 12, 16)
 sex <- factor(rep(c("M", "F"), c(6, 6)))
 SF <- cbind(numdead, numalive = 20-numdead)
-budworm.lg <- glm(SF ~ sex*ldose, family = binomial,x=TRUE)
-Setup.budworm=Prior_Setup(budworm.lg)
+#budworm.lg <- glm(SF ~ sex*ldose, family = binomial,x=TRUE)
+
+Setup.budworm=Prior_Setup(SF ~ sex*ldose)
 ```
+
+Reviewing the full printed output, we see that the intercept corresponds to *Females* at ldose=0. The *sex* dummy for *males* represent how much higher (or lower) the percentage dead would be for males at ldose=0. The *ldose* variable in turn represents the linear impact of ldose for females (so the slope), while the interaction variable represents how much larger (or smaller) the slope would be for males.
+
+Any useful prior here should either use meaninful prior information for these coefficients based on any other available information or insights or be weak enough to greatly overlap with the distribution of the coefficients implied by the data. 
 
 ```{r Venables Print Check_Prior}
 print(Setup.budworm)
@@ -284,23 +313,17 @@ print(Setup.budworm)
 
 # Checking For Prior-Data Conflicts Ahead of Model Estimation
 
-As we noted in the previous chapter in the section titled "Variable Transformation and Preliminary Setup", it is critical for coefficients to the interpretable in order foranalysts to be able to provide sensible priors.
-In some cases, efforts aimed at enhancing interpretation through model transformations or efforts aimed at gathering meaningful prior information can be difficult and/or time consuming. Unfortunately, this leaves open the possibility for analysts to specify priors that end up having more influence on the posterior estimates than they may have intended. This is particularly problematic in cases where the anayst is attempting to use what might best be described as a "non-informative prior".  
+As we noted in the previous chapter, it is critical for coefficients to the interpretable in order foranalysts to be able to provide sensible priors.  In some cases, efforts aimed at enhancing interpretation through model transformations or efforts aimed at gathering meaningful prior information can be difficult and/or time consuming. Unfortunately, this leaves open the possibility for analysts to specify priors that end up having more influence on the posterior estimates than they may have intended. This is particularly problematic in cases where the anayst is attempting to use what might best be described as a "non-informative prior".  
 
-To catch some of these cases without influencing potentially good prior specifiations un-necessarily we propose an approach that involes running a classical model with the same specification as the Bayesian model without directly viewing the coefficient estimates and then passing information related to the classical estimates together with the prior specification to our function to check if the maximum likelihood estimates seem to conflict with the prior. In particular, we check if the prior Bayesian credible interval has overlap with the confidence interval based on the maximum likelihood estimate.
+To catch some of these cases we provide a Prior_Check function that looks to see if the maximum likelihood estimates seem to conflict with the prior specification. In particular, the functions checks if the prior Bayesian credible interval has overlap with the confidence interval based on the maximum likelihood estimate.
 
 Conceptually, this approach is similar to that described in [@Evans2006]. Here are a few examples implementing this approach:
 
 *Our prior Specification From Chapter 4*
 
-We first run the checks for our original specification (this assumes code in Chapter 4 has been run). The resulting check just indicates that the maximum likelihood estimates are roughly consistent with the prior. This is mainly because the maximum likelihood estimate for the slope, while different from our prior estimate, was still well within the prior credible interval.
+We first run the checks for our original specification (this assumes code in the previous Chapter has been run). The resulting check just indicates that the maximum likelihood estimates are roughly consistent with the prior. This is mainly because the maximum likelihood estimate for the slope, while different from our prior estimate, was still well within the prior credible interval.
 
 ```{r Check Old Prior}
-glm.out1<-glm(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),data=Menarche_Model_Data)
-
-Like_std=summary(glm.out1)$coefficients[,2]
-
-#D93_Prior_Error_Checks=
 Prior_Check(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamily=dNormal(mu1,V1),data=Menarche_Model_Data)
 
 
@@ -311,11 +334,6 @@ Prior_Check(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamil
 Here we run a model with the same prior but with the original Age variable. This now indicates a potential problem. A prior point estimate for half of all girls having had their first period is clearly non-sensical, but it would clearly be difficult to provide any kind of sensible prior point estimate that far out or the range of the data.
 
 ```{r Check Old Age}
-glm.out2<-glm(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),data=Menarche_Model_Data)
-
-Like_std=summary(glm.out2)$coefficients[,2]
-
-#D93_Prior_Error_Checks=
 Prior_Check(cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),pfamily=dNormal(mu1,V1)
 ,data=Menarche_Model_Data)
 
@@ -326,7 +344,6 @@ Let's take a look what would have happened to our estimates if we would have pro
 
 ```{r Run wrong Age,results = "hide"}
 
-#glmb.out2<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
 glmb.out2<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age,family=binomial(logit),pfamily=dNormal(mu=mu1,Sigma=V1),data=Menarche_Model_Data)
 ```
 
@@ -343,24 +360,19 @@ Here we run a model with the same Age variable as in our original specification 
 
 
 ```{r Check 0 mean}
-glm.out3<-glm(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),data=Menarche_Model_Data)
-
-Like_std=summary(glm.out3)$coefficients[,2]
-
 mu2=mu1
 mu2[2,1]=0
 
 pc=Prior_Check(cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamily=dNormal(mu2,V1)
 ,data=Menarche_Model_Data)
-pc[2,1]
+
+print(pc)
 
 ```
 Let's proceed with running the model to see how it compares to the original model.
 
 
 ```{r Run wrong mean,results = "hide"}
-prior2=list(mu=mu2,Sigma=V1)
-#glmb.out3<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age2,family=binomial(logit),mu=mu2,Sigma=V1,data=Menarche_Model_Data)
 glmb.out3<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamily=dNormal(mu=mu2,Sigma=V1),data=Menarche_Model_Data)
 ```
 
@@ -377,7 +389,6 @@ Let's look at what would have happened to our results if we scaled the prior sta
 ```{r Run wrong mean-adjusted Variance,results = "hide"}
 V2=V1
 V2[2,2]=(pc[2,1]*sd_slope)^2
-prior3=list(mu=mu2,Sigma=V2)
 #glmb.out4<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ #Age2,family=binomial(logit),mu=mu2,Sigma=V2,data=Menarche_Model_Data)
 glmb.out4<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamily=dNormal(mu=mu2,Sigma=V2),data=Menarche_Model_Data)
 ```

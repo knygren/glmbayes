@@ -120,14 +120,13 @@ library(glmbayes)
 
 # General Discussion 
 
-As we saw in the previous chapter, using the Bayesian version *glmb* of the classical function *glm* requires the specification of an additional prior multivariate normal distribution. Some models (discussed in a later Vignette) also requires the specification of a prior for the dispersion (variance) parameter. Here we spend some time walking through an example where we specify a multivariate prior for a model with two coeffcients related to the Age of menarche (i.e., the age at which girls experience their first period).  As part of the setup, we discuss the approach taken and give some general advice in regards to setting of prior distributions.
+As we saw in the previous chapter, using the Bayesian version *glmb* of the classical function *glm* requires the specification of an additional prior distribution (a pfamily). For Poisson and Binomial families, the most appropriate of the currently implemented priors would be the dNormal pfamily which requires specifying a prior mean and a prior variance-covariance matrix for the regression coefficients. Some models (covered more in a later Vignette) also requires providing either a constant or a prior for the dispersion (variance) parameter associated with the model. Here we focus on the case where only the regression coefficients require a prior and walk through an example where we specify a multivariate prior for a model with two coeffcients related to the Age of menarche (i.e., the age at which girls experience their first period).  As part of the setup, we discuss the approach taken and give some general advice in regards to setting of prior distributions.
  
 # The Age of Menarche Data 
 
-The data we will be using here is the *menarche2* data covering the *Age of Menarche* for girls in Warsaw.This data appears in [@Venables2002] and in their supporting *MASS* package. It is provided (and renamed) here so as to allow examples to run during build without loading of the *MASS* package.  
+The data we will be using here is the *menarche2* data covering the *Age of Menarche* for girls in Warsaw. This data appears in [@Venables2002] and in their supporting *MASS* package. It is provided (and renamed) here so as to allow examples to run during build without loading of the *MASS* package.  
 
-In the data, there are observations related to 25 cohorts of girls at ages ranging from an average age of 9.21 to an average age of 17.58. The average age for each cohort is captured in a column named *Age*.
-For each of the cohorts, there is also a column (*Total*) giving the total number of girls in the cohort and a column *Menarche* giving the number of girls out of the cohort who had experienced Menarche at that age.
+In the data, there are observations related to 25 cohorts of girls at ages ranging from an average age of 9.21 to an average age of 17.58. The average age for each cohort is captured in a column named *Age*.  For each of the cohorts, there is also a column (*Total*) giving the total number of girls in the cohort and a column *Menarche* giving the number of girls out of the cohort who had experienced Menarche at that age.
 
 The first 5 observations are printed below. It is important to note that in Bayesian analyses (at least those that seek to incorporate prior/external information), the priors should ideally be based on information outside of the data being studied, so we will hold off on a more complete view of the data until we have mapped out our prior. The analysis we will be exploring here is a model of the relationship between age and the percentage of girls who have had their first period using various formulations of binomial regression.  
 
@@ -140,11 +139,11 @@ head(menarche2, 5)
 
 # Variable Transformation and Preliminary Setup
 
-Because of the need for a prior distribution, it is important that coefficients in Bayesian models can be interpreted so that analysts can set reasonable priors. This is true regardless of whether analysts are looking to give a model a *weak* prior (that will limit any move of the estimates away from those driven by the purely by data for that specific model) or if the analyst is looking to give the model a *strong* prior that incorporates meaningful external information and/or prior knowledge. If the analysts can't interpret the coefficients, then is is difficult to know whether a prior distribution is *weak* or *strong* and whether it is likely to move estimates meaningfully away from classical estimates.   
+Because of the need for a prior distribution, it is important that coefficients in Bayesian models can be interpreted so that analysts can set reasonable priors. This is true regardless of whether analysts are looking to give a model a *weak* prior (that will limit any move of the estimates away from those driven purely by the data for that specific model) or if the analyst is looking to give the model a *strong* prior that incorporates meaningful external information and/or prior knowledge. If the analysts can't interpret the coefficients, then is is difficult to know whether a prior distribution is *weak* or *strong* and whether it is likely to move estimates meaningfully away from classical estimates.   
 
-A useful approach to making coefficients more interpretable involves centering variables closer to the center (or at least within the support of) the data. To facilitate the interpretation of the coefficients in our model, we will therefore pick a reference age *ref_age1* within the support of the data (we pick 13 but you can feel free to try a different reference age) and define a new variable *Age2=Age-ref_age1*. This will allow our prior for the intercept to represent a point estimate (on the chosen link function scale) for the percentage of girls who have had their first period by age 13. It also happens to be an age close to the average age of menarche in other sources [@Hamilton2004, p.29] which reported the UK average age of menarche in the UK as 12.9.  
+A useful approach to making coefficients more interpretable involves centering variables closer to the center (or at least within the support of) the data. To facilitate the interpretation of the coefficients in our model, we will therefore pick a reference age *ref_age1* within the support of the data (we pick 13 but you can feel free to pick a different reference age or to use the mean across the observations) and define a new variable *Age2=Age-ref_age1*. This will allow our prior for the intercept to represent a point estimate (on the chosen link function scale) for the percentage of girls who have had their first period by age 13. It also happens to be an age close to the average age of menarche in other sources [@Hamilton2004, p.29] which reported the UK average age of menarche in the UK as 12.9.  
 
-In addition to the intercept, our model will contain a slope coefficient for the modified age variable that will capture the change in the percentage of girls who have had their first period (on the relevant link scale). To be able to formulate a prior for this, we will set up a second reference age *ref_age2* (our choice will be 14) at which we also will formulate a point estimate for the percentage who have had their first period. A point estimate for the slope on the link scale will then be derived as the difference between the two estimates (on the link scale) divided by the Age gap between the two reference ages. Below is code doing the variable transformation and a preliminary setup to prepare for the prior specification.   
+In addition to the intercept, our model will contain a slope coefficient for the modified age variable that will capture the change in the percentage of girls who have had their first period (on the relevant link scale). To be able to formulate a prior for this, we will set up a second reference age *ref_age2* (our choice will be 15) at which we also will formulate a point estimate for the percentage who have had their first period. A point estimate for the slope on the link scale will then be derived as the difference between the two estimates (on the link scale) divided by the Age gap between the two reference ages. Below is code doing the variable transformation and a preliminary setup to prepare for the prior specification.   
 
 ```{r Analysis Setup}
 ## Number of variables in model
@@ -256,30 +255,18 @@ V1[2,1]=V1[1,2]
 print(V1)
 ```
 
-
-
-```{r Check Prior,echo = FALSE}
-#This code is a test - Seems like the covariance make sense and the correlation matches that intended
-#library(MASS)
-#sim_test <- mvrnorm(1000, mu = mu1, Sigma = V1 ) # from MASS package
-#colMeans(sim_test)
-#var(sim_test)
-#b=sim_test[,1]+sim_test[,2]
-#mean(b)
-#var(cbind(sim_test[,1],b))
-```
-
 # Running the Model 
 
-We are now ready to run a Logit model using the above specification. As a best practice, we recommend creating a data frame holding all the variables used in the model formula and to use it as the "data" for the model. We will show how this data will be used an an input to the prediction function in the next Chapter.
+We are now ready to run a Logit model using the above specification. As a best practice, we recommend creating a data frame holding all the variables used in the model formula and to use it as the "data" for the model. We will show how this data can be used an an input to the prediction function in the next Chapter.
 
 The below code performs the step creating the Model data frame and then submits the model. 
 
 ```{r Run Logit,results = "hide"}
-Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,Menarche=menarche2$Menarche,Age2)
-prior=list(mu=mu1,Sigma=V1)
-#glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
-glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamily=dNormal(mu=mu1,Sigma=V1),data=Menarche_Model_Data)
+Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,
+Menarche=menarche2$Menarche,Age2)
+
+glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~Age2,family=binomial(logit),
+pfamily=dNormal(mu=mu1,Sigma=V1),data=Menarche_Model_Data)
 
 ```
 
@@ -318,11 +305,11 @@ summary(glmb.out1)
 
 *Interpreting the "Prior and Maximum Likelihood Estimates with Standard Deviations" table*
 
-This table gives a side-by-side comparison of the prior and the data driven maximum likelihood estimates (that should match the ouput from the glm function for the same model). In addition to revealing any differences in the estimates themselves, the relative magnitude of the standard deviations give insight into how "strong" the prior specification is relative to the information contained in the data.  The unstandardized weights on the prior and data respectively are in most cases likely to be close to *(1/sd_prior)^2* and *(1/sd_data)^2* respectively. The fact that the prior standard deviations are much larger in this case tells us that the posterior estimates are likely to be much closer to the maximum likelihood estimates than to the prior estimates.
+This table gives a side-by-side comparison of the prior and the data driven maximum likelihood estimates (that should match the ouput from the glm function for the same model). In addition to revealing any differences in the estimates themselves, the relative magnitude of the standard deviations give insight into how "strong" the prior specification is relative to the information contained in the data.  The unstandardized weights on the prior and data respectively are in most cases likely to be close to *(1/sd_prior)^2* and *(1/sd_data)^2* respectively. The fact that the prior standard deviations are much larger in this case tells us that the posterior mean estimates are likely to be much closer to the maximum likelihood estimates than to the prior estimates.
 
 *Interpreting the "Bayesian Estimates Based on 1000 iid draws table*
 
-This table gives more information related to the estimates seen in the print output. We now have a view of both the posterior mode and posterior mean. If these were substantially different, it would indicated that the posterior density had substantial asymmetry.  The posterior standard deviation will generally be smaller than both the prior and the likelihood standard deviations.  In this case, the posterior standard deviation for the *intercept* appears to be nearly the same as the likelihood standard deviation while the posterior standard deviation for *Age2* is substantially smaller (suggest some weight on the prior). 
+This table gives more information related to the estimates seen in the print output. We now have a view of both the posterior mode and posterior mean. If these were substantially different, it would indicated that the posterior density had substantial asymmetry.  The posterior standard deviation will generally be smaller than both the prior and the likelihood standard deviations.  In this case, the posterior standard deviation for the *intercept* appears to be nearly the same as the likelihood standard deviation while the posterior standard deviation for *Age2* is substantially smaller (suggesting some weight on the prior). 
 
 The tail probability gives the probability (under the posterior density) of the true coefficient being at least as far away from the center as the prior point estimate.  In this case, there is ~44% probability of the intercept being greater than 0 but only a ~0.01% chance that the Age2 coefficient is smaller than the prior point estimate of 1.098.  The latter is flagged as highly significant suggesting that the true slope coefficient is substantially larger than the prior point estimate. 
 
@@ -330,7 +317,7 @@ The MC error column gives a sense of any error in the estimates driven by the fa
 
 *Interpreting the "Distribution Percentile" table*
 
-This table providence credible interval information at several significance levels for the model.  It gives the user insight into the range of most of the support for the posterior density and how it compared to both the prior and maximum likelihood point estimates. In this case, we can see that the prior point estimate for the intercept is close to the center of the density while the prior point estimate is far away from it. 
+This table providence credible interval information at several significance levels for the model.  It gives the user insight into the range of most of the support for the posterior density and how it compares to both the prior and maximum likelihood point estimates. In this case, we can see that the prior point estimate for the intercept is close to the center of the density while the prior point estimate is far away from it. 
 
 *Brief discussion of Findings from model*
 
@@ -344,6 +331,6 @@ In this note, we walked through an example illustrating a process for setting of
 * Incorporating external information if available (like our information regarding the average age of Menarche in the UK)
 * Making reasonable assumptions based on other knowledge/insight (e.g., our prior point estimate at age 15)
 
-In the next section, we will take a take a look at how the analysts can identify the variables for which priors specifications are needed and approaches to checking whether the data seems consistent with the specified prior.
+In the next section, we will take a take a look at how the analysts can check whether the data seems consistent with the specified prior.
 
 # References
