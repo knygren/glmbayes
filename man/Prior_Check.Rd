@@ -28,10 +28,6 @@ Prior_Check(formula, family, pfamily, level = 0.95, data = NULL)
     the variables in the model.  If not found in \code{data}, the
     variables are taken from \code{environment(formula)},
     typically the environment from which \code{glm} is called.}
-
-\item{mu}{a vector of length \code{p} giving the prior means of the variables in the design matrix.}
-
-\item{Sigma}{a positive-definite symmetric matrix of dimension \code{p * p} specifying the prior covariance matrix of the variables.}
 }
 \value{
 A vector where each item provided the ratio of the absolue value for the difference between the 
