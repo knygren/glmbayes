@@ -23,12 +23,7 @@ Data with information on 17 overdoses of the drug amitriptyline
 \details{
 Details to be added...
 }
-\references{Data downloaded from https://data.library.virginia.edu/getting-started-with-multivariate-multiple-regression/. \cr
-
-Fox, J and Weisberg, S (2011). An {R} Companion to Applied Regression, Second Edition. Thousand Oaks CA: Sage. URL: http://socserv.socsci.mcmaster.ca/jfox/Books/Companion
-Johnson, R and Wichern, D (2007). Applied Multivariate Statistical Analysis, Sixth Edition. Prentice-Hall.
-Rudorfer, MV “Cardiovascular Changes and Plasma Drug Levels after Amitriptyline Overdose.” Journal of Toxicology-Clinical Toxicology, 19 (1982), 67-71.
-
+\references{
 }
 \examples{
 data(menarche2)
