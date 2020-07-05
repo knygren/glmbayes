@@ -7,7 +7,7 @@
 \usage{
 Prior_Check(object, mu = NULL, Sigma = NULL, level = 0.95)
 
-Prior_Check_v2(formula, family, mu, Sigma, level = 0.95, data = NULL)
+Prior_Check_v2(formula, family, pfamily, level = 0.95, data = NULL)
 }
 \arguments{
 \item{object}{a fitted model object of class \code{"glm"}. Typically the result of a call to \link{glm}.}
@@ -18,9 +18,25 @@ Prior_Check_v2(formula, family, mu, Sigma, level = 0.95, data = NULL)
 
 \item{level}{the confidence level at which the Prior-data conflict should be checked.}
 
-\item{family}{a family}
+\item{formula}{an object of class \code{"\link[stats]{formula}"} (or one that
+    can be coerced to that class): a symbolic description of the
+    model to be fitted.  The details of model specification are given
+    under \sQuote{Details}.}
 
-\item{data}{a data frame.}
+\item{family}{a description of the error distribution and link
+    function to be used in the model.  For \code{glm} this can be a
+    character string naming a family function, a family function or the
+    result of a call to a family function.  For \code{glm.fit} only the
+    third option is supported.  (See \code{\link[stats]{family}} for details of
+    family functions.)}
+
+\item{pfamily}{the prior family to use for the model (including the constants passed to prior).}
+
+\item{data}{an optional data frame, list or environment (or object
+    coercible by \code{\link{as.data.frame}} to a data frame) containing
+    the variables in the model.  If not found in \code{data}, the
+    variables are taken from \code{environment(formula)},
+    typically the environment from which \code{glm} is called.}
 }
 \value{
 A vector where each item provided the ratio of the absolue value for the difference between the 

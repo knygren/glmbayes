@@ -58,10 +58,10 @@ mu=ps$mu
 V=ps$Sigma
 
 Prior_Check_v2(counts ~ outcome + treatment,family = poisson(),
-mu=mu,Sigma=V)
+pfamily=dNormal(mu=mu,Sigma=V))
 mu[1,1]=log(mean(counts))
 Prior_Check_v2(counts ~ outcome + treatment,family = poisson(),
-mu=mu,Sigma=V)
+pfamily=dNormal(mu=mu,Sigma=V))
 
 glmb.D93<-glmb(n=1000,counts ~ outcome + treatment, family=poisson(), pfamily=dNormal(mu=mu,Sigma=V))
 ```

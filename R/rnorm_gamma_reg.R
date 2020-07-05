@@ -223,6 +223,8 @@ if(m>1){
   
 }
 
+
+
 P_Post=P+t(X)%*%X
 mu_Post=solve(P_Post)%*%(mu+t(X)%*%Ytemp)
 
