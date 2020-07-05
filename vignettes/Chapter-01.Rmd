@@ -40,6 +40,7 @@ The example code for the glm function specifies a Poisson regression model for t
 
 ```{r Prior_and_Calls,results = "hide"}
 ## Prior mean vector 
+
 mu<-matrix(0,5)           
 mu[1,1]=log(mean(counts)) 
 ## Prior standard deviation and Variance
@@ -49,7 +50,18 @@ prior=list(mu=mu,Sigma=V)
 ## Call to glm
 glm.D93 <- glm(counts ~ outcome + treatment, 
               family = poisson())
+
 ## Call to glmb
+mf=model.frame(counts ~ outcome + treatment)
+ps=Prior_Setup(counts ~ outcome + treatment)
+mu=ps$mu
+V=ps$Sigma
+
+Prior_Check_v2(counts ~ outcome + treatment,family = poisson(),
+mu=mu,Sigma=V)
+mu[1,1]=log(mean(counts))
+Prior_Check_v2(counts ~ outcome + treatment,family = poisson(),
+mu=mu,Sigma=V)
 
 glmb.D93<-glmb(n=1000,counts ~ outcome + treatment, family=poisson(), pfamily=dNormal(mu=mu,Sigma=V))
 ```

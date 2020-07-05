@@ -15,11 +15,15 @@
 #' @rdname Prior_Setup
 #' @order 1
 
+## Note arguments outside of first two are currently not used
 
-Prior_Setup<-function(formula,data, subset = NULL, na.action = na.fail, 
+Prior_Setup<-function(formula,data=NULL, subset = NULL, na.action = na.fail, 
                          drop.unused.levels = FALSE, xlev = NULL, ...){
   
-  mf<-model.frame(formula)
+  #mf<-model.frame(formula,data,subset=subset,na.action=na.action,
+  #                drop.unused.levels=drop.unused.levels,xlev=xlev)
+  
+  mf<-model.frame(formula,data)
   x<-model.matrix(formula,mf)
   
   nvar=ncol(x)
@@ -33,6 +37,8 @@ Prior_Setup<-function(formula,data, subset = NULL, na.action = na.fail,
   rownames(Sigma)=var_names
   colnames(Sigma)=var_names
   
+  print("Variable names are:")
+  print(var_names)
   return(list(mu=mu,Sigma=Sigma,model=mf,x=x))    
   
 }

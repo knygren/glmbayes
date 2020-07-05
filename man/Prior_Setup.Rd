@@ -6,7 +6,7 @@
 \usage{
 Prior_Setup(
   formula,
-  data,
+  data = NULL,
   subset = NULL,
   na.action = na.fail,
   drop.unused.levels = FALSE,
