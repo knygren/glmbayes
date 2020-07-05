@@ -1,10 +1,10 @@
 ---
-title: "Chapter 1: The glmbayes package-A General Overview"
+title: "Chapter 1: The glmbayes package-a detailed overview"
 author: "Kjell Nygren"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Chapter 1: The glmbayes package-A General Overview}
+  %\VignetteIndexEntry{Chapter 1: The glmbayes package-a detailed overview}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,7 +13,7 @@ vignette: >
 
 The *glmbayes* package produces iid samples for Bayesian Linear Models and Bayesian Genereralized Linear Models by providing Bayesian versions of the *lmb* and *glm* functions for classical models. Extensive efforts have been made to make the new functions, *lmb* and *glmb*, as similar as possible to their classical cousins. To that end, the functions add a single required argument (pfamily) and one optional argument (n) to those typically used by the classical functions. The Bayesian functions also generally inherit and/or provide implemented methods for nearly all of the methods available for the *lm* and *glm* functions so that the same type of outputs as from the classical functions can be readily produced.   
 
-This vignette is designed to provide users an overview of the package and the various functionalities available. In the rest of this introduction, we briefly touch on the basics of loading the package and accessings various help resources and demos (which we recommend as a next step for users after they read this vignette).    The next section then gives an overview of all the core functions that most users are likely to use. This includes
+This vignette is designed to provide users a detailed overview of the package and the various functionalities available. In the rest of this introduction, we briefly touch on the basics of loading the package and accessings various help resources and demos (which we recommend as a next step for users after they read this vignette).    The next section then gives an overview of all the core functions that most users are likely to use. This includes
 the two aforementioned functions, functions used to specify and check prior distributions, and methods available for the two functions. Most users can likely stop after that section and can then turn to either the help pages or the next set of vignettes that go into a more detailed comparisons of how the methods are used for these Bayesian functions vs. for their classical cousins.
 
 For advanced users who are interested in implementing Block-Gibbs sampling procedures or in doing simulation for other more complex models, we recommend continuing on to the third section in this vignette that covers the two functions *rlmb* and *rglmb* and are designed for implementation of precisely that type of sampling. The third section discusses how those functions can be called, references some examples/demos where they are used, and describes how to use the output from the functions to access similar output to that produced by the *lmb* and *glmb* functions.
@@ -347,12 +347,48 @@ methods(class="rlmb")
 
 # Advanced Topics
 
+In this section, we cover additional functions included in the package that most users likely would not call directly but which provide visibility to the simulation methods utilized as part of the package. These functions can be broadly broken down into four distinct categories:. 
 
+* A set of simulation functions (one for each pfamily) that gets called during the estimation process when the respective pfamily is specified.
+* Two functions for the Central Normal Distribution that play a key role in generating candidates for the envelope used to estimate some of the models 
+* A set of functions related to the envelope construction and simulation from a model in Standard form that uses the envelope as part of the simulation process
+* A set of utility functions used by various method functions to produce the desired outputs
 
 ## Simulation Functions
 
+One of the key items returned by the *pfamily* functions is an assigned simulation function to be called during the estimation process (one for each pfamily).  These functions can also be called directly (though we don't recommend it). The Function documentation for each of these underlying functions contains information on the type of algorihm used to generate the sample. We refer the reader to the documentation for each of these functions but note the following relationship:
+
+* The *rglmb_norm_reg* function is used for the *dNormal* *pfamily*
+* The *rglmb_dispersion* function is used for the *dGamma* *pfamily*
+* The *rnorm_gamma_reg* function is used for the *dNormal_Gamma* *pfamily*
+
 ## Normal_ct Functions
+
+For estimation of Bayesian generalized linear models with Normal Priors but non-gaussian families, accept-reject 
+procedures are used where candidates are generated from mixtures of restricted multivariate normal distributions. Two functions for univariate restricted normal distributions (*rnorm_ct* and *pnorm_ct*) play a key role during this process and can be viewed as generalizations of the rnorm and pnorm functions.
 
 ## Envelope Related Functions
 
+For estimation of Bayesian generalized linear models with Normal Priors but with non-gaussian families, there are a number of functions that are used in order to generate the samples and that all in one-way-or another are related to the Enveloping functions used. The below is a list of these functions (we refer the reader to the respective function documentation for details).
+
+* *glmb_Standardize_Model* standardizes a Bayesian Generalized Linear Model so it can be sampled using an Enveloping function
+* *EnvelopeBuild* builds the enveloping function used during the simulation 
+* *EnvelopeOpt* selects an "optimal" size for the Grid used during Envelope construction
+* *EnvelopeSort* sorts the envelope after construction to increade efficiency of the simulation
+* *Set_Grid*  calculates log-densities associated with the restricted normals used to generate candidated
+* *set_logP* calculates constans used during sampling from the constructed envelope
+* *rnnorm_reg_std* simulates from a standardized Bayesian Generalized linear model using an Enveloping function
+* *Neg_logLik*  returns the Negative log-likelihood for a Generalized Linear Model
+* *Neg_logPost* returns the negative log-posterior for a Bayesian Generalized Linear Model
+* *Neg_logPost_Gradient* returns the Gradient for the Negative Log-posteror of a Bayesian Generalized Linear Model
+
 ## Utility Functions 
+
+Finally, the package contains a small set of functions that are used by various method functions. While these are currently exported, we may in the future choose not to export them as they are unlikely to be useful for users of the package as standalone functions.
+
+* Compare_Model_Frames
+* complete_newdata
+* generate_predictions
+* get_x_matrix
+* glmbdic
+
