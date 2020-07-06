@@ -367,4 +367,226 @@ menarche2
 
 # Using the DIC Statistic
 
+The DIC Statistic is mainly useful when comparing the predictions from several models with the same likelihood function but with different specifications (say different link-functions or different model variables). Here, we will explore alternative link functions for the Menarche data by using the Probit and Clog-Log Models and will then compare the models using the DIC Statistic and related outputs.
+
+## Running The Probit Model
+
+```{r Probit_Model}
+## ----Probit: set up link function info and initialize prior matrices-----------
+
+## Set up link function and initialize prior mean and Variance-Covariance matrices
+bi_probit <- binomial(link="probit")
+mu2<-matrix(0,nrow=nvars,ncol=1)
+rownames(mu2)=c("Intercept","Age2")
+colnames(mu2)=c("Prior Mean")
+V2<-1*diag(nvars)
+rownames(V2)=c("Intercept","Age2")
+colnames(V2)=c("Intercept","Age2")
+
+
+## ----Probit:set prior means----------------------------------------------------
+## Prior mean for intercept is set to point estimate 
+## at reference age1 (on logit scale)
+mu2[1,1]=bi_probit$linkfun(m1)
+
+## Prior mean for slope is set to difference in point estimates
+## on logit scale divided by Age_Diff
+
+mu2[2,1]=(bi_probit$linkfun(m2) -bi_probit$linkfun(m1))/Age_Diff 
+print(mu2)
+
+
+## ----Probit:set prior Variance Covariance matrix-------------------------------
+## Implied standard deviations for point estimates on logit scale
+
+sd_m1= (bi_probit$linkfun(m1) -bi_probit$linkfun(m1_lower))/1.96
+sd_m2= (bi_probit$linkfun(m2) -bi_probit$linkfun(m2_lower))/1.96
+
+## Implied Standard deviation for slope (using variance formula for difference between two variables)
+a=(1/Age_Diff)
+sd_slope=sqrt((a*sd_m1)^2+(a*sd_m2)^2-2*a*a*(sd_m1*sd_m2*m_corr))
+
+#Cov(m1,slope)=cov(m1, a*(m2-m1)) =a*E[(m1-E[m1])((m2-m1)-E[m2-m1])]
+#   =a*E[(m1-E[m1])(m2-E[m2])]- a* E[(m1-E[m1])(m1-E[m1])]
+##   =a*Cov[m1,m2] - a*Var[m1]
+##  =a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+cov_V2=a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+
+# Set covariance matrix
+V2[1,1]=sd_m1^2
+V2[2,2]=sd_slope^2
+V2[1,2]=cov_V2
+V2[2,1]=V2[1,2]
+print(V2)
+
+
+## ----Run Probit,results = "hide"-----------------------------------------------
+Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,
+                               Menarche=menarche2$Menarche,Age2)
+
+glmb.out2<-glmb(n=1000,cbind(Menarche, Total-Menarche) ~Age2,family=binomial(probit),
+                pfamily=dNormal(mu=mu2,Sigma=V2),data=Menarche_Model_Data)
+
+print(glmb.out2)
+summary(glmb.out2)
+```
+
+## Running The Clog-Log Model
+
+
+```{r cloglog_Model}
+
+## ----cloglog: set up link function info and initialize prior matrices-----------
+
+## Set up link function and initialize prior mean and Variance-Covariance matrices
+bi_cloglog <- binomial(link="cloglog")
+mu3<-matrix(0,nrow=nvars,ncol=1)
+rownames(mu3)=c("Intercept","Age2")
+colnames(mu3)=c("Prior Mean")
+V3<-1*diag(nvars)
+rownames(V3)=c("Intercept","Age2")
+colnames(V3)=c("Intercept","Age2")
+
+readline("press any key to continue")
+
+## ----cloglog:set prior means----------------------------------------------------
+## Prior mean for intercept is set to point estimate 
+## at reference age1 (on logit scale)
+mu3[1,1]=bi_cloglog$linkfun(m1)
+
+## Prior mean for slope is set to difference in point estimates
+## on logit scale divided by Age_Diff
+
+mu3[2,1]=(bi_cloglog$linkfun(m2) -bi_cloglog$linkfun(m1))/Age_Diff 
+print(mu3)
+
+readline("press any key to continue")
+
+## ----Probit:set prior Variance Covariance matrix-------------------------------
+## Implied standard deviations for point estimates on logit scale
+
+sd_m1= (bi_cloglog$linkfun(m1) -bi_cloglog$linkfun(m1_lower))/1.96
+sd_m2= (bi_cloglog$linkfun(m2) -bi_cloglog$linkfun(m2_lower))/1.96
+
+## Implied Standard deviation for slope (using variance formula for difference between two variables)
+a=(1/Age_Diff)
+sd_slope=sqrt((a*sd_m1)^2+(a*sd_m2)^2-2*a*a*(sd_m1*sd_m2*m_corr))
+
+#Cov(m1,slope)=cov(m1, a*(m2-m1)) =a*E[(m1-E[m1])((m2-m1)-E[m2-m1])]
+#   =a*E[(m1-E[m1])(m2-E[m2])]- a* E[(m1-E[m1])(m1-E[m1])]
+##   =a*Cov[m1,m2] - a*Var[m1]
+##  =a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+cov_V3=a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+
+# Set covariance matrix
+V3[1,1]=sd_m1^2
+V3[2,2]=sd_slope^2
+V3[1,2]=cov_V3
+V3[2,1]=V3[1,2]
+print(V3)
+
+readline("press any key to continue")
+
+## ----Run cloglog,results = "hide"-----------------------------------------------
+Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,
+                               Menarche=menarche2$Menarche,Age2)
+
+glmb.out3<-glmb(n=1000,cbind(Menarche, Total-Menarche) ~Age2,family=binomial(cloglog),
+                pfamily=dNormal(mu=mu3,Sigma=V3),data=Menarche_Model_Data)
+
+print(glmb.out3)
+summary(glmb.out3)
+
+readline("press any key to continue")
+
+```
+## Running The Reverse Clog-Log Model
+
+
+```{r cloglog_Model2}
+
+## ----cloglog: set up link function info and initialize prior matrices-----------
+
+## Set up link function and initialize prior mean and Variance-Covariance matrices
+bi_cloglog <- binomial(link="cloglog")
+mu4<-matrix(0,nrow=nvars,ncol=1)
+rownames(mu4)=c("Intercept","Age2")
+colnames(mu4)=c("Prior Mean")
+V4<-1*diag(nvars)
+rownames(V4)=c("Intercept","Age2")
+colnames(V4)=c("Intercept","Age2")
+
+readline("press any key to continue")
+
+## ----cloglog:set prior means----------------------------------------------------
+## Prior mean for intercept is set to point estimate 
+## at reference age1 (on logit scale)
+mu4[1,1]=bi_cloglog$linkfun((1-m1))
+
+## Prior mean for slope is set to difference in point estimates
+## on logit scale divided by Age_Diff
+
+mu4[2,1]=(bi_cloglog$linkfun((1-m2))-bi_cloglog$linkfun((1-m1)))/Age_Diff 
+print(mu4)
+
+readline("press any key to continue")
+
+## ----Probit:set prior Variance Covariance matrix-------------------------------
+## Implied standard deviations for point estimates on logit scale
+
+sd_m1= (bi_cloglog$linkfun((1-m1_lower))-bi_cloglog$linkfun((1-m1)))/1.96
+sd_m2= (bi_cloglog$linkfun((1-m2_lower))-bi_cloglog$linkfun((1-m2)))/1.96
+
+## Implied Standard deviation for slope (using variance formula for difference between two variables)
+a=(1/Age_Diff)
+sd_slope=sqrt((a*sd_m1)^2+(a*sd_m2)^2-2*a*a*(sd_m1*sd_m2*m_corr))
+
+#Cov(m1,slope)=cov(m1, a*(m2-m1)) =a*E[(m1-E[m1])((m2-m1)-E[m2-m1])]
+#   =a*E[(m1-E[m1])(m2-E[m2])]- a* E[(m1-E[m1])(m1-E[m1])]
+##   =a*Cov[m1,m2] - a*Var[m1]
+##  =a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+cov_V4=a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+
+# Set covariance matrix
+V4[1,1]=sd_m1^2
+V4[2,2]=sd_slope^2
+V4[1,2]=cov_V4
+V4[2,1]=V4[1,2]
+print(V4)
+
+readline("press any key to continue")
+
+## ----Run cloglog,results = "hide"-----------------------------------------------
+Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,
+                               Menarche=menarche2$Menarche,Age2)
+
+glmb.out4<-glmb(n=1000,cbind(Total-Menarche,Menarche) ~Age2,family=binomial(cloglog),
+                pfamily=dNormal(mu=mu4,Sigma=V4),data=Menarche_Model_Data)
+
+print(glmb.out4)
+summary(glmb.out4)
+
+```
+
+## Comparing the DIC Statistics
+
+```{r Compare_DIC}
+DIC_Out=rbind(
+  extractAIC(glmb.out1),
+  extractAIC(glmb.out2),
+  extractAIC(glmb.out3),
+  extractAIC(glmb.out4))
+
+rownames(DIC_Out)=c("Logit","Probit","Clog-Log","Reverse Clog-Log")
+DIC_Out
+```
+
+## Plotting Predictions and Residuals For the Additional Models
+
+### Probit Model
+
+### clog-log Model
+
+### Reverse clog-log Model
+
 # References
