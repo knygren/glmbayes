@@ -28,6 +28,8 @@ simulate.glmb<-function(object,nsim=1,seed=NULL,...){
   if(!is.null(method_args[['prior.weights']])) { wt=method_args[['prior.weights']]}
   else{prior.weights=object$prior.weights}
  
+  
+  
    ##  print(pred)
 #  stop()
   #wt=method_args$wt

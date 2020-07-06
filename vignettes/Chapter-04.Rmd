@@ -184,11 +184,21 @@ print(mu1)
 
 ```
 
-```{r Logit:set prior Variance Covariance matrix,results = "hide",echo = FALSE}
+```{r Logit:set prior Variance Covariance matrix}
 ## Implied standard deviations for point estimates on logit scale
 
 sd_m1= (bi_logit$linkfun(m1) -bi_logit$linkfun(m1_lower))/1.96
 sd_m2= (bi_logit$linkfun(m2) -bi_logit$linkfun(m2_lower))/1.96
+
+## Also compute implied estimate for upper bound of confidence intervals
+
+m1_upper=bi_logit$linkinv(bi_logit$linkfun(m1)+sd_m1*1.96)
+m2_upper=bi_logit$linkinv(bi_logit$linkfun(m2)+sd_m2*1.96)
+print("m1_upper is:")
+m1_upper
+print("m2_upper is:")
+m2_upper
+
 
 ## Implied Standard deviation for slope (using variance formula for difference between two variables)
 a=(1/Age_Diff)
@@ -205,6 +215,7 @@ V1[1,1]=sd_m1^2
 V1[2,2]=sd_slope^2
 V1[1,2]=cov_V1
 V1[2,1]=V1[1,2]
+print("V1 is:")
 print(V1)
 ```
 
@@ -217,17 +228,142 @@ glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(l
 ```
 
 
-# General Discussion 
+# Introduction
 
 In this section, we will be continuing our discussion of the Bayesian model using the Menarche data that we covered in chapter 4.  Recall that our main model (with the carefully specified prior) had the summary output below. The focus of this chapter will be to dig deeper and to examine model fit, residuals, outliers, and the DIC statistic (for model comparisons).  
 
-```{r Summary Logit}
-summary(glmb.out1)
+
+# Reviewing Model Predictions
+
+## Fits and Predictions for Actual Data
+
+
+```{r Model_Preds1,fig.height = 5, fig.width = 7}
+## Predicting for original data
+
+pred1=predict(glmb.out1,type="response")
+pred1_m=colMeans(pred1)
+
+plot(Menarche/Total ~ Age, data=menarche2,main="% of girls Who have had their first period")
+lines(menarche2$Age, pred1_m,lty=1)
+
+
 ```
 
-# Reviewing Model Fits
+
+## Predictions for Simulated Data
+
+```{r Setup_NewData}
+## Pull Model Info
+mod_Object=glmb.out1
+n=nrow(mod_Object$coefficients)
+obs_size=median(menarche2$Total) ## Median of Total counts
+
+# Generate New Data for The Independent Variable
+Age_New <- seq(8, 20, 0.25)
+Age2_New=Age_New-13
+
+# olddata - Should contain all variables used in original model formula
+olddata=data.frame(Age=menarche2$Age,
+Menarche=menarche2$Menarche,Total=menarche2$Total,Age2=Age2)
+
+# Should contain all variables used on RHS of model formula
+newdata=data.frame(Age=Age_New,Age2=Age2_New)
+
+```
+
+```{r Model_Sims}
+## Predict and Simulate for newdata
+
+pred_menarche=predict(mod_Object,newdata=newdata,olddata=olddata,type="response")
+pred_y=matrix(0,nrow=n,ncol=length(Age_New))
+for(i in 1:n){
+  pred_y[i,1:length(Age_New)]=rbinom(length(Age_New),size=obs_size,
+  prob=pred_menarche[i,1:length(Age_New)])
+}
+
+```
+
+```{r Mean_and_Quartile_Info}
+
+## Produce mean and quantile information
+
+pred_m=colMeans(pred_menarche)
+pred_y_m=colMeans(pred_y/obs_size)
+quant1_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.025))
+quant2_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.975))
+quant1_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.025))
+quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975))
+
+```
+
+
+```{r Model_Plots,fig.height = 5, fig.width = 7}
+
+plot(Menarche/Total ~ Age, data=menarche2,main="Percentage of girls Who have had their first period")
+lines(Age_New, pred_m,lty=1)
+lines(Age_New, quant1_m,lty=2)
+lines(Age_New, quant2_m,lty=2)
+lines(Age_New, quant1_m_y,lty=2)
+lines(Age_New, quant2_m_y,lty=2)
+
+```
+
+
+```{r Store_Preds}
+
+outdata=data.frame(Age=Age_New,Age2=Age2_New,pred_m=pred_m, quant1_m, quant2_m,quant1_m_y,quant2_m_y)
+
+print("Prior Confidence Interval at age 13 was")
+cbind(m1_lower,m1_upper)
+
+print("Prior Confidence Interval at age 15 was")
+cbind(m2_lower,m2_upper)
+
+print("Posterior Predictions between ages 13 and 15 are")
+outdata[which(outdata$Age >= 13&outdata$Age <= 15 ),]
+
+```
 
 # Reviewing Model Residuals
+
+```{r Residual_Analysis}
+## Get Residuals for model, their means, and credible bounds
+res_out=residuals(glmb.out1)
+res_mean=colMeans(res_out)
+res_low1=apply(res_out,2,FUN=quantile,probs=c(0.025))
+res_high1=apply(res_out,2,FUN=quantile,probs=c(0.975))
+```
+
+```{r Simulate_New_Residuals}
+## Simulate new data and get residuals for simulated data
+
+ysim1=simulate(glmb.out1,nsim=1,seed=NULL,pred=pred1,family="binomial",
+                        prior.weights=weights(glmb.out1))
+res_ysim_out1=residuals(glmb.out1,ysim=ysim1)
+res_low=apply(res_ysim_out1,2,FUN=quantile,probs=c(0.025))
+res_high=apply(res_ysim_out1,2,FUN=quantile,probs=c(0.975))
+```
+
+
+```{r Residual_Plot,fig.height = 5, fig.width = 7}
+# Plot Credible Interval bounds for Deviance Residuals
+
+plot(res_mean~Age,ylim=c(-2.5,2.5),
+  main="Credible Interval Bounds for Logit Model Deviance Residuals",
+  xlab = "Age", ylab = "Dev. Residuals")
+lines(Age, 0*res_mean,lty=1)
+lines(Age, res_low,lty=1)
+lines(Age, res_high,lty=1)
+lines(Age, res_low1,lty=2)
+lines(Age, res_high1,lty=2)
+```
+
+
+```{r Raw_Data}
+# Look a the raw data
+menarche2
+```
 
 # Using the DIC Statistic
 

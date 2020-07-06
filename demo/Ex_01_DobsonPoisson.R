@@ -1,3 +1,7 @@
+## Code From Vignette 
+## Chapter 1: Getting started with glmbayes
+
+
 ## Dobson (1990) Page 93: Randomized Controlled Trial :
 counts <- c(18,17,15,20,10,20,25,13,12)
 outcome <- gl(3,1,9)
@@ -8,27 +12,43 @@ print(d.AD <- data.frame(treatment, outcome, counts))
 glm.D93 <- glm(counts ~ outcome + treatment, 
                family = poisson())
 
+readline("press any key to continue")
+
 ## Using glmb
 ## Step 1: Set up Prior
 ps=Prior_Setup(counts ~ outcome + treatment)
 mu=ps$mu
 V=ps$Sigma
+
+readline("press any key to continue")
+
 # Step2A: Check the Prior
 Prior_Check(counts ~ outcome + treatment,family = poisson(),
             pfamily=dNormal(mu=mu,Sigma=V))
+
+readline("press any key to continue")
+
 # Step2B: Update and Re-Check the Prior
 mu[1,1]=log(mean(counts))
 Prior_Check(counts ~ outcome + treatment,family = poisson(),
             pfamily=dNormal(mu=mu,Sigma=V))
+
+readline("press any key to continue")
+
 # Step 3: Call the glmb function
 glmb.D93<-glmb(counts ~ outcome + treatment, family=poisson(), 
                pfamily=dNormal(mu=mu,Sigma=V))
+
+readline("press any key to continue")
+
 
 ## ----Printed_Views------------------------------------------------------------
 ## Printed view of the output from the glm function 
 print(glm.D93)
 ## Printed view of the output from the glmb function 
 print(glmb.D93)
+
+readline("press any key to continue")
 
 ## ----Methods---------------------------------------------------------------
 ## Methods for class "lm"
@@ -40,12 +60,16 @@ methods(class="glm")
 ## Methods for class "glmb"
 methods(class="glmb")
 
+readline("press any key to continue")
+
 ## ----summary--------------------------------------------------------------
 ## summary output for the "glm" class
 summary(glm.D93)
 
 ## summary output for the "glm" class
 summary(glmb.D93)
+
+readline("press any key to continue")
 
 ## ----fitted outputs-------------------------------------------------------
 ## fitted outputs for the glm function
@@ -55,12 +79,14 @@ fitted(glm.D93)
 ## mean of fitted outputs for the glm function
 colMeans(fitted(glmb.D93))
 
+
 ## ----predictions----------------------------------------------------------
 ## predictions for the glm function
 predict(glm.D93)
 
 ## predictions for the glmb function
 colMeans(predict(glmb.D93)) 
+
 
 ## ----residuals------------------------------------------------------------
 ## residuals for the glm function
@@ -69,19 +95,23 @@ residuals(glm.D93)
 ## residuals for the glmb function
 colMeans(residuals(glmb.D93))
 
+readline("press any key to continue")
+
 ## ----vcov-----------------------------------------------------------------
 ## vcov for the glm function
 vcov(glm.D93)
 
-## vcov for the glm function
+## vcov for the glmb function
 vcov(glmb.D93)
 
 ## ----confint--------------------------------------------------------------
 ## confint for the glm function
 confint(glm.D93)
 
-## confint for the glm function
+## confint for the glmb function
 confint(glmb.D93)
+
+readline("press any key to continue")
 
 ## ----AIC/DIC------------------------------------------------------------------
 ## AIC for the glm function (equivalent degrees of freedom and the AIC)
@@ -103,6 +133,8 @@ logLik(glm.D93)
 
 ## Deviance for the glmb function
 mean(logLik(glmb.D93))
+
+readline("press any key to continue")
 
 ## ----Model Frame----------------------------------------------------------
 ## Model Frame for the glm function

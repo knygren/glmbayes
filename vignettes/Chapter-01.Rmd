@@ -197,7 +197,7 @@ vcov(glm.D93)
 ```
 
 ```{r glmb vcov}
-## vcov for the glm function
+## vcov for the glmb function
 vcov(glmb.D93)
 ```
 
@@ -210,7 +210,7 @@ confint(glm.D93)
 ```
 
 ```{r glmb confint}
-## confint for the glm function
+## confint for the glmb function
 confint(glmb.D93)
 ```
 

@@ -219,6 +219,7 @@ mu1[1,1]=bi_logit$linkfun(m1)
 mu1[2,1]=(bi_logit$linkfun(m2) -bi_logit$linkfun(m1))/Age_Diff 
 print(mu1)
 
+
 ```
 
 **Setting the prior Variance-Covariance Matrix**
@@ -237,6 +238,16 @@ The piece of code setting the prior variance-covariance matrix for this prior sp
 sd_m1= (bi_logit$linkfun(m1) -bi_logit$linkfun(m1_lower))/1.96
 sd_m2= (bi_logit$linkfun(m2) -bi_logit$linkfun(m2_lower))/1.96
 
+## Also compute implied estimate for upper bound of confidence intervals
+
+m1_upper=bi_logit$linkinv(bi_logit$linkfun(m1)+sd_m1*1.96)
+m2_upper=bi_logit$linkinv(bi_logit$linkfun(m2)+sd_m2*1.96)
+print("m1_upper is:")
+m1_upper
+print("m2_upper is:")
+m2_upper
+
+
 ## Implied Standard deviation for slope (using variance formula for difference between two variables)
 a=(1/Age_Diff)
 sd_slope=sqrt((a*sd_m1)^2+(a*sd_m2)^2-2*a*a*(sd_m1*sd_m2*m_corr))
@@ -252,6 +263,7 @@ V1[1,1]=sd_m1^2
 V1[2,2]=sd_slope^2
 V1[1,2]=cov_V1
 V1[2,1]=V1[1,2]
+print("V1 is:")
 print(V1)
 ```
 

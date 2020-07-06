@@ -28,11 +28,13 @@ V
 
 ### Run and predict original model
 n=1000
-budworm.lgb <- glmb(n=n,SF ~ sex*ldose, family = binomial,mu=mu,Sigma=V)
+budworm.lgb <- glmb(SF ~ sex*ldose, family = binomial,dNormal(mu=mu,Sigma=V))
+
+
 summary(budworm.lgb)
 colMeans(predict(budworm.lgb))
 olddata=data.frame(SF,sex,ldose)
-olddata=data.frame(SF.numdead,SF.numalive,sex,ldose)
+#olddata=data.frame(SF.numdead,SF.numalive,sex,ldose)
 
 ##  Add summary function that
 #(1) Generates quantiles for predictions
@@ -50,12 +52,16 @@ obs_size=20
 ##### Male data - Note levels should match those for olddata
 newdataM=data.frame(ldose = ld,sex = factor(rep("M", length(ld)), levels = levels(sex)))
 
+
+
+olddata=model.frame(SF~sex*ldose)
+
 ## Predict on the response scale (probability)
 pred_males=predict(budworm.lgb,newdata=newdataM,olddata=olddata, type="response")
 
 ## Simulate new data (also based on 1000 draws from binomial)
 
-pred_males_y=matrix(0,nrow=n,ncol=length(ld))
+pred_y_males=matrix(0,nrow=n,ncol=length(ld))
 for(i in 1:n){
   pred_y_males[i,1:length(ld)]=rbinom(length(ld),size=obs_size,prob=pred_males[i,1:length(ld)])
 }
@@ -85,6 +91,8 @@ lines(2^ld, quant1_m_y,lty=2)
 lines(2^ld, quant2_m_y,lty=2)
 
 
+newdataM
+olddata
 ########################  Female analysis starts here ###########################################
 
 
