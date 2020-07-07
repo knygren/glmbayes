@@ -121,12 +121,27 @@ lmb.D9
 
 class(lmb.D9)
 
+if(class(lmb.D9)[1]=="lmb") print("Hello lmb")
+
+if(class(lmb.D9)[1]=="glmb") print("Hello glmb")
+
+if(class(glmb.out1)[1]=="glmb") print("Hello glmb")
+if(class(glmb.out1)[1]=="lmb") print("Hello lmb")
+
+
+
 colMeans(fitted(lmb.D9))
 colMeans(predict(lmb.D9))
 colMeans(residuals(lmb.D9))
 
+glmsummary2<-summary(lmb.D9$lm)
+
+## This triggers error
+se1<-sqrt(diag(glmsummary2$cov.scaled))
+
+
 ## Needs a summary function
-#summary(lmb.D9)
+summary(lmb.D9)
 
 
 lmb.D9$DIC
@@ -145,8 +160,13 @@ extractAIC(lm.D9)
 lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
 
 summary(lm.D9)
+lm_summary=summary.lm(lm.D9)
+lm_summary$coefficients
+se=lm_summary$coefficients[,2]
 
-#lm_summary=summary(lm.D9)
+colnames(lm_summary$coefficients)
+
+
 
 #lm_summary
 #lm.D9$coefficients

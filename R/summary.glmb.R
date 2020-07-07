@@ -63,8 +63,7 @@
 summary.glmb<-function(object,...){
   
   mres<-colMeans(residuals(object))
-  
-  
+
   l1<-length(object$coef.means)
   n<-length(object$coefficients[,1])
   percentiles<-matrix(0,nrow=l1,ncol=7)
@@ -85,11 +84,20 @@ summary.glmb<-function(object,...){
     pval2[i,1]<-min(pval1[i,1],1-pval1[i,1])
     
   }
+
+  ## Note: This restricts function to classes glmb and lmb
+  ## Could break calls to this function from other classes
   
+  if(class(object)[1]=="glmb"){
   glmsummary<-summary(object$glm)
   se1<-sqrt(diag(glmsummary$cov.scaled))
+  } 
   
-  
+  if(class(object)[1]=="lmb"){
+    lm_summary=summary.lm(object$lm)
+    se1=lm_summary$coefficients[,2]
+  }  
+    
   Tab1<-cbind("Prior Mean"=object$Prior$mean,"Prior.sd"=as.numeric(sqrt(diag(object$Prior$Variance)))
               ,"Max Like."=as.numeric(object$glm$coefficients),"Like.sd"=se1)
   TAB<-cbind("Post.Mode"=as.numeric(object$coef.mode),"Post.Mean"=object$coef.means,"Post.Sd"=se,"MC Error"=as.numeric(mc),"Pr(tail)"=as.numeric(pval2))
