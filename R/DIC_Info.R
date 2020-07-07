@@ -18,7 +18,7 @@
 #' \item{pD}{Effective number of parameters}
 #' \item{DIC}{DIC statistic}
 #' @example inst/examples/Ex_glmbdic.R
-#' @export
+#' @noRd
 
 DIC_Info<-function(coefficients,y,x,alpha=0,f1,f4,wt=1,dispersion=1){
 

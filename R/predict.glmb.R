@@ -29,8 +29,7 @@
 #' from the original model object.
 #' @param ... further arguments passed to or from other methods.
 #' @return A list with the Estimated effective number of parameters \code{pD}
-#' and the \code{DIC} from the object \code{fit} of class \code{"glmb"}. See \code{\link{glmbdic}}
-#' for details on the definition of these objects.
+#' and the \code{DIC} from the object \code{fit} of class \code{"glmb"}. 
 #' @details If \code{newdata} is omitted the predictions are based on the data
 #' used for the fit.  In that case how cases with missing values in the
 #' original fit is determined by the \code{na.action} argument of that

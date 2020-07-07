@@ -90,7 +90,7 @@
 #' The function returns the output from a call to the function \code{\link{glm}} as well as the simulated 
 #' Bayesian coefficients and associated outputs. In addition, the function returns model diagnostic 
 #' information related to the \code{DIC}, a Bayesian Information Criterion similar to the \code{AIC} for 
-#' classical models. See \code{\link{glmbdic}} for details.  
+#' classical models.   
 #' 
 #' For the gaussian family, iid samples from the posterior density are genererated using 
 #' standard simulation procedures for multivariate normal densities. For all other 

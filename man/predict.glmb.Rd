@@ -53,8 +53,7 @@ from the original model object.}
 }
 \value{
 A list with the Estimated effective number of parameters \code{pD}
-and the \code{DIC} from the object \code{fit} of class \code{"glmb"}. See \code{\link{glmbdic}}
-for details on the definition of these objects.
+and the \code{DIC} from the object \code{fit} of class \code{"glmb"}.
 }
 \description{
 Obtains predictions and optionally estimates standard errors of those

@@ -16,7 +16,7 @@
 #' the missing variables that can be used to substitute the missing 
 #' data in newdata with means from the olddata  
 #' @example inst/examples/Ex_confint.glmb.R
-
+#' @noRd
 
 
 complete_newdata<-function(object,newdata,olddata,type){
@@ -170,7 +170,7 @@ complete_newdata<-function(object,newdata,olddata,type){
 
   # get x and model frame matrices and then generate predictions
   
-  x_matrices=.get_x_matrix(object,olddata,newdata)
+  x_matrices=get_x_matrix(object,olddata,newdata)
   
   return(x_matrices)
   

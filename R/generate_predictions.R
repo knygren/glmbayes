@@ -9,6 +9,7 @@
 #' rows in \code{object$coefficients} and the number of columns equal the number of rows in  
 #' newdata passed to the predict function.
 #' @example inst/examples/Ex_confint.glmb.R
+#' @noRd 
 
 generate_predictions<-function(object,type="link",new_x,new_model_frame){
   

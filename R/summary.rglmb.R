@@ -77,22 +77,22 @@ summary.rglmb<-function(object,...){
   if (!is.null(offset)) {
     if(length(dispersion2)==1){
       
-      DICinfo<-glmbdic(object$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
+      DICinfo<-DIC_Info(object$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
     }
     
     if(length(dispersion2)>1){
-      DICinfo<-glmbdic(object$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+      DICinfo<-DIC_Info(object$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
     }
     
     linear.predictors<-t(offset+x%*%t(object$coefficients))}
   if (is.null(offset)) {
     if(length(dispersion2)==1){
       
-      DICinfo<-glmbdic(object$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
+      DICinfo<-DIC_Info(object$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
     }
     
     if(length(dispersion2)>1){
-      DICinfo<-glmbdic(object$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+      DICinfo<-DIC_Info(object$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
     }
     
     linear.predictors<-t(x%*%t(object$coefficients))

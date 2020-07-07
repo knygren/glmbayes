@@ -7,9 +7,9 @@
 #' @param newdata A data frame containing the model variables wih possible new values
 #' @return A design matrix x_new and a model frame mod_frame_new
 #' @example inst/examples/Ex_confint.glmb.R
+#' @noRd
 
-
-.get_x_matrix<-function(object,olddata,newdata){
+get_x_matrix<-function(object,olddata,newdata){
   
   nrow1=nrow(olddata)
   nrow2=nrow(newdata)

@@ -7,6 +7,7 @@
 #' differing number of rows are allowed
 #' @return 0 if the two model frames pass the comparison. If not, the function stops.
 #' @example inst/examples/Ex_confint.glmb.R
+#' @noRd
 
 Compare_Model_Frames<-function(oldframe,newframe,Check_Rows=TRUE){
   
