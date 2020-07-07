@@ -13,5 +13,7 @@ V=((mysd)^2)*diag(5)
 ## Call to glmb
 glmb.D93<-glmb(n=1000,counts ~ outcome + treatment,
                family = poisson(),pfamily=dNormal(mu=mu,Sigma=V))
-## ----glmb extractAIC-------------------------------------------------------------
-extractAIC(glmb.D93)
+
+## ----glmb vcov----------------------------------------------------------------
+case.names(glmb.D93)
+

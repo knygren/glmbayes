@@ -10,7 +10,7 @@
 #' \item{Sigma}{An initial version of the prior Variance-Covariance vector, populated as the diagonal identity matrix}
 #' \item{model}{The model frame from \code{object} if it exists}
 #' \item{x}{The design matrix from \code{object} if it exists}
-#' @example inst/examples/Ex_Prior_Check.R
+#' @example inst/examples/Ex_Prior_Setup.R
 #' @export
 #' @rdname Prior_Setup
 #' @order 1

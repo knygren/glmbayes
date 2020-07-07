@@ -189,7 +189,7 @@ newdata=data.frame(Age=Age_New,Age2=Age2_New)
 # Simulate for newdata
 
 pred_menarche=predict(mod_Object,newdata=newdata,olddata=olddata,type="response")
-colMeans(pred_menarche)
+pred_m=colMeans(pred_menarche)
 
 n=nrow(mod_Object$coefficients)
 pred_y=matrix(0,nrow=n,ncol=length(Age_New))
@@ -208,8 +208,6 @@ quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975))
 
 
 plot(Menarche/Total ~ Age, data=menarche2,main="Percentage of girls Who have had their first period")
-
-
 lines(Age_New, pred_m,lty=1)
 lines(Age_New, quant1_m,lty=2)
 lines(Age_New, quant2_m,lty=2)

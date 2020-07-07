@@ -5,7 +5,7 @@
 #' @param full logical; if \code{TRUE}, all names (including zero weights, ...) are returned.
 #' @param \ldots further arguments passed to or from other methods.
 #' @return A character vector
-#' @example inst/examples/Ex_confint.glmb.R
+#' @example inst/examples/Ex_case.names.glmb.R
 #' @rdname case.names.glmb
 #' @export
 #' @method case.names glmb

@@ -12,7 +12,7 @@
 #' vector of weights specifying prior.weights for the simulated values (default is 1)
 #' @return Simulated values for data corresponding to simulated model predictions that correspond either 
 #' to the original data or to a \code{newdata} data frame provided to the predict function. 
-#' @example inst/examples/Ex_confint.glmb.R
+#' @example inst/examples/Ex_residuals.glmb.R
 #' @export
 #' @method  simulate glmb
 

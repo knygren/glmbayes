@@ -1,28 +1,17 @@
-data(menarche2)
+## ----dobson-------------------------------------------------------------------
+## Dobson (1990) Page 93: Randomized Controlled Trial :
+counts <- c(18,17,15,20,10,20,25,13,12)
+outcome <- gl(3,1,9)
+treatment <- gl(3,3)
 
-summary(menarche2)
-plot(Menarche/Total ~ Age, data=menarche2)
-
-Age2=menarche2$Age-13
-
-x<-matrix(as.numeric(1.0),nrow=length(Age2),ncol=2)
-x[,2]=Age2
-
-y=menarche2$Menarche/menarche2$Total
-wt=menarche2$Total
-
-mu<-matrix(as.numeric(0.0),nrow=2,ncol=1)
-mu[2,1]=(log(0.9/0.1)-log(0.5/0.5))/3
-
-V1<-1*diag(as.numeric(2.0))
-
-# 2 standard deviations for prior estimate at age 13 between 0.1 and 0.9
-## Specifies uncertainty around the point estimates
-
-V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
-V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
-out<-rglmb(n = 1000, y=y, x=x, pfamily=dNormal(mu=mu,Sigma=V1), weights = wt, 
-           family = binomial(logit)) 
-summary(out)
-
-mean(out$iters)
+## Prior mean vector 
+mu<-matrix(0,5)           
+mu[1,1]=log(mean(counts)) 
+## Prior standard deviation and Variance
+mysd<-1           
+V=((mysd)^2)*diag(5)  
+## Call to glmb
+glmb.D93<-glmb(n=1000,counts ~ outcome + treatment,
+               family = poisson(),pfamily=dNormal(mu=mu,Sigma=V))
+## ----glmb logLik-------------------------------------------------------------
+colMeans(logLik(glmb.D93))

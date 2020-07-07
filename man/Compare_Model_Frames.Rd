@@ -27,9 +27,7 @@ Compares model frames and stops if the dimensions, names, or attributes don't ma
 counts <- c(18,17,15,20,10,20,25,13,12)
 outcome <- gl(3,1,9)
 treatment <- gl(3,3)
-print(d.AD <- data.frame(treatment, outcome, counts))
 
-## ----Prior_and_Calls,results = "hide"-----------------------------------------
 ## Prior mean vector 
 mu<-matrix(0,5)           
 mu[1,1]=log(mean(counts)) 
@@ -39,10 +37,6 @@ V=((mysd)^2)*diag(5)
 ## Call to glmb
 glmb.D93<-glmb(n=1000,counts ~ outcome + treatment,
                family = poisson(),pfamily=dNormal(mu=mu,Sigma=V))
-
-
 ## ----glmb confint-------------------------------------------------------------
-## confint for the glmb function
 confint(glmb.D93)
-
 }
