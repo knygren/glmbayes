@@ -178,62 +178,61 @@ during the simulation process may vary. The returned value \code{iters} contains
 number of candidates generated before acceptance for each draw.
 }
 \examples{
+set.seed(333)
 ## Dobson (1990) Page 93: Randomized Controlled Trial :
 counts <- c(18,17,15,20,10,20,25,13,12)
 outcome <- gl(3,1,9)
 treatment <- gl(3,3)
-print(d.AD <- data.frame(treatment, outcome, counts))
-
-n<-1000
 mysd<-1
-
 mu<-matrix(0,5)
+mu[1]=log(mean(counts))
 V0<-((mysd)^2)*diag(5)
-prior=list(mu=mu,Sigma=V0)
-glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu,Sigma=V0))
-
+glmb.D93<-glmb(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu,Sigma=V0))
 summary(glmb.D93)
 
 # Menarche Binomial Data Example 
-
-#library(MASS)
 data(menarche2)
+Age2=Age-13
 
-summary(menarche2)
-plot(Menarche/Total ~ Age, data=menarche2)
+#Priors Are Derived in Vignette
 
-n<-1000
-mu<-matrix(0,nrow=2,ncol=1)
-V1<-1*diag(2)
-V1[1,1]<-100
-V1[2,2]<-1
-
-glm.out1<-glm(cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,
-              family=binomial(logit), data=menarche2)
-
-# temporarily edit out as it seems slow (adding back in - may need
-#to adjust prior)
-prior1=list(mu=mu,Sigma=V1)
-glmb.out1<-glmb(n=n,cbind(Menarche, Total-Menarche) ~ Age,family
-                =binomial(logit),pfamily=dNormal(mu=mu,Sigma=V1), data=menarche2)
-
-summary(glm.out1)
+## Logit Prior and Model
+mu1=as.matrix(c(0,1.098612),ncol=1)
+V1<-1*diag(nvars)
+V1[1,1]=0.18687882
+V1[2,2]=0.10576217
+V1[1,2]=-0.03389182
+V1[2,1]=-0.03389182
+glmb.out1<-glmb(cbind(Menarche, Total-Menarche) ~ Age2,
+family=binomial(logit),pfamily=dNormal(mu=mu1,Sigma=V1), data=menarche2)
 summary(glmb.out1)
-glm.out2<-glm(cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,
-family=binomial(probit), data=menarche2)
-glmb.out2<-glmb(n=n,cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,
-family=binomial(probit),pfamily=dNormal(mu=mu,Sigma=V1),data=menarche2)
 
-summary(glm.out2)
+## Probit Prior and Model
+mu2=as.matrix(c(0,0.6407758),ncol=1)
+V2<-1*diag(nvars)
+V2[1,1]=0.07158369
+V2[2,2]=0.03453205
+V2[1,2]=-0.01512075
+V2[2,1]=-0.01512075
+glmb.out2<-glmb(cbind(Menarche, Total-Menarche) ~ Age2,
+family=binomial(probit),pfamily=dNormal(mu=mu2,Sigma=V2), data=menarche2)
 summary(glmb.out2)
 
-glm.out3 <-glm(cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,
-family=binomial(cloglog),data=menarche2)
-glmb.out3<-glmb(n=n,cbind(menarche2$Menarche, menarche2$Total-menarche2$Menarche) ~ menarche2$Age,
-family=binomial(cloglog),pfamily=dNormal(mu=mu,Sigma=V1))
-
-summary(glm.out3)
+## clog-log Prior and Model
+mu2=as.matrix(c(-0.3665129,0.6002727),ncol=1)
+V2<-1*diag(nvars)
+V2[1,1]=0.11491322
+V2[2,2]=0.03365986
+V2[1,2]=-0.03502783
+V2[2,1]=-0.03502783
+glmb.out3<-glmb(cbind(Menarche, Total-Menarche) ~ Age2,
+                family=binomial(cloglog),pfamily=dNormal(mu=mu2,Sigma=V2), data=menarche2)
 summary(glmb.out3)
+
+DIC_Out=rbind(extractAIC(glmb.out1),extractAIC(glmb.out2),extractAIC(glmb.out3))
+rownames(DIC_Out)=c("logit","probit","clog-log")
+colnames(DIC_Out)=c("pD","DIC")
+DIC_Out
 }
 \references{
 Dobson, A. J. (1990)

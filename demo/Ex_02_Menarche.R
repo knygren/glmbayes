@@ -158,15 +158,15 @@ summary(glmb.out4)
 readline("press any key to continue")
 
 ## ----DIC Comparison-----------------------------------------------------------
-DIC_Info=rbind(extractAIC(glmb.out1),
+DIC_Out=rbind(extractAIC(glmb.out1),
                extractAIC(glmb.out2),
                extractAIC(glmb.out3),
                extractAIC(glmb.out4))
 
-colnames(DIC_Info)=c("pD","DIC")
-rownames(DIC_Info)=c("Original Specification","Regular Age","Slope Mean=0 - No Var Adjustment",
+colnames(DIC_Out)=c("pD","DIC")
+rownames(DIC_Out)=c("Original Specification","Regular Age","Slope Mean=0 - No Var Adjustment",
                      "Slope Mean=0 - Var Adjustment")
-print(DIC_Info)
+print(DIC_Out)
 
 readline("press any key to continue")
 

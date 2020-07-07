@@ -125,7 +125,8 @@ pred_m=colMeans(pred_menarche)
 n=nrow(mod_Object$coefficients)
 pred_y=matrix(0,nrow=n,ncol=length(Age_New))
 for(i in 1:n){
-  pred_y[i,1:length(Age_New)]=rbinom(length(Age_New),size=obs_size,prob=pred_menarche[i,1:length(Age_New)
+  pred_y[i,1:length(Age_New)]=rbinom(length(Age_New),size=obs_size,
+  prob=pred_menarche[i,1:length(Age_New)
                                                                                       ])
 }
 
@@ -137,7 +138,8 @@ quant1_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.025))
 quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975))
 
 #Plot Predictions for newdata
-plot(Menarche/Total ~ Age, data=menarche2,main="Percentage of girls Who have had their first period")
+plot(Menarche/Total ~ Age, data=menarche2,
+main="Percentage of girls Who have had their first period")
 lines(Age_New, pred_m,lty=1)
 lines(Age_New, quant1_m,lty=2)
 lines(Age_New, quant2_m,lty=2)

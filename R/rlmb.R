@@ -177,23 +177,7 @@ rlmb<-function(n=1,y,x,pfamily,offset=rep(0,nobs),weights=NULL)
   return(outlist)
   
 
-#    dispersion2=dispersion
-#    if(is.null(dispersion)){dispersion2=0}
-#    if(dispersion2>0){outlist<-.rnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)}
-#    else{
-#      ## For now, build list here - will be created by pfamily
-#      prior_list2=list(mu=mu,Sigma=solve(P),P=P,shape=shape,rate=rate)        
-#      outlist=rnorm_gamma_reg(n=n,y=y,x=x,prior_list=prior_list2,offset=offset2,weights=wt)  
-#      }
-    
 
-#  colnames(outlist$coefficients)<-colnames(x)
-  
-#  outlist$call<-match.call()
-  
-#  class(outlist)<-c(outlist$class,"rlmb")
-#  outlist
-  
 }
 
 #' @rdname rlmb

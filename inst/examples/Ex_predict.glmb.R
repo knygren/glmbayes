@@ -46,7 +46,8 @@ pred_m=colMeans(pred_menarche)
 n=nrow(mod_Object$coefficients)
 pred_y=matrix(0,nrow=n,ncol=length(Age_New))
 for(i in 1:n){
-  pred_y[i,1:length(Age_New)]=rbinom(length(Age_New),size=obs_size,prob=pred_menarche[i,1:length(Age_New)
+  pred_y[i,1:length(Age_New)]=rbinom(length(Age_New),size=obs_size,
+  prob=pred_menarche[i,1:length(Age_New)
                                                                                       ])
 }
 

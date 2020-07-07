@@ -206,56 +206,89 @@ y = TRUE,qr = TRUE, singular.ok = TRUE, contrasts = NULL,offset, ...)
 
 #    if(is.numeric(n)==FALSE||is.numeric(mu)==FALSE||is.numeric(Sigma)==FALSE) stop("non-numeric argument to numeric function")
   ## Pull in information from the pfamily  
-  prior_list=pfamily$prior_list 
 
-  
+    prior_list=pfamily$prior_list 
     y<-z$y	
     x<-z$x
     b<-z$coefficients
     mu<-as.matrix(as.vector(prior_list$mu))
     Sigma<-as.matrix(prior_list$Sigma)    
+    dispersion=prior_list$dispersion
     P<-solve(prior_list$Sigma) 
-    wtin<-z$prior.weights	
+    
+    if(is.null(z$weights))     wtin<-rep(1,length(y))
+    else wtin=z$weights	
 
+
+print("1.0")    
+    
 ## Eliminate Gridtype from rlmb and lmb
 
 sim<-rlmb(n=n,y=y,x=x,pfamily=pfamily,weights=wtin,
             offset=offset)
 
-
+print("2.0")    
 
 	dispersion2<-sim$dispersion
+	print(dispersion2)    
+	
+	print("2.1")    
+	
 	famfunc<-sim$famfunc
 	Prior<-list(mean=as.numeric(mu),Variance=Sigma)
 	names(Prior$mean)<-colnames(z$x)
 	colnames(Prior$Variance)<-colnames(z$x)
 	rownames(Prior$Variance)<-colnames(z$x)
 
+	
+	print("3.0")    
+	
   
 if (!is.null(offset)) {
+  print("3.0.1")    
+  
   if(length(dispersion2)==1){
     
     DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
   }
   
   if(length(dispersion2)>1){
+    print("3.0.1.1")    
+    
     DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+    print("3.0.1.2")    
   }
   
   linear.predictors<-t(offset+x%*%t(sim$coefficients))}
-if (is.null(offset)) {
-  if(length(dispersion2)==1){
+	fitted.values=linear.predictors
+	
+	
+	if (is.null(offset)) {
+	  print("3.0.2")    
+	  
+	    if(length(dispersion2)==1){
         
     DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
   }
   
   if(length(dispersion2)>1){
+    print("3.0.2.1")    
+    
     DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+    print("3.0.2.2")    
   }
   
+	  print("3.1")    
+	  
   linear.predictors<-t(x%*%t(sim$coefficients))
-
-  }
+  print("3.2")    
+  fitted.values=linear.predictors
+  
+  
+}
+	
+	print("4.0")    
+	
 	#linkinv<-z$family$linkinv
 	outlist<-list(
 	  lm=z,
@@ -272,7 +305,8 @@ if (is.null(offset)) {
 	  Dbar=DICinfo$Dbar,
 	  Dthetabar=DICinfo$Dthetabar,
 	  DIC=DICinfo$DIC,
-	  prior.weights=z$prior.weights,
+	  prior.weights=z$weights,
+	  weights=z$weights,
 	  y=z$y,
 	  x=z$x,
 	  model=z$model,
@@ -301,7 +335,7 @@ if (is.null(offset)) {
 print.lmb<-function (x, digits = max(3, getOption("digits") - 3), ...) 
 {
 		
-    cat("\nCall:  ", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+    cat("\nCall:  \n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
         "\n\n", sep = "")
  if (length(coef(x))) {
         cat("Posterior Mean Coefficients")
@@ -310,9 +344,6 @@ print.lmb<-function (x, digits = max(3, getOption("digits") - 3), ...)
             print.gap = 2, quote = FALSE)
     }
     else cat("No coefficients\n\n")
-        cat("\nEffective Number of Parameters:",x$pD,"\n")
-        cat("Expected Residual Deviance:",mean(x$deviance),"\n")
-        cat("DIC:",x$DIC,"\n\n")
 }
 
 

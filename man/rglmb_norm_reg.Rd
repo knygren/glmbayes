@@ -107,12 +107,45 @@ ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
 trt <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
 group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
 weight <- c(ctl, trt)
-lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
 
-lm_summary=summary(lm.D9)
+ps=Prior_Setup(weight ~ group)
+mu=ps$mu
+V=ps$Sigma
+mu[1,1]=mean(weight)
 
-lm_summary
-lm.D9$coefficients
+Prior_Check(weight ~ group,family =gaussian(),
+           pfamily=dNormal(mu=mu,Sigma=V))
+
+#lmb.D9=lmb(weight ~ group,dNormal(mu,V))
+
+
+#lmb.D9=lmb(weight ~ group,dNormal(mu,V,dispersion=1))
+
+#lmb.D9$fitted.values  # Not currently present 
+#lmb.D9$linear.predictors  ## Present
+
+#residuals(lmb.D9)
+
+#lmb.D9$prior.weights
+
+#lmb.D9$DIC
+
+
+
+
+#print(lmb.D9)  # Print function not working
+
+#lm.D9$prior.weights
+#summary(lmb.D9)
+
+#lmb.D9$coefficients
+
+#lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
+
+#lm_summary=summary(lm.D9)
+
+#lm_summary
+#lm.D9$coefficients
 
 n<-10000
 y<-lm.D9$y

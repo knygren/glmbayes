@@ -2,15 +2,20 @@
 % Please edit documentation in R/dummy.coef.glmb.R
 \name{dummy.coef.glmb}
 \alias{dummy.coef.glmb}
+\alias{print.dummy_coef.glmb}
 \title{Extract Coefficients in Original Coding}
 \usage{
 \method{dummy.coef}{glmb}(object, use.na = FALSE, ...)
+
+\method{print}{dummy_coef.glmb}(x, ...)
 }
 \arguments{
 \item{object}{a \code{glmb} model fit}
 
 \item{use.na}{logical flag for coefficients in a singular model. If use.na is true, 
 undetermined coefficients will be missing; if false they will get one possible value.}
+
+\item{x}{object to be printed}
 
 \item{\ldots}{arguments passed to or from other methods}
 }

@@ -6,6 +6,7 @@
 #' @param object a \code{glmb} model fit
 #' @param use.na logical flag for coefficients in a singular model. If use.na is true, 
 #' undetermined coefficients will be missing; if false they will get one possible value.
+#' @param x object to be printed
 #' @param \ldots arguments passed to or from other methods
 #' @details A fitted linear model has coefficients for the contrasts of the factor terms, 
 #' usually one less in number than the number of levels. This function re-expresses the 
@@ -15,7 +16,7 @@
 #' contrasts, as the missing coefficients are by definition zero. 
 #' @return A list giving for each term the draws for the coefficients. 
 #' @example inst/examples/Ex_confint.glmb.R
-
+#' @exportClass  dummy.coef.glmb
 #' @method dummy.coef glmb
 #' @export
 
@@ -143,8 +144,28 @@ dummy.coef.glmb<-function (object, use.na = FALSE, ...)
     res2=list(coefficients=coefficients,coef.means=coef.means,
               coef.mode=coef.mode)
     
-    structure(res2, class = "dummy_coef.glmb")
+    structure(res2, class = "dummy_coef.glmb",  matrix = isM)
 }
 
 
-#print.dummy.coef.glmb<-function(x,...,title){}
+#' @rdname dummy.coef.glmb
+#' @method print dummy_coef.glmb
+#' @importFrom utils head
+#' @export
+
+print.dummy_coef.glmb<-function(x, ...){
+
+cat("\nPrinting coefficients (first 5 records)\n")  
+  cn=names(x$coefficients)
+  for(i in 1:length(x$coefficients)){
+    cat(cn[i],"\n")
+    print(head(x$coefficients[[i]],5))
+  }
+  
+  
+cat("coef.means:","\n")
+print(x$coef.means)
+cat("coef.mode:","\n")
+print(x$coef.mode)
+
+}

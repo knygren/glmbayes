@@ -71,7 +71,9 @@ res_high=apply(res_ysim_out1,2,FUN=quantile,probs=c(0.975))
 
 # Plot Credible Interval bounds for Deviance Residuals
 
-plot(res_mean~Age,ylim=c(-2.5,2.5),main="Credible Interval Bound for Menarche - Logit Model Deviance Residuals",xlab = "Age", ylab = "Avg. Dev. Res")
+plot(res_mean~Age,ylim=c(-2.5,2.5),
+main="Credible Interval Bound for Menarche - Logit Model Deviance Residuals",
+xlab = "Age", ylab = "Avg. Dev. Res")
 lines(Age, 0*res_mean,lty=1)
 lines(Age, res_low,lty=1)
 lines(Age, res_high,lty=1)

@@ -78,7 +78,7 @@ p_info=Prior_Setup(weight~group)
 mu1=p_info$mu    
 Sigma1=p_info$Sigma
 
-lmb.D9 <- lmb(weight ~ group,pfamily=dNormal_Gamma(mu1,Sigma1,shape=4,rate=0.1))
+#lmb.D9 <- lmb(weight ~ group,pfamily=dNormal_Gamma(mu1,Sigma1,shape=4,rate=0.1))
 ```
 
 *Calling glm vs. calling glmb*

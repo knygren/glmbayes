@@ -33,7 +33,7 @@
 #' \item{simfun}{function: the function used to generate samples from the posterior density. 
 #' All currently implemented pfamiles have simulation functions that generate iid samples
 #' for the associated posterior distribution.}
-#' @example inst/examples/Ex_confint.glmb.R
+#' @example inst/examples/Ex_pfamily.R
 #' @export 
 #' @exportClass pfamily 
 #' @rdname pfamily
