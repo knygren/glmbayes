@@ -170,7 +170,7 @@ complete_newdata<-function(object,newdata,olddata,type){
 
   # get x and model frame matrices and then generate predictions
   
-  x_matrices=get_x_matrix(object,olddata,newdata)
+  x_matrices=.get_x_matrix(object,olddata,newdata)
   
   return(x_matrices)
   

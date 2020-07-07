@@ -9,7 +9,7 @@
 #' @example inst/examples/Ex_confint.glmb.R
 
 
-get_x_matrix<-function(object,olddata,newdata){
+.get_x_matrix<-function(object,olddata,newdata){
   
   nrow1=nrow(olddata)
   nrow2=nrow(newdata)
