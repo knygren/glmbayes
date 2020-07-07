@@ -58,7 +58,8 @@ quant1_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.025))
 quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975))
 
 #Plot Predictions for newdata
-plot(Menarche/Total ~ Age, data=menarche2,main="Percentage of girls Who have had their first period")
+plot(Menarche/Total ~ Age, data=menarche2,
+main="Percentage of girls Who have had their first period")
 lines(Age_New, pred_m,lty=1)
 lines(Age_New, quant1_m,lty=2)
 lines(Age_New, quant2_m,lty=2)

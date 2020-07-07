@@ -24,6 +24,7 @@ Data with information on 17 overdoses of the drug amitriptyline
 Details to be added...
 }
 \references{
+UVA Example - Add Reference Here.
 }
 \examples{
 data(menarche2)
