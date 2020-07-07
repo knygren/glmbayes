@@ -220,75 +220,64 @@ y = TRUE,qr = TRUE, singular.ok = TRUE, contrasts = NULL,offset, ...)
     else wtin=z$weights	
 
 
-print("1.0")    
-    
-## Eliminate Gridtype from rlmb and lmb
 
 sim<-rlmb(n=n,y=y,x=x,pfamily=pfamily,weights=wtin,
             offset=offset)
 
-print("2.0")    
 
+  
 	dispersion2<-sim$dispersion
-	print(dispersion2)    
-	
-	print("2.1")    
-	
+
 	famfunc<-sim$famfunc
 	Prior<-list(mean=as.numeric(mu),Variance=Sigma)
 	names(Prior$mean)<-colnames(z$x)
 	colnames(Prior$Variance)<-colnames(z$x)
 	rownames(Prior$Variance)<-colnames(z$x)
 
-	
-	print("3.0")    
-	
   
 if (!is.null(offset)) {
-  print("3.0.1")    
-  
+
   if(length(dispersion2)==1){
     
     DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
   }
   
   if(length(dispersion2)>1){
-    print("3.0.1.1")    
-    
+
     DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
-    print("3.0.1.2")    
   }
   
-  linear.predictors<-t(offset+x%*%t(sim$coefficients))}
-	fitted.values=linear.predictors
+  linear.predictors<-t(offset+x%*%t(sim$coefficients))
+  fitted.values=linear.predictors
+  
+  }
 	
 	
 	if (is.null(offset)) {
-	  print("3.0.2")    
-	  
+
 	    if(length(dispersion2)==1){
         
     DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
   }
   
   if(length(dispersion2)>1){
-    print("3.0.2.1")    
-    
+
     DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
-    print("3.0.2.2")    
   }
   
-	  print("3.1")    
-	  
+
   linear.predictors<-t(x%*%t(sim$coefficients))
-  print("3.2")    
   fitted.values=linear.predictors
-  
   
 }
 	
-	print("4.0")    
-	
+	residuals=fitted.values
+
+	for(i in 1:n){
+	  
+	  residuals[i,1:length(y)]=y-residuals[i,1:length(y)]
+	}	
+
 	#linkinv<-z$family$linkinv
 	outlist<-list(
 	  lm=z,
@@ -296,6 +285,7 @@ if (!is.null(offset)) {
 	  coef.means=colMeans(sim$coefficients),
     coef.mode=sim$coef.mode,
 	  dispersion=dispersion2,
+	  residuals=residuals,
 	  Prior=Prior,
 	  fitted.values=fitted.values,
 	  #family=fit$family,
@@ -324,7 +314,7 @@ if (!is.null(offset)) {
 
 	outlist$call<-match.call()
 
-	class(outlist)<-c(outlist$class,"glmb","glm","lm")
+	class(outlist)<-c(outlist$class,"lmb","glmb","glm","lm")
 	outlist
 }
 

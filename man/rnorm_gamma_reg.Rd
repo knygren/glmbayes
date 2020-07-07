@@ -79,19 +79,21 @@ mu[1,1]=mean(weight)
 Prior_Check(weight ~ group,family =gaussian(),
            pfamily=dNormal(mu=mu,Sigma=V))
 
-#lmb.D9=lmb(weight ~ group,dNormal(mu,V))
+lmb.D9=lmb(weight ~ group,dNormal(mu,V))
+lmb.D9
+
+class(lmb.D9)
+
+colMeans(fitted(lmb.D9))
+colMeans(predict(lmb.D9))
+colMeans(residuals(lmb.D9))
+
+## Needs a summary function
+#summary(lmb.D9)
 
 
-#lmb.D9=lmb(weight ~ group,dNormal(mu,V,dispersion=1))
-
-#lmb.D9$fitted.values  # Not currently present 
-#lmb.D9$linear.predictors  ## Present
-
-#residuals(lmb.D9)
-
-#lmb.D9$prior.weights
-
-#lmb.D9$DIC
+lmb.D9$DIC
+extractAIC(lm.D9)
 
 
 
@@ -103,7 +105,9 @@ Prior_Check(weight ~ group,family =gaussian(),
 
 #lmb.D9$coefficients
 
-#lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
+lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
+
+summary(lm.D9)
 
 #lm_summary=summary(lm.D9)
 

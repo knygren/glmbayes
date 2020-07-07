@@ -2,9 +2,12 @@
 % Please edit documentation in R/residuals.glmb.R
 \name{residuals.glmb}
 \alias{residuals.glmb}
+\alias{residuals.lmb}
 \title{Accessing Bayesian Generalized Linear Model Fits}
 \usage{
 \method{residuals}{glmb}(object, ysim = NULL, ...)
+
+\method{residuals}{lmb}(object, ysim = NULL, ...)
 }
 \arguments{
 \item{object}{an object of class \code{glmb}, typically the result of a call to \link{glmb}}

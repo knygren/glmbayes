@@ -172,6 +172,7 @@ rlmb<-function(n=1,y,x,pfamily,offset=rep(0,nobs),weights=NULL)
   
   outlist=simfun(n=n,y=y,x=x,prior_list=prior_list,offset=offset,weights=weights,family=family)
 
+
   outlist$pfamily=pfamily
 
   return(outlist)

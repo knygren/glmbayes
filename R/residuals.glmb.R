@@ -36,3 +36,13 @@ residuals.glmb<-function(object,ysim=NULL,...)
   colnames(DevRes)<-names(y)
   DevRes
 }
+
+#' @rdname residuals.glmb
+#' @export 
+#' @method residuals lmb
+
+residuals.lmb<-function(object,ysim=NULL,...)
+{
+  return(residuals.lm(object,ysim,...))
+  }
+
