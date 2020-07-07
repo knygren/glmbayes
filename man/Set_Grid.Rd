@@ -55,3 +55,4 @@ glmb.D93<-glmb(n=1000,counts ~ outcome + treatment,
 ## ----glmb extractAIC-------------------------------------------------------------
 extractAIC(glmb.D93)
 }
+\keyword{internal}

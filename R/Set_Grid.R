@@ -24,6 +24,7 @@
 #' 0 and is later populated by the Set_logP function}
 #' @example inst/examples/Ex_extractAIC.glmb.R
 #' @export
+#' @keywords internal
 
 Set_Grid<-function(GridIndex,cbars,Lint){
   
