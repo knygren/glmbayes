@@ -127,7 +127,7 @@
 #' New York: Springer.
 #' 
 #' 
-#' @example inst/examples/Ex_glmb.R
+#' @example inst/examples/Ex_lmb.R
 #' 
 #' @export lmb
 #' @exportClass lmb

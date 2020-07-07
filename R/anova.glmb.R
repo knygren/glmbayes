@@ -24,6 +24,16 @@ anova.glmb<-function(object,...){
   mu=as.matrix(object$Prior$mean,ncol=1)
   V=object$Prior$Variance
   obj_family=family(object)
+  pf=object$pfamily
+
+  if(!attr(object$pfamily,"Prior Type")=="dNormal") stop("Not Yet Implemented")
+
+  prior_list=pf$prior_list
+  mu=prior_list$mu
+  V=prior_list$Sigma
+  dispersion=prior_list$dispersion
+  
+  #stop("Printed Information above")
   
   
   n_obs=nobs(object)
@@ -48,10 +58,19 @@ anova.glmb<-function(object,...){
   rownames(anova_out)[1]="NULL"
   rownames(anova_out)[2:(nterms_all+1)]=tl_all
   
+  # Initialize last row elements
+  
+  anova_out$DIC[(nterms_all+1)]=object$DIC
+  anova_out[(nterms_all+1),5]=object$pD
+  anova_out[(nterms_all+1),4]=mean(object$deviance)
+  anova_out[(nterms_all+1),3]=nobs(object)-object$pD
+  
   # Initialize nterms_left and tt2
   nterms_left=nterms_all
   tt2=terms_all
   
+  
+
   while(nterms_left>0){
     
     ## Update the formula with one less term
@@ -72,7 +91,10 @@ anova.glmb<-function(object,...){
     
     # Run glmb model for smaller model
     prior=list(mu=mu2,Sigma=V2)
-    object2<-glmb(n=n,newff, family = obj_family,prior=prior,Gridtype=2)
+  
+    
+#    object2<-glmb(n=n,newff, family = obj_family,prior=prior,Gridtype=2)
+    object2<-glmb(n=n,newff, family = obj_family,pfamily=dNormal(mu2,V2,dispersion))
     
     # Update anova_out table
     

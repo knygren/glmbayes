@@ -178,61 +178,30 @@ during the simulation process may vary. The returned value \code{iters} contains
 number of candidates generated before acceptance for each draw.
 }
 \examples{
-set.seed(333)
-## Dobson (1990) Page 93: Randomized Controlled Trial :
-counts <- c(18,17,15,20,10,20,25,13,12)
-outcome <- gl(3,1,9)
-treatment <- gl(3,3)
-mysd<-1
-mu<-matrix(0,5)
-mu[1]=log(mean(counts))
-V0<-((mysd)^2)*diag(5)
-glmb.D93<-glmb(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu,Sigma=V0))
-summary(glmb.D93)
+## Annette Dobson (1990) "An Introduction to Generalized Linear Models".
+## Page 9: Plant Weight Data.
+ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
+trt <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
+weight <- c(ctl, trt)
 
-# Menarche Binomial Data Example 
-data(menarche2)
-Age2=Age-13
+ps=Prior_Setup(weight ~ group)
+mu=ps$mu
+V=ps$Sigma
+mu[1,1]=mean(weight)
 
-#Priors Are Derived in Vignette
+Prior_Check(weight ~ group,family =gaussian(),
+           pfamily=dNormal(mu=mu,Sigma=V))
 
-## Logit Prior and Model
-mu1=as.matrix(c(0,1.098612),ncol=1)
-V1<-1*diag(nvars)
-V1[1,1]=0.18687882
-V1[2,2]=0.10576217
-V1[1,2]=-0.03389182
-V1[2,1]=-0.03389182
-glmb.out1<-glmb(cbind(Menarche, Total-Menarche) ~ Age2,
-family=binomial(logit),pfamily=dNormal(mu=mu1,Sigma=V1), data=menarche2)
-summary(glmb.out1)
+## May move this step inside the Prior_Check function
+lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
+disp_ML=sigma(lm.D9)^2
+n_prior=2
+shape=n_prior/2
+rate= disp_ML*shape
 
-## Probit Prior and Model
-mu2=as.matrix(c(0,0.6407758),ncol=1)
-V2<-1*diag(nvars)
-V2[1,1]=0.07158369
-V2[2,2]=0.03453205
-V2[1,2]=-0.01512075
-V2[2,1]=-0.01512075
-glmb.out2<-glmb(cbind(Menarche, Total-Menarche) ~ Age2,
-family=binomial(probit),pfamily=dNormal(mu=mu2,Sigma=V2), data=menarche2)
-summary(glmb.out2)
-
-## clog-log Prior and Model
-mu2=as.matrix(c(-0.3665129,0.6002727),ncol=1)
-V2<-1*diag(nvars)
-V2[1,1]=0.11491322
-V2[2,2]=0.03365986
-V2[1,2]=-0.03502783
-V2[2,1]=-0.03502783
-glmb.out3<-glmb(cbind(Menarche, Total-Menarche) ~ Age2,
-                family=binomial(cloglog),pfamily=dNormal(mu=mu2,Sigma=V2), data=menarche2)
-summary(glmb.out3)
-
-DIC_Out=rbind(extractAIC(glmb.out1),extractAIC(glmb.out2),extractAIC(glmb.out3))
-rownames(DIC_Out)=c("logit","probit","clog-log")
-colnames(DIC_Out)=c("pD","DIC")
-DIC_Out
+lmb.D9=lmb(weight ~ group,dNormal_Gamma(mu,V/disp_ML,shape=shape,rate=rate))
+summary(lmb.D9)
 }
 \references{
 Dobson, A. J. (1990)

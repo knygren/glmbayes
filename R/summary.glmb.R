@@ -119,6 +119,7 @@ summary.glmb<-function(object,...){
             pD=object$pD,
             deviance=object$deviance,
             DIC=object$DIC,
+            dispersion=mean(object$dispersion),
             iters=mean(object$iters)
             )
   
@@ -146,6 +147,8 @@ print.summary.glmb<-function(x,digits = max(3, getOption("digits") - 3),...){
   cat("\nEffective Number of Parameters:",x$pD,"\n")
   cat("Expected Residual Deviance:",mean(x$deviance),"\n")
   cat("DIC:",x$DIC,"\n\n")
+  cat("Expected Mean dispersion:",x$dispersion,"\n")
+  cat("Sq.root of Expected Mean dispersion:",sqrt(x$dispersion),"\n\n")
   cat("Mean Likelihood Subgradient Candidates Per iid sample:",x$iters,"\n\n")
   
   
