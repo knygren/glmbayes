@@ -79,36 +79,33 @@ mu[1,1]=mean(weight)
 Prior_Check(weight ~ group,family =gaussian(),
            pfamily=dNormal(mu=mu,Sigma=V))
 
-lmb.D9=lmb(weight ~ group,dNormal(mu,V))
+## Will move this step inside the Prior_Check
+
+lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
+disp_ML=sigma(lm.D9)^2
+
+
+lmb.D9=lmb(weight ~ group,dNormal(mu,V,dispersion=disp_ML))
+
 lmb.D9
+summary(lmb.D9)
 
-class(lmb.D9)
-
-if(class(lmb.D9)[1]=="lmb") print("Hello lmb")
-
-if(class(lmb.D9)[1]=="glmb") print("Hello glmb")
-
-if(class(glmb.out1)[1]=="glmb") print("Hello glmb")
-if(class(glmb.out1)[1]=="lmb") print("Hello lmb")
+glmb.D9=glmb(weight ~ group,family=gaussian(),dNormal(mu,V,dispersion=disp_ML))
+summary(glmb.D9)
 
 
 
+
+mean(lmb.D9$dispersion)
+
+
+####################################################
 colMeans(fitted(lmb.D9))
 colMeans(predict(lmb.D9))
 colMeans(residuals(lmb.D9))
-
-glmsummary2<-summary(lmb.D9$lm)
-
-## This triggers error
-se1<-sqrt(diag(glmsummary2$cov.scaled))
+extractAIC(lmb.D9)
 
 
-## Needs a summary function
-summary(lmb.D9)
-
-
-lmb.D9$DIC
-extractAIC(lm.D9)
 
 
 
@@ -120,7 +117,6 @@ extractAIC(lm.D9)
 
 #lmb.D9$coefficients
 
-lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
 
 summary(lm.D9)
 lm_summary=summary.lm(lm.D9)

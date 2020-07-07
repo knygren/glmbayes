@@ -88,18 +88,22 @@ summary.glmb<-function(object,...){
   ## Note: This restricts function to classes glmb and lmb
   ## Could break calls to this function from other classes
   
-  if(class(object)[1]=="glmb"){
+  if(!is.null(object$glm)){
   glmsummary<-summary(object$glm)
   se1<-sqrt(diag(glmsummary$cov.scaled))
+  ml=as.numeric(object$glm$coefficients)
   } 
+
   
-  if(class(object)[1]=="lmb"){
+  
+  if(!is.null(object$lm)){
     lm_summary=summary.lm(object$lm)
     se1=lm_summary$coefficients[,2]
+    ml=lm_summary$coefficients[,1]
   }  
     
   Tab1<-cbind("Prior Mean"=object$Prior$mean,"Prior.sd"=as.numeric(sqrt(diag(object$Prior$Variance)))
-              ,"Max Like."=as.numeric(object$glm$coefficients),"Like.sd"=se1)
+              ,"Max Like."=ml,"Like.sd"=se1)
   TAB<-cbind("Post.Mode"=as.numeric(object$coef.mode),"Post.Mean"=object$coef.means,"Post.Sd"=se,"MC Error"=as.numeric(mc),"Pr(tail)"=as.numeric(pval2))
   TAB2<-cbind("1.0%"=percentiles[,1],"2.5%"=percentiles[,2],"5.0%"=percentiles[,3],Median=as.numeric(percentiles[,4]),"95.0%"=percentiles[,5],"97.5%"=as.numeric(percentiles[,6]),"99.0%"=as.numeric(percentiles[,7]))
   

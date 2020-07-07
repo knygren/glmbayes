@@ -264,8 +264,6 @@ outlist<-list(
   Envelope=NULL,
   loglike=LL)
 
-print("dispersion inside rnorm_gamma_reg")
-print(dispersion)
 
 colnames(outlist$coefficients)<-colnames(x)
 
