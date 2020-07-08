@@ -52,8 +52,8 @@ from the original model object.}
 \item{...}{further arguments passed to or from other methods.}
 }
 \value{
-A list with the Estimated effective number of parameters \code{pD}
-and the \code{DIC} from the object \code{fit} of class \code{"glmb"}.
+A matrix of predictions where the rows correspond to the draws from the estimated model, and
+the columns to the observations in the newdata dataset (or the original data if newdata is missing).
 }
 \description{
 Obtains predictions and optionally estimates standard errors of those

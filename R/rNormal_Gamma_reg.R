@@ -194,17 +194,37 @@ if(k2!=k) stop("dimensions of X and A are inconsistent")
 if(k3!=k) stop("dimensions of X and Bbar are inconsistent")
 
 
-#
-# first draw Sigma
-#
-RA=chol(A)
-W=rbind(X,RA)
 
-Z=rbind(Ytemp,matrix(RA%*%Bbar,ncol=1)) ## Force dimension to 1
+# first draw Sigma
+### Write a wraper 
+
+#################################### Start of rNormal_Gamma_reg.fit
+
+RA=chol(A)
+W=rbind(X,RA)    # W should be modified design matrix !
+Z=rbind(Ytemp,matrix(RA%*%Bbar,ncol=1)) ## Z Should be the modified y vector!
+
+
+## Try calling lm.fit here (weights already applied above)
+## 
+
+
+lm_fit_out=lm.fit (W, Z,    offset = NULL, method = "qr", tol = 1e-7,
+        singular.ok = TRUE)
+##
+
+#### End of rNormal_Gamma_reg_fit 
+
+print("Coefficients from call to lm.fit")
+print(lm_fit_out$coefficients)
+
 
 #   note:  Y,X,A,Bbar must be matrices!
 IR=backsolve(chol(crossprod(W)),diag(k))
 #                      W'W = R'R  &  (W'W)^-1 = IRIR'  -- this is the UL decomp!
+
+
+
 Btilde=crossprod(t(IR))%*%crossprod(W,matrix(Z,ncol=1))   
 #                      IRIR'(W'Z) = (X'X+A)^-1(X'Y + ABbar)
 S=crossprod(Z-W%*%Btilde)
@@ -224,9 +244,9 @@ if(m>1){
 }
 
 
+print("Coefficients from rmultireg function")
+print(Btilde)
 
-P_Post=P+t(X)%*%X
-mu_Post=solve(P_Post)%*%(mu+t(X)%*%Ytemp)
 
 a_prior=shape     ## Should be relationship to shape in Wishart  
 b_prior=rate  ## Should be relationship to scale in Wishart (could also be V/2)
