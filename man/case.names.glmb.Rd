@@ -20,7 +20,7 @@
 A character vector
 }
 \description{
-Simple utilities returning (non-missing) canse names, and (non-eliminated) variable names.
+Simple utilities returning (non-missing) case names, and (non-eliminated) variable names.
 }
 \examples{
 ## ----dobson-------------------------------------------------------------------

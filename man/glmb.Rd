@@ -36,27 +36,34 @@ glmb(
     model to be fitted.  The details of model specification are given
     under \sQuote{Details}.}
 
-\item{family}{a description of the error distribution and link function to be used in the model. For \code{glmb} 
-this can be a character string naming a family function, a family function or the result of a call to a family function. 
-(See \code{\link{family}} for details of family functions.)}
+\item{family}{a description of the error distribution and link
+    function to be used in the model.  For \code{glm} this can be a
+    character string naming a family function, a family function or the
+    result of a call to a family function.  For \code{glm.fit} only the
+    third option is supported.  (See \code{\link[stats]{family}} for details of
+    family functions.)}
 
 \item{pfamily}{the prior family to use for the model (including the constants passed to prior).}
 
 \item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
 
-\item{data}{an optional data frame, list or environment (or object coercible by \code{\link{as.data.frame}} to a data frame)
-containing the variables in the model. If not found in \code{data}, the variables are taken from 
-\code{environment(formula)}, typically the environment from which \code{glmb} is called.}
+\item{data}{an optional data frame, list or environment (or object
+    coercible by \code{\link{as.data.frame}} to a data frame) containing
+    the variables in the model.  If not found in \code{data}, the
+    variables are taken from \code{environment(formula)},
+    typically the environment from which \code{glm} is called.}
 
 \item{weights}{an optional vector of \sQuote{prior weights} to be used
     in the fitting process.  Should be \code{NULL} or a numeric vector.}
 
 \item{subset2}{an optional vector specifying a subset of observations to be used in the fitting process.}
 
-\item{offset}{this can be used to specify an \code{a priori} known component to be included in the 
-linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number 
-of cases. One or more \code{\link{offset}} terms can be included in the formula instead or as well, and if more than one 
-is specified their sum is used. See \code{model.offset}.}
+\item{offset}{this can be used to specify an \emph{a priori} known
+    component to be included in the linear predictor during fitting.
+    This should be \code{NULL} or a numeric vector of length equal to
+    the number of cases.  One or more \code{\link[stats]{offset}} terms can be
+    included in the formula instead or as well, and if more than one is
+    specified their sum is used.  See \code{\link[stats]{model.offset}}.}
 
 \item{na.action}{a function which indicates what should happen when the data contain \code{NA}s.  The default is set by 
 the \code{na.action} setting of \code{\link{options}}, and is \code{\link[stats]{na.fail}} 
@@ -79,10 +86,16 @@ can be useful.}
 \item{model}{a logical value indicating whether \emph{model frame}
     should be included as a component of the returned value.}
 
-\item{method}{the method to be used in fitting the classical model during a call to \code{\link{glm}}. The default method \code{glm.fit} 
-uses iteratively reweighted least squares (IWLS): the alternative \code{"model.frame"} returns the model frame and does no fitting.
-User-supplied fitting functions can be supplied either as a function or a character string naming a 
-function, with a function which takes the same arguments as \code{glm.fit}. If specified as a character string it is looked up from within the \pkg{stats} namespace.}
+\item{method}{the method to be used in fitting the model.  The default
+    method \code{"glm.fit"} uses iteratively reweighted least squares
+    (IWLS): the alternative \code{"model.frame"} returns the model frame
+    and does no fitting.
+
+    User-supplied fitting functions can be supplied either as a function
+    or a character string naming a function, with a function which takes
+    the same arguments as \code{glm.fit}.  If specified as a character
+    string it is looked up from within the \pkg{stats} namespace.
+  }
 
 \item{x}{For \code{glm}:
     logical values indicating whether the response vector and model
@@ -276,3 +289,12 @@ Venables, W. N. and Ripley, B. D. (2002)
 \emph{Modern Applied Statistics with S.}
 New York: Springer.
 }
+\seealso{
+The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.
+
+Other Modeling Functions:
+\code{\link{lmb}()},
+\code{\link{rglmb}()},
+\code{\link{rlmb}()}
+}
+\concept{modelfuns}

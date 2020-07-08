@@ -28,9 +28,12 @@ prior distribution.}
 
 \item{weights}{an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.}
 
-\item{family}{a description of the error distribution and link function to be used in the model. For \code{glmb} 
-this can be a character string naming a family function, a family function or the result of a call to a family function. 
-(See \code{\link{family}} for details of family functions.)}
+\item{family}{a description of the error distribution and link
+    function to be used in the model.  For \code{glm} this can be a
+    character string naming a family function, a family function or the
+    result of a call to a family function.  For \code{glm.fit} only the
+    third option is supported.  (See \code{\link[stats]{family}} for details of
+    family functions.)}
 }
 \value{
 \code{rNormal_Gamma_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 
@@ -132,7 +135,7 @@ pfamily.
 \code{\link{rglmb}} and \code{\link{glmb}} for functions that depend on 
 simulation functions.
 
-Other simulation functions
+Other family Simulation Functions:
 \code{\link{rGamma_reg}()},
 \code{\link{rNormal_reg}()}
 }

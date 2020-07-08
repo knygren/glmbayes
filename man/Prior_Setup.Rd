@@ -70,3 +70,10 @@ mu=ps$mu
 V=ps$Sigma
 print(ps)
 }
+\seealso{
+
+
+Other Prior Utility Functions:
+\code{\link{Prior_Check}()}
+}
+\concept{prior}

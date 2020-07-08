@@ -8,10 +8,10 @@
 #' rlmb
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
 #' @param y a vector of observations of length \code{m}.
-#' @param x a design matrix of dimension \code{m * p}.
-#' @param pfamily the prior family to use for the model (including the constants passed to prior). 
-#' @param offset an offset parameter
-#' @param weights a weighting variable
+#' @param x for \code{rlmb} a design matrix of dimension \code{m * p} and for 
+#' \code{print.rlmb} the object to be printed. 
+#' @param pfamily a description of the prior distribution and associated constants to be used in the model. This
+#' should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions.)
 #' @param digits the number of significant digits to use when printing.
 #' @param \ldots additional optional arguments.
 #' @return \code{rlmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
@@ -52,6 +52,9 @@
 #' Depending on the selection, the time to build the envelope and the acceptance rate 
 #' during the simulation process may vary. The returned value \code{iters} contains the 
 #' number of candidates generated before acceptance for each draw.
+#' @family modelfuns
+#' @seealso The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.
+
 #' @references 
 #' Dobson, A. J. (1990)
 #' \emph{An Introduction to Generalized Linear Models.}

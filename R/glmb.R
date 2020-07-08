@@ -5,28 +5,15 @@
 #' glmb
 #' print.glmb
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
-#' @param family a description of the error distribution and link function to be used in the model. For \code{glmb} 
-#' this can be a character string naming a family function, a family function or the result of a call to a family function. 
-#' (See \code{\link{family}} for details of family functions.)
-#' @param pfamily the prior family to use for the model (including the constants passed to prior). 
-#' @param data an optional data frame, list or environment (or object coercible by \code{\link{as.data.frame}} to a data frame)
-#' containing the variables in the model. If not found in \code{data}, the variables are taken from 
-#' \code{environment(formula)}, typically the environment from which \code{glmb} is called.
+#' @param pfamily a description of the prior distribution and associated constants to be used in the model. This
+#' should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions.)
 #' @param subset2 an optional vector specifying a subset of observations to be used in the fitting process.
-#' @param offset this can be used to specify an \code{a priori} known component to be included in the 
-#' linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number 
-#' of cases. One or more \code{\link{offset}} terms can be included in the formula instead or as well, and if more than one 
-#' is specified their sum is used. See \code{model.offset}. 
 #' @param na.action a function which indicates what should happen when the data contain \code{NA}s.  The default is set by 
 #' the \code{na.action} setting of \code{\link{options}}, and is \code{\link[stats]{na.fail}} 
 #' if that is unset.  The \sQuote{factory-fresh} default is \code{stats{na.omit}}.  
 #' Another possible value is \code{NULL}, no action.  Value \code{stats{na.exclude}} 
 #' can be useful.
 #' @param Gridtype an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.
-#' @param method the method to be used in fitting the classical model during a call to \code{\link{glm}}. The default method \code{glm.fit} 
-#' uses iteratively reweighted least squares (IWLS): the alternative \code{"model.frame"} returns the model frame and does no fitting.
-#' User-supplied fitting functions can be supplied either as a function or a character string naming a 
-#' function, with a function which takes the same arguments as \code{glm.fit}. If specified as a character string it is looked up from within the \pkg{stats} namespace.
 #' @param digits the number of significant digits to use when printing.
 #' @inheritParams stats::glm
 #' @return \code{glmb} returns an object of class \code{"glmb"}. The function \code{summary} (i.e., 
@@ -102,7 +89,9 @@
 #' Depending on the selection, the time to build the envelope and the acceptance rate 
 #' during the simulation process may vary. The returned value \code{iters} contains the 
 #' number of candidates generated before acceptance for each draw.
-#' 
+#' @family modelfuns
+#' @seealso The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.
+
 #' @references 
 #' Dobson, A. J. (1990)
 #' \emph{An Introduction to Generalized Linear Models.}

@@ -157,3 +157,12 @@ Venables, W. N. and Ripley, B. D. (2002)
 \emph{Modern Applied Statistics with S.}
 New York: Springer.
 }
+\seealso{
+The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.
+
+Other Modeling Functions:
+\code{\link{glmb}()},
+\code{\link{lmb}()},
+\code{\link{rglmb}()}
+}
+\concept{modelfuns}

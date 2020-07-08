@@ -42,6 +42,7 @@
 #' @export 
 #' @rdname rGamma_reg
 #' @order 1
+#' @export
 
 ## Offset in this model may need to be handled better
 

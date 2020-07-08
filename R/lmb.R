@@ -100,7 +100,9 @@
 #' Depending on the selection, the time to build the envelope and the acceptance rate 
 #' during the simulation process may vary. The returned value \code{iters} contains the 
 #' number of candidates generated before acceptance for each draw.
-#' 
+#' @family modelfuns
+#' @seealso The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.
+
 #' @references 
 #' Dobson, A. J. (1990)
 #' \emph{An Introduction to Generalized Linear Models.}

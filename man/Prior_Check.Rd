@@ -56,3 +56,10 @@ mu[1,1]=log(mean(counts))
 Prior_Check(counts ~ outcome + treatment,family = poisson(),
             pfamily=dNormal(mu=mu,Sigma=V))
 }
+\seealso{
+
+
+Other Prior Utility Functions:
+\code{\link{Prior_Setup}()}
+}
+\concept{prior}

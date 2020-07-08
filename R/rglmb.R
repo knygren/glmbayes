@@ -10,8 +10,12 @@
 #' @inheritParams glmb
 #' @return Currently mainly the draws for the dispersion and the regression coefficients
 #' will be updated to return outputs consistent with other function
+#' @family modelfuns
+#' @seealso The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.
 #' @example inst/examples/Ex_rglmb.R
 #' @export 
+#' @rdname rglmb
+#' @order 1
 
 
 
@@ -65,7 +69,7 @@ rglmb<-function(n=1,y,x,family=gaussian(),pfamily,offset=NULL,weights=1){
 
 
 #' @rdname rglmb
-#' @order 4
+#' @order 2
 #' @method print rglmb
 #' @export
 

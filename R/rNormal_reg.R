@@ -101,6 +101,7 @@
 #' New York: Springer.
 #' 
 #' @example inst/examples/Ex_rnorm_gamma_reg.R
+#' @export
 
 rNormal_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
 
