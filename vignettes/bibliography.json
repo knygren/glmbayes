@@ -4,19 +4,24 @@
       {
         "family": "Nygren",
         "given": "Kjell"
+      },
+      {
+        "family": "Nygren",
+        "given": "Lan M."
       }
     ],
-    "id": "item1",
+    "container-title": "Journal of the American Statistical Association",
+    "id": "nygren2006",
     "issued": {
       "date-parts": [
         [
-          2005
+          2006
         ]
       ]
     },
     "publisher": "Cambridge University Press",
     "publisher-place": "Cambridge",
-    "title": "First book",
+    "title": "Likelihood Subgradient Densities",
     "type": "book"
   },
   {

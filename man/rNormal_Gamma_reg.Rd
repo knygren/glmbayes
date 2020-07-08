@@ -93,9 +93,8 @@ n<-10000
 y<-lmb.D9$y
 x<-as.matrix(lmb.D9$x)
 prior_list=list(mu=mu,Sigma=V/disp_ML,shape=shape,rate=rate)
-ngamma.D9=rnorm_gamma_reg(n=1000,y=y,x=x,
+ngamma.D9=rNormal_Gamma_reg(n=1000,y=y,x=x,
   prior_list=prior_list)
-print(ngamma.D9)
 summary(ngamma.D9$coefficients)
 
 }
