@@ -96,9 +96,6 @@ if(!missing(prior_list)){
   else rate=NULL
 }
 
-  
-
-  
 if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
 is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
   
@@ -138,115 +135,17 @@ if (!all(ev >= -tol * abs(ev[1L])))
 famfunc=glmbfamfunc(gaussian())  
 f1=famfunc$f1
 
-## Convert as in call to rmultireg    
-
-Y=matrix((y-offset2)*sqrt(wt),nrow=length(y))
-X=x*sqrt(wt)
-Bbar=mu
-A=P
-#V=V
-
-#####    Beginning of rmultireg operations
-
-#
-# revision history:
-#    Modified 4/7/15 to produce produce vectorized output  
-#    changed 1/11/05 by P. Rossi to fix sum of squares error
-#
-# purpose:
-#    draw from posterior for Multivariate Regression Model with
-#    natural conjugate prior
-# arguments:
-#    Y is n x m matrix
-#    X is n x k
-#    Bbar is the prior mean of regression coefficients  (k x m)
-#    A is prior precision matrix
-#    nu, V are parameters for prior on Sigma
-# output:
-#    list of B, Sigma draws of matrix of coefficients and Sigma matrix
-# model:
-#    Y=XB+U  cov(u_i) = Sigma
-#    B is k x m matrix of coefficients
-# priors:  beta|Sigma  ~ N(betabar,Sigma (x) A^-1)
-#                   betabar=vec(Bbar)
-#                   beta = vec(B) 
-#          Sigma ~ IW(nu,V) or Sigma^-1 ~ W(nu, V^-1)
-
-l0=length(Y)
-Ytemp=matrix(Y,ncol=1)
-
-l1=nrow(Ytemp)
-if(l0>l1) stop("Dimensions of y not correct")
-
-m=1
-
-k=ncol(X)
-l2=nrow(X)
-
-if(l2!=l1) stop("Dimensions of X and Y are inconsistent")
-
-k1=dim(A)[1]
-k2=dim(A)[2]
-k3=length(Bbar)
-
-if(k1!=k) stop("dimensions of X and A are inconsistent")
-if(k2!=k) stop("dimensions of X and A are inconsistent")
-if(k3!=k) stop("dimensions of X and Bbar are inconsistent")
-
-
-
-# first draw Sigma
-### Write a wraper 
-
-#################################### Start of rNormal_Gamma_reg.fit
-
-RA=chol(A)
-W=rbind(X,RA)    # W should be modified design matrix !
-Z=rbind(Ytemp,matrix(RA%*%Bbar,ncol=1)) ## Z Should be the modified y vector!
-
-
-## Try calling lm.fit here (weights already applied above)
-## 
-
-
-lm_fit_out=lm.fit (W, Z,    offset = NULL, method = "qr", tol = 1e-7,
-        singular.ok = TRUE)
-##
-
-#### End of rNormal_Gamma_reg_fit 
-
-print("Coefficients from call to lm.fit")
-print(lm_fit_out$coefficients)
-
-
-#   note:  Y,X,A,Bbar must be matrices!
-IR=backsolve(chol(crossprod(W)),diag(k))
-#                      W'W = R'R  &  (W'W)^-1 = IRIR'  -- this is the UL decomp!
-
-
-
-Btilde=crossprod(t(IR))%*%crossprod(W,matrix(Z,ncol=1))   
-#                      IRIR'(W'Z) = (X'X+A)^-1(X'Y + ABbar)
-S=crossprod(Z-W%*%Btilde)
-#                      E'E
+fit=rNormal_reg.wfit(x,y,P,mu, w=wt,offset=offset2,method="qr",tol=1e-7,singular.ok=TRUE)
+Btilde=fit$Btilde
+IR=fit$IR
+S=fit$S
+k=fit$k
+m=1  ## Used to fix dimension to 1 --> Will eventually do away with
 
 out1<-matrix(0,nrow=n,ncol=k)
 
-if(m==1){
-  
-  out2=matrix(0,nrow=n,ncol=1)  
-}
-
-if(m>1){
-  
-  out2<-vector("list", n)
-  
-}
-
-
-print("Coefficients from rmultireg function")
-print(Btilde)
-
+if(m==1){  out2=matrix(0,nrow=n,ncol=1)  }
+if(m>1){  out2<-vector("list", n)}   # Code if we had muliple columns of data (should perhas have m items)
 
 a_prior=shape     ## Should be relationship to shape in Wishart  
 b_prior=rate  ## Should be relationship to scale in Wishart (could also be V/2)
@@ -264,12 +163,9 @@ draws<-matrix(1,n)
 LL<-matrix(1,n)
 
 for(i in 1:n){
-  
-  ## This function should return the negative log-likelihood 
-  
+    ## This function should return the negative log-likelihood 
   LL[i]=f1(b=out1[i,],y=y,x=x,alpha=offset2,wt=wt/out2[i])	
 }
-
 
 outlist<-list(
   coefficients=out1
@@ -293,7 +189,6 @@ class(outlist)<-c(outlist$class,"rglmb")
 
 return(outlist)
 
-#return(dispersion)
 
 }
 

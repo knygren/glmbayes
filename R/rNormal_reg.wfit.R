@@ -57,6 +57,8 @@ rNormal_reg.wfit<-function(x,y,P,mu, w,offset=NULL,method="qr",tol=1e-7,singular
   if(k2!=k) stop("dimensions of X and A are inconsistent")
   if(k3!=k) stop("dimensions of X and Bbar are inconsistent")
   
+  ## Do cholesky decomposition - Might be inaccurate/inefficient
+  
   RA=chol(A)
   
   # Create modifed design matrix x and modifed observed y matrix
@@ -76,10 +78,14 @@ rNormal_reg.wfit<-function(x,y,P,mu, w,offset=NULL,method="qr",tol=1e-7,singular
   lmf$IR=backsolve(chol(crossprod(W)),diag(k))
   #                      W'W = R'R  &  (W'W)^-1 = IRIR'  -- this is the UL decomp!
   
+  
   lmf$k=k
-  
   lmf$Btilde=matrix(lmf$coefficients,ncol=1)
+
+  #                      E'E
+  lmf$S=crossprod(Z-W%*%lmf$Btilde)  # This part likely is used for the Gamma or Wishart simulation - Essentially RSS
   
+    
   return(lmf)
   
   

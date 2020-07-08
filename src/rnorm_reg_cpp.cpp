@@ -108,7 +108,23 @@ Rcpp::List rnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   z.rows(0,l2-1)=y2b;
   z.rows(l2,l1+l2-1)=RA*mu2;
+
+  // The function (.lm.fit should be used here is it is available)
   
+   // lm.fit is R Wrappper around *.cpp function named C_Cdqrls
+   // Not sure how to call C_cdqrls directly.
+   // For now, set up to call lm.fit [Figure out later]
+   
+   Rcpp::Function lm_fit_fun("lm.fit");
+   
+   // Call lm_fit_fun to get the posterior mode
+   // Should be numerically more accurate for large matrices that old method
+
+   List fit=lm_fit_fun(_["x"]=W,_["y"]=z);
+   
+   NumericMatrix b2a=asMat(fit[0]);  // optimized value (coefficients)
+   // Rcpp::Rcout << "Optimized value from lm_fit :"  << b2a << std::endl;
+   
   // This should be WTW= XTX +P
   // Seems redundant to store here and then recalculate below
   
@@ -118,9 +134,14 @@ Rcpp::List rnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   arma::mat IR=arma::inv(trimatu(chol(trans(W)*W)));
   
-  // This should be posterior mean 
+  // This should be posterior mean [Keep old code in case we want to return to it]
   
-  arma::mat b2=(IR*trans(IR))*(trans(W)*z);
+  // arma::mat b2=(IR*trans(IR))*(trans(W)*z);
+  // b2.print("optimized value from old code")  ; 
+  
+  // arma::mat b2=(IR*trans(IR))*(trans(W)*z);
+  arma::mat b2(b2a.begin(), b2a.nrow(), b2a.ncol(), false);
+  //b2.print("optimized value from new code")  ; 
   
   NumericMatrix out(n,l1);
   arma::mat out2(out.begin(), out.nrow(), out.ncol(), false);
