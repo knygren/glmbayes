@@ -28,8 +28,8 @@
 #' A check is also run to verify if the resulting x matrix from olddata is consistent with that 
 #' from the original model object.
 #' @param ... further arguments passed to or from other methods.
-#' @return A list with the Estimated effective number of parameters \code{pD}
-#' and the \code{DIC} from the object \code{fit} of class \code{"glmb"}. 
+#' @return A matrix of predictions where the rows correspond to the draws from the estimated model, and
+#' the columns to the observations in the newdata dataset (or the original data if newdata is missing). 
 #' @details If \code{newdata} is omitted the predictions are based on the data
 #' used for the fit.  In that case how cases with missing values in the
 #' original fit is determined by the \code{na.action} argument of that

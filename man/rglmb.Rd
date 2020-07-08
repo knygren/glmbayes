@@ -12,25 +12,9 @@ rglmb(n = 1, y, x, family = gaussian(), pfamily, offset = NULL, weights = 1)
 \arguments{
 \item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
 
-\item{y}{For \code{glm}:
-    logical values indicating whether the response vector and model
-    matrix used in the fitting process should be returned as components
-    of the returned value.
+\item{y}{a vector of observations of length \code{m}.}
 
-    For \code{glm.fit}: \code{x} is a design matrix of dimension
-    \code{n * p}, and \code{y} is a vector of observations of length
-    \code{n}.
-  }
-
-\item{x}{For \code{glm}:
-    logical values indicating whether the response vector and model
-    matrix used in the fitting process should be returned as components
-    of the returned value.
-
-    For \code{glm.fit}: \code{x} is a design matrix of dimension
-    \code{n * p}, and \code{y} is a vector of observations of length
-    \code{n}.
-  }
+\item{x}{for \code{rglmb} a design matrix of dimension \code{m * p} and for \code{print.rglmb} the object to be printed.}
 
 \item{family}{a description of the error distribution and link
     function to be used in the model.  For \code{glm} this can be a
@@ -39,7 +23,8 @@ rglmb(n = 1, y, x, family = gaussian(), pfamily, offset = NULL, weights = 1)
     third option is supported.  (See \code{\link[stats]{family}} for details of
     family functions.)}
 
-\item{pfamily}{the prior family to use for the model (including the constants passed to prior).}
+\item{pfamily}{a description of the prior distribution and associated constants to be used in the model. This
+should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions.)}
 
 \item{offset}{an offset parameter}
 
@@ -95,6 +80,31 @@ summary(out)
 
 # Add mean(out$iters to rglmb summary function)
 mean(out$iters)
+}
+\references{
+Dobson, A. J. (1990)
+\emph{An Introduction to Generalized Linear Models.}
+London: Chapman and Hall.
+
+Hastie, T. J. and Pregibon, D. (1992)
+\emph{Generalized linear models.}
+Chapter 6 of \emph{Statistical Models in S}
+eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
+McCullagh P. and Nelder, J. A. (1989)
+\emph{Generalized Linear Models.}
+London: Chapman and Hall.
+
+Nygren, K.N. and Nygren, L.M (2006)
+Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
+vol.101, no.475, pp 1144-1156.
+
+Raiffa, Howard and Schlaifer, R (1961)
+\emph{Applied Statistical Decision Theory.}
+Boston: Clinton Press, Inc.
+
+Venables, W. N. and Ripley, B. D. (2002)
+\emph{Modern Applied Statistics with S.}
+New York: Springer.
 }
 \seealso{
 The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.

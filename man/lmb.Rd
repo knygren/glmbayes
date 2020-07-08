@@ -32,7 +32,8 @@ lmb(
     model to be fitted.  The details of model specification are given
     under \sQuote{Details}.}
 
-\item{pfamily}{the prior family to use for the model (including the constants passed to prior).}
+\item{pfamily}{a description of the prior distribution and associated constants to be used in the model. This
+should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions.)}
 
 \item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
 
@@ -146,7 +147,8 @@ cases (factored by the supplied case weights) and the component of \code{y}
 of the result is the proportion of successes.
 }
 \description{
-\code{lmb} is used to fit Bayesian generalized linear models, specified by giving a symbolic description of the linear predictor, a description of the error distribution, and a multivariate normal prior.
+\code{lmb} is used to fit Bayesian linear models, specified by giving a symbolic descriptions of the linear 
+predictor and the prior distribution.
 }
 \details{
 The function \code{glmb} is a Bayesian version of the classical \code{\link{glm}} function.  Setup of
@@ -204,17 +206,12 @@ lmb.D9=lmb(weight ~ group,dNormal_Gamma(mu,V/disp_ML,shape=shape,rate=rate))
 summary(lmb.D9)
 }
 \references{
-Dobson, A. J. (1990)
-\emph{An Introduction to Generalized Linear Models.}
-London: Chapman and Hall.
-
-Hastie, T. J. and Pregibon, D. (1992)
-\emph{Generalized linear models.}
-Chapter 6 of \emph{Statistical Models in S}
+Chambers, J.M.(1992) \emph{Linear models.} Chapter 4 of \emph{Statistical Models in S}
 eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
-McCullagh P. and Nelder, J. A. (1989)
-\emph{Generalized Linear Models.}
-London: Chapman and Hall.
+
+Wilkinson, G.N. and Rogers, C.E. (1973). Symbolic descriptions of factorial models for 
+analysis of variance. \emph{Applied Statistics}, \bold{22}, 392-399.
+doi: \href{https://doi.org/10.2307/2346786}{10.2307/2346786}.
 
 Nygren, K.N. and Nygren, L.M (2006)
 Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
@@ -223,10 +220,6 @@ vol.101, no.475, pp 1144-1156.
 Raiffa, Howard and Schlaifer, R (1961)
 \emph{Applied Statistical Decision Theory.}
 Boston: Clinton Press, Inc.
-
-Venables, W. N. and Ripley, B. D. (2002)
-\emph{Modern Applied Statistics with S.}
-New York: Springer.
 }
 \seealso{
 The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.

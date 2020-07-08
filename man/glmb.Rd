@@ -12,7 +12,7 @@ glmb(
   n = 1000,
   data,
   weights,
-  subset2,
+  subset,
   offset,
   na.action,
   Gridtype = 1,
@@ -43,7 +43,8 @@ glmb(
     third option is supported.  (See \code{\link[stats]{family}} for details of
     family functions.)}
 
-\item{pfamily}{the prior family to use for the model (including the constants passed to prior).}
+\item{pfamily}{a description of the prior distribution and associated constants to be used in the model. This
+should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions.)}
 
 \item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
 
@@ -56,7 +57,7 @@ glmb(
 \item{weights}{an optional vector of \sQuote{prior weights} to be used
     in the fitting process.  Should be \code{NULL} or a numeric vector.}
 
-\item{subset2}{an optional vector specifying a subset of observations to be used in the fitting process.}
+\item{subset}{an optional vector specifying a subset of observations to be used in the fitting process.}
 
 \item{offset}{this can be used to specify an \emph{a priori} known
     component to be included in the linear predictor during fitting.
@@ -176,7 +177,8 @@ cases (factored by the supplied case weights) and the component of \code{y}
 of the result is the proportion of successes.
 }
 \description{
-\code{glmb} is used to fit Bayesian generalized linear models, specified by giving a symbolic description of the linear predictor, a description of the error distribution, and a multivariate normal prior.
+\code{glmb} is used to fit Bayesian generalized linear models, specified by giving a symbolic descriptions of 
+the linear predictor,  the error distribution, and the prior distribution.
 }
 \details{
 The function \code{glmb} is a Bayesian version of the classical \code{\link{glm}} function.  Setup of

@@ -4,7 +4,10 @@
 #' The model is specified by providing a data vector, a design matrix, 
 #' the family (determining the likelihood function) and the pfamily (determining the 
 #' prior distribution).
-#' @param pfamily the prior family to use for the model (including the constants passed to prior). 
+#' @param y a vector of observations of length \code{m}.
+#' @param x for \code{rglmb} a design matrix of dimension \code{m * p} and for \code{print.rglmb} the object to be printed. 
+#' @param pfamily a description of the prior distribution and associated constants to be used in the model. This
+#' should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions.)
 #' @param offset an offset parameter
 #' @param weights a weighting variable
 #' @inheritParams glmb
@@ -12,6 +15,32 @@
 #' will be updated to return outputs consistent with other function
 #' @family modelfuns
 #' @seealso The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.
+#' 
+#' @references 
+#' Dobson, A. J. (1990)
+#' \emph{An Introduction to Generalized Linear Models.}
+#' London: Chapman and Hall.
+#' 
+#' Hastie, T. J. and Pregibon, D. (1992)
+#' \emph{Generalized linear models.}
+#' Chapter 6 of \emph{Statistical Models in S}
+#' eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
+#' McCullagh P. and Nelder, J. A. (1989)
+#' \emph{Generalized Linear Models.}
+#' London: Chapman and Hall.
+#' 
+#' Nygren, K.N. and Nygren, L.M (2006)
+#' Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
+#' vol.101, no.475, pp 1144-1156.
+#' 
+#' Raiffa, Howard and Schlaifer, R (1961)
+#' \emph{Applied Statistical Decision Theory.}
+#' Boston: Clinton Press, Inc.
+#' 
+#' Venables, W. N. and Ripley, B. D. (2002)
+#' \emph{Modern Applied Statistics with S.}
+#' New York: Springer.
+#' 
 #' @example inst/examples/Ex_rglmb.R
 #' @export 
 #' @rdname rglmb

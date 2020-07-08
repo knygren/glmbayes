@@ -1,11 +1,13 @@
 #' The Bayesian Linear Model Distribution
 #'
 #' \code{rlmb} is used to generate iid samples from Bayesian Linear Models with multivariate normal priors. 
-#' The model is specified by providing a data vector, a design matrix, and at least 2 prior constants.
+#' The model is specified by providing a data vector, a design matrix, and a pfamily (determining the 
+#' prior distribution).
 #' @name 
 #' rlmb
 #' @aliases
 #' rlmb
+#' rlmb.print
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
 #' @param y a vector of observations of length \code{m}.
 #' @param x for \code{rlmb} a design matrix of dimension \code{m * p} and for 
@@ -13,7 +15,7 @@
 #' @param pfamily a description of the prior distribution and associated constants to be used in the model. This
 #' should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions.)
 #' @param digits the number of significant digits to use when printing.
-#' @param \ldots additional optional arguments.
+#' @inheritParams lmb
 #' @return \code{rlmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
@@ -56,17 +58,12 @@
 #' @seealso The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.
 
 #' @references 
-#' Dobson, A. J. (1990)
-#' \emph{An Introduction to Generalized Linear Models.}
-#' London: Chapman and Hall.
-#' 
-#' Hastie, T. J. and Pregibon, D. (1992)
-#' \emph{Generalized linear models.}
-#' Chapter 6 of \emph{Statistical Models in S}
+#' Chambers, J.M.(1992) \emph{Linear models.} Chapter 4 of \emph{Statistical Models in S}
 #' eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
-#' McCullagh P. and Nelder, J. A. (1989)
-#' \emph{Generalized Linear Models.}
-#' London: Chapman and Hall.
+#' 
+#' Wilkinson, G.N. and Rogers, C.E. (1973). Symbolic descriptions of factorial models for 
+#' analysis of variance. \emph{Applied Statistics}, \bold{22}, 392-399.
+#' doi: \href{https://doi.org/10.2307/2346786}{10.2307/2346786}.
 #' 
 #' Nygren, K.N. and Nygren, L.M (2006)
 #' Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
@@ -75,10 +72,6 @@
 #' Raiffa, Howard and Schlaifer, R (1961)
 #' \emph{Applied Statistical Decision Theory.}
 #' Boston: Clinton Press, Inc.
-#' 
-#' Venables, W. N. and Ripley, B. D. (2002)
-#' \emph{Modern Applied Statistics with S.}
-#' New York: Springer.
 #' 
 #' @example inst/examples/Ex_rlmb.R
 #' @export

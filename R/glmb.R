@@ -1,13 +1,14 @@
 #' Fitting Bayesian Generalized Linear Models
 #'
-#' \code{glmb} is used to fit Bayesian generalized linear models, specified by giving a symbolic description of the linear predictor, a description of the error distribution, and a multivariate normal prior.
+#' \code{glmb} is used to fit Bayesian generalized linear models, specified by giving a symbolic descriptions of 
+#' the linear predictor,  the error distribution, and the prior distribution.
 #' @aliases
 #' glmb
 #' print.glmb
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
 #' @param pfamily a description of the prior distribution and associated constants to be used in the model. This
 #' should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions.)
-#' @param subset2 an optional vector specifying a subset of observations to be used in the fitting process.
+#' @param subset an optional vector specifying a subset of observations to be used in the fitting process.
 #' @param na.action a function which indicates what should happen when the data contain \code{NA}s.  The default is set by 
 #' the \code{na.action} setting of \code{\link{options}}, and is \code{\link[stats]{na.fail}} 
 #' if that is unset.  The \sQuote{factory-fresh} default is \code{stats{na.omit}}.  
@@ -91,7 +92,7 @@
 #' number of candidates generated before acceptance for each draw.
 #' @family modelfuns
 #' @seealso The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.
-
+#' 
 #' @references 
 #' Dobson, A. J. (1990)
 #' \emph{An Introduction to Generalized Linear Models.}
@@ -117,13 +118,12 @@
 #' \emph{Modern Applied Statistics with S.}
 #' New York: Springer.
 #' 
-#' 
 #' @example inst/examples/Ex_glmb.R
 #' 
 #' @export glmb
 #' @exportClass glmb
 
-glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1),n=1000,data, weights, subset2,
+glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1),n=1000,data, weights, subset,
                 offset,na.action, Gridtype=1,start = NULL, etastart, 
                  mustart,  control = list(...), model = TRUE, 
                  method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
@@ -132,6 +132,12 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
    # Note, renamed subset argument to subset2 as it caused conflict with subset function
 
     call <- match.call()
+
+    # In earlier iteration, subset did not work so used subset2 as argument.
+    # Trying to rename argument and then setting subset2=subset as part of process of changing
+      
+    #subset2=subset # line 153, 
+    
     if (is.character(family)) 
         family <- get(family, mode = "function", envir = parent.frame())
     if (is.function(family)) 
@@ -144,7 +150,7 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
         if (missing(data)) 
         data <- environment(formula)
     mf <- match.call(expand.dots = FALSE)
-    m <- match(c("formula", "data", "subset2", "weights", "na.action", 
+    m <- match(c("formula", "data", "subset", "weights", "na.action", 
         "etastart", "mustart", "offset"), names(mf), 0L)
     mf <- mf[c(1L, m)]
     mf$drop.unused.levels <- TRUE
@@ -208,9 +214,7 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
 
     ## Use the prior list to set the prior elements if it is not missing
     ## Error checking to verify that the correct elements are present
-    
   
-
     y<-fit$y	
     x<-fit$x
     b<-fit$coefficients

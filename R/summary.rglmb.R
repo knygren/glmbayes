@@ -24,33 +24,7 @@
 #' function. This is particularly true for the print output from the function 
 #' (i.e. the output of the function \code{\link{print.summary.rglmb}}).
 #' 
-#' @references 
-#' Dobson, A. J. (1990)
-#' \emph{An Introduction to Generalized Linear Models.}
-#' London: Chapman and Hall.
-#' 
-#' Hastie, T. J. and Pregibon, D. (1992)
-#' \emph{Generalized linear models.}
-#' Chapter 6 of \emph{Statistical Models in S}
-#' eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
-#' McCullagh P. and Nelder, J. A. (1989)
-#' \emph{Generalized Linear Models.}
-#' London: Chapman and Hall.
-#' 
-#' Nygren, K.N. and Nygren, L.M (2006)
-#' Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
-#' vol.101, no.475, pp 1144-1156.
-#' 
-#' Raiffa, Howard and Schlaifer, R (1961)
-#' \emph{Applied Statistical Decision Theory.}
-#' Boston: Clinton Press, Inc.
-#' 
-#' Spiegelhalter, et al
-#' 
-#' Venables, W. N. and Ripley, B. D. (2002)
-#' \emph{Modern Applied Statistics with S.}
-#' New York: Springer.
-#' 
+#' @seealso \code{\link{lmb}}, \code{\link{glmb}}, \code{\link{summary}}, \code{[stats]\link{summary.lm}},\code{[stats]\link{summary.glm}}. 
 #' @example inst/examples/Ex_summary.rglmb.R
 #' @export
 #' @method summary rglmb
@@ -171,18 +145,6 @@ summary.rglmb<-function(object,...){
   res
   
 }
-
-##  coefficients=out1
-##,coef.mode=Btilde,
-##dispersion=dispersion,
-##Prior=list(mean=as.numeric(mu),Precision=P),
-##prior.weights=wt,
-##y=y,
-##x=x,
-##famfunc=famfunc,
-##iters=draws,
-##Envelope=NULL,
-##loglike=LL
 
 
 #' @rdname summary.rglmb

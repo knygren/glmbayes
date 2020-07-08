@@ -2,6 +2,7 @@
 % Please edit documentation in R/rlmb.R
 \name{rlmb}
 \alias{rlmb}
+\alias{rlmb.print}
 \alias{print.rlmb}
 \title{The Bayesian Linear Model Distribution}
 \usage{
@@ -14,17 +15,29 @@ rlmb(n = 1, y, x, pfamily, offset = rep(0, nobs), weights = NULL)
 
 \item{y}{a vector of observations of length \code{m}.}
 
-\item{x}{a design matrix of dimension \code{m * p}.}
+\item{x}{for \code{rlmb} a design matrix of dimension \code{m * p} and for 
+\code{print.rlmb} the object to be printed.}
 
-\item{pfamily}{the prior family to use for the model (including the constants passed to prior).}
+\item{pfamily}{a description of the prior distribution and associated constants to be used in the model. This
+should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions.)}
 
-\item{offset}{an offset parameter}
+\item{offset}{this can be used to specify an a priori known component to be 
+included in the linear predictor during fitting. This should be \code{NULL} or a numeric 
+vector or matrix of extents
+matching those of the response.  One or more \code{offset} terms can be
+included in the formula instead or as well, and if more than one are specified their 
+sum is used.  See \code{model.offset}.}
 
-\item{weights}{a weighting variable}
+\item{weights}{an optional vector of weights to be used in the fitting
+    process.  Should be \code{NULL} or a numeric vector.
+    If non-NULL, weighted least squares is used with weights
+    \code{weights} (that is, minimizing \code{sum(w*e^2)}); otherwise
+    ordinary least squares is used.  See also \sQuote{Details},}
 
 \item{digits}{the number of significant digits to use when printing.}
 
-\item{\ldots}{additional optional arguments.}
+\item{...}{additional arguments to be passed to the low level
+    regression fitting functions (see below).}
 }
 \value{
 \code{rlmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
@@ -44,7 +57,8 @@ An object of class \code{"rglmb"} is a list containing at least the following co
 }
 \description{
 \code{rlmb} is used to generate iid samples from Bayesian Linear Models with multivariate normal priors. 
-The model is specified by providing a data vector, a design matrix, and at least 2 prior constants.
+The model is specified by providing a data vector, a design matrix, and a pfamily (determining the 
+prior distribution).
 }
 \details{
 The \code{rglmb} function produces iid samples for Bayesian generalized linear 
@@ -133,17 +147,12 @@ P<-0.1*diag(2)
 outtemp4=rlmb(n=1000,y=y,x=x,pfamily=dNormal_Gamma(mu=mu,Sigma=solve(P),shape=shape,rate=rate))
 }
 \references{
-Dobson, A. J. (1990)
-\emph{An Introduction to Generalized Linear Models.}
-London: Chapman and Hall.
-
-Hastie, T. J. and Pregibon, D. (1992)
-\emph{Generalized linear models.}
-Chapter 6 of \emph{Statistical Models in S}
+Chambers, J.M.(1992) \emph{Linear models.} Chapter 4 of \emph{Statistical Models in S}
 eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
-McCullagh P. and Nelder, J. A. (1989)
-\emph{Generalized Linear Models.}
-London: Chapman and Hall.
+
+Wilkinson, G.N. and Rogers, C.E. (1973). Symbolic descriptions of factorial models for 
+analysis of variance. \emph{Applied Statistics}, \bold{22}, 392-399.
+doi: \href{https://doi.org/10.2307/2346786}{10.2307/2346786}.
 
 Nygren, K.N. and Nygren, L.M (2006)
 Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
@@ -152,10 +161,6 @@ vol.101, no.475, pp 1144-1156.
 Raiffa, Howard and Schlaifer, R (1961)
 \emph{Applied Statistical Decision Theory.}
 Boston: Clinton Press, Inc.
-
-Venables, W. N. and Ripley, B. D. (2002)
-\emph{Modern Applied Statistics with S.}
-New York: Springer.
 }
 \seealso{
 The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.
