@@ -57,7 +57,6 @@ pfamily.default <- function(object, ...){
 
 #' @rdname pfamily
 #' @order 6
-#' @keywords internal
 
 print.pfamily <- function(x, ...)
 {
@@ -156,7 +155,7 @@ dGamma<-function(shape,rate,beta){
   attr(prior_list,"Prior Type")="dGamma"  
   outlist=list(pfamily="dGamma",prior_list=prior_list,okfamilies=okfamilies,
                plinks=plinks,             
-               simfun=rglmb_dispersion)
+               simfun=rGamma_reg)
                
   attr(outlist,"Prior Type")="dGamma"
   class(outlist)="pfamily"

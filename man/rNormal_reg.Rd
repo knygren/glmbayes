@@ -163,7 +163,7 @@ New York: Springer.
 }
 \seealso{
 Other simulation functions
-\code{\link{rglmb_dispersion}()},
+\code{\link{rGamma_reg}()},
 \code{\link{rnorm_gamma_reg}()}
 }
 \concept{simfuncs}

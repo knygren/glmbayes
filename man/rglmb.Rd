@@ -93,4 +93,3 @@ summary(out)
 # Add mean(out$iters to rglmb summary function)
 mean(out$iters)
 }
-\keyword{internal}

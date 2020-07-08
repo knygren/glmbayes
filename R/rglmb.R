@@ -68,7 +68,6 @@ rglmb<-function(n=1,y,x,family=gaussian(),pfamily,offset=NULL,weights=1){
 #' @order 4
 #' @method print rglmb
 #' @export
-#' @keywords internal
 
 print.rglmb<-function (x, digits = max(3, getOption("digits") - 3), ...) 
 {

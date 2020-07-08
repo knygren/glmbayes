@@ -319,7 +319,6 @@ if (is.null(offset)) {
 #' @rdname glmb
 #' @method print glmb
 #' @export 
-#' @keywords internal 
 
 print.glmb<-function (x, digits = max(3, getOption("digits") - 3), ...) 
 {
@@ -360,6 +359,7 @@ print.glmb<-function (x, digits = max(3, getOption("digits") - 3), ...)
 #' \item{pD}{Effective number of parameters}
 #' \item{DIC}{DIC statistic}
 #' @example inst/examples/Ex_glmbdic.R
+#' @export 
 #' @noRd
 
 DIC_Info<-function(coefficients,y,x,alpha=0,f1,f4,wt=1,dispersion=1){

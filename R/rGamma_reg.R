@@ -40,13 +40,13 @@
 #' @references A reference
 #' @example inst/examples/Ex_rglmb_dispersion.R
 #' @export 
-#' @rdname rglmb_dispersion
+#' @rdname rGamma_reg
 #' @order 1
 
 ## Offset in this model may need to be handled better
 
 
-rglmb_dispersion<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
+rGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
     
   call <- match.call()
 
@@ -160,7 +160,7 @@ if(family$family=="Gamma")
 
   outlist$call<-match.call()
   
-  class(outlist)<-c(outlist$class,"rglmbdisp")
+  class(outlist)<-c(outlist$class,"rGamma_reg")
 
   return(outlist)
 
@@ -168,12 +168,11 @@ if(family$family=="Gamma")
 
 
 #' @export
-#' @rdname rglmb_dispersion
+#' @rdname rGamma_reg
 #' @order 3
-#' @method print rglmb_dispersion
-#' @keywords  internal
+#' @method print rGamma_reg
 
-print.rglmb_dispersion<-function (x, digits = max(3, getOption("digits") - 3), ...) 
+print.rGamma_reg<-function (x, digits = max(3, getOption("digits") - 3), ...) 
 {
   
   cat("\nCall:  ", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
@@ -188,12 +187,12 @@ print.rglmb_dispersion<-function (x, digits = max(3, getOption("digits") - 3), .
 }
 
 #' @export
-#' @rdname rglmb_dispersion
+#' @rdname rGamma_reg
 #' @order 3
-#' @method summary rglmb_dispersion
+#' @method summary rGamma_reg
 
 
-summary.rglmb_dispersion<-function(object,...){
+summary.rGamma_reg<-function(object,...){
   
   n<-length(object$dispersion)  
   percentiles<-matrix(0,nrow=1,ncol=7)

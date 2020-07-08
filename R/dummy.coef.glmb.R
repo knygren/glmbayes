@@ -152,7 +152,6 @@ dummy.coef.glmb<-function (object, use.na = FALSE, ...)
 #' @method print dummy_coef.glmb
 #' @importFrom utils head
 #' @export
-#' @keywords internal
 
 print.dummy_coef.glmb<-function(x, ...){
 

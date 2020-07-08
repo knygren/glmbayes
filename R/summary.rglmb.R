@@ -188,7 +188,6 @@ summary.rglmb<-function(object,...){
 #' @rdname summary.rglmb
 #' @export
 #' @method print summary.rglmb
-#' @keywords  internal
 
 print.summary.rglmb<-function(x,digits = max(3, getOption("digits") - 3),...){
   cat("Call\n")

@@ -134,7 +134,7 @@ pfamily.
 simulation functions.
 
 Other simulation functions
-\code{\link{rNormal_reg}()},
-\code{\link{rglmb_dispersion}()}
+\code{\link{rGamma_reg}()},
+\code{\link{rNormal_reg}()}
 }
 \concept{simfuncs}

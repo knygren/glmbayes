@@ -87,4 +87,3 @@ V0<-((mysd)^2)*diag(5)
 glmb.D93<-glmb(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu,Sigma=V0))
 summary(glmb.D93)
 }
-\keyword{internal}

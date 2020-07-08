@@ -132,7 +132,6 @@ summary.glmb<-function(object,...){
 #' @rdname summary.glmb
 #' @export
 #' @method print summary.glmb
-#' @keywords  internal
 
 print.summary.glmb<-function(x,digits = max(3, getOption("digits") - 3),...){
   cat("Call\n")

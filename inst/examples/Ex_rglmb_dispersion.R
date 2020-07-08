@@ -56,7 +56,7 @@ rate/shape ## Should match v_prior (currently also v_old)
 
 prior_list=list(beta=b_old,shape=shape,rate=rate)
 
-dispout<-rglmb_dispersion(n=n,y,x,prior_list=prior_list,
+dispout<-rGamma_reg(n=n,y,x,prior_list=prior_list,
 offset= rep(0, length(y)),family=gaussian())
 
 mean(dispout$dispersion) 
