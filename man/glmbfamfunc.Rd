@@ -43,3 +43,4 @@ f3<-famfunc$f3
 f5<-famfunc$f5
 f6<-famfunc$f6
 }
+\keyword{internal}

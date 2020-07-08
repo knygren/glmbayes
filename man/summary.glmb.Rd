@@ -53,9 +53,9 @@ print(d.AD <- data.frame(treatment, outcome, counts))
 
 mysd<-1
 mu<-matrix(0,5)
-mu=log(mean(counts))
+mu[1,1]=log(mean(counts))
 V0<-((mysd)^2)*diag(5)
-glmb.D93<-glmb(n=n,counts ~ outcome + treatment, family = poisson(),
+glmb.D93<-glmb(counts ~ outcome + treatment, family = poisson(),
 pfamily=dNormal(mu=mu,Sigma=V0))
 summary(glmb.D93)
 

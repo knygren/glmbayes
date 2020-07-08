@@ -1,3 +1,4 @@
+#' @keywords internal
 #' @rdname Normal_ct
 #' @order 2
 #' @export

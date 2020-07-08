@@ -29,6 +29,7 @@
 #' \item{draws}{A vector with the number of candidates required before 
 #' acceptance for each draw}
 #' @details Simulates from the posterior density of a model in standard form
+#' @keywords internal
 #' @example inst/examples/Ex_rnnorm_reg_std.R
 #' @export
 

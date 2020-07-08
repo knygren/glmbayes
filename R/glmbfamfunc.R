@@ -23,6 +23,7 @@
 #' @export
 #' @rdname glmbfamfunc
 #' @order 1
+#' @keywords internal
 
 glmbfamfunc<-function(family){
 
@@ -365,6 +366,7 @@ if(family$family=="Gamma" && family$link=="log")
 #' @rdname glmbfamfunc
 #' @order 2
 #' @method print glmbfamfunc
+#' @keywords internal
 
 
 print.glmbfamfunc<-function(x,...)

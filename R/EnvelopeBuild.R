@@ -68,6 +68,7 @@
 #'     
 #' @example inst/examples/Ex_EnvelopeBuild.R
 #' @export
+#' @keywords internal
 
 
 

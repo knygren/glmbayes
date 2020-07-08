@@ -9,6 +9,7 @@
 #' @param P A matrix
 #' @param family A family
 #' @return The sum of \code{x} and \code{y}
+#' @keywords internal
 #' @examples
 #' 1+1
 #' 10+1

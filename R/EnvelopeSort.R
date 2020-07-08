@@ -30,6 +30,7 @@
 #' speed up simulation once the envelope is constructed.
 #' @example inst/examples/Ex_EnvelopeSort.R
 #' @export
+#' @keywords internal
 
 
 

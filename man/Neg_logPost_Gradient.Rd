@@ -33,3 +33,4 @@ Gradient for the Negative Log-Posterior of a Bayesian Generalized Linear Model
 1+1
 10+1
 }
+\keyword{internal}

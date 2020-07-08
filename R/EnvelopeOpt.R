@@ -16,6 +16,7 @@
 #' @seealso \code{\link{rglmb}}, \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeSort}} 
 #' @example inst/examples/Ex_EnvelopeOpt.R
 #' @export
+#' @keywords internal
 
 
 EnvelopeOpt<-function(a1,n){

@@ -37,6 +37,7 @@
 #' in the standardized model are approximately independent at the posterior mode.
 #' @example inst/examples/Ex_glmb_Standardize_Model.R
 #' @export
+#' @keywords internal
 
 
 glmb_Standardize_Model<-function(y, x, P, bstar, A1){

@@ -120,3 +120,4 @@ Env2
 \seealso{
 \code{\link{rglmb}}, \code{\link{EnvelopeBuild}}, \code{\link{EnvelopeSort}}
 }
+\keyword{internal}

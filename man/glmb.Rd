@@ -209,10 +209,10 @@ summary(glmb.D93)
 
 # Menarche Binomial Data Example 
 data(menarche2)
-Age2=Age-13
+Age2=menarche2$Age-13
 
 #Priors Are Derived in Vignette
-
+nvars=2
 ## Logit Prior and Model
 mu1=as.matrix(c(0,1.098612),ncol=1)
 V1<-1*diag(nvars)

@@ -66,3 +66,4 @@ log(pnorm_ct(0.2,0.4,log.p=FALSE))
 pnorm(0.5)-pnorm(0.4999999999999999)
 pnorm_ct(0.4999999999999999,0.5,log.p=FALSE)
 }
+\keyword{internal}

@@ -36,7 +36,7 @@ nvars=2
 ref_age1=13  # user can modify this
 ref_age2=15  ## user can modify this
 ## Define variables used later in analysis
-Age2=Age-ref_age1
+Age2=menarche2$Age-ref_age1
 Age_Diff=ref_age2-ref_age1
 mu1=as.matrix(c(0,1.098612),ncol=1)
 V1<-1*diag(nvars)
