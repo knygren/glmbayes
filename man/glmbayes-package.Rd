@@ -15,10 +15,10 @@ using three main functions. For models with fixed dispersion parameters, the \co
 function is the workhorse function and comes with a minimialistic interface for the input and output.
 It is also suitable for use as part of block Gibbs sampling procedures. The \code{\link{glmb}} function is 
 essentially a wrapper function for the rglmb function that provides an interface closer to that of the \code{\link{glm}} 
-function. The \code{\link{rglmb_dispersion}} function can be leveraged in order to produce samples for the 
+function. The \code{\link{rGamma_reg}} function can be leveraged in order to produce samples for the 
 dispersion parameters associated with the gaussian and Gamma link functions. Most methods 
 defined for the output of the \code{\link{glm}} function are also defined for the \code{\link{glmb}}, 
-\code{\link{rglmb}}, and \code{\link{rglmb_dispersion}} functions (see their respective documentation 
+\code{\link{rglmb}}, and \code{\link{rGamma_reg}} functions (see their respective documentation 
 for details).
 
 For the regression parameters, multivariate normal priors are assumed. Simulation for the 
@@ -36,9 +36,9 @@ approach for the iid sampling. Models that fail to have log-concave likelihood f
 implemented.  Our demos (viewable by entering the \code{demo()} command) provides examples of each 
 of these families and links. 
 
-The current implementation requires separate use of the \code{\link{rglmb_dispersion}} function in order 
+The current implementation requires separate use of the \code{\link{rGamma_reg}} function in order 
 to generate samples for dispersion parameters (gaussian, Gammma, quasipoisson, quasi-binomial 
-families). Our demos include examples of the joint use of the \code{\link{rglmb}} and \code{\link{rglmb_dispersion}} to 
+families). Our demos include examples of the joint use of the \code{\link{rglmb}} and \code{\link{rGamma_reg}} to 
 produce samples for both regression and dispersion parameters using two-block Gibbs samplers. 
 As these two-block Gibbs samplers likely are geometrically ergodic, future implementations may 
 incorporate these two-block Gibbs samplers into the \code{\link{rglmb}} and \code{\link{glmb}} functions by leveraging 

@@ -36,7 +36,7 @@ this can be a character string naming a family function, a family function or th
 (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
 \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
-various useful features of the value returned by \code{\link{rnorm_gamma_reg}}.
+various useful features of the value returned by \code{\link{rNormal_reg}}.
 An object of class \code{"rglmb"} is a list containing at least the following components:
 \item{coefficients}{a \code{n} by \code{length(mu)} matrix with one sample in each row}
 \item{PostMode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
@@ -164,6 +164,6 @@ New York: Springer.
 \seealso{
 Other simulation functions
 \code{\link{rGamma_reg}()},
-\code{\link{rnorm_gamma_reg}()}
+\code{\link{rNormal_Gamma_reg}()}
 }
 \concept{simfuncs}

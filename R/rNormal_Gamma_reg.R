@@ -1,6 +1,6 @@
 #' The Bayesian Normal-Gamma Regression Distribution
 #'
-#' \code{rnorm_gamma_reg} is used to generate iid samples from Bayesian linear models with a normal-gamma prior. 
+#' \code{rNormal_Gamma_reg} is used to generate iid samples from Bayesian linear models with a normal-gamma prior. 
 #' The model is specified by providing a data vector, a design matrix, and 4 prior constants.
 #'
 #' 
@@ -12,11 +12,11 @@
 #' @param offset this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
 #' @param weights an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
 #' @inheritParams glmb
-#' @return \code{rnorm_gamma_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 
+#' @return \code{rNormal_Gamma_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
 #' \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
-#' various useful features of the value returned by \code{\link{rnorm_gamma_reg}}.
+#' various useful features of the value returned by \code{\link{rNormal_Gamma_reg}}.
 #' An object of class \code{"rglmb"} is a list containing at least the following components:
 #' \item{coefficients}{a \code{n} by \code{length(mu)} matrix with one sample in each row}
 #' \item{PostMode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
@@ -26,7 +26,7 @@
 #' \item{Envelope}{an object of class \code{"envelope"}  }
 #' \item{dispersion}{an \code{n} by \code{1} matrix with simulated values for the dispersion}
 #' \item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
-#' @details The \code{rnorm_gamma} function produces iid samples for Bayesian generalized linear 
+#' @details The \code{rNormal_Gamma_reg} function produces iid samples for Bayesian generalized linear 
 #' models from the gaussian family (identity link) with a conjugate multivariate normal-gamma prior
 #' for the regression coefficients and the dispersion (variance).
 #' See Raiffa and Schlaifer (1961) for details on conjugate priors. 
@@ -71,7 +71,7 @@
 #' @export
 
 
-rnorm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
+rNormal_Gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
 
 ## Added for consistency with earlier verion of function
   

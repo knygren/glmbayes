@@ -215,7 +215,7 @@ dNormal_Gamma<-function(mu, Sigma,shape, rate){
   prior_list=list(mu=mu,Sigma=Sigma,shape=shape,rate=rate)
   attr(prior_list,"Prior Type")="dNormal_Gamma"  
   outlist=list(pfamily="dNormal_Gamma",call=call,prior_list=prior_list,
-    okfamilies=okfamilies,plinks=plinks,simfun=rnorm_gamma_reg)
+    okfamilies=okfamilies,plinks=plinks,simfun=rNormal_Gamma_reg)
   
   attr(outlist,"Prior Type")="dNormal_Gamma"             
   class(outlist)="pfamily"

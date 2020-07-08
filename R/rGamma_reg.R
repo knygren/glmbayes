@@ -1,10 +1,10 @@
 #' The Bayesian Generalized Linear Model Dispersion Distribution
 #'
-#' \code{rglmb_dispersion} is used to generate iid samples for the dispersion parameter in Bayesian Generalized Linear models. 
+#' \code{rGamma_reg} is used to generate iid samples for the dispersion parameter in Bayesian Generalized Linear models. 
 #' The model is specified by providing the model structure, regression coefficient, and a Gamma prior.
 #' @aliases
-#' rglmb_dispersion
-#' print.rglmb_dispersion
+#' rGamma_reg
+#' print.rGamma_reg
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
 #' @param y a vector of observations of length \code{m}.
 #' @param x a design matrix of dimension \code{m * p}.
@@ -16,15 +16,15 @@
 #' @param digits Number of significant digits to use for printed outpute
 #' @param object an object of class \code{"glmb_dispersion"} that is to be summarized
 #' @param \ldots further arguments passed to or from other methods
-#' @return \code{rglmb_dispersion} returns a object of class \code{"rglmbdisp"}.  The function \code{summary} 
+#' @return \code{rGamma_reg} returns a object of class \code{"rglmbdisp"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
 #' \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
-#' various useful features of the value returned by \code{\link{rglmb_dispersion}}.
+#' various useful features of the value returned by \code{\link{rGamma_reg}}.
 #' An object of class \code{"rglmbdisp"} is a list containing at least the following components:
 #' \item{dispersion}{an \code{n} by \code{1} matrix with simulated values for the dispersion}
 #' \item{Prior}{A list with two components. The first being the prior mean vector and the second the prior precision matrix}
-#' @details The \code{rglmb_dispersion} function produces iid samples for 
+#' @details The \code{rGamma_reg} function produces iid samples for 
 #' the dispersion parameter in Bayesian generalized linear models (gaussian and Gamma families
 #' only). Core required inputs for the function include the data vector, the design  
 #' matrix, an estimate for the regression coefficients, and a prior gamma distribution specification. 
