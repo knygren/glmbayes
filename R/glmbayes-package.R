@@ -2,7 +2,6 @@
 #'
 #' Generates iid samples for Bayesian Generalized Linear Models.
 #' @aliases
-#' glmbayes-package
 #' glmbayes
 #' @details 
 #' The \code{glmbayes} package produces iid samples for Bayesian Genereralized Linear Models and is
@@ -79,6 +78,5 @@
 #' @importFrom Rcpp evalCpp
 #' @importFrom MASS mvrnorm
 #' @useDynLib glmbayes
-#' @name glmbayes-package
-#' 
+#' @name glmbayes
 NULL

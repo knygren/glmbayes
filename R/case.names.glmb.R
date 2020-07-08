@@ -1,6 +1,6 @@
 #' Case and Variable Names of Fitted Models
 #'
-#' Simple utilities returning (non-missing) canse names, and (non-eliminated) variable names.
+#' Simple utilities returning (non-missing) case names, and (non-eliminated) variable names.
 #' @param object a fitted model object, typically of class \code{"glmb"}. 
 #' @param full logical; if \code{TRUE}, all names (including zero weights, ...) are returned.
 #' @param \ldots further arguments passed to or from other methods.

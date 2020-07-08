@@ -15,14 +15,16 @@
     "issued": {
       "date-parts": [
         [
-          2006
+          2006,
+          9
         ]
       ]
     },
-    "publisher": "Cambridge University Press",
-    "publisher-place": "Cambridge",
     "title": "Likelihood Subgradient Densities",
-    "type": "book"
+    "publisher": "Taylor and Francis, Ltd",
+    "volume": "101",
+     "page": "1144-1156",
+   "type": "article-journal"
   },
   {
     "author": [
