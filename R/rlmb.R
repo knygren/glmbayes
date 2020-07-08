@@ -185,6 +185,7 @@ rlmb<-function(n=1,y,x,pfamily,offset=rep(0,nobs),weights=NULL)
 #' @order 2
 #' @export
 #' @method print rlmb
+#' @keywords  internal
 
 
 print.rlmb<-function (x, digits = max(3, getOption("digits") - 3), ...) 

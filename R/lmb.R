@@ -321,6 +321,7 @@ if (!is.null(offset)) {
 #' @rdname lmb
 #' @method print lmb
 #' @export 
+#' @keywords internal
 
 print.lmb<-function (x, digits = max(3, getOption("digits") - 3), ...) 
 {

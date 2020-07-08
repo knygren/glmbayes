@@ -169,8 +169,9 @@ if(family$family=="Gamma")
 
 #' @export
 #' @rdname rglmb_dispersion
-#' @order 2
+#' @order 3
 #' @method print rglmb_dispersion
+#' @keywords  internal
 
 print.rglmb_dispersion<-function (x, digits = max(3, getOption("digits") - 3), ...) 
 {

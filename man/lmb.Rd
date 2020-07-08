@@ -228,3 +228,4 @@ Venables, W. N. and Ripley, B. D. (2002)
 \emph{Modern Applied Statistics with S.}
 New York: Springer.
 }
+\keyword{internal}

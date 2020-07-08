@@ -52,3 +52,4 @@ summary(glmb.D93)
 myd=dummy.coef(glmb.D93)
 print(myd)
 }
+\keyword{internal}

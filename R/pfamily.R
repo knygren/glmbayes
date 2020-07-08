@@ -57,6 +57,7 @@ pfamily.default <- function(object, ...){
 
 #' @rdname pfamily
 #' @order 6
+#' @keywords internal
 
 print.pfamily <- function(x, ...)
 {
@@ -119,7 +120,7 @@ dNormal<-function(mu,Sigma,dispersion=NULL){
 
   outlist=list(pfamily="dNormal",prior_list=prior_list,okfamilies=okfamilies,
   plinks=plinks,             
-  simfun=rglmb_norm_reg)
+  simfun=rNormal_reg)
   attr(outlist,"Prior Type")="dNormal"             
   class(outlist)="pfamily"
   outlist$call<-match.call()

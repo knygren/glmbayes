@@ -1,6 +1,6 @@
 #' The Bayesian Generalized Linear Model with Normal Prior Distribution
 #'
-#' \code{rglmb_norm_reg} is used to generate iid samples from Bayesian Generalized linear 
+#' \code{rNormal_reg} is used to generate iid samples from Bayesian Generalized linear 
 #' models with a normal prior. The model is specified by providing a data vector, a design matrix, 
 #' and 2 prior constants (mu and Sigma) for the normal prior.
 #'
@@ -12,7 +12,7 @@
 #' @param offset this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
 #' @param weights an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
 #' @inheritParams glmb
-#' @return \code{rglmb_norm_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 
+#' @return \code{rNormal_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
 #' \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
@@ -102,7 +102,7 @@
 #' 
 #' @example inst/examples/Ex_rnorm_gamma_reg.R
 
-rglmb_norm_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
+rNormal_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
 
 ## Added for consistency with earlier verion of function
   

@@ -23,7 +23,7 @@
 #' is low.}
 #' @example inst/examples/Ex_extractAIC.glmb.R
 #' @export
-#' @keywords internal
+#' @keywords  internal
 
 
 setlogP<-function(logP, NegLL, cbars, G3){
