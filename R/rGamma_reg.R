@@ -165,7 +165,7 @@ if(family$family=="Gamma")
     prior.weights=weights,
     y=y,
     x=x,
-    famfunc=famfunc(family),
+    famfunc=glmbfamfunc(family),
     iters=rep(1,n),
     Envelope=NULL
     )

@@ -21,7 +21,7 @@
 #' \code{\link[stats]{model.extract}}.
 #' @param Gridtype an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.
 #' @param digits the number of significant digits to use when printing.
-#' @inheritParams stats::glm
+#' @inheritParams   stats::glm 
 #' @return \code{glmb} returns an object of class \code{"glmb"}. The function \code{summary} (i.e., 
 #' \code{\link{summary.glmb}}) can be used to obtain or print a summary of the results.  The generic accessor functions 
 #' \code{\link{coefficients}}, \code{\link{fitted.values}}, \code{\link{residuals}}, and \code{\link{extractAIC}} can be used 

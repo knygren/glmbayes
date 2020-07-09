@@ -7,20 +7,24 @@
 #' @param y a vector of observations of length \code{m}.
 #' @param x for \code{rglmb} a design matrix of dimension \code{m * p} and for \code{print.rglmb} the object to be printed. 
 #' @inheritParams glmb
+#' @inheritDotParams 
 #' @return \code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
 #' \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
 #' various useful features of the value returned by \code{\link{rglmb}}.
 #' An object of class \code{"rglmb"} is a list containing at least the following components:
-#' \item{coefficients}{a \code{n} by \code{length(mu)} matrix with one sample in each row}
-#' \item{PostMode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
-#' \item{Prior}{A list with two components. The first being the prior mean vector and the second the prior precision matrix}
+#' \item{coefficients}{a matrix of dimension \code{n} by \code{length(mu)} with one sample in each row}
+#' \item{coef.mode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
+#' \item{dispersion}{Either a constant provided as part of the call, or a vector of length \code{n} with one sample in each row.}
+#' \item{Prior}{A list with the priors specified for the model in question. Items in the
+#' list may vary based on the type of prior}
+#' \item{prior.weights}{a vector of weights specified or implied by the model} 
+#' \item{y}{a vector with the dependent variable} 
+#' \item{x}{a matrix with the implied design matrix for the model} 
+#' \item{famfunc}{Family functions used during estimation process}
 #' \item{iters}{an \code{n} by \code{1} matrix giving the number of candidates generated before acceptance for each sample.}
-#' \item{famfunc}{an object of class \code{"famfunc"}}
-#' \item{Envelope}{an object of class \code{"envelope"}  }
-#' \item{dispersion}{the dispersion parameter used in the model}
-#' \item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
+#' \item{Envelope}{the envelope that was used during sampling}
 #' 
 #' @author The \R implementation of \code{rglmb} has been written by Kjell Nygren and
 #' was built to be a Bayesian version of the \code{glm} function but with a more minimalistic interface 

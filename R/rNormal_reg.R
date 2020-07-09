@@ -224,6 +224,7 @@ start=start,family=family$family,link=family$link,Gridtype=Gridtype)
 colnames(outlist$coefficients)<-colnames(x)
 
 # include family in final list
+
 rglmb_df=as.data.frame(cbind(y,x))
 rglmb_f=DF2formula(rglmb_df)
 rglmb_mf=model.frame(rglmb_f,rglmb_df)

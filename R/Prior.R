@@ -65,7 +65,9 @@ Prior_Setup<-function(formula,data=NULL, subset = NULL, na.action = na.fail,
 #' @rdname Prior_Check
 #' @order 1
 
-Prior_Check<-function(formula,family,pfamily,level=0.95,data=NULL){
+Prior_Check<-function(formula,family,pfamily,level=0.95,data=NULL, weights, subset,na.action, 
+                      start = NULL, etastart, mustart, offset ,control = list(...) , model = TRUE, 
+                      method = "glm.fit",x = FALSE, y = TRUE, contrasts = NULL, ...){
   
   pf=pfamily
   prior_list=pfamily$prior_list

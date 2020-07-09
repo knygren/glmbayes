@@ -4,7 +4,27 @@
 \alias{Prior_Check}
 \title{Checks for Prior-data conflicts}
 \usage{
-Prior_Check(formula, family, pfamily, level = 0.95, data = NULL)
+Prior_Check(
+  formula,
+  family,
+  pfamily,
+  level = 0.95,
+  data = NULL,
+  weights,
+  subset,
+  na.action,
+  start = NULL,
+  etastart,
+  mustart,
+  offset,
+  control = list(...),
+  model = TRUE,
+  method = "glm.fit",
+  x = FALSE,
+  y = TRUE,
+  contrasts = NULL,
+  ...
+)
 }
 \arguments{
 \item{formula}{an object of class \code{"\link[stats]{formula}"} (or one that
@@ -28,6 +48,80 @@ Prior_Check(formula, family, pfamily, level = 0.95, data = NULL)
     the variables in the model.  If not found in \code{data}, the
     variables are taken from \code{environment(formula)},
     typically the environment from which \code{glm} is called.}
+
+\item{weights}{an optional vector of \sQuote{prior weights} to be used
+    in the fitting process.  Should be \code{NULL} or a numeric vector.}
+
+\item{subset}{an optional vector specifying a subset of observations
+    to be used in the fitting process.}
+
+\item{na.action}{a function which indicates what should happen
+    when the data contain \code{NA}s.  The default is set by
+    the \code{na.action} setting of \code{\link{options}}, and is
+    \code{\link[stats]{na.fail}} if that is unset.  The \sQuote{factory-fresh}
+    default is \code{\link[stats]{na.omit}}.  Another possible value is
+    \code{NULL}, no action.  Value \code{\link[stats]{na.exclude}} can be useful.}
+
+\item{start}{starting values for the parameters in the linear predictor.}
+
+\item{etastart}{starting values for the linear predictor.}
+
+\item{mustart}{starting values for the vector of means.}
+
+\item{offset}{this can be used to specify an \emph{a priori} known
+    component to be included in the linear predictor during fitting.
+    This should be \code{NULL} or a numeric vector of length equal to
+    the number of cases.  One or more \code{\link[stats]{offset}} terms can be
+    included in the formula instead or as well, and if more than one is
+    specified their sum is used.  See \code{\link[stats]{model.offset}}.}
+
+\item{control}{a list of parameters for controlling the fitting
+    process.  For \code{glm.fit} this is passed to
+    \code{\link[stats]{glm.control}}.}
+
+\item{model}{a logical value indicating whether \emph{model frame}
+    should be included as a component of the returned value.}
+
+\item{method}{the method to be used in fitting the model.  The default
+    method \code{"glm.fit"} uses iteratively reweighted least squares
+    (IWLS): the alternative \code{"model.frame"} returns the model frame
+    and does no fitting.
+
+    User-supplied fitting functions can be supplied either as a function
+    or a character string naming a function, with a function which takes
+    the same arguments as \code{glm.fit}.  If specified as a character
+    string it is looked up from within the \pkg{stats} namespace.
+  }
+
+\item{x}{For \code{glm}:
+    logical values indicating whether the response vector and model
+    matrix used in the fitting process should be returned as components
+    of the returned value.
+
+    For \code{glm.fit}: \code{x} is a design matrix of dimension
+    \code{n * p}, and \code{y} is a vector of observations of length
+    \code{n}.
+  }
+
+\item{y}{For \code{glm}:
+    logical values indicating whether the response vector and model
+    matrix used in the fitting process should be returned as components
+    of the returned value.
+
+    For \code{glm.fit}: \code{x} is a design matrix of dimension
+    \code{n * p}, and \code{y} is a vector of observations of length
+    \code{n}.
+  }
+
+\item{contrasts}{an optional list. See the \code{contrasts.arg}
+    of \code{model.matrix.default}.}
+
+\item{...}{
+    For \code{glm}: arguments to be used to form the default
+    \code{control} argument if it is not supplied directly.
+
+    For \code{weights}: further arguments passed to or from other methods.
+  }
 }
 \value{
 A vector where each item provided the ratio of the absolue value for the difference between the 
