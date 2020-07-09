@@ -7,7 +7,6 @@
 #' @param y a vector of observations of length \code{m}.
 #' @param x for \code{rglmb} a design matrix of dimension \code{m * p} and for \code{print.rglmb} the object to be printed. 
 #' @inheritParams glmb
-#' @inheritDotParams 
 #' @return \code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},

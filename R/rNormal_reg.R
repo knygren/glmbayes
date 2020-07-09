@@ -106,6 +106,7 @@
 rNormal_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
 
 ## Added for consistency with earlier verion of function
+## Useful to copy offset and weight and then to modify to non-null as needed  
   
 offset2=offset
 wt=weights
@@ -209,14 +210,18 @@ else {
 
 
 if(family$family=="gaussian"){ 
-  outlist<-.rnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)
+  outlist<-.rnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset=offset2,wt=wt,dispersion=dispersion,
+    ##                      famfunc=famfunc,f1=f1,
+                          f2=f2,f3=f3,start=mu)
 
   }
 else{
   if(is.null(dispersion)){dispersion2=1}
   else{dispersion2=dispersion}
-  outlist<-.rnnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,
-dispersion=dispersion2,famfunc=famfunc,f1=f1,f2=f2,f3=f3,
+  outlist<-.rnnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset=offset2,wt=wt,
+dispersion=dispersion2,
+##famfunc=famfunc,f1=f1,
+f2=f2,f3=f3,
 start=start,family=family$family,link=family$link,Gridtype=Gridtype)
 }
 
@@ -229,7 +234,8 @@ rglmb_df=as.data.frame(cbind(y,x))
 rglmb_f=DF2formula(rglmb_df)
 rglmb_mf=model.frame(rglmb_f,rglmb_df)
 
-outlist$family=family  
+outlist$family=family
+outlist$famfunc=famfunc
 outlist$call<-match.call()
 outlist$offset2<-offset2
 outlist$formula<-rglmb_f

@@ -166,8 +166,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // rnnorm_reg_cpp
-Rcpp::List rnnorm_reg_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P, NumericVector offset2, NumericVector wt, double dispersion, Rcpp::List famfunc, Function f1, Function f2, Function f3, NumericVector start, std::string family, std::string link, int Gridtype);
-RcppExport SEXP _glmbayes_rnnorm_reg_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP offset2SEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP famfuncSEXP, SEXP f1SEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP) {
+Rcpp::List rnnorm_reg_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P, NumericVector offset, NumericVector wt, double dispersion, Function f2, Function f3, NumericVector start, std::string family, std::string link, int Gridtype);
+RcppExport SEXP _glmbayes_rnnorm_reg_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP offsetSEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -176,24 +176,22 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type mu(muSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type offset2(offset2SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type offset(offsetSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
     Rcpp::traits::input_parameter< double >::type dispersion(dispersionSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type famfunc(famfuncSEXP);
-    Rcpp::traits::input_parameter< Function >::type f1(f1SEXP);
     Rcpp::traits::input_parameter< Function >::type f2(f2SEXP);
     Rcpp::traits::input_parameter< Function >::type f3(f3SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type start(startSEXP);
     Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
     Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
     Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
-    rcpp_result_gen = Rcpp::wrap(rnnorm_reg_cpp(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype));
+    rcpp_result_gen = Rcpp::wrap(rnnorm_reg_cpp(n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family, link, Gridtype));
     return rcpp_result_gen;
 END_RCPP
 }
 // rnorm_reg_cpp
-Rcpp::List rnorm_reg_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P, NumericVector offset2, NumericVector wt, double dispersion, Rcpp::List famfunc, Function f1, Function f2, Function f3, NumericVector start, std::string family, std::string link, int Gridtype);
-RcppExport SEXP _glmbayes_rnorm_reg_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP offset2SEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP famfuncSEXP, SEXP f1SEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP) {
+Rcpp::List rnorm_reg_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P, NumericVector offset, NumericVector wt, double dispersion, Function f2, Function f3, NumericVector start, std::string family, std::string link, int Gridtype);
+RcppExport SEXP _glmbayes_rnorm_reg_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP offsetSEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -202,18 +200,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type mu(muSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type offset2(offset2SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type offset(offsetSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
     Rcpp::traits::input_parameter< double >::type dispersion(dispersionSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type famfunc(famfuncSEXP);
-    Rcpp::traits::input_parameter< Function >::type f1(f1SEXP);
     Rcpp::traits::input_parameter< Function >::type f2(f2SEXP);
     Rcpp::traits::input_parameter< Function >::type f3(f3SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type start(startSEXP);
     Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
     Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
     Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
-    rcpp_result_gen = Rcpp::wrap(rnorm_reg_cpp(n, y, x, mu, P, offset2, wt, dispersion, famfunc, f1, f2, f3, start, family, link, Gridtype));
+    rcpp_result_gen = Rcpp::wrap(rnorm_reg_cpp(n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family, link, Gridtype));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -228,8 +224,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_Inv_f3_gaussian", (DL_FUNC) &_glmbayes_Inv_f3_gaussian, 7},
     {"_glmbayes_glmb_Standardize_Model", (DL_FUNC) &_glmbayes_glmb_Standardize_Model, 5},
     {"_glmbayes_rnnorm_reg_std_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_std_cpp, 12},
-    {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 16},
-    {"_glmbayes_rnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnorm_reg_cpp, 16},
+    {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 14},
+    {"_glmbayes_rnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnorm_reg_cpp, 14},
     {NULL, NULL, 0}
 };
 

@@ -18,15 +18,19 @@ using namespace Rcpp;
 
 Rcpp::List rnorm_reg_cpp(int n,NumericVector y,NumericMatrix x, 
                          NumericVector mu,NumericMatrix P,
-                         NumericVector offset2,NumericVector wt,
+                         NumericVector offset,NumericVector wt,
                          double dispersion,
-                         Rcpp::List famfunc, 
-                         Function f1,Function f2,Function f3,
+                         Function f2,Function f3,
                            NumericVector start,
-                           std::string family="binomial",
-                           std::string link="logit",
+                           std::string family="gaussian",
+                           std::string link="identity",
                            int Gridtype=2      
 ) {
+
+  //                         Rcpp::List famfunc, 
+  //                         Function f1,
+  
+  NumericVector offset2=offset;
   
   // add checks to make sure that dimensions are consistent
   // (i) number of rows in y, offset2, and wt2 should equal rows of x
@@ -189,10 +193,11 @@ Rcpp::List rnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
     Rcpp::Named("coef.mode")=b2,
     Rcpp::Named("dispersion")=dispersion2,
     Rcpp::Named("Prior")=Prior,
+    Rcpp::Named("offset")=offset,
     Rcpp::Named("prior.weights")=wt,
     Rcpp::Named("y")=y,
     Rcpp::Named("x")=x,
-    Rcpp::Named("famfunc")=famfunc,
+//    Rcpp::Named("famfunc")=famfunc,
     Rcpp::Named("iters")=draws,
     Rcpp::Named("Envelope")=NULL
 //  ,  Rcpp::Named("loglike")=LL

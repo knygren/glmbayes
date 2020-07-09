@@ -171,6 +171,7 @@ outlist<-list(
   coefficients=out1
   ,coef.mode=Btilde,
   dispersion=dispersion,
+  offset=offset,
   Prior=list(mean=as.numeric(mu),Precision=P),
   prior.weights=wt,
   y=y,
