@@ -50,8 +50,11 @@ lm.D9=lm(weight~group)
 lmb.D9=lmb(weight ~ group,dNormal_Gamma(mu,V/disp_ML,shape=shape,rate=rate))
 lmb.D9_v2=lmb(weight ~ group,dNormal(mu,V,dispersion=disp_ML))
 
+glm.D9=glm(weight ~ group,family=gaussian())
+glmb.D9=glmb(weight ~ group,family=gaussian(),dNormal_Gamma(mu,V/disp_ML,shape=shape,rate=rate))
+glmb.D9_v2=glmb(weight ~ group,family=gaussian(),dNormal(mu,V,dispersion=disp_ML))
 
-lm.D9$weights  
+
 ```
 
 
@@ -74,6 +77,8 @@ summary(lmb.D9_v2)
 residuals(lm.D9)
 colMeans(residuals(lmb.D9))
 colMeans(residuals(lmb.D9_v2))
+
+residuals(glm.D9)
 
 ```
 
@@ -107,3 +112,43 @@ colMeans(logLik(lmb.D9))
 colMeans(logLik(lmb.D9_v2))
 
 ```
+
+```{r lm_confint}
+## Now produces correct results for both versions
+confint(lm.D9)
+confint(lmb.D9)
+confint(lmb.D9_v2)
+
+```
+```{r lm_deviance}
+## Note: Bayesian Deviance Estimates quite a bit larger than the Classical
+## This is because Classical minimizez the deviance
+## while the Bayesian model simulates over a range of possible values
+
+deviance(lm.D9)
+mean(deviance(lmb.D9))
+mean(deviance(lmb.D9_v2))
+
+deviance(glm.D9)
+mean(deviance(glmb.D9))
+mean(deviance(glmb.D9_v2))
+
+```
+
+```{r extractAIC}
+## Now produces correct results for both versions
+AIC(lm.D9)
+
+extractAIC(lm.D9)
+extractAIC(lmb.D9)
+extractAIC(lmb.D9_v2)
+
+extractAIC(glm.D9)
+extractAIC(glmb.D9)
+extractAIC(glmb.D9_v2)
+
+```
+
+
+
+

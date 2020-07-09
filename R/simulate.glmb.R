@@ -88,7 +88,6 @@ simulate.glmb<-function(object,nsim=1,seed=NULL,...){
     ## Verify this part - rather complicated    
     if(family=="gaussian") y_temp[i,1:nvars]=rnorm(n=nvars,mean=pred[i,1:nvars],sd=sqrt(1/wt))              
     
-    
   }
   
   return(y_temp)

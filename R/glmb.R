@@ -125,188 +125,192 @@
 
 glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1),n=1000,data, weights, subset,
                 offset,na.action, Gridtype=1,start = NULL, etastart, 
-                 mustart,  control = list(...), model = TRUE, 
-                 method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
-                 ...) 
-    {
-   # Note, renamed subset argument to subset2 as it caused conflict with subset function
-
-    call <- match.call()
-
-    # In earlier iteration, subset did not work so used subset2 as argument.
-    # Trying to rename argument and then setting subset2=subset as part of process of changing
+                mustart,  control = list(...), model = TRUE, 
+                method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
+                ...) 
+{
+  # Note, renamed subset argument to subset2 as it caused conflict with subset function
+  
+  call <- match.call()
+  
+  # In earlier iteration, subset did not work so used subset2 as argument.
+  # Trying to rename argument and then setting subset2=subset as part of process of changing
+  
+  #subset2=subset # line 153, 
+  
+  if (is.character(family)) 
+    family <- get(family, mode = "function", envir = parent.frame())
+  if (is.function(family)) 
+    family <- family()
+  if (is.null(family$family)) {
+    print(family)
+    stop("'family' not recognized")
+  }
+  
+  if (missing(data)) 
+    data <- environment(formula)
+  mf <- match.call(expand.dots = FALSE)
+  m <- match(c("formula", "data", "subset", "weights", "na.action", 
+               "etastart", "mustart", "offset"), names(mf), 0L)
+  mf <- mf[c(1L, m)]
+  mf$drop.unused.levels <- TRUE
+  mf[[1L]] <- quote(stats::model.frame)
+  mf <- eval(mf, parent.frame())
+  if (identical(method, "model.frame")) 
+    return(mf)
+  if (!is.character(method) && !is.function(method)) 
+    stop("invalid 'method' argument")
+  if (identical(method, "glm.fit")) 
+    control <- do.call("glm.control", control)
+  mt <- attr(mf, "terms")
+  Y <- model.response(mf, "any")
+  if (length(dim(Y)) == 1L) {
+    nm <- rownames(Y)
+    dim(Y) <- NULL
+    if (!is.null(nm)) 
+      names(Y) <- nm
+  }
+  X <- if (!is.empty.model(mt)) 
+    model.matrix(mt, mf, contrasts)
+  else matrix(, NROW(Y), 0L)
+  weights <- as.vector(model.weights(mf))
+  if (!is.null(weights) && !is.numeric(weights)) 
+    stop("'weights' must be a numeric vector")
+  if (!is.null(weights) && any(weights < 0)) 
+    stop("negative weights not allowed")
+  offset <- as.vector(model.offset(mf))
+  if (!is.null(offset)) {
+    if (length(offset) != NROW(Y)) 
+      stop(gettextf("number of offsets is %d should equal %d (number of observations)", 
+                    length(offset), NROW(Y)), domain = NA)
+  }
+  mustart <- model.extract(mf, "mustart")
+  etastart <- model.extract(mf, "etastart")
+  fit <- eval(call(if (is.function(method)) "method" else method, 
+                   x = X, y = Y, weights = weights, start = start, etastart = etastart, 
+                   mustart = mustart, offset = offset, family = family, 
+                   control = control, intercept = attr(mt, "intercept") > 
+                     0L))
+  if (length(offset) && attr(mt, "intercept") > 0L) {
+    fit2 <- eval(call(if (is.function(method)) "method" else method, 
+                      x = X[, "(Intercept)", drop = FALSE], y = Y, weights = weights, 
+                      offset = offset, family = family, control = control, 
+                      intercept = TRUE))
+    if (!fit2$converged) 
+      warning("fitting to calculate the null deviance did not converge -- increase 'maxit'?")
+    fit$null.deviance <- fit2$deviance
+  }
+  if (model) 
+    fit$model <- mf
+  fit$na.action <- attr(mf, "na.action")
+  fit$x <- X
+  fit <- c(fit, list(call = call, formula = formula, terms = mt, 
+                     data = data, offset = offset, control = control, method = method, 
+                     contrasts = attr(X, "contrasts"), xlevels = .getXlevels(mt, 
+                                                                             mf)))
+  class(fit) <- c(fit$class, c("glm", "lm"))
+  
+  # Verify inputs and Initialize
+  
+  ## Use the prior list to set the prior elements if it is not missing
+  ## Error checking to verify that the correct elements are present
+  
+  y<-fit$y	
+  x<-fit$x
+  b<-fit$coefficients
+  
+  prior_list=pfamily$prior_list 
+  
+  mu<-as.matrix(as.vector(prior_list$mu))
+  Sigma<-as.matrix(prior_list$Sigma)    
+  P<-solve(prior_list$Sigma) 
+  wtin<-fit$prior.weights	
+  
+  
+  #sim<-rglmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,dispersion=dispersion,shape=shape,rate=rate,offset2=offset,family=family,
+  #           start=b,Gridtype=Gridtype)
+  
+  
+  
+  sim<-rglmb(n=n,y=y,x=x,family=family,pfamily=pfamily,offset=offset,weights=wtin)
+  
+  
+  
+  dispersion2<-sim$dispersion
+  famfunc<-sim$famfunc
+  
+  Prior<-list(mean=prior_list$mu,Variance=prior_list$Sigma)
+  names(Prior$mean)<-colnames(fit$x)
+  colnames(Prior$Variance)<-colnames(fit$x)
+  rownames(Prior$Variance)<-colnames(fit$x)
+  
+  
+  if (!is.null(offset)) {
+    if(length(dispersion2)==1){
+        #    DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
+            DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+            
+            }
+    
+    if(length(dispersion2)>1){
+    #  DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+    }
+    
+    linear.predictors<-t(offset+x%*%t(sim$coefficients))}
+  if (is.null(offset)) {
+    if(length(dispersion2)==1){
+      #DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
+      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
       
-    #subset2=subset # line 153, 
+          }
     
-    if (is.character(family)) 
-        family <- get(family, mode = "function", envir = parent.frame())
-    if (is.function(family)) 
-        family <- family()
-    if (is.null(family$family)) {
-        print(family)
-        stop("'family' not recognized")
+    if(length(dispersion2)>1){
+    #  DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+      DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
     }
     
-        if (missing(data)) 
-        data <- environment(formula)
-    mf <- match.call(expand.dots = FALSE)
-    m <- match(c("formula", "data", "subset", "weights", "na.action", 
-        "etastart", "mustart", "offset"), names(mf), 0L)
-    mf <- mf[c(1L, m)]
-    mf$drop.unused.levels <- TRUE
-    mf[[1L]] <- quote(stats::model.frame)
-    mf <- eval(mf, parent.frame())
-    if (identical(method, "model.frame")) 
-        return(mf)
-    if (!is.character(method) && !is.function(method)) 
-        stop("invalid 'method' argument")
-    if (identical(method, "glm.fit")) 
-        control <- do.call("glm.control", control)
-    mt <- attr(mf, "terms")
-    Y <- model.response(mf, "any")
-    if (length(dim(Y)) == 1L) {
-        nm <- rownames(Y)
-        dim(Y) <- NULL
-        if (!is.null(nm)) 
-            names(Y) <- nm
-    }
-    X <- if (!is.empty.model(mt)) 
-        model.matrix(mt, mf, contrasts)
-    else matrix(, NROW(Y), 0L)
-    weights <- as.vector(model.weights(mf))
-    if (!is.null(weights) && !is.numeric(weights)) 
-        stop("'weights' must be a numeric vector")
-    if (!is.null(weights) && any(weights < 0)) 
-        stop("negative weights not allowed")
-    offset <- as.vector(model.offset(mf))
-    if (!is.null(offset)) {
-        if (length(offset) != NROW(Y)) 
-            stop(gettextf("number of offsets is %d should equal %d (number of observations)", 
-                length(offset), NROW(Y)), domain = NA)
-    }
-    mustart <- model.extract(mf, "mustart")
-    etastart <- model.extract(mf, "etastart")
-    fit <- eval(call(if (is.function(method)) "method" else method, 
-        x = X, y = Y, weights = weights, start = start, etastart = etastart, 
-        mustart = mustart, offset = offset, family = family, 
-        control = control, intercept = attr(mt, "intercept") > 
-            0L))
-    if (length(offset) && attr(mt, "intercept") > 0L) {
-        fit2 <- eval(call(if (is.function(method)) "method" else method, 
-            x = X[, "(Intercept)", drop = FALSE], y = Y, weights = weights, 
-            offset = offset, family = family, control = control, 
-            intercept = TRUE))
-        if (!fit2$converged) 
-            warning("fitting to calculate the null deviance did not converge -- increase 'maxit'?")
-        fit$null.deviance <- fit2$deviance
-    }
-    if (model) 
-        fit$model <- mf
-    fit$na.action <- attr(mf, "na.action")
-        fit$x <- X
-     fit <- c(fit, list(call = call, formula = formula, terms = mt, 
-        data = data, offset = offset, control = control, method = method, 
-        contrasts = attr(X, "contrasts"), xlevels = .getXlevels(mt, 
-            mf)))
-    class(fit) <- c(fit$class, c("glm", "lm"))
+    linear.predictors<-t(x%*%t(sim$coefficients))
     
-    # Verify inputs and Initialize
-
-    ## Use the prior list to set the prior elements if it is not missing
-    ## Error checking to verify that the correct elements are present
-  
-    y<-fit$y	
-    x<-fit$x
-    b<-fit$coefficients
-
-    prior_list=pfamily$prior_list 
-    
-    mu<-as.matrix(as.vector(prior_list$mu))
-    Sigma<-as.matrix(prior_list$Sigma)    
-    P<-solve(prior_list$Sigma) 
-    wtin<-fit$prior.weights	
-
-
-#sim<-rglmb(n=n,y=y,x=x,mu=mu,P=P,wt=wtin,dispersion=dispersion,shape=shape,rate=rate,offset2=offset,family=family,
-#           start=b,Gridtype=Gridtype)
-
-
-
-sim<-rglmb(n=n,y=y,x=x,family=family,pfamily=pfamily,offset=offset,weights=wtin)
-
-
-
-	dispersion2<-sim$dispersion
-	famfunc<-sim$famfunc
-	
-	Prior<-list(mean=prior_list$mu,Variance=prior_list$Sigma)
-	names(Prior$mean)<-colnames(fit$x)
-	colnames(Prior$Variance)<-colnames(fit$x)
-	rownames(Prior$Variance)<-colnames(fit$x)
-
-  
-if (!is.null(offset)) {
-  if(length(dispersion2)==1){
-    
-    DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
   }
+  linkinv<-fit$family$linkinv
+  fitted.values<-linkinv(linear.predictors)
   
-  if(length(dispersion2)>1){
-    DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
-  }
   
-  linear.predictors<-t(offset+x%*%t(sim$coefficients))}
-if (is.null(offset)) {
-  if(length(dispersion2)==1){
-        
-    DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
-  }
-  
-  if(length(dispersion2)>1){
-    DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
-  }
-  
-  linear.predictors<-t(x%*%t(sim$coefficients))
-
-  }
-	linkinv<-fit$family$linkinv
-	fitted.values<-linkinv(linear.predictors)
-
-	
-	outlist<-list(
-	  glm=fit,
-	  coefficients=sim$coefficients,
-	  coef.means=colMeans(sim$coefficients),
+  outlist<-list(
+    glm=fit,
+    coefficients=sim$coefficients,
+    coef.means=colMeans(sim$coefficients),
     coef.mode=sim$coef.mode,
-	  dispersion=dispersion2,
-	  Prior=Prior,
-	  fitted.values=fitted.values,
-	  family=fit$family,
-	  linear.predictors=linear.predictors,
-	  deviance=DICinfo$Deviance,
-	  pD=DICinfo$pD,
-	  Dbar=DICinfo$Dbar,
-	  Dthetabar=DICinfo$Dthetabar,
-	  DIC=DICinfo$DIC,
-	  prior.weights=fit$prior.weights,
-	  y=fit$y,
-	  x=fit$x,
-	  model=fit$model,
-	  call=fit$call,
-	  formula=fit$formula,
-	  terms=fit$terms,
-	  data=fit$data,
+    dispersion=dispersion2,
+    Prior=Prior,
+    fitted.values=fitted.values,
+    family=fit$family,
+    linear.predictors=linear.predictors,
+    deviance=DICinfo$Deviance,
+    pD=DICinfo$pD,
+    Dbar=DICinfo$Dbar,
+    Dthetabar=DICinfo$Dthetabar,
+    DIC=DICinfo$DIC,
+    prior.weights=fit$prior.weights,
+    y=fit$y,
+    x=fit$x,
+    model=fit$model,
+    call=fit$call,
+    formula=fit$formula,
+    terms=fit$terms,
+    data=fit$data,
     famfunc=famfunc,
-	  iters=sim$iters,
-	  contrasts=fit$contrasts,	  
-	  xlevels=fit$xlevels,
-	  pfamily=pfamily
-	  )
-
-	outlist$call<-match.call()
-
-	class(outlist)<-c(outlist$class,"glmb","glm","lm")
-	outlist
+    iters=sim$iters,
+    contrasts=fit$contrasts,	  
+    xlevels=fit$xlevels,
+    pfamily=pfamily
+  )
+  
+  outlist$call<-match.call()
+  
+  class(outlist)<-c(outlist$class,"glmb","glm","lm")
+  outlist
 }
 
 #' @rdname glmb
@@ -315,19 +319,19 @@ if (is.null(offset)) {
 
 print.glmb<-function (x, digits = max(3, getOption("digits") - 3), ...) 
 {
-		
-    cat("\nCall:  ", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
-        "\n\n", sep = "")
- if (length(coef(x))) {
-        cat("Posterior Mean Coefficients")
-        cat(":\n")
-        print.default(format(x$coef.means, digits = digits), 
-            print.gap = 2, quote = FALSE)
-    }
-    else cat("No coefficients\n\n")
-        cat("\nEffective Number of Parameters:",x$pD,"\n")
-        cat("Expected Residual Deviance:",mean(x$deviance),"\n")
-        cat("DIC:",x$DIC,"\n\n")
+  
+  cat("\nCall:  ", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  if (length(coef(x))) {
+    cat("Posterior Mean Coefficients")
+    cat(":\n")
+    print.default(format(x$coef.means, digits = digits), 
+                  print.gap = 2, quote = FALSE)
+  }
+  else cat("No coefficients\n\n")
+  cat("\nEffective Number of Parameters:",x$pD,"\n")
+  cat("Expected Residual Deviance:",mean(x$deviance),"\n")
+  cat("DIC:",x$DIC,"\n\n")
 }
 
 
@@ -362,12 +366,21 @@ DIC_Info<-function(coefficients,y,x,alpha=0,f1,f4,wt=1,dispersion=1){
   D<-matrix(0,nrow=l2,ncol=1)
   D2<-matrix(0,nrow=l2,ncol=1)
   
+  #disp_temp=dispersion
+  #if(length(dispersion)==1) disp_temp=rep(dispersion,length(y))
+  
+  
+  
   if(length(dispersion)==1){
     for(i in 1:l2){
       b<-as.vector(coefficients[i,])
       # No offset! [Edit to multiply by dispersion to get residual deviance]
       
-      D[i,1]<-dispersion*f4(b=b,y=y,x=x,alpha=alpha,wt=wt/dispersion,dispersion=dispersion)
+      # This calculation likely has cancellation effects
+      #  Passing dispersion as both     
+      #D[i,1]<-dispersion*f4(b=b,y=y,x=x,alpha=alpha,wt=wt/dispersion,dispersion=dispersion)
+      D[i,1]<-f4(b=b,y=y,x=x,alpha=alpha,wt=wt,dispersion=dispersion)
+      
       D2[i,1]<-2*f1(b=b,y=y,x=x,alpha=alpha,wt=wt)
     }
     
@@ -382,7 +395,9 @@ DIC_Info<-function(coefficients,y,x,alpha=0,f1,f4,wt=1,dispersion=1){
   if(length(dispersion)>1){
     for(i in 1:l2){
       b<-as.vector(coefficients[i,])
-      D[i,1]<-f4(b=b,y=y,x=x,alpha=alpha,wt=wt/dispersion[i],dispersion=dispersion[i])
+      #D[i,1]<-f4(b=b,y=y,x=x,alpha=alpha,wt=wt/dispersion[i],dispersion=dispersion[i])
+      D[i,1]<-f4(b=b,y=y,x=x,alpha=alpha,wt=wt,dispersion=dispersion[i])
+      
       D2[i,1]<-2*f1(b=b,y=y,x=x,alpha=alpha,wt=wt/dispersion[i])
     }
     
