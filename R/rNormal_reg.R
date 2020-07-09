@@ -210,7 +210,8 @@ else {
 
 if(family$family=="gaussian"){ 
   outlist<-.rnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset2=offset2,wt=wt,dispersion=dispersion,famfunc=famfunc,f1=f1,f2=f2,f3=f3,start=mu)
-}
+
+  }
 else{
   if(is.null(dispersion)){dispersion2=1}
   else{dispersion2=dispersion}

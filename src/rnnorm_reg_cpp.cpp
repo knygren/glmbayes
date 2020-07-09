@@ -395,8 +395,11 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   arma::vec mu1b(mu1.begin(),l2,false);
   
   // Step 2: Run posterior optimization with log-posterior function and gradient functions
-  // glmsim_NGauss2 seems to use a function for optimization (optPostMode)
-  
+  // Note: May eventually replace this with use of a call to modified version of glm.fit
+  // Likely would require writing modified family functions that add the prior components
+  // This is a bit complex - may make a difference for larger problems or problems
+  // where BFGS method for other reasons fails to find True optimmum.
+
   List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,
                   _["x"]=x,
                   _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
@@ -492,6 +495,9 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   // Add mean back in and compute LL (for post processing)
   // Can add option to not compute LL
+  // Note: LL does not seem to be used by downstream functins so can likely be edited out and removed 
+  // From output - It is recomputed by summary functions
+  
   
   for(i=0;i<n;i++){
     out(_,i)=out(_,i)+mu;  // Add mean vector back 

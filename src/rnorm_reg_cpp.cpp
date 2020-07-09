@@ -114,6 +114,7 @@ Rcpp::List rnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
    // lm.fit is R Wrappper around *.cpp function named C_Cdqrls
    // Not sure how to call C_cdqrls directly.
    // For now, set up to call lm.fit [Figure out later]
+   // Likely safer to call lm.fit as it has wrappers to catch problems (although slower)
    
    Rcpp::Function lm_fit_fun("lm.fit");
    
@@ -153,12 +154,34 @@ Rcpp::List rnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   for(i=0;i<n;i++){
     U1( _, i)=rnorm(l1);
-    
     // Normal Draws are scaled by Posterior Variance
-    
     out2.row(i)=trans(b2+IR*U2.col(i));
 
   }
+  
+  
+  
+  // Note: LL does not seem to be used by downstream functins so can likely be edited out and removed 
+  // From output - It is recomputed by summary functions
+  // Note: in rnnorm_reg_cpp, out is the transpose of what is here
+  // Do temporary (slow) solution to try to ensure the below works
+  // will come back and correct later
+  
+  
+//    NumericMatrix out3(l1,n);   
+  
+//    int j;
+//    for(i=0;i<n;i++){
+//      for(j=0;j<l1;j++){
+//      out3(j,i)=out(i,j);  // copy to new matrix (do more elegant solution later) 
+//      }
+//     LL[i]=as<double>(f1(_["b"]=out3(_,i),_["y"]=y,_["x"]=x,offset2,wt2)); // Calculate log_likelihood
+//   }
+  
+  //  Rcpp::Rcout << "LL is :"  << LL << std::endl;
+  
+  
+  
   Rcpp::List Prior=Rcpp::List::create(Rcpp::Named("mean")=mu,Rcpp::Named("Precision")=P);  
   
   Rcpp::List outlist=Rcpp::List::create(

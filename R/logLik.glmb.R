@@ -23,9 +23,18 @@ logLik.glmb<-function(object,...){
   n<-length(object$coefficients[,1])
   
   logLikout<-matrix(0,nrow=n,ncol=1)
-  #f1temp(b=out$coefficients,y=out$y,x=out$x,alpha=0,wt=Claims/dispersion)
-  for(i in 1:n){
+
+  if(length(dispersion)==1){  
+    for(i in 1:n){
     logLikout[i,1]<--f1(object$coefficients[i,],y=y,x=x,wt=wt/dispersion)
+    }
   }
+  
+  if(length(dispersion)>1){  
+    for(i in 1:n){
+      logLikout[i,1]<--f1(object$coefficients[i,],y=y,x=x,wt=wt/dispersion[i])
+    }
+  }
+  
   logLikout
 }

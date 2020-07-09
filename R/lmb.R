@@ -213,8 +213,6 @@ y = TRUE,qr = TRUE, singular.ok = TRUE, contrasts = NULL,offset, ...)
     if(is.null(z$weights))     wtin<-rep(1,length(y))
     else wtin=z$weights	
 
-
-
 sim<-rlmb(n=n,y=y,x=x,pfamily=pfamily,weights=wtin,
             offset=offset)
 
@@ -223,6 +221,8 @@ sim<-rlmb(n=n,y=y,x=x,pfamily=pfamily,weights=wtin,
 	dispersion2<-sim$dispersion
 
 	famfunc<-sim$famfunc
+	
+	
 	Prior<-list(mean=as.numeric(mu),Variance=Sigma)
 	names(Prior$mean)<-colnames(z$x)
 	colnames(Prior$Variance)<-colnames(z$x)
@@ -289,8 +289,8 @@ if (!is.null(offset)) {
 	  Dbar=DICinfo$Dbar,
 	  Dthetabar=DICinfo$Dthetabar,
 	  DIC=DICinfo$DIC,
-	  prior.weights=z$weights,
-	  weights=z$weights,
+	  prior.weights=wtin,
+	  weights=wtin,
 	  y=z$y,
 	  x=z$x,
 	  model=z$model,
