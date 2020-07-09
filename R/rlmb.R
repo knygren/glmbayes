@@ -16,7 +16,7 @@
 #' should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions.)
 #' @param digits the number of significant digits to use when printing.
 #' @inheritParams lmb
-#' @return \code{rlmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
+#' @return \code{rlmb} returns a object of class \code{"rlmb"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
 #' \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
@@ -30,13 +30,13 @@
 #' \item{Envelope}{an object of class \code{"envelope"}  }
 #' \item{dispersion}{the dispersion parameter used in the model}
 #' \item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
-#' @details The \code{rglmb} function produces iid samples for Bayesian generalized linear 
-#' models. It has a more minimialistic interface than than the \code{\link{glmb}} 
+#' @details The \code{rlmb} function produces iid samples for Bayesian generalized linear 
+#' models. It has a more minimialistic interface than than the \code{\link{lmb}} 
 #' function. Core required inputs for the function include the data vector, the design  
 #' matrix and a prior specification. In addition, the dispersion parameter must 
 #' currently be provided for the gaussian, Gamma, quasipoisson, and quasibinomial 
 #' families (future implementations may incorporate a prior for these into the 
-#' \code{rglmb} function).
+#' \code{rlmb} function).
 #' 
 #' Current implemented models include the gaussian family (identity link function), the
 #' poisson and quasipoisson families (log link function), the gamma family (log link 
@@ -56,7 +56,16 @@
 #' number of candidates generated before acceptance for each draw.
 #' @family modelfuns
 #' @seealso The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.
-
+#' 
+#' \code{\link{pfamily}} for documentation of pfamily functions used to specify priors.
+#' 
+#' \code{\link{Prior_Setup}}, \code{\link{Prior_Check}} for functions used to initialize and to check priors,  
+#'
+#' \code{\link{summary.glmb}}, \code{\link{predict.glmb}}, \code{\link{simulate.glmb}}, 
+#' \code{\link{extractAIC.glmb}}, \code{\link{dummy.coef.glmb}} and methods(class="glmb") for methods 
+#' inherited from class \code{glmb} and the methods and generic functions for classes \code{glm} and 
+#' \code{lm} from which class \code{lmb} also inherits.
+#'
 #' @references 
 #' Chambers, J.M.(1992) \emph{Linear models.} Chapter 4 of \emph{Statistical Models in S}
 #' eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
@@ -68,6 +77,7 @@
 #' Nygren, K.N. and Nygren, L.M (2006)
 #' Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
 #' vol.101, no.475, pp 1144-1156.
+#' doi: \href{https://doi.org/10.1198/016214506000000357}{10.1198/016214506000000357}.
 #' 
 #' Raiffa, Howard and Schlaifer, R (1961)
 #' \emph{Applied Statistical Decision Theory.}

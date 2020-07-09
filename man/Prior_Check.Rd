@@ -59,7 +59,7 @@ Prior_Check(counts ~ outcome + treatment,family = poisson(),
 \seealso{
 
 
-Other Prior Utility Functions:
+Other prior utility Functions:
 \code{\link{Prior_Setup}()}
 }
 \concept{prior}

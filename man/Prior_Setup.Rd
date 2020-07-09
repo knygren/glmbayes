@@ -73,7 +73,7 @@ print(ps)
 \seealso{
 
 
-Other Prior Utility Functions:
+Other prior utility Functions:
 \code{\link{Prior_Check}()}
 }
 \concept{prior}

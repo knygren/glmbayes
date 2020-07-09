@@ -15,3 +15,11 @@ extractAIC.glmb<-function(fit,...)
   c(pD=fit$pD,DIC=fit$DIC)
   
 }
+
+
+## Alias for extractAIC function
+
+#' @export
+#' @rdname extractAIC.glmb
+#'
+extractDIC<-function(fit,...) UseMethod(extractAIC)

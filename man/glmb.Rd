@@ -44,7 +44,8 @@ glmb(
     family functions.)}
 
 \item{pfamily}{a description of the prior distribution and associated constants to be used in the model. This
-should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions.)}
+should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions and \sQuote{Details}
+for details about prior specifications).}
 
 \item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
 
@@ -59,12 +60,11 @@ should be a pfamily function (see \code{\link{pfamily}} for details of pfamily f
 
 \item{subset}{an optional vector specifying a subset of observations to be used in the fitting process.}
 
-\item{offset}{this can be used to specify an \emph{a priori} known
-    component to be included in the linear predictor during fitting.
-    This should be \code{NULL} or a numeric vector of length equal to
-    the number of cases.  One or more \code{\link[stats]{offset}} terms can be
-    included in the formula instead or as well, and if more than one is
-    specified their sum is used.  See \code{\link[stats]{model.offset}}.}
+\item{offset}{this can be used to specify an \emph{a priori} known component to be included in the linear 
+predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of 
+cases.  One or more \code{\link[stats]{offset}} terms can be included in the formula instead or as well, and 
+if more than one is specified their sum is used.  See documentation for \code{model.offset} at 
+\code{\link[stats]{model.extract}}.}
 
 \item{na.action}{a function which indicates what should happen when the data contain \code{NA}s.  The default is set by 
 the \code{na.action} setting of \code{\link{options}}, and is \code{\link[stats]{na.fail}} 
@@ -282,6 +282,7 @@ London: Chapman and Hall.
 Nygren, K.N. and Nygren, L.M (2006)
 Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
 vol.101, no.475, pp 1144-1156.
+doi: \href{https://doi.org/10.1198/016214506000000357}{10.1198/016214506000000357}.
 
 Raiffa, Howard and Schlaifer, R (1961)
 \emph{Applied Statistical Decision Theory.}
@@ -292,11 +293,25 @@ Venables, W. N. and Ripley, B. D. (2002)
 New York: Springer.
 }
 \seealso{
-The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.
+\code{\link[stats]{lm}} and \code{\link[stats]{glm}} for classical modeling functions.
 
-Other Modeling Functions:
+\code{\link{pfamily}} for documentation of pfamily functions used to specify priors.
+
+\code{\link{Prior_Setup}}, \code{\link{Prior_Check}} for functions used to initialize and to check priors,  
+
+\code{\link{summary.glmb}}, \code{\link{predict.glmb}}, \code{\link{residuals.glmb}}, \code{\link{simulate.glmb}}, 
+\code{\link{extractAIC.glmb}}, \code{\link{dummy.coef.glmb}} and methods(class="glmb") for \code{glmb} 
+and the methods and generic functions for classes \code{glm} and \code{lm} from which class \code{glmb} inherits.
+
+Other glmbayes modeling functions:
 \code{\link{lmb}()},
 \code{\link{rglmb}()},
 \code{\link{rlmb}()}
+}
+\author{
+The \R implementation of \code{glmb} has been written by Kjell Nygren and
+was built to be a Bayesian version of the \code{glm} function and hence tries
+to mirror the features of the \code{glm} function to the greatest extent possible. For details
+on the author(s) for the \code{glm} function see the documentation for \code{\link[stats]{glm}}.
 }
 \concept{modelfuns}

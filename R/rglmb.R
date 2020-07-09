@@ -6,15 +6,37 @@
 #' prior distribution).
 #' @param y a vector of observations of length \code{m}.
 #' @param x for \code{rglmb} a design matrix of dimension \code{m * p} and for \code{print.rglmb} the object to be printed. 
-#' @param pfamily a description of the prior distribution and associated constants to be used in the model. This
-#' should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions.)
-#' @param offset an offset parameter
-#' @param weights a weighting variable
 #' @inheritParams glmb
-#' @return Currently mainly the draws for the dispersion and the regression coefficients
-#' will be updated to return outputs consistent with other function
+#' @return \code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
+#' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
+#' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
+#' \code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
+#' various useful features of the value returned by \code{\link{rglmb}}.
+#' An object of class \code{"rglmb"} is a list containing at least the following components:
+#' \item{coefficients}{a \code{n} by \code{length(mu)} matrix with one sample in each row}
+#' \item{PostMode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
+#' \item{Prior}{A list with two components. The first being the prior mean vector and the second the prior precision matrix}
+#' \item{iters}{an \code{n} by \code{1} matrix giving the number of candidates generated before acceptance for each sample.}
+#' \item{famfunc}{an object of class \code{"famfunc"}}
+#' \item{Envelope}{an object of class \code{"envelope"}  }
+#' \item{dispersion}{the dispersion parameter used in the model}
+#' \item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
+#' 
+#' @author The \R implementation of \code{rglmb} has been written by Kjell Nygren and
+#' was built to be a Bayesian version of the \code{glm} function but with a more minimalistic interface 
+#' than the \code{glmb} function. It also borrows some of its structure from other random generating function 
+#' like \code{\link{rnorm}} and hence the \code{r} prefix. 
+#' 
 #' @family modelfuns
-#' @seealso The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.
+#' @seealso \code{\link[stats]{lm}} and \code{\link[stats]{glm}} for classical modeling functions.
+#' 
+#' \code{\link{pfamily}} for documentation of pfamily functions used to specify priors.
+#' 
+#' \code{\link{Prior_Setup}}, \code{\link{Prior_Check}} for functions used to initialize and to check priors,  
+#'
+#' \code{\link{summary.glmb}}, \code{\link{predict.glmb}}, \code{\link{residuals.glmb}}, \code{\link{simulate.glmb}}, 
+#' \code{\link{extractAIC.glmb}}, \code{\link{dummy.coef.glmb}} and methods(class="glmb") for \code{glmb} 
+#' and the methods and generic functions for classes \code{glm} and \code{lm} from which class \code{glmb} inherits.
 #' 
 #' @references 
 #' Dobson, A. J. (1990)
@@ -32,6 +54,7 @@
 #' Nygren, K.N. and Nygren, L.M (2006)
 #' Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
 #' vol.101, no.475, pp 1144-1156.
+#' doi: \href{https://doi.org/10.1198/016214506000000357}{10.1198/016214506000000357}.
 #' 
 #' Raiffa, Howard and Schlaifer, R (1961)
 #' \emph{Applied Statistical Decision Theory.}

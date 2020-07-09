@@ -1,9 +1,9 @@
 
 list(
-  rd_family_title = list(simfuncs = "Other family Simulation Functions:",
-                         modelfuns= "Other Modeling Functions:",
+  rd_family_title = list(simfuncs = "Other family simulation functions:",
+                         modelfuns= "Other glmbayes modeling functions:",
                          pfamilies= "Other pfamily Objects:",
-                         prior ="Other Prior Utility Functions:",
-                         data = "Other Package Datasets:"
+                         prior ="Other prior utility Functions:",
+                         data = "Other package datasets:"
                          )
 )

@@ -33,7 +33,8 @@ lmb(
     under \sQuote{Details}.}
 
 \item{pfamily}{a description of the prior distribution and associated constants to be used in the model. This
-should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions.)}
+should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions and \sQuote{Details}
+for details about prior specifications).}
 
 \item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
 
@@ -107,33 +108,35 @@ sum is used.  See \code{model.offset}.}
 to extract various useful features of the value returned by code{\link{glmb}}.
 
 An object of class \code{"lmb"} is a list containing at least the following components:
-\item{glm}{an object of class \code{"glm"} containing the output from a call to the function \code{\link{glm}}}
+\item{lm}{an object of class \code{"lm"} containing the output from a call to the function \code{\link{lm}}}
 \item{coefficients}{a matrix of dimension \code{n} by \code{length(mu)} with one sample in each row}
 \item{coef.means}{a vector of \code{length(mu)} with the estimated posterior mean coefficients}
 \item{coef.mode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
 \item{dispersion}{Either a constant provided as part of the call, or a vector of length \code{n} with one sample in each row.}
 \item{Prior}{A list with the priors specified for the model in question. Items in
 list may vary based on the type of prior}
-\item{fitted.values}{a matrix of dimension \code{n} by \code{length(y)} with one sample for the mean fitted values in each row}
-\item{family}{the \code{\link{family}} object used.}
+\item{residuals}{a matrix of dimension \code{n} by \code{length(y)} with one sample for the deviance residuals in each row}
+\item{fitted.values}{a matrix of dimension \code{n} by \code{length(y)} with one sample for the fitted values in each row}
 \item{linear.predictors}{an \code{n} by \code{length(y)} matrix with one sample for the linear fit on the link scale in each row}
 \item{deviance}{an \code{n} by \code{1} matrix with one sample for the deviance in each row}
 \item{pD}{An Estimate for the effective number of parameters}
 \item{Dbar}{Expected value for minus twice the log-likelihood function}
 \item{Dthetabar}{Value of minus twice the log-likelihood function evaluated at the mean value for the coefficients}   
 \item{DIC}{Estimated Deviance Information criterion} 
+\item{weights}{a vector of weights specified or implied by the model} 
 \item{prior.weights}{a vector of weights specified or implied by the model} 
-\item{y}{a vector with the dependent variable} 
-\item{x}{a matrix with the implied design matrix for the model} 
+\item{y}{a vector of observations of length \code{m}.} 
+\item{x}{a design matrix of dimension \code{m * p}} 
 \item{model}{if requested (the default),the model frame} 
 \item{call}{the matched call} 
-\item{formula}{the formula supplie} 
+\item{formula}{the formula supplied} 
 \item{terms}{the \code{\link{terms}} object used} 
 \item{data}{the \code{data argument}} 
-\item{famfunc}{Family functions used during estimation process}
+\item{famfunc}{family functions used during estimation and post processing}
 \item{iters}{an \code{n} by \code{1} matrix giving the number of candidates generated before acceptance for each sample.}
 \item{contrasts}{(where relevant) the contrasts used.}
 \item{xlevels}{(where relevant) a record of the levels of the factors used in fitting}
+\item{pfamily}{the prior family specified}
 \item{digits}{the number of significant digits to use when printing.}
 In addition, non-empty fits will have (yet to be implemented) components \code{qr}, \code{R}
 and \code{effects} relating to the final weighted linear fit for the posterior mode.  
@@ -151,19 +154,12 @@ of the result is the proportion of successes.
 predictor and the prior distribution.
 }
 \details{
-The function \code{glmb} is a Bayesian version of the classical \code{\link{glm}} function.  Setup of
-the models mirrors those for the \code{\link{glm}} function but add additional required arguments
-\code{mu} and \code{Sigma}, representing a multivariate normal prior. In addition, the dispersion 
-parameter must currently be provided for the gaussian, Gamma, quasipoisson, and quasibinomial families 
-(future implementations may incoporate priors for these into the \code{glmb} function).  The function 
-generates random iid samples from the posterior density associated with the model (assuming a fixed 
-dispersion parameter). 
-
-Current implemented models include the gaussian family (identity link function), the poisson and
-quasipoisson families (log link function), the gamma family (log link function), as well as the 
-binomial and quasibinomial families (logit, probit, and cloglog link functions).
-
-The function returns the output from a call to the function \code{\link{glm}} as well as the simulated 
+The function \code{lmb} is a Bayesian version of the classical \code{\link{lm}} function.  Setup of
+the models mirrors those for the \code{\link{lm}} function but add the required argument \code{\link{pfamily}}
+with a prior formulation. The function generates random iid samples from the posterior density associated 
+with the model. 
+ 
+The function returns the output from a call to the function \code{\link{lm}} as well as the simulated 
 Bayesian coefficients and associated outputs. In addition, the function returns model diagnostic 
 information related to the \code{DIC}, a Bayesian Information Criterion similar to the \code{AIC} for 
 classical models. 
@@ -216,6 +212,7 @@ doi: \href{https://doi.org/10.2307/2346786}{10.2307/2346786}.
 Nygren, K.N. and Nygren, L.M (2006)
 Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
 vol.101, no.475, pp 1144-1156.
+doi: \href{https://doi.org/10.1198/016214506000000357}{10.1198/016214506000000357}.
 
 Raiffa, Howard and Schlaifer, R (1961)
 \emph{Applied Statistical Decision Theory.}
@@ -224,9 +221,25 @@ Boston: Clinton Press, Inc.
 \seealso{
 The classical modeling functions \code{\link[stats]{lm}} and \code{\link[stats]{glm}}.
 
-Other Modeling Functions:
+\code{\link{pfamily}} for documentation of pfamily functions used to specify priors.
+
+\code{\link{Prior_Setup}}, \code{\link{Prior_Check}} for functions used to initialize and to check priors,  
+
+\code{\link{summary.glmb}}, \code{\link{predict.glmb}}, \code{\link{simulate.glmb}}, 
+\code{\link{extractAIC.glmb}}, \code{\link{dummy.coef.glmb}} and methods(class="glmb") for methods 
+inherited from class \code{glmb} and the methods and generic functions for classes \code{glm} and 
+\code{lm} from which class \code{lmb} also inherits.
+
+Other glmbayes modeling functions:
 \code{\link{glmb}()},
 \code{\link{rglmb}()},
 \code{\link{rlmb}()}
+}
+\author{
+The \R implementation of \code{lmb} has been written by Kjell Nygren and
+was built to be a Bayesian version of the \code{lm} function and hence tries
+to mirror the features of the \code{lm} function to the greatest extent possible while also taking advantage
+of some of the method functions developed for the \code{glmb} function. For details
+on the author(s) for the \code{lm} function see the documentation for \code{\link[stats]{lm}}.
 }
 \concept{modelfuns}

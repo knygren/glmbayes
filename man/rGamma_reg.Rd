@@ -180,7 +180,7 @@ v_old
 A reference
 }
 \seealso{
-Other family Simulation Functions:
+Other family simulation functions:
 \code{\link{rNormal_Gamma_reg}()},
 \code{\link{rNormal_reg}()}
 }

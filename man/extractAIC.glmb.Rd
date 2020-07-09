@@ -2,9 +2,12 @@
 % Please edit documentation in R/extractAIC.glmb.R
 \name{extractAIC.glmb}
 \alias{extractAIC.glmb}
+\alias{extractDIC}
 \title{Extract DIC from a Fitted Bayesian Model}
 \usage{
 \method{extractAIC}{glmb}(fit, ...)
+
+extractDIC(fit, ...)
 }
 \arguments{
 \item{fit}{an object of class \code{"glmb"}, typically the result of a call to \link{glmb}}

@@ -164,7 +164,7 @@ Venables, W. N. and Ripley, B. D. (2002)
 New York: Springer.
 }
 \seealso{
-Other family Simulation Functions:
+Other family simulation functions:
 \code{\link{rGamma_reg}()},
 \code{\link{rNormal_Gamma_reg}()}
 }

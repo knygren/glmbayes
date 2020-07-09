@@ -20,8 +20,8 @@
 A matrix \code{DevRes} of dimension \code{n} times \code{p} containing
 the Deviance residuals for each draw. If ysim is provided, the residuals are based
 on a comparison to the simulated data instead. The credible intervals
-for residuals based on simulated data should be a more approproiate measure of
-whether individual residuals represent outliers or not
+for residuals based on simulated data should be a more appropriate measure of
+whether individual residuals represent outliers or not.
 }
 \description{
 These functions are all \link{methods} for class \code{glmb} or \code{summary.glmb} objects.
