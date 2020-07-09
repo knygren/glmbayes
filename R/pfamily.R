@@ -1,12 +1,13 @@
 #' Prior Family Objects for Bayesian Models
 #'
 #' Prior family objects provide a convenient way to specify the details of the priors 
-#' used by functions such as \code{\link{glmb}}. See the documentation for \code{\link{glmb}}
-#' for the details of how such model fitting takes place.
+#' used by functions such as \code{\link{glmb}}. See the documentations for \code{\link{lmb}},
+#' \code{\link{glmb}}, \code{\link{glmb}}, and \code{\link{rglmb}} for the details of how such model fitting 
+#' takes place.
 #' @param object the function \code{pfamily} accesses the \code{pfamily} objects which
 #' are stored within objects created by modelling functions (e.g., \code{glmb}).
-#' @param mu a prior mean vector for the model coefficients
-#' @param Sigma a prior Variance-Covariance matrix for the model coefficients
+#' @param mu a prior mean vector for the the modeling coefficients used in several pfamilies
+#' @param Sigma a prior Variance-Covariance matrix for the model coefficients in several pfamilies
 #' @param dispersion the dispersion to be assumed when it is not given a prior. Should be provided
 #' when the Normal prior is for the \code{gaussian()}, \code{Gamma()}, \code{quasibinomial},
 #' or \code{quasipoisson} families. The \code{binomial()} and \code{poisson()} families
@@ -18,21 +19,27 @@
 #' Needs to be provided when the Gamma prior is used for the dispersion. This
 #' specification is typically only used as part of Gibbs sampling where the beta and 
 #' dispersion parameters are updated separately. 
-#' @param x an object, a family function that is to be printed
+#' @param x an object, a pfamily function that is to be printed
 #' @param \ldots additional argument(s) for methods.
-#' @details \code{pfamily} is a generic function with methods for classed \code{glmb} and 
+#' @details \code{pfamily} is a generic function with methods for classe \code{glmb} and 
 #' \code{lmb}. Many \code{glmb} models currently only have implementations for the \code{dNormal()} 
 #' prior family. The \code{Gamma()} family also works with the \code{dGamma()} prior 
-#' family while the \code{gaussian()} family works with the \code{dGamma()}, 
-#' \code{dNormal_Gamma()},and \code{dIndependent_Normal_Gamma()} families.  
+#' family while the \code{gaussian()} family works with the \code{dGamma()} and 
+#' \code{dNormal_Gamma()} pfamilies.  
 #' @return An object of class \code{"pfamily"} (which has a concise print method). This is a
 #' list with elements.
 #' \item{pfamily}{character: the pfamily name}
 #' \item{prior_list}{a list with the prior parameters associated with the prior specification}
 #' \item{okfamilies}{currently implemented families for which the prior family can be used.}
+#' \item{plinks}{a function that assigns a set of oklinks for the combination of a family and 
+#' and pfamily.}
 #' \item{simfun}{function: the function used to generate samples from the posterior density. 
 #' All currently implemented pfamiles have simulation functions that generate iid samples
 #' for the associated posterior distribution.}
+#' @author The design of the \code{pfamily} set of functions was developed by Kjell Nygren and was 
+#' inspired by the family used by the \code{\link{glmb}} function to specify the likelihood 
+#' function. That design in turn was inspired by S functions of the same names described in
+#' Hastie and Pregibon (1992).
 #' @example inst/examples/Ex_pfamily.R
 #' @export 
 #' @exportClass pfamily 

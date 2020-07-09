@@ -33,8 +33,7 @@ lmb(
     under \sQuote{Details}.}
 
 \item{pfamily}{a description of the prior distribution and associated constants to be used in the model. This
-should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions and \sQuote{Details}
-for details about prior specifications).}
+should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions).}
 
 \item{n}{number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.}
 

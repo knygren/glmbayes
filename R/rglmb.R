@@ -30,6 +30,8 @@
 #' @family modelfuns
 #' @seealso \code{\link[stats]{lm}} and \code{\link[stats]{glm}} for classical modeling functions.
 #' 
+#' \code{\link{family}} for documentation of family functions used to specify priors.
+
 #' \code{\link{pfamily}} for documentation of pfamily functions used to specify priors.
 #' 
 #' \code{\link{Prior_Setup}}, \code{\link{Prior_Check}} for functions used to initialize and to check priors,  

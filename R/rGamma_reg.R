@@ -157,7 +157,14 @@ if(family$family=="Gamma")
   
 }
   
-  outlist=list(dispersion=out,Prior=list(shape=shape,rate=rate))
+  outlist=list(
+    coefficients=matrix(b,nrow=1,ncol=length(b)),
+    coef.mode=NULL,
+    dispersion=out,
+    Prior=list(shape=shape,rate=rate),
+    prior.weights=weights
+    )
+  
 
   outlist$call<-match.call()
   
