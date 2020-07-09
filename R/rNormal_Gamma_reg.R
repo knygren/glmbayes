@@ -176,6 +176,7 @@ outlist<-list(
   prior.weights=wt,
   y=y,
   x=x,
+  fit=fit,
   famfunc=famfunc,
   iters=draws,
   Envelope=NULL

@@ -320,6 +320,7 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
     formula=fit$formula,
     terms=fit$terms,
     data=fit$data,
+    fit=sim$fit,
     famfunc=famfunc,
     iters=sim$iters,
     contrasts=fit$contrasts,	  

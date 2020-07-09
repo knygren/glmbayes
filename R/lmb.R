@@ -314,6 +314,7 @@ lmb <- function ( formula, pfamily, n=1000,data, subset, weights, na.action,meth
     formula=z$formula,
     terms=z$terms,
     data=z$data,
+    fit=sim$fit,
     famfunc=famfunc,
     iters=sim$iters,
     contrasts=z$contrasts,	  

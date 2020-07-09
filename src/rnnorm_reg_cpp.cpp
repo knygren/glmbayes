@@ -523,7 +523,7 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
     Rcpp::Named("prior.weights")=wt,
     Rcpp::Named("y")=y,
     Rcpp::Named("x")=x,
-//    Rcpp::Named("famfunc")=famfunc,
+    Rcpp::Named("fit")=opt,
     Rcpp::Named("iters")=sim[1],
     Rcpp::Named("Envelope")=Envelope
 //  ,  Rcpp::Named("loglike")=LL
