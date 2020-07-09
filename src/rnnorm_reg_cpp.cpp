@@ -501,7 +501,7 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   for(i=0;i<n;i++){
     out(_,i)=out(_,i)+mu;  // Add mean vector back 
-    LL[i]=as<double>(f1(_["b"]=out(_,i),_["y"]=y,_["x"]=x,offset2,wt2)); // Calculate log_likelihood
+//    LL[i]=as<double>(f1(_["b"]=out(_,i),_["y"]=y,_["x"]=x,offset2,wt2)); // Calculate log_likelihood
   }
   
   
@@ -517,8 +517,8 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
     Rcpp::Named("x")=x,
     Rcpp::Named("famfunc")=famfunc,
     Rcpp::Named("iters")=sim[1],
-    Rcpp::Named("Envelope")=Envelope,
-    Rcpp::Named("loglike")=LL
+    Rcpp::Named("Envelope")=Envelope
+//  ,  Rcpp::Named("loglike")=LL
   );  
   
   return(outlist);

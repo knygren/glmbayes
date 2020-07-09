@@ -7,8 +7,7 @@
 #' print.glmb
 #' @param n number of draws to generate. If \code{length(n) > 1}, the length is taken to be the number required.
 #' @param pfamily a description of the prior distribution and associated constants to be used in the model. This
-#' should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions and \sQuote{Details}
-#' for details about prior specifications).
+#' should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions).
 #' @param subset an optional vector specifying a subset of observations to be used in the fitting process.
 #' @param na.action a function which indicates what should happen when the data contain \code{NA}s.  The default is set by 
 #' the \code{na.action} setting of \code{\link{options}}, and is \code{\link[stats]{na.fail}} 

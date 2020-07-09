@@ -24,8 +24,7 @@ rglmb(n = 1, y, x, family = gaussian(), pfamily, offset = NULL, weights = 1)
     family functions.)}
 
 \item{pfamily}{a description of the prior distribution and associated constants to be used in the model. This
-should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions and \sQuote{Details}
-for details about prior specifications).}
+should be a pfamily function (see \code{\link{pfamily}} for details of pfamily functions).}
 
 \item{offset}{this can be used to specify an \emph{a priori} known component to be included in the linear 
 predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of 
@@ -128,6 +127,7 @@ New York: Springer.
 \seealso{
 \code{\link[stats]{lm}} and \code{\link[stats]{glm}} for classical modeling functions.
 
+\code{\link{family}} for documentation of family functions used to specify priors.
 \code{\link{pfamily}} for documentation of pfamily functions used to specify priors.
 
 \code{\link{Prior_Setup}}, \code{\link{Prior_Check}} for functions used to initialize and to check priors,  

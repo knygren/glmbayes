@@ -194,8 +194,8 @@ Rcpp::List rnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
     Rcpp::Named("x")=x,
     Rcpp::Named("famfunc")=famfunc,
     Rcpp::Named("iters")=draws,
-    Rcpp::Named("Envelope")=NULL,
-    Rcpp::Named("loglike")=LL
+    Rcpp::Named("Envelope")=NULL
+//  ,  Rcpp::Named("loglike")=LL
   );  
   
   return(outlist);

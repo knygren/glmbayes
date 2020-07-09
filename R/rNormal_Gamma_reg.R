@@ -160,12 +160,12 @@ out2<-matrix(dispersion,nrow=n,ncol=1)
 for(i in 1:n){out1[i,1:k]<- t(Btilde + IR%*%matrix(rnorm(m*k),ncol=m)*sqrt(dispersion[i])) }
 
 draws<-matrix(1,n)
-LL<-matrix(1,n)
+##LL<-matrix(1,n)
 
-for(i in 1:n){
+#for(i in 1:n){
     ## This function should return the negative log-likelihood 
-  LL[i]=f1(b=out1[i,],y=y,x=x,alpha=offset2,wt=wt/out2[i])	
-}
+#  LL[i]=f1(b=out1[i,],y=y,x=x,alpha=offset2,wt=wt/out2[i])	
+#}
 
 outlist<-list(
   coefficients=out1
@@ -177,8 +177,9 @@ outlist<-list(
   x=x,
   famfunc=famfunc,
   iters=draws,
-  Envelope=NULL,
-  loglike=LL)
+  Envelope=NULL
+# , loglike=LL
+)
 
 
 colnames(outlist$coefficients)<-colnames(x)
