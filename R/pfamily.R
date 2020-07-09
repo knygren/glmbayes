@@ -40,6 +40,35 @@
 #' inspired by the family used by the \code{\link{glmb}} function to specify the likelihood 
 #' function. That design in turn was inspired by S functions of the same names described in
 #' Hastie and Pregibon (1992).
+#' @references 
+#' Cox, D.R. and Snell, E.J. (1981) \emph{Applied Statistics; Principles and Examples.} London: chapman and Hall.
+#' 
+#' Dobson, A. J. (1990)
+#' \emph{An Introduction to Statistical Modeling.} London: Chapman and Hall.
+#' 
+#' Hastie, T. J. and Pregibon, D. (1992)
+#' \emph{Generalized linear models.}
+#' Chapter 6 of \emph{Statistical Models in S}
+#' eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
+#' McCullagh P. and Nelder, J. A. (1989)
+#' \emph{Generalized Linear Models.}
+#' London: Chapman and Hall.
+#' 
+#' Nygren, K.N. and Nygren, L.M (2006)
+#' Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
+#' vol.101, no.475, pp 1144-1156.
+#' doi: \href{https://doi.org/10.1198/016214506000000357}{10.1198/016214506000000357}.
+#' 
+#' Raiffa, Howard and Schlaifer, R (1961)
+#' \emph{Applied Statistical Decision Theory.}
+#' Boston: Clinton Press, Inc.
+#' 
+#' @seealso \code{\link{lmb}}, \code{\link{glmb}}, \code{\link{rlmb}}, \code{\link{rglmb}} for modeling 
+#' functions using pfamilies
+#' 
+#' \code{\link{rNormal_reg}}, \code{\link{rNormal_Gamma_reg}}, and \code{\link{rGamma_reg}} for lower level
+#' functions that sample from the resulting posterior distributions from the currently available \code{pfamilies}.
+#' 
 #' @example inst/examples/Ex_pfamily.R
 #' @export 
 #' @exportClass pfamily 

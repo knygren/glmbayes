@@ -162,7 +162,12 @@ if(family$family=="Gamma")
     coef.mode=NULL,
     dispersion=out,
     Prior=list(shape=shape,rate=rate),
-    prior.weights=weights
+    prior.weights=weights,
+    y=y,
+    x=x,
+    famfunc=famfunc(family),
+    iters=rep(1,n),
+    Envelope=NULL
     )
   
 

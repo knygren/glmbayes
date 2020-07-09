@@ -22,9 +22,9 @@ dNormal_Gamma(mu, Sigma, shape, rate)
 \item{object}{the function \code{pfamily} accesses the \code{pfamily} objects which
 are stored within objects created by modelling functions (e.g., \code{glmb}).}
 
-\item{mu}{a prior mean vector for the model coefficients}
+\item{mu}{a prior mean vector for the the modeling coefficients used in several pfamilies}
 
-\item{Sigma}{a prior Variance-Covariance matrix for the model coefficients}
+\item{Sigma}{a prior Variance-Covariance matrix for the model coefficients in several pfamilies}
 
 \item{dispersion}{the dispersion to be assumed when it is not given a prior. Should be provided
 when the Normal prior is for the \code{gaussian()}, \code{Gamma()}, \code{quasibinomial},
@@ -41,7 +41,7 @@ Needs to be provided when the Gamma prior is used for the dispersion. This
 specification is typically only used as part of Gibbs sampling where the beta and 
 dispersion parameters are updated separately.}
 
-\item{x}{an object, a family function that is to be printed}
+\item{x}{an object, a pfamily function that is to be printed}
 
 \item{\ldots}{additional argument(s) for methods.}
 }
@@ -51,21 +51,24 @@ list with elements.
 \item{pfamily}{character: the pfamily name}
 \item{prior_list}{a list with the prior parameters associated with the prior specification}
 \item{okfamilies}{currently implemented families for which the prior family can be used.}
+\item{plinks}{a function that assigns a set of oklinks for the combination of a family and 
+and pfamily.}
 \item{simfun}{function: the function used to generate samples from the posterior density. 
 All currently implemented pfamiles have simulation functions that generate iid samples
 for the associated posterior distribution.}
 }
 \description{
 Prior family objects provide a convenient way to specify the details of the priors 
-used by functions such as \code{\link{glmb}}. See the documentation for \code{\link{glmb}}
-for the details of how such model fitting takes place.
+used by functions such as \code{\link{glmb}}. See the documentations for \code{\link{lmb}},
+\code{\link{glmb}}, \code{\link{glmb}}, and \code{\link{rglmb}} for the details of how such model fitting 
+takes place.
 }
 \details{
-\code{pfamily} is a generic function with methods for classed \code{glmb} and 
+\code{pfamily} is a generic function with methods for classe \code{glmb} and 
 \code{lmb}. Many \code{glmb} models currently only have implementations for the \code{dNormal()} 
 prior family. The \code{Gamma()} family also works with the \code{dGamma()} prior 
-family while the \code{gaussian()} family works with the \code{dGamma()}, 
-\code{dNormal_Gamma()},and \code{dIndependent_Normal_Gamma()} families.
+family while the \code{gaussian()} family works with the \code{dGamma()} and 
+\code{dNormal_Gamma()} pfamilies.
 }
 \examples{
 mu=c(0,0)
@@ -86,4 +89,40 @@ mu[1]=log(mean(counts))
 V0<-((mysd)^2)*diag(5)
 glmb.D93<-glmb(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu,Sigma=V0))
 summary(glmb.D93)
+}
+\references{
+Cox, D.R. and Snell, E.J. (1981) \emph{Applied Statistics; Principles and Examples.} London: chapman and Hall.
+
+Dobson, A. J. (1990)
+\emph{An Introduction to Statistical Modeling.} London: Chapman and Hall.
+
+Hastie, T. J. and Pregibon, D. (1992)
+\emph{Generalized linear models.}
+Chapter 6 of \emph{Statistical Models in S}
+eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
+McCullagh P. and Nelder, J. A. (1989)
+\emph{Generalized Linear Models.}
+London: Chapman and Hall.
+
+Nygren, K.N. and Nygren, L.M (2006)
+Likelihood Subgradient Densities. \emph{Journal of the American Statistical Association}.
+vol.101, no.475, pp 1144-1156.
+doi: \href{https://doi.org/10.1198/016214506000000357}{10.1198/016214506000000357}.
+
+Raiffa, Howard and Schlaifer, R (1961)
+\emph{Applied Statistical Decision Theory.}
+Boston: Clinton Press, Inc.
+}
+\seealso{
+\code{\link{lmb}}, \code{\link{glmb}}, \code{\link{rlmb}}, \code{\link{rglmb}} for modeling 
+functions using pfamilies
+
+\code{\link{rNormal_reg}}, \code{\link{rNormal_Gamma_reg}}, and \code{\link{rGamma_reg}} for lower level
+functions that sample from the resulting posterior distributions from the currently available \code{pfamilies}.
+}
+\author{
+The design of the \code{pfamily} set of functions was developed by Kjell Nygren and was 
+inspired by the family used by the \code{\link{glmb}} function to specify the likelihood 
+function. That design in turn was inspired by S functions of the same names described in
+Hastie and Pregibon (1992).
 }
