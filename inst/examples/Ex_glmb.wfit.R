@@ -16,11 +16,11 @@ betastar=glmb.D93$coef.mode  # Posterior mode from optim
 x=glmb.D93$x
 y=glmb.D93$y
 #offset=glmb.D93$offset   # not present in the output --> For now set to 0 vector
-offset=0*y   # Should return this from lower level functions
-weights=glmb.D93$prior.weights
+offset2=0*y   # Should return this from lower level functions
+weights2=glmb.D93$prior.weights
 
 ## Check influence measures for original model
-fit=glmb.wfit(x,y,weights,offset,family=poisson(),Bbar=mu,P=solve(V0),betastar)
+fit=glmb.wfit(x,y,weights2,offset2,family=poisson(),Bbar=mu,P=solve(V0),betastar)
 influence.measures(fit)
 
 print(fit)
@@ -33,10 +33,36 @@ glmb2.D93<-glmb(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal
 
 Bbar2=mu1  # Prior mean
 betastar2=glmb2.D93$coef.mode  # Posterior mode from optim
-fit2=glmb.wfit(x,y,weights,offset,family=poisson(),Bbar2,P=solve(V1),betastar2)
+fit2=glmb.wfit(x,y,weights2,offset2,family=poisson(),Bbar2,P=solve(V1),betastar2)
 
 influence.measures(fit2)
 
 print(fit2)
 print(glmb2.D93$coef.mode)
 
+
+glmb2.D93$qr=glmb2.D93$fit$qr
+
+
+#rstandard(glmb2.D93,influence(glmb2.D93))
+#rstudent(glmb2.D93,influence(glmb2.D93))
+dfbetas(glmb2.D93,influence(glmb2.D93))
+dfbeta(glmb2.D93,influence(glmb2.D93))
+hatvalues(glmb2.D93,influence(glmb2.D93))
+#cooks.distance(glmb2.D93,influence(glmb2.D93))
+
+#covratio(glmb2.D93,influence(glmb2.D93))
+#dffits(glmb2.D93,influence(glmb2.D93))
+
+dffits(glmb2.D93$fit,influence(glmb2.D93))
+cooks.distance(glmb2.D93$fit,influence(glmb2.D93))
+covratio(glmb2.D93$fit,influence(glmb2.D93))
+#hat(glmb2.D93$fit,influence(glmb2.D93))
+
+
+influence.measures.glmb(glmb2.D93,influence(glmb2.D93))
+
+
+influence.measures.glmb(glmb2.D93,influence(glmb2.D93))
+
+influence.measures(glmb2.D93$fit,influence(glmb2.D93))

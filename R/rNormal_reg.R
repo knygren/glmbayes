@@ -223,7 +223,20 @@ dispersion=dispersion2,
 ##famfunc=famfunc,f1=f1,
 f2=f2,f3=f3,
 start=start,family=family$family,link=family$link,Gridtype=Gridtype)
-}
+
+  
+  betastar=outlist$coef.mode  # Posterior mode from optim
+  x=outlist$x
+  y=outlist$y
+  #offset=glmb.D93$offset   # not present in the output --> For now set to 0 vector
+  #offset=offset2   # Should return this from lower level functions
+  weights=outlist$prior.weights
+  
+  ## Check influence measures for original model
+  outlist$fit=glmb.wfit(x,y,weights,offset=offset2,family=family,Bbar=mu,P,betastar)
+  
+  
+  }
 
 
 colnames(outlist$coefficients)<-colnames(x)
