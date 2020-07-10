@@ -272,8 +272,8 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
       ##    Bounding term involving ntheta_star should be pre-calculated
       ##    for now, do it here
       
-      UB2= (0.5 * t(ntheta)%P2*%ntheta +t(cbars_new)%*% ntheta 
-            -(0.5*t(ntheta_star)%P2*%ntheta_star+t(cbars_new)%*% ntheta_star ) )
+      UB2= (0.5 * t(ntheta)%*%P2%*%ntheta +t(cbars_new)%*% ntheta 
+            -(0.5*t(ntheta_star)%*%P2%*%ntheta_star+t(cbars_new)%*% ntheta_star ) )
       
       ## UB1 also contains a term that involves -0.5*(1/dispersion) * RSS(ntheta)
       ## This term is then re-entered here and bounded
