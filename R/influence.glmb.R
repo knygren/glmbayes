@@ -9,8 +9,21 @@
 #' @export 
 
 
+influence.glmb<-function(model,...){
+  
+  # Just tell function to use fit component
+  # necessary because coefficients are draws and not modes
+  # so not all items returned by fitting function can be include in glmb returned list
+  
+  return(influence(model$fit,...)) 
+  
+}
 
-influence.glmb<-function(model,do.coef=TRUE){
+#' @export 
+#' @method lm.influence glmb
+#' @rdname influence.glmb  
+
+lm.influence.glmb<-function(model,do.coef=TRUE){
   
   # Just tell function to use fit component
   # necessary because coefficients are draws and not modes
@@ -25,6 +38,8 @@ influence.glmb<-function(model,do.coef=TRUE){
 #'
 #' This function provides the basic quantities which are used in forming a wide variety of diagnostics for checking
 #' the quality of Bayesian regression fits.
+#' @param infl influence structure as returned by \code{\link{lm.influence.glmb}} or \code{influence.glmb} 
+#' (the latter only for the glm method of \code{rstudent} and \code{cooks.distance}).
 #' @inheritParams stats::influence.measures
 #' @return a \code{\link{list}} wih components:
 #' @example inst/examples/Ex_glmb.wfit.R

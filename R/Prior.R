@@ -52,9 +52,8 @@ Prior_Setup<-function(formula,data=NULL, subset = NULL, na.action = na.fail,
 #'
 #' Checks if the credible intervals for the prior overlaps with the implied confidence intervals from 
 #' the classical model that comes from a call to the glm function 
-#' @param pfamily the prior family to use for the model (including the constants passed to prior). 
 #' @param level the confidence level at which the Prior-data conflict should be checked.
-#' @inheritParams stats::glm
+#' @inheritParams glmb
 #' @return A vector where each item provided the ratio of the absolue value for the difference between the 
 #' prior and maximum likelihood estimate divided by the length of the sum of half of the two intervals 
 #' (where normality is assumed)

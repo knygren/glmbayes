@@ -102,9 +102,33 @@ print(fit2)
 print(glmb2.D93$coef.mode)
 
 
-glmb2.D93$qr=glmb2.D93$fit$qr
+#glmb2.D93$qr=glmb2.D93$fit$qr
+
+
+influence.measures(glmb2.D93$fit,influence(glmb2.D93))
 
 influence.measures.glmb(glmb2.D93,influence(glmb2.D93))
+
+
+#rstandard(glmb2.D93,influence(glmb2.D93))
+#rstudent(glmb2.D93,influence(glmb2.D93))
+dfbetas(glmb2.D93,influence(glmb2.D93))
+dfbeta(glmb2.D93,influence(glmb2.D93))
+hatvalues(glmb2.D93,influence(glmb2.D93))
+#cooks.distance(glmb2.D93,influence(glmb2.D93))
+
+#covratio(glmb2.D93,influence(glmb2.D93))
+#dffits(glmb2.D93,influence(glmb2.D93))
+
+dffits(glmb2.D93$fit,influence(glmb2.D93))
+cooks.distance(glmb2.D93$fit,influence(glmb2.D93))
+covratio(glmb2.D93$fit,influence(glmb2.D93))
+#hat(glmb2.D93$fit,influence(glmb2.D93))
+
+
+influence.measures.glmb(glmb2.D93,influence(glmb2.D93))
+
+
 influence.measures.glmb(glmb2.D93,influence(glmb2.D93))
 
 influence.measures(glmb2.D93$fit,influence(glmb2.D93))

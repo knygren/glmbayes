@@ -9,8 +9,6 @@ mu[1]=log(mean(counts))
 V0<-((mysd)^2)*diag(5)
 glmb.D93<-glmb(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu,Sigma=V0))
 
-##### Try calling lm.fit using posterior mode from model to see if the optimized mode gets returned back
-
 ## Start setup here [First output from earlier optim optimization]
 betastar=glmb.D93$coef.mode  # Posterior mode from optim
 x=glmb.D93$x
@@ -41,7 +39,12 @@ print(fit2)
 print(glmb2.D93$coef.mode)
 
 
-glmb2.D93$qr=glmb2.D93$fit$qr
+#glmb2.D93$qr=glmb2.D93$fit$qr
+
+
+influence.measures(glmb2.D93$fit,influence(glmb2.D93))
+
+influence.measures.glmb(glmb2.D93,influence(glmb2.D93))
 
 
 #rstandard(glmb2.D93,influence(glmb2.D93))

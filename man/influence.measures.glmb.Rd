@@ -10,10 +10,8 @@
 \item{model}{an \R object, typically returned by \code{\link[stats]{lm}} or
     \code{\link[stats]{glm}}.}
 
-\item{infl}{influence structure as returned by
-    \code{\link[stats]{lm.influence}} or \code{\link[stats]{influence}} (the latter
-    only for the \code{glm} method of \code{rstudent} and
-    \code{cooks.distance}).}
+\item{infl}{influence structure as returned by \code{\link{lm.influence.glmb}} or \code{influence.glmb} 
+(the latter only for the glm method of \code{rstudent} and \code{cooks.distance}).}
 }
 \value{
 a \code{\link{list}} wih components:
@@ -66,9 +64,33 @@ print(fit2)
 print(glmb2.D93$coef.mode)
 
 
-glmb2.D93$qr=glmb2.D93$fit$qr
+#glmb2.D93$qr=glmb2.D93$fit$qr
+
+
+influence.measures(glmb2.D93$fit,influence(glmb2.D93))
 
 influence.measures.glmb(glmb2.D93,influence(glmb2.D93))
+
+
+#rstandard(glmb2.D93,influence(glmb2.D93))
+#rstudent(glmb2.D93,influence(glmb2.D93))
+dfbetas(glmb2.D93,influence(glmb2.D93))
+dfbeta(glmb2.D93,influence(glmb2.D93))
+hatvalues(glmb2.D93,influence(glmb2.D93))
+#cooks.distance(glmb2.D93,influence(glmb2.D93))
+
+#covratio(glmb2.D93,influence(glmb2.D93))
+#dffits(glmb2.D93,influence(glmb2.D93))
+
+dffits(glmb2.D93$fit,influence(glmb2.D93))
+cooks.distance(glmb2.D93$fit,influence(glmb2.D93))
+covratio(glmb2.D93$fit,influence(glmb2.D93))
+#hat(glmb2.D93$fit,influence(glmb2.D93))
+
+
+influence.measures.glmb(glmb2.D93,influence(glmb2.D93))
+
+
 influence.measures.glmb(glmb2.D93,influence(glmb2.D93))
 
 influence.measures(glmb2.D93$fit,influence(glmb2.D93))
