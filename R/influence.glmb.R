@@ -52,3 +52,64 @@ rstandard.glmb<-function(model,...,infl=influence(model)){
 
 }
   
+#' @export 
+#' @method rstudent glmb
+#' @rdname glmb.influence.measures 
+
+rstudent.glmb<-function(model,...,infl=influence(model)){
+  
+  if(is.null(infl)) infl=influence(model)
+  
+  return(rstudent(model$fit,infl))
+  
+}
+
+
+#' @export 
+#' @rdname glmb.influence.measures 
+
+glmb.dffits<-function(model,infl=influence(model)){
+  
+  if(is.null(infl)) infl=influence(model)
+  
+  return(dffits(model$fit,infl))
+  
+}
+
+
+#' @export 
+#' @method dfbetas glmb
+#' @rdname glmb.influence.measures 
+
+dfbetas.glmb<-function(model,...,infl=influence(model)){
+  
+  if(is.null(infl)) infl=influence(model)
+  
+  return(dfbetas(model$fit,infl))
+  
+}
+
+#' @export 
+#' @rdname glmb.influence.measures 
+
+glmb.covratio<-function(model,infl=influence(model)){
+  
+  if(is.null(infl)) infl=influence(model)
+  
+  return(covratio(model$fit,infl))
+  
+}
+
+
+#' @export 
+#' @method cooks.distance glmb
+#' @rdname glmb.influence.measures 
+
+cooks.distance.glmb<-function(model,...,infl=influence(model)){
+  
+  if(is.null(infl)) infl=influence(model)
+  
+  return(cooks.distance(model$fit,infl))
+  
+}
+

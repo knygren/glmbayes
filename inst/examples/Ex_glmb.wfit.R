@@ -50,42 +50,53 @@ influence(glmb2.D93,do.coef=FALSE)
 #influence.measures(glmb2.D93$fit,influence(glmb2.D93,do.coef=FALSE))
 glmb.influence.measures(glmb2.D93,influence(glmb2.D93))
 
+
 ## Do not need method functions
 dfbeta(glmb2.D93,influence(glmb2.D93))
 dfbeta(glmb2.D93$fit,influence(glmb2.D93))
 hatvalues(glmb2.D93,influence(glmb2.D93))
 hatvalues(glmb2.D93$fit,influence(glmb2.D93))
 
+# Methods (implmented)
+
+rstandard(glmb2.D93,infl=influence(glmb2.D93))
+rstandard(glmb2.D93)
+
+
+# Need Metods
 
 ## Needs a method function
 #dfbetas(glmb2.D93,influence(glmb2.D93))
-#dfbetas(glmb2.D93,influence(glmb2.D93,do.coef=TRUE))
+dfbetas(glmb2.D93)
+dfbetas(glmb2.D93,influence(glmb2.D93,do.coef=TRUE))
 dfbetas(glmb2.D93$fit,influence(glmb2.D93))
 
 
-# Needs a method function
-#dffits(glmb2.D93,influence(glmb2.D93))
-dffits(glmb2.D93$fit,influence(glmb2.D93))
 
 
 # Needs a method function
-#cooks.distance(glmb2.D93,influence(glmb2.D93))
+cooks.distance(glmb2.D93)
 cooks.distance(glmb2.D93$fit,influence(glmb2.D93))
 
-# Needs a method function
-#covratio(glmb2.D93,influence(glmb2.D93))
-covratio(glmb2.D93$fit,influence(glmb2.D93))
 
 
 # Needs a method function (now works)
-rstandard(glmb2.D93,influence(glmb2.D93))
-rstandard(glmb2.D93)
 #rstandard(glmb2.D93$fit,influence(glmb2.D93))
 
 
 # Needs a method function
-#rstudent(glmb2.D93,influence(glmb2.D93))
+rstudent(glmb2.D93)
 rstudent(glmb2.D93$fit,influence(glmb2.D93))
+
+
+# Not a method, separate function
+glmb.dffits(glmb2.D93)
+dffits(glmb2.D93$fit,influence(glmb2.D93)) 
+
+# Not a method - separate function
+glmb.covratio(glmb2.D93)  
+covratio(glmb2.D93$fit,influence(glmb2.D93))  
+
 
 
 # Needs a method function but requires a different approach
