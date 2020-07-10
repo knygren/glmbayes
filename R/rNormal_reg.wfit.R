@@ -85,6 +85,10 @@ rNormal_reg.wfit<-function(x,y,P,mu, w,offset=NULL,method="qr",tol=1e-7,singular
   #                      E'E
   lmf$S=crossprod(Z-W%*%lmf$Btilde)  # This part likely is used for the Gamma or Wishart simulation - Essentially RSS
   
+  # Assign the "lm" class for now to allow the method functions for influence measures to work
+  
+  class(lmf)="lm"
+  
     
   return(lmf)
   

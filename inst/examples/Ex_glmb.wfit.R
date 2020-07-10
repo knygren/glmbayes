@@ -1,0 +1,42 @@
+set.seed(333)
+## Dobson (1990) Page 93: Randomized Controlled Trial :
+counts <- c(18,17,15,20,10,20,25,13,12)
+outcome <- gl(3,1,9)
+treatment <- gl(3,3)
+mysd<-1
+mu<-matrix(0,5)
+mu[1]=log(mean(counts))
+V0<-((mysd)^2)*diag(5)
+glmb.D93<-glmb(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu,Sigma=V0))
+
+##### Try calling lm.fit using posterior mode from model to see if the optimized mode gets returned back
+
+## Start setup here [First output from earlier optim optimization]
+betastar=glmb.D93$coef.mode  # Posterior mode from optim
+x=glmb.D93$x
+y=glmb.D93$y
+#offset=glmb.D93$offset   # not present in the output --> For now set to 0 vector
+offset=0*y   # Should return this from lower level functions
+weights=glmb.D93$prior.weights
+
+## Check influence measures for original model
+fit=glmb.wfit(x,y,weights,offset,family=poisson(),Bbar=mu,P=solve(V0),betastar)
+influence.measures(fit)
+
+print(fit)
+print(glmb.D93$coef.mode)
+
+### Now try a strong prior with poorly chosen intercept
+mu1=0*mu
+V1=0.1*V0
+glmb2.D93<-glmb(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu1,Sigma=V1))
+
+Bbar2=mu1  # Prior mean
+betastar2=glmb2.D93$coef.mode  # Posterior mode from optim
+fit2=glmb.wfit(x,y,weights,offset,family=poisson(),Bbar2,P=solve(V1),betastar2)
+
+influence.measures(fit2)
+
+print(fit2)
+print(glmb2.D93$coef.mode)
+
