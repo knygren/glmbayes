@@ -5,6 +5,7 @@
 \alias{dNormal}
 \alias{dGamma}
 \alias{dNormal_Gamma}
+\alias{dIndependent_Normal_Gamma}
 \alias{print.pfamily}
 \title{Prior Family Objects for Bayesian Models}
 \usage{
@@ -15,6 +16,8 @@ dNormal(mu, Sigma, dispersion = NULL)
 dGamma(shape, rate, beta)
 
 dNormal_Gamma(mu, Sigma, shape, rate)
+
+dIndependent_Normal_Gamma(mu, Sigma, shape, rate)
 
 \method{print}{pfamily}(x, ...)
 }

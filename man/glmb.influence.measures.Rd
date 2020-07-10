@@ -134,13 +134,11 @@ rstudent(glmb2.D93$fit,influence(glmb2.D93))
 
 # Not a method, separate function
 glmb.dffits(glmb2.D93)
-#dffits(glmb2.D93,infl=influence(glmb2.D93,do.coef=TRUE))  # Looking in the wrong place for coefficients it seems
-# Might need to call influence.measures and pull dffits from there
-dffits(glmb2.D93$fit,influence(glmb2.D93)) # weird because this works - apparently dffits is not a method!
+dffits(glmb2.D93$fit,influence(glmb2.D93)) 
 
 # Not a method - separate function
-glmb.covratio(glmb2.D93)  # Still looking
-covratio(glmb2.D93$fit,influence(glmb2.D93))  # weird because this works - apparently dffits is not a method!
+glmb.covratio(glmb2.D93)  
+covratio(glmb2.D93$fit,influence(glmb2.D93))  
 
 
 

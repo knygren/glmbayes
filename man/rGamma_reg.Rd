@@ -182,6 +182,7 @@ A reference
 \seealso{
 Other family simulation functions:
 \code{\link{rNormal_Gamma_reg}()},
-\code{\link{rNormal_reg}()}
+\code{\link{rNormal_reg}()},
+\code{\link{rindependent_norm_gamma_reg}()}
 }
 \concept{simfuncs}

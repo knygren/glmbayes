@@ -137,6 +137,7 @@ simulation functions.
 
 Other family simulation functions:
 \code{\link{rGamma_reg}()},
-\code{\link{rNormal_reg}()}
+\code{\link{rNormal_reg}()},
+\code{\link{rindependent_norm_gamma_reg}()}
 }
 \concept{simfuncs}
