@@ -2,20 +2,14 @@
 % Please edit documentation in R/influence.glmb.R
 \name{influence.glmb}
 \alias{influence.glmb}
-\alias{lm.influence.glmb}
 \title{Bayesian Regression Diagnostics}
 \usage{
 \method{influence}{glmb}(model, ...)
-
-\method{lm.influence}{glmb}(model, do.coef = TRUE)
 }
 \arguments{
 \item{model}{an object as returned by \code{\link[stats]{lm}} or \code{\link[stats]{glm}}.}
 
 \item{...}{further arguments passed to or from other methods.}
-
-\item{do.coef}{logical indicating if the changed \code{coefficients}
-    (see below) are desired.  These need \eqn{O(n^2 p)} computing time.}
 }
 \value{
 a \code{\link{list}} wih components:
@@ -35,8 +29,6 @@ mu<-matrix(0,5)
 mu[1]=log(mean(counts))
 V0<-((mysd)^2)*diag(5)
 glmb.D93<-glmb(counts ~ outcome + treatment, family = poisson(),pfamily=dNormal(mu=mu,Sigma=V0))
-
-##### Try calling lm.fit using posterior mode from model to see if the optimized mode gets returned back
 
 ## Start setup here [First output from earlier optim optimization]
 betastar=glmb.D93$coef.mode  # Posterior mode from optim
@@ -68,34 +60,63 @@ print(fit2)
 print(glmb2.D93$coef.mode)
 
 
+
+influence(glmb2.D93)
+influence(glmb2.D93,do.coef=TRUE)
+influence(glmb2.D93,do.coef=FALSE)
+
 #glmb2.D93$qr=glmb2.D93$fit$qr
+#influence.measures(glmb2.D93,influence(glmb2.D93))
+#influence.measures(glmb2.D93$fit,influence(glmb2.D93))
+#influence.measures(glmb2.D93$fit,influence(glmb2.D93,do.coef=FALSE))
+glmb.influence.measures(glmb2.D93,influence(glmb2.D93))
 
-
-influence.measures(glmb2.D93$fit,influence(glmb2.D93))
-
-influence.measures.glmb(glmb2.D93,influence(glmb2.D93))
-
-
-#rstandard(glmb2.D93,influence(glmb2.D93))
-#rstudent(glmb2.D93,influence(glmb2.D93))
-dfbetas(glmb2.D93,influence(glmb2.D93))
+## Do not need method functions
 dfbeta(glmb2.D93,influence(glmb2.D93))
+dfbeta(glmb2.D93$fit,influence(glmb2.D93))
 hatvalues(glmb2.D93,influence(glmb2.D93))
-#cooks.distance(glmb2.D93,influence(glmb2.D93))
+hatvalues(glmb2.D93$fit,influence(glmb2.D93))
 
-#covratio(glmb2.D93,influence(glmb2.D93))
+
+## Needs a method function
+#dfbetas(glmb2.D93,influence(glmb2.D93))
+#dfbetas(glmb2.D93,influence(glmb2.D93,do.coef=TRUE))
+dfbetas(glmb2.D93$fit,influence(glmb2.D93))
+
+
+# Needs a method function
 #dffits(glmb2.D93,influence(glmb2.D93))
-
 dffits(glmb2.D93$fit,influence(glmb2.D93))
+
+
+# Needs a method function
+#cooks.distance(glmb2.D93,influence(glmb2.D93))
 cooks.distance(glmb2.D93$fit,influence(glmb2.D93))
+
+# Needs a method function
+#covratio(glmb2.D93,influence(glmb2.D93))
 covratio(glmb2.D93$fit,influence(glmb2.D93))
+
+
+# Needs a method function (now works)
+rstandard(glmb2.D93,influence(glmb2.D93))
+rstandard(glmb2.D93)
+#rstandard(glmb2.D93$fit,influence(glmb2.D93))
+
+
+# Needs a method function
+#rstudent(glmb2.D93,influence(glmb2.D93))
+rstudent(glmb2.D93$fit,influence(glmb2.D93))
+
+
+# Needs a method function but requires a different approach
+# The influence function actually stores this measure
+## This seems to require more work to create a method function
+## Should 
+#hat(glmb2.D93,influence(glmb2.D93))
 #hat(glmb2.D93$fit,influence(glmb2.D93))
 
-
-influence.measures.glmb(glmb2.D93,influence(glmb2.D93))
-
-
-influence.measures.glmb(glmb2.D93,influence(glmb2.D93))
-
-influence.measures(glmb2.D93$fit,influence(glmb2.D93))
+infl=influence(glmb2.D93)
+ha2t=infl$hat               
+hat2               
 }
