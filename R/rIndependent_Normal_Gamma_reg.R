@@ -10,7 +10,7 @@
 #' @return Currently mainly the draws for the dispersion and the regression coefficients
 #' will be updated to return outputs consistent with other function
 #' @family simfuncs 
-#' @example inst/examples/Ex_confint.glmb.R
+#' @example inst/examples/Ex_rindep_norm_gamma_reg.R
 #' @export 
 
 
