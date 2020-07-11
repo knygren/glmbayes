@@ -52,7 +52,7 @@ sum_out1=summary(glmb.D9)
 #prior=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion)
 
 # Temporarily lower the prior variance
-Sigma_prior=0.1*Sigma_prior
+Sigma_prior=1*Sigma_prior
 
 glmb.D9_v2=glmb(n=1000,weight~group, family=gaussian(),dNormal(mu=mu,Sigma=Sigma_prior,dispersion=dispersion))
 
@@ -101,8 +101,8 @@ prior_list2=list(mu=mu_temp,Sigma=Sigma_prior,dispersion=dispersion,
 summary(sim1)
 summary(sim2)
 
-mean(sim1$iters)
-mean(sim2$iters)
+mean(sim1$iters)  # Stronger prior made this a lot worse
+mean(sim2$iters)  # Strength or Prior did not impact much on this 
 
 mu=mu_temp
 
@@ -116,6 +116,7 @@ glmb.D9_v3=glmb(n=1000,weight ~ group,family=gaussian(),dNormal_Gamma(mu,Sigma_p
 summary(glmb.D9_v3)
 
 cov(sim1$coefficients)
+cov(sim2$coefficients)
 cov(glmb.D9_v3$coefficients)
 
 
@@ -196,12 +197,13 @@ disp_out[i,1]=disp_out1$dispersion
 dispersion
 
 # New sampler (when prior=maximum likelihood estimate seemed to match Two-Block Gibbs)
+## Dispersion is a bit too low - consistent with high precision needed to be penalized more
 
 mean(sim1$dispersion)
 var(sim1$dispersion)
 
-#mean(sim2$dispersion)
-#var(sim2$dispersion)
+mean(sim2$dispersion)
+var(sim2$dispersion)
 
 #mean(sim3$dispersion)
 #var(sim3$dispersion)
@@ -224,8 +226,8 @@ mean(1/sim1$dispersion)
 var(1/sim1$dispersion)
 
 
-#mean(1/sim2$dispersion)
-#var(1/sim2$dispersion)
+mean(1/sim2$dispersion)
+var(1/sim2$dispersion)
 
 #mean(1/sim3$dispersion)
 #var(1/sim3$dispersion)
@@ -252,7 +254,7 @@ t(glmb.D9_v2$coef.means)
 ## instead of those with variable dispersion from two-block Givvs
 
 colMeans(sim1$coefficients)
-#colMeans(sim2$coefficients)
+colMeans(sim2$coefficients)
 #colMeans(sim3$coefficients)
 
 ## mean for two-block Gibbs
@@ -267,7 +269,7 @@ colMeans(beta_out)
 cov(glmb.D9_v2$coefficients)  
 cov(glmb.D9_v3$coefficients)  
 cov(sim1$coefficients)  
-#cov(sim2$coefficients)  
+cov(sim2$coefficients)  
 #cov(sim3$coefficients)  
 ## With 10,000 iterations, this now seems much closer to the output from the function....
 cov(beta_out)
@@ -284,20 +286,27 @@ cor(beta_out[,2],disp_out[,1])  # 0.2615
 
 sd1=sqrt(diag(cov(glmb.D9$coefficients)))
 sd2=sqrt(diag(cov(sim1$coefficients)))
-sd3=sqrt(diag(cov(beta_out)))
+sd3=sqrt(diag(cov(sim2$coefficients)))
+sd4=sqrt(diag(cov(beta_out)))
 
 sd2
 sd3
+sd4
 
 ## Standard deviation now slightly higher than two-block Gibbs
 
 rbind(colMeans(sim1$coefficients),sd2)
-rbind(colMeans(beta_out),sd3)
+rbind(colMeans(sim2$coefficients),sd3)
+rbind(colMeans(beta_out),sd4)
 
 ## t-tests are a bit inconclusive [Really need a multivariate test here]
 
 t.test(sim1$coefficients[,1],beta_out[,1])
 t.test(sim1$coefficients[,2],beta_out[,2])
+
+
+t.test(sim2$coefficients[,1],beta_out[,1])
+t.test(sim2$coefficients[,2],beta_out[,2])
 
 #####################################################################3
 

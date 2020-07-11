@@ -208,8 +208,8 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   New_LL=c(1:gs)
   New_logP2=c(1:gs)
   
-  print("logP - Old Envelope")
-  print(Env2$logP)
+#  print("logP - Old Envelope")
+#  print(Env2$logP)
   
   
   
@@ -591,8 +591,8 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   New_LL=c(1:gs)
   New_logP2=c(1:gs)
   
-  print("logP - Old Envelope")
-  print(Env2$logP)
+#  print("logP - Old Envelope")
+#  print(Env2$logP)
   
   for(i in 1:gs){
     
@@ -609,32 +609,32 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   
   
   
-  print("cbars")
-  print(cbars)
+#  print("cbars")
+#  print(cbars)
   
-  print("Env2$thetabars")
-  print(Env2$thetabars)
+#  print("Env2$thetabars")
+#  print(Env2$thetabars)
 
   New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), as.vector(alpha), as.vector(wt2))
   
-  print("New_thetabars that should match")
-  print(New_thetabars)
+#  print("New_thetabars that should match")
+#  print(New_thetabars)
 
   
   thetastars1=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), as.vector(alpha), as.vector(0*wt2))
   
-  print("thetastars at 0 weight")
-  print(thetastars1)
+#  print("thetastars at 0 weight")
+#  print(thetastars1)
   
     
-  print("theta_star")
-  print(theta_star)
+#  print("theta_star")
+#  print(theta_star)
   
-  print("logP1")
-  print(logP1)
+#  print("logP1")
+#  print(logP1)
 
-  print("New_LL")
-  print(New_LL)
+#  print("New_LL")
+#  print(New_LL)
   
   maxlogP=max(New_logP2)
   
@@ -650,12 +650,12 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   
     
   
-  print("Old PLSD")
-  print(Env2$PLSD)
+#  print("Old PLSD")
+#  print(Env2$PLSD)
   
   
-  print("New PLSD")
-  print(PLSD_new)
+#  print("New PLSD")
+#  print(PLSD_new)
   
   #print("P2")
   #print(P2)
