@@ -316,6 +316,7 @@ arma::mat  Inv_f3_gaussian(NumericMatrix cbars,NumericVector y, NumericMatrix x,
 
     xb2=alpha2 -y2;
     
+    // Is this sign right?
     outtemp2=-inv_sympd(P2+x2.t() * Ptemp2*x2)*(-cbars2+x2.t() * Ptemp2 *xb2+P2*mu2);
     
   }

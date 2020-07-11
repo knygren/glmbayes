@@ -2,9 +2,20 @@
 % Please edit documentation in R/rIndependent_Normal_Gamma_reg.R
 \name{rindependent_norm_gamma_reg}
 \alias{rindependent_norm_gamma_reg}
+\alias{rindependent_norm_gamma_reg_v2}
 \title{The Bayesian Indendepent Normal-Gamma Regression Distribution}
 \usage{
 rindependent_norm_gamma_reg(
+  n,
+  y,
+  x,
+  prior_list,
+  offset = NULL,
+  weights = 1,
+  family = gaussian()
+)
+
+rindependent_norm_gamma_reg_v2(
   n,
   y,
   x,
@@ -146,7 +157,27 @@ shape=shape,rate=rate,Precision=solve(Sigma_prior))
 ptm <- proc.time()
 sim1=rindependent_norm_gamma_reg(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
  proc.time()-ptm
+
+ # Try a model where prior mean is equal to maximum likelihood estimate
+
+#mu_temp=lm.D9$coefficients
+mu_temp=mu
+
+ ## Temporarily make prior dispersion very large 
+#disp_temp=100*dispersion
+prior_list2=list(mu=mu_temp,Sigma=Sigma_prior,dispersion=dispersion,
+                 shape=shape,rate=rate,Precision=solve(Sigma_prior))
+ ptm <- proc.time()
+ sim2=rindependent_norm_gamma_reg_v2(n=1000,y,x,prior_list=prior_list2,offset=NULL,weights=1)
+ proc.time()-ptm
+ 
 summary(sim1)
+summary(sim2)
+
+mean(sim1$iters)
+mean(sim2$iters)
+
+mu=mu_temp
 
 mean(sim1$dispersion) 
 mean(1/sim1$dispersion)  # should be ~1.8 ## Estimate with only base terms --> 2.07 =(shape/rate)
