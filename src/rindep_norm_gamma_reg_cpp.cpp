@@ -39,8 +39,8 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
   double a2=0;
   double U=0;
   double test=0;
-  double test_int=0;
-  double test_data=0;
+//  double test_int=0;
+//  double test_data=0;
   double U2=0;
   
   //out(0,0)=1;
@@ -49,10 +49,12 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
   NumericMatrix loglt=Envelope["loglt"];
   NumericMatrix logrt=Envelope["logrt"];
   NumericMatrix cbars=Envelope["cbars"];
+  
+
 //  NumericMatrix cbars_int=Envelope["cbars_int"];
   NumericVector LLconst=Envelope["LLconst"]; 
-  NumericVector LLconst_int=Envelope["LLconst_int"]; 
-  
+//  NumericVector LLconst_int=Envelope["LLconst_int"]; 
+
   NumericVector outtemp=out(0,_);
   arma::rowvec outtemp2(outtemp.begin(),l1,false);
   NumericVector cbartemp=cbars(0,_);
@@ -63,7 +65,7 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
 //  NumericVector cbartemp_int=cbars_int(0,_);
 //  arma::rowvec cbartemp_int2(cbartemp_int.begin(),l1,false);
   
-  
+
     NumericMatrix testtemp(1,1);
   arma::mat testtemp2(testtemp.begin(),1,1,false);
 
@@ -75,7 +77,9 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
   arma::mat btemp2(btemp.begin(),l1,1,false); 
   NumericVector testll(1);
   NumericVector testll_data(1);
-  
+
+
+    
   if(progbar==1){ Rcpp::Rcout << "Starting Simulation:" << std::endl;  };
 
     Rcpp::checkUserInterrupt();
@@ -84,7 +88,7 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
 //      if(i==n-1) {Rcpp::Rcout << "" << std::endl;}
     }
     
-    
+
     //a1=0;
 
       U=R::runif(0.0, 1.0);
@@ -99,6 +103,8 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
         }
         //a2=1; 
       }
+      
+
       for(int j=0;j<l1;j++){  
         
         // Switch to using thetabars here
@@ -107,7 +113,9 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
         
         
       }
-      
+
+
+            
       // cbars_int2 holds the intercept part
       
       outtemp=out(0,_);   // Hopefully this doew not break link to outtemp2
@@ -131,15 +139,17 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
       
 
       test=LLconst(J(0))+testtemp(0,0)-testll(0);
-      
-      test_int=LLconst_int(J(0))+testtemp_int(0,0)-(testll(0)-testll_data(0));
-      test_data=test-test_int;
 
-    
+
+//      test_int=LLconst_int(J(0))+testtemp_int(0,0)-(testll(0)-testll_data(0));
+//      test_data=test-test_int;
+
+
   return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("test")=test,Rcpp::Named("J")=J,
-                                        Rcpp::Named("log_U2")=log(U2),
-                                        Rcpp::Named("test_int")=test_int,
-                                        Rcpp::Named("test_data")=test_data);      
+                                        Rcpp::Named("log_U2")=log(U2)
+//                                      ,  Rcpp::Named("test_int")=test_int,
+//                                        Rcpp::Named("test_data")=test_data
+                              );      
   
 }
 

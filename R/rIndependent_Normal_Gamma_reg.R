@@ -201,6 +201,8 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   ## Because of Acceptance procedure below, this should use RSS_ML not RSS_Post from above
   
   iters_out<-c(1:n)
+  disp_out<-matrix(0,nrow=n,ncol=1)
+  beta_out<-matrix(0,nrow=n,ncol=ncol(x))
   
   ## Loop through and accept/reject based on test from internal function
   
@@ -257,7 +259,7 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
                    as.matrix(P2), as.vector(alpha), as.vector(wt2))
       
       ntheta=as.matrix(New_thetabars[J_out,1:ncol(x)],ncol=1)
-      ntheta_star=as.matrix(-P2%*%as.matrix(cbars_new,ncol=1),ncol=1)  
+      ntheta_star=as.matrix(P2%*%as.matrix(cbars_new,ncol=1),ncol=1)  
       
       betadiff=as.matrix(sim$out[1,1:ncol(x)],ncol=1)-as.matrix(New_thetabars[J_out,1:ncol(x)],ncol=1)
       
@@ -272,8 +274,8 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
       ##    Bounding term involving ntheta_star should be pre-calculated
       ##    for now, do it here
       
-      UB2= (0.5 * t(ntheta)%*%P2%*%ntheta +t(cbars_new)%*% ntheta 
-            -(0.5*t(ntheta_star)%*%P2%*%ntheta_star+t(cbars_new)%*% ntheta_star ) )
+      UB2= (0.5 * t(ntheta)%*%P2%*%ntheta -t(cbars_new)%*% ntheta 
+            -(0.5*t(ntheta_star)%*%P2%*%ntheta_star-t(cbars_new)%*% ntheta_star ) )
       
       ## UB1 also contains a term that involves -0.5*(1/dispersion) * RSS(ntheta)
       ## This term is then re-entered here and bounded
@@ -290,13 +292,16 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
       test1= LL_Test-UB1
       test2= LL_Test-(UB1+UB2)
       test3= LL_Test-(UB1+UB2+UB3)
-
-      print("tests 1, 2, and 3 - Each test should get a bit more negative")
-      print(test1)
-      print(test2)
-      print(test3)
+      test=test3-log_U2
       
-      stop("test values printed above")
+      #print("tests 1, 2, and 3 - Each test should get a bit more negative")
+      #print(test1)
+      #print(test2)
+      #print(test3)
+      
+      #print("Final Test")
+      #print(test)
+      #stop("test values printed above")
       
       ## UB1 --> Should be test if we are using prior for beta but shift the two components to gamm
       ## UB2 --> Should be test if we were sampling for the conditional density using the grid positioned at betastar, dispstar
@@ -318,7 +323,7 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
       
       
       
-     a1=1
+     #a1=1
       if(test>=0) a1=1
       else{iters_out[i]=iters_out[i]+1}        
       
