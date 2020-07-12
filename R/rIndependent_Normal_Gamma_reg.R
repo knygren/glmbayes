@@ -611,6 +611,11 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   max_disp3=1/qgamma(c(0.01),shape2,rate3)
   
  
+  print("max_disp3")
+  print(max_disp3)
+  
+  print("quantile function lower bound for 1/dispersion under approximate posterior")
+  pgamma(1/max_disp3,shape2,rate3)
   
   ## Copy Envelope for use in simulation (as needed update components)
   
@@ -746,9 +751,13 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       ## Now updated to use modified shape from adjustment below
       
       #p=rgamma(1,shape=shape2,rate=rate2)  
-      p=rgamma(1,shape=shape3,rate=rate2)  
+      #p=rgamma(1,shape=shape3,rate=rate2)  
       
-      dispersion=1/p
+      # Simulate from a restricted gamma distribution
+      dispersion=r_invgamma(1,shape=shape3,rate=rate2,disp_upper=max_disp_f)
+      p=1/dispersion
+      
+      #dispersion=1/p
       
       ## Update wt2
       
@@ -1067,3 +1076,19 @@ Neg_logLik2<-function(b, y, x, alpha, wt,family){
 
 
 
+################################## Utility functions used by the above  #################
+
+p_inv_gamma<-function(dispersion,shape,rate){
+  1-pgamma(1/dispersion,shape=shape,rate=rate)
+}
+
+q_inv_gamma<-function(p,shape,rate,disp_upper){
+  p_upp=p_inv_gamma(disp_upper,shape=shape,rate=rate)
+  p2=1-(p*p_upp)
+  1/qgamma(p2,shape,rate)
+}
+
+r_invgamma<-function(n,shape,rate,disp_upper){
+  p=runif(n)
+  q_inv_gamma(p=p,shape=shape,rate=rate,disp_upper=disp_upper)
+}
