@@ -6,7 +6,7 @@
 #' prior distribution.
 #' @param offset an offset parameter
 #' @param weights a weighting variable
-#' @param max_disp parameter used to control upper bound in accept-reject procedure 
+#' @param max_disp parameter currently used to control upper bound in accept-reject procedure 
 #' @inheritParams glmb
 #' @return Currently mainly the draws for the dispersion and the regression coefficients
 #' will be updated to return outputs consistent with other function
@@ -189,6 +189,7 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   shape2= shape + n_obs/2
   rate2 =rate + RSS_ML/2
+  
   
   ## Copy Envelope for use in simulation (as needed update components)
   
@@ -449,8 +450,12 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
     ## Residual SUM of SQUARES at current conditional posterior mode estimate
     
     RSS2_post=t(y-xbetastar)%*%(y-xbetastar)  
+
+    shape2= shape + n_obs/2
+    rate2 =rate + RSS2_post/2
     
-    dispersion2=RSS2_post/n_obs
+        
+    dispersion2=rate2/shape2
     
   }
   
@@ -567,12 +572,45 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   
   
   #### End of Standardization - Steps below might change  
-  
+  print("RSS - Post and ML")
+  print(RSS2_post)
+  print(RSS_ML)
   
   ## Update Gamma parameters
   
   shape2= shape + n_obs/2
-  rate2 =rate + RSS_ML/2
+  rate2 =rate + (RSS_ML/2)
+  rate3 =rate + (RSS2_post/2)
+
+  lm_log2=5.555805   # Also used above
+  
+  shape3=shape2-lm_log2
+  
+  print("Old Candidate shape and rate are")
+  print(shape2)
+  print(rate2)
+  
+  print("New Candidate shape and rate are")
+  print(shape3)
+  print(rate2)
+  
+  #print(rate3)
+  
+  
+  print("99st percentile for Inverse Gamma candidates density is")
+  print(1/qgamma(c(0.01),shape2,rate2))
+  max_disp1=1/qgamma(c(0.01),shape2,rate2)
+  
+
+  print("99th percentile for Inverse Gamma prior density is")
+  print(1/qgamma(c(0.01),shape,rate))
+  max_disp2=1/qgamma(c(0.01),shape,rate)
+  
+  print("99th percentile for approximate Inverse  Gamma posterior density is")
+  print(1/qgamma(c(0.01),shape2,rate3))
+  max_disp3=1/qgamma(c(0.01),shape2,rate3)
+  
+ 
   
   ## Copy Envelope for use in simulation (as needed update components)
   
@@ -622,9 +660,17 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
 #  print("New_thetabars that should match")
 #  print(New_thetabars)
 
-  max_disp2=max_disp/2
+  #max_disp2=max_disp/2
+  #max_disp_f=max(max_disp1)
   
-  wt2=wt/rep(max_disp2,length(y))
+  # max_disp3 is the approximation to posterior- makes more sense
+  # than the prior or the candidata distribution as starting point
+  # for now, link this to the 99th percentile for dispersion under approximate posterior
+  
+  max_disp_f=max_disp3
+  
+  
+  wt2=wt/rep(max_disp_f,length(y))
   
     
   thetastars1=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
@@ -696,7 +742,11 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
     iters_out[i]=1
     
     while(a1==0){
-      p=rgamma(1,shape=shape2,rate=rate2)  
+      
+      ## Now updated to use modified shape from adjustment below
+      
+      #p=rgamma(1,shape=shape2,rate=rate2)  
+      p=rgamma(1,shape=shape3,rate=rate2)  
       
       dispersion=1/p
       
@@ -823,9 +873,41 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       
       UB3A =max_New_LL -LL_temp[J_out]
       
-      # When max_disp is provided
+      ## max_new_LL appears to be linear in the dispersion
+      ## Let's consider a function New_LL_log_disp (linear in log_dispersion)
+      ## that is tangent to max_new_LL near center of distribution
+      ## and bounds max_new_LL from below.
+      ## such a log term can be used to modify density that generates
+      ## dispersion candidates (by changing shape parameter)
+      ## and can then be included here. then we instead try to bound max_new_LL - New_LL_log_disp
+      ## This can not be achieved either, but we can use a reasonable upper bound for dispersion
+      ## so that difference is bounded below that upper bound
+      ## As a test, we hard code this function here (will then generalize)
+      
+      lm_log1=6.637078
+      lm_log2=5.555805   # Also used above
+      #New_LL_log_disp=0
+      New_LL_log_disp=lm_log1+lm_log2*log(dispersion)
+      max_LL_log_disp=lm_log1+lm_log2*log(max_disp_f) ## From above
+      
       
       UB3B=max_New_LL_UB-max_New_LL
+      
+      #print("UB3B - Old Method")
+      #print(UB3B)
+      UB3B=(max_New_LL_UB-max_LL_log_disp)-(max_New_LL-New_LL_log_disp)
+      
+      #print("Max Difference - New Method")
+      
+    #  print(max_New_LL_UB-max_LL_log_disp)
+     # print("UB3B - new Method")
+    #  print(UB3B)
+  
+    #  print("dispersion")    
+    #  print(dispersion)    
+    #  stop("UB3B tests above")
+      
+            #UB3B=max_New_LL_UB2-max_New_LL
       
     #  UB3= (0.5 * t(ntheta)%*%P2%*%ntheta -t(cbars_new)%*% ntheta 
     #        -(0.5*t(ntheta_star)%*%P2%*%ntheta_star-t(cbars_new)%*% ntheta_star ) )
@@ -846,9 +928,11 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       test3A= LL_Test-(UB1+UB2+UB3A)
       test3B= LL_Test-(UB1+UB2+UB3A+UB3B)
 
-      if(UB3B<0){ warning("Candidate with UB3B<0 detected. Max_disp might be set too low")  
-        cat("\nAssociated value for candidate dispersion was:",dispersion)
-        cat("\nOverall Log-Accepance rate:",test3B)
+      if(test3B<0){ 
+        warning("Candidate with Positive Log-Acceptance. Bounding function may need adjustment")  
+        #cat("\nAssociated value for UB3B was:",UB3B)
+        #cat("\nAssociated value for candidate dispersion was:",dispersion)
+        #cat("\nOverall Log-Accepance rate:",test3B)
       }
       
       

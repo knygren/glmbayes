@@ -82,9 +82,9 @@ shape=shape,rate=rate,Precision=solve(Sigma_prior))
 
 ## Using new function
 
-ptm <- proc.time()
-sim1=rindependent_norm_gamma_reg(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
- proc.time()-ptm
+#ptm <- proc.time()
+#sim1=rindependent_norm_gamma_reg(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
+# proc.time()-ptm
 
  # Try a model where prior mean is equal to maximum likelihood estimate
 
@@ -108,10 +108,60 @@ prior_list2=list(mu=mu_temp,Sigma=Sigma_prior,dispersion=dispersion,
 #sim2$weight_out[1:10] 
 
 hist(sim2$dispersion,50)
-
 quantile(sim2$dispersion,probs=c(0.01,0.99))
+mean(sim2$iters)  # Strength of Prior did not impact much on this 
+1/mean(sim2$iters)
 
-#plot(sim2$dispersion)
+mean(sim2$dispersion)
+
+plot(log(sim2$weight_out)~log(1/sim2$dispersion))
+
+lm_test2=lm(sim2$weight_out~sim2$dispersion)
+lmc=lm_test2$coefficients
+lmc[1]+lmc[2]*0.9
+lmc[1]+lmc[2]*0.45
+
+dispstar=0.61
+lm_log2=lmc[2]*dispstar
+
+lm_log1=lmc[1]+lm_log2-lm_log2*log(dispstar)
+
+pred3=lm_log1+lm_log2*log(sim2$dispersion)
+
+plot(sim2$weight_out~sim2$dispersion)
+
+disp_new <- seq(0, 2, 0.1)
+pred4=lm_log1+lm_log2*log(disp_new)
+
+lines(disp_new,pred4,lty=2)
+
+plot(sim2$weight_out-pred3)
+
+lm_log2
+disp_UB=0.9
+lmc[1]+lmc[2]*disp_UB
+lmc[1]+lmc[2]*disp_UB -(lm_log1+lm_log2*log(disp_UB))
+
+disp_UB=2
+lmc[1]+lmc[2]*disp_UB
+lmc[1]+lmc[2]*disp_UB -(lm_log1+lm_log2*log(disp_UB))
+
+
+
+
+lines(sim2$dispersion,lm_test2$fitted.values,lty=2)
+
+
+summary(sim2$dispersion)
+
+lm_test=lm(log(sim2$weight_out)~log(1/sim2$dispersion))
+lm_test$coefficients
+
+lines(log(1/sim2$dispersion),lm_test$fitted.values,lty=2)
+
+fit_test=2.15-1.5*log(1/sim2$dispersion)
+
+lines(log(1/sim2$dispersion),fit_test,lty=2)
 
 #max(sim2$dispersion) 
 
