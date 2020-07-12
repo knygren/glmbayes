@@ -6,6 +6,7 @@
 #' prior distribution.
 #' @param offset an offset parameter
 #' @param weights a weighting variable
+#' @param max_disp parameter used to control upper bound in accept-reject procedure 
 #' @inheritParams glmb
 #' @return Currently mainly the draws for the dispersion and the regression coefficients
 #' will be updated to return outputs consistent with other function
@@ -399,7 +400,8 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
 #' @export 
 #' @rdname  rindependent_norm_gamma_reg
 
-rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
+rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
+                                         max_disp=0.9){
   
   call<-match.call()
   
@@ -620,8 +622,13 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
 #  print("New_thetabars that should match")
 #  print(New_thetabars)
 
+  max_disp2=max_disp/2
   
-  thetastars1=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), as.vector(alpha), as.vector(0*wt2))
+  wt2=wt/rep(max_disp2,length(y))
+  
+    
+  thetastars1=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
+                              as.vector(alpha), as.vector(wt2))
   
 #  print("thetastars at 0 weight")
 #  print(thetastars1)
@@ -648,26 +655,29 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
 
   log_P_diff=log(Env_temp$PLSD)-log(Env2$PLSD)
   
+  #################################
+  
+  
+  
+  for(j in 1:gs){
     
-  
-#  print("Old PLSD")
-#  print(Env2$PLSD)
-  
-  
-#  print("New PLSD")
-#  print(PLSD_new)
-  
-  #print("P2")
-  #print(P2)
-  
-  #print("cbars")
-  #print(cbars)
+    theta_bars_temp=as.matrix(thetastars1[j,1:ncol(x)],ncol=1)
+    cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
+    
+    # New formula - This should likely replace: -NegLL(i)+arma::as_scalar(G3row.t() * cbarrow)
+    
+    New_LL[j]=-0.5*t(theta_bars_temp)%*%P2%*%theta_bars_temp+t(cbars_temp)%*% theta_bars_temp
+    
+  }
   
   
-  #print("New_LL_new")
-  #print(New_LL_new)
+  LL_temp=log_P_diff+New_LL
   
-  #  stop("logP old above")
+  
+  max_New_LL_UB=max(LL_temp)
+  
+  print("max_New_LL_UB")  
+  print(max_New_LL_UB)  
   
   
   ########################  End of test ############################
@@ -676,6 +686,7 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   iters_out<-c(1:n)
   disp_out<-matrix(0,nrow=n,ncol=1)
   beta_out<-matrix(0,nrow=n,ncol=ncol(x))
+  weight_out<-0*c(1:n)
   
   ## Loop through and accept/reject based on test from internal function
   
@@ -768,14 +779,14 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       ##    This term varies across the likelihood subgradient densities
       ##    and therefore needs to be handled across them
 
-      for(i in 1:gs){
+      for(j in 1:gs){
         
-        theta_bars_temp=as.matrix(New_thetabars[i,1:ncol(x)],ncol=1)
-        cbars_temp=as.matrix(cbars[i,1:ncol(x)],ncol=1)
+        theta_bars_temp=as.matrix(New_thetabars[j,1:ncol(x)],ncol=1)
+        cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
         
         # New formula - This should likely replace: -NegLL(i)+arma::as_scalar(G3row.t() * cbarrow)
         
-        New_LL[i]=-0.5*t(theta_bars_temp)%*%P2%*%theta_bars_temp+t(cbars_temp)%*% theta_bars_temp
+        New_LL[j]=-0.5*t(theta_bars_temp)%*%P2%*%theta_bars_temp+t(cbars_temp)%*% theta_bars_temp
         
         #New_logP2[i]=logP1[i]+New_LL[i]+0.5*t(cbars_temp)%*%cbars_temp
         #New_logP2[i]=logP1[i]+0.5*t(cbars_temp)%*%cbars_temp
@@ -812,12 +823,18 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       
       UB3A =max_New_LL -LL_temp[J_out]
       
-      UB3= (0.5 * t(ntheta)%*%P2%*%ntheta -t(cbars_new)%*% ntheta 
-            -(0.5*t(ntheta_star)%*%P2%*%ntheta_star-t(cbars_new)%*% ntheta_star ) )
+      # When max_disp is provided
+      
+      UB3B=max_New_LL_UB-max_New_LL
+      
+    #  UB3= (0.5 * t(ntheta)%*%P2%*%ntheta -t(cbars_new)%*% ntheta 
+    #        -(0.5*t(ntheta_star)%*%P2%*%ntheta_star-t(cbars_new)%*% ntheta_star ) )
       
             
-      UB3= (0.5 * t(ntheta)%*%P2%*%ntheta -t(cbars_new)%*% ntheta 
-            -(0.5*t(ntheta_star)%*%P2%*%ntheta_star-t(cbars_new)%*% ntheta_star ) )
+    # UB3= (0.5 * t(ntheta)%*%P2%*%ntheta -t(cbars_new)%*% ntheta 
+    #        -(0.5*t(ntheta_star)%*%P2%*%ntheta_star-t(cbars_new)%*% ntheta_star ) )
+      
+      
       
             
       ## Terms for dealing with multiple envelopes....
@@ -827,12 +844,21 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       test1= LL_Test-UB1
       test2= LL_Test-(UB1+UB2)
       test3A= LL_Test-(UB1+UB2+UB3A)
-      #test4= LL_Test-(UB1+UB2+UB3A+UB4)
+      test3B= LL_Test-(UB1+UB2+UB3A+UB3B)
+
+      if(UB3B<0){ warning("Candidate with UB3B<0 detected. Max_disp might be set too low")  
+        cat("\nAssociated value for candidate dispersion was:",dispersion)
+        cat("\nOverall Log-Accepance rate:",test3B)
+      }
+      
+      
+            #test4= LL_Test-(UB1+UB2+UB3A+UB4)
       
       ## For now use test3A here (will likely need to further bound across dispersion values)
       ## but this could be close
       
       test=test3A-log_U2
+      test=test3B-log_U2
       
       #print("dispersion")
       #print(dispersion)
@@ -840,17 +866,19 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       #print("J_out")
       #print(J_out)
 
-      #print("tests 1, 2, 3A - Each test should get a bit more negative")
+      #print("tests 1, 2, 3A and 3B - Each test should get a bit more negative")
       #print(test1)
       #print(test2)
       #print(test3A)
-      #print(test4)
-      
+      #print(test3B)
+
       #print("Final Test")
       #print(test)
       
       #stop("test values printed above")
-      
+  
+      weight_out[i]=max_New_LL
+          
       #a1=1
       if(test>=0) a1=1
       else{iters_out[i]=iters_out[i]+1}        
@@ -884,7 +912,8 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
     famfunc=famfunc,
     iters=iters_out,
     Envelope=NULL,
-    loglike=NULL
+    loglike=NULL,
+    weight_out=weight_out
     #,test_out=test_out
   )
   

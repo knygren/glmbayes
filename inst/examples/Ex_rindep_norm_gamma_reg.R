@@ -54,7 +54,8 @@ sum_out1=summary(glmb.D9)
 # Temporarily lower the prior variance
 Sigma_prior=1*Sigma_prior
 
-glmb.D9_v2=glmb(n=1000,weight~group, family=gaussian(),dNormal(mu=mu,Sigma=Sigma_prior,dispersion=dispersion))
+glmb.D9_v2=glmb(n=1000,weight~group, family=gaussian(),
+dNormal(mu=mu,Sigma=Sigma_prior,dispersion=dispersion))
 
 n_prior=2
 shape=n_prior/2
@@ -94,26 +95,81 @@ mu_temp=mu
 #disp_temp=100*dispersion
 prior_list2=list(mu=mu_temp,Sigma=Sigma_prior,dispersion=dispersion,
                  shape=shape,rate=rate,Precision=solve(Sigma_prior))
+
+#Note: max_disp=0.9 seened to require just 8.552 candidates per acceptance
+# if max_disp =1.5, this seems much higher and algorith seems to possibly hang
+
  ptm <- proc.time()
- sim2=rindependent_norm_gamma_reg_v2(n=1000,y,x,prior_list=prior_list2,offset=NULL,weights=1)
+ sim2=rindependent_norm_gamma_reg_v2(n=1000,y,x,prior_list=prior_list2,offset=NULL,weights=1,max_disp=0.9)
  proc.time()-ptm
- 
+
+#hist(log(sim2$weight_out),30)
+#max(log(sim2$weight_out))  
+#sim2$weight_out[1:10] 
+
+hist(sim2$dispersion,50)
+
+quantile(sim2$dispersion,probs=c(0.01,0.99))
+
+#plot(sim2$dispersion)
+
+#max(sim2$dispersion) 
+
+#cov_out$center
+#cov_out=cov.wt(sim2$coefficients,sim2$weight_out)
+#cov_out$cov
+cov(sim1$coefficients)  
+cov(sim2$coefficients)  
+
+#cov_disp=cov.wt(sim2$dispersion,sim2$weight_out)
+#cov_disp$center
+cov_disp$cov
+
+mean(sim1$dispersion)
+mean(sim2$dispersion)
+#weighted.mean(sim2$dispersion,sim2$weight_out)
+#mean(disp_out)
+var(disp_out)
+
+#hist(sim2$dispersion,30)
+#hist(1/sim2$dispersion,30)
+
+#plot(sim2$weight_out~sim2$dispersion)
+
+#prec_out=(1/sim2$dispersion)
+#plot(sim2$weight_out~prec_out)
+
+#weighted.mean(1/sim2$dispersion,sim2$weight_out)
+#mean(1/sim1$dispersion)
+#mean(1/sim2$dispersion)
+#mean(1/disp_out)
+
+
+#cov(sim3$coefficients)  
+## With 10,000 iterations, this now seems much closer to the output from the function....
+#cov(beta_out)
+
+
 summary(sim1)
 summary(sim2)
 
 mean(sim1$iters)  # Stronger prior made this a lot worse
-mean(sim2$iters)  # Strength or Prior did not impact much on this 
+mean(sim2$iters)  # Strength of Prior did not impact much on this 
 
 mu=mu_temp
 
 mean(sim1$dispersion) 
 mean(1/sim1$dispersion)  # should be ~1.8 ## Estimate with only base terms --> 2.07 =(shape/rate)
 
+
+
 disp_temp=rate/shape
 
 glmb.D9_v3=glmb(n=1000,weight ~ group,family=gaussian(),dNormal_Gamma(mu,Sigma_prior/disp_temp,
             shape=shape,rate=rate))
 summary(glmb.D9_v3)
+
+mean(glmb.D9_v3$dispersion)
 
 cov(sim1$coefficients)
 cov(sim2$coefficients)
@@ -149,7 +205,8 @@ for(i in 1:1000){
   #disp_out1<-rglmb_dispersion(n=1,y,x,prior_list=prior3,
   #offset= rep(0, length(y)),family=gaussian())
   
-  disp_out1<-rGamma_reg(n=1,y,x,prior_list=prior3,offset= rep(0, length(y)),weights=1,family=gaussian())
+  disp_out1<-rGamma_reg(n=1,y,x,prior_list=prior3,offset= rep(0, length(y)),
+  weights=1,family=gaussian())
   dispersion2=disp_out1$dispersion
   
 #  disp_out[i,1]=disp_out1$dispersion
@@ -180,7 +237,8 @@ prior3=list(shape=shape, rate=rate,beta=b_old)
 
 #disp_out1<-rglmb_dispersion(n=1,y,x,prior_list=prior3,
 #offset= rep(0, length(y)),family=gaussian())
-disp_out1<-rGamma_reg(n=1,y,x,prior_list=prior3,offset= rep(0, length(y)),weights=1,family=gaussian())
+disp_out1<-rGamma_reg(n=1,y,x,prior_list=prior3,
+offset= rep(0, length(y)),weights=1,family=gaussian())
 dispersion2=disp_out1$dispersion
 
 
@@ -293,7 +351,6 @@ sd2
 sd3
 sd4
 
-## Standard deviation now slightly higher than two-block Gibbs
 
 rbind(colMeans(sim1$coefficients),sd2)
 rbind(colMeans(sim2$coefficients),sd3)
