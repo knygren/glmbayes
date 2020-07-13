@@ -2,20 +2,9 @@
 % Please edit documentation in R/rIndependent_Normal_Gamma_reg.R
 \name{rindependent_norm_gamma_reg}
 \alias{rindependent_norm_gamma_reg}
-\alias{rindependent_norm_gamma_reg_v2}
 \title{The Bayesian Indendepent Normal-Gamma Regression Distribution}
 \usage{
 rindependent_norm_gamma_reg(
-  n,
-  y,
-  x,
-  prior_list,
-  offset = NULL,
-  weights = 1,
-  family = gaussian()
-)
-
-rindependent_norm_gamma_reg_v2(
   n,
   y,
   x,
@@ -162,9 +151,15 @@ prior_list=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,
 # if max_disp =1.5, this seems much higher and algorithm seems to possibly hang
 
  ptm <- proc.time()
- sim2=rindependent_norm_gamma_reg_v2(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1,max_disp=0.9)
+ sim2=rindependent_norm_gamma_reg(n=100,y,x,prior_list=prior_list,
+offset=NULL,weights=1,max_disp=0.9)
  proc.time()-ptm
-
+ 
+ # 100 iterations took: 
+#  90.53 [RSS_Old2/n_obs]
+# 33.20 [rate2/shape2]
+# 19.51 [rate2/(shape2-1)]  # now 12.64 seconds
+# 10.10 [dispstar=0.6452614]
  
  min(sim2$dispersion)
  max(sim2$dispersion)
@@ -172,12 +167,12 @@ prior_list=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,
 
  
 hist(sim2$dispersion,50)
-quantile(sim2$dispersion,probs=c(0.01,0.99))
+quantile(sim2$dispersion,probs=c(0.01,0.5,0.99))
 mean(sim2$iters)  # Strength of Prior did not impact much on this 
 1/mean(sim2$iters)
 
 mean(sim2$dispersion)
-
+quantile(sim2$dispersion,c(0.1,0.5,0.9))
 
 lm_test2=lm(sim2$weight_out~sim2$dispersion)
 lmc=lm_test2$coefficients
@@ -251,6 +246,8 @@ dispersion2=dispersion
 
 # Loop through two-block-Gibbs sampler
 
+low=0.2845312
+upp=1.126446
 #### Burn-in iterations
 
 for(i in 1:1000){
@@ -269,8 +266,13 @@ for(i in 1:1000){
   #disp_out1<-rglmb_dispersion(n=1,y,x,prior_list=prior3,
   #offset= rep(0, length(y)),family=gaussian())
   
-  disp_out1<-rGamma_reg(n=1,y,x,prior_list=prior3,offset= rep(0, length(y)),
+  a1=0
+  while(a1==0){
+    disp_out1<-rGamma_reg(n=1,y,x,prior_list=prior3,offset= rep(0, length(y)),
   weights=1,family=gaussian())
+  if(disp_out1$dispersion>low & disp_out1$dispersion<upp) a1=1  
+   
+  }  
   dispersion2=disp_out1$dispersion
   
 #  disp_out[i,1]=disp_out1$dispersion
@@ -301,11 +303,13 @@ prior3=list(shape=shape, rate=rate,beta=b_old)
 
 #disp_out1<-rglmb_dispersion(n=1,y,x,prior_list=prior3,
 #offset= rep(0, length(y)),family=gaussian())
-disp_out1<-rGamma_reg(n=1,y,x,prior_list=prior3,
-offset= rep(0, length(y)),weights=1,family=gaussian())
-dispersion2=disp_out1$dispersion
-
-
+a1=0
+while(a1==0){
+  disp_out1<-rGamma_reg(n=1,y,x,prior_list=prior3,offset= rep(0, length(y)),
+                        weights=1,family=gaussian())
+  if(disp_out1$dispersion>low & disp_out1$dispersion<upp) a1=1  
+  
+}  
 dispersion2=disp_out1$dispersion
 
 disp_out[i,1]=disp_out1$dispersion
@@ -399,10 +403,7 @@ rbind(colMeans(sim2$coefficients),sd3)
 rbind(colMeans(beta_out),sd4)
 
 ## t-tests are a bit inconclusive [Really need a multivariate test here]
-
-t.test(sim1$coefficients[,1],beta_out[,1])
-t.test(sim1$coefficients[,2],beta_out[,2])
-
+## These tests don't show much difference anymore.
 
 t.test(sim2$coefficients[,1],beta_out[,1])
 t.test(sim2$coefficients[,2],beta_out[,2])

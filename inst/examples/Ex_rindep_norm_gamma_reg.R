@@ -86,10 +86,15 @@ prior_list=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,
 # if max_disp =1.5, this seems much higher and algorithm seems to possibly hang
 
  ptm <- proc.time()
- sim2=rindependent_norm_gamma_reg_v2(n=1000,y,x,prior_list=prior_list,
+ sim2=rindependent_norm_gamma_reg(n=100,y,x,prior_list=prior_list,
 offset=NULL,weights=1,max_disp=0.9)
  proc.time()-ptm
-
+ 
+ # 100 iterations took: 
+#  90.53 [RSS_Old2/n_obs]
+# 33.20 [rate2/shape2]
+# 19.51 [rate2/(shape2-1)]  # now 12.64 seconds
+# 10.10 [dispstar=0.6452614]
  
  min(sim2$dispersion)
  max(sim2$dispersion)
@@ -97,12 +102,12 @@ offset=NULL,weights=1,max_disp=0.9)
 
  
 hist(sim2$dispersion,50)
-quantile(sim2$dispersion,probs=c(0.01,0.99))
+quantile(sim2$dispersion,probs=c(0.01,0.5,0.99))
 mean(sim2$iters)  # Strength of Prior did not impact much on this 
 1/mean(sim2$iters)
 
 mean(sim2$dispersion)
-
+quantile(sim2$dispersion,c(0.1,0.5,0.9))
 
 lm_test2=lm(sim2$weight_out~sim2$dispersion)
 lmc=lm_test2$coefficients
