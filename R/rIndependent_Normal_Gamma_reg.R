@@ -829,7 +829,7 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       #p=rgamma(1,shape=shape2,rate=rate2)  
 
       # Simulate from a restricted gamma distribution
-      dispersion=r_invgamma(1,shape=shape3,rate=rate2,disp_upper=max_disp_f)
+      dispersion=r_invgamma(1,shape=shape3,rate=rate2,disp_upper=upp,disp_lower=low)
       p=1/dispersion
       
       #dispersion=1/p
@@ -1155,13 +1155,15 @@ p_inv_gamma<-function(dispersion,shape,rate){
   1-pgamma(1/dispersion,shape=shape,rate=rate)
 }
 
-q_inv_gamma<-function(p,shape,rate,disp_upper){
+q_inv_gamma<-function(p,shape,rate,disp_upper,disp_lower){
   p_upp=p_inv_gamma(disp_upper,shape=shape,rate=rate)
-  p2=1-(p*p_upp)
+  p_low=p_inv_gamma(disp_lower,shape=shape,rate=rate)
+  p1=p_low+p*(p_upp-p_low)
+  p2=1-p1
   1/qgamma(p2,shape,rate)
 }
 
-r_invgamma<-function(n,shape,rate,disp_upper){
+r_invgamma<-function(n,shape,rate,disp_upper,disp_lower){
   p=runif(n)
-  q_inv_gamma(p=p,shape=shape,rate=rate,disp_upper=disp_upper)
+  q_inv_gamma(p=p,shape=shape,rate=rate,disp_upper=disp_upper,disp_lower)
 }
