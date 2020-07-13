@@ -395,7 +395,8 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   LL_New=-f2_gaussian_vector(t(Env_temp$thetabars), y, as.matrix(x2), as.matrix(mu2,ncol=1),
                              as.matrix(P2), as.vector(alpha), as.vector(wt2))
   
-
+  
+  
   for(j in 1:gs){
     
     theta_bars_temp=as.matrix(New_thetabars[j,1:ncol(x)],ncol=1)
@@ -445,8 +446,8 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   sim_temp=rindep_norm_gamma_reg_std_R(n=1,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt2,
   f2=f2,Envelope=Env2,
-  gamma_list=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low)
-  ,family="gaussian",link="identity",as.integer(0))
+  gamma_list=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low),
+  RSS_ML=RSS_ML,family="gaussian",link="identity",as.integer(0))
 
   #################################################################################
   
@@ -637,7 +638,7 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
 
 
 rindep_norm_gamma_reg_std_R <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, 
-  gamma_list, family, link, progbar = 1L) {
+  gamma_list, RSS_ML,family, link, progbar = 1L) {
 
   ## Pull constants from Env2 and gamma_list
   
@@ -662,17 +663,58 @@ rindep_norm_gamma_reg_std_R <- function(n, y, x, mu, P, alpha, wt, f2, Envelope,
   
     while(a1==0){
       
+      # Generate Candidate for dispersion from Restricted Gamma
       dispersion=r_invgamma(1,shape=shape3,rate=rate2,
         disp_upper=disp_upper,disp_lower=disp_lower)
-      p=1/dispersion
+      p=1/dispersion   # This may not be needed
+      
+      
+      ## Setup for Candidate Generation from Restricted Multivariate Normal
       wt2=wt/rep(dispersion,length(y))
       New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x),as.matrix(mu,ncol=1), as.matrix(P), 
                                     as.vector(alpha), as.vector(wt2))
       LL_New=-f2_gaussian_vector(t(New_thetabars), y, as.matrix(x), as.matrix(mu,ncol=1),
                                  as.matrix(P), as.vector(alpha), as.vector(wt2))
       
+      
+      # Generate Candidate for Restricted Multivariate Normal
+      
+      sim=.rindep_norm_gamma_reg_std_cpp(n=1,y=y,x=x,mu=mu,P=P,alpha=alpha,wt=wt2,
+      f2=f2,Envelope=Env2,family="gaussian",link="identity",as.integer(0))
+      
+      # Get Key output from *.cpp function
+      J_out=sim$J+1
+      log_U2=sim$log_U2
+      
+      # Store Candidates in permananent array - should move towards end of function
+      
+      disp_out[i,1]=dispersion
+      beta_out[i,1:ncol(x)]=sim$out[1,1:ncol(x)]
+      
+      # Calculate LL function for candidate
+            
+      LL_Test=-f2_gaussian_vector(as.matrix(beta_out[i,1:ncol(x)],ncol=1), y, as.matrix(x), 
+            as.matrix(mu,ncol=1),as.matrix(P), as.vector(alpha), as.vector(wt2))
+      
+      ###Setup to calculate acceptance-rejection [This may not be needed]
+      
+      #ntheta_star=as.matrix(thetastars1[J_out,],ncol=1) --> May not be used here
 
-           
+      ## Series of Upper Bounds
+    
+      # Block 1: UB1
+      betadiff=as.matrix(sim$out[1,1:ncol(x)],ncol=1)-as.matrix(New_thetabars[J_out,1:ncol(x)],ncol=1)
+      UB1=LL_New[J_out]-Env2$cbars[J_out,1:ncol(x)]%*%(betadiff)
+      
+      ## Block 2: UB2
+      
+      ntheta=as.matrix(New_thetabars[J_out,1:ncol(x)],ncol=1)
+      yxbeta=(y-alpha-x%*%ntheta)*sqrt(wt)
+      RSS_ntheta=t(yxbeta)%*%(yxbeta)
+      UB2  =  0.5*(1/dispersion)*(RSS_ntheta-RSS_ML)
+      
+    
+                 
     test=1  # edit out later
     #a1=1
     if(test>=0) a1=1
