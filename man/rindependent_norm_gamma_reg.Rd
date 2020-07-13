@@ -158,7 +158,7 @@ offset=NULL,weights=1,max_disp=0.9)
  # 100 iterations took: 
 #  90.53 [RSS_Old2/n_obs]
 # 33.20 [rate2/shape2]
-# 19.51 [rate2/(shape2-1)]  # now 12.64 seconds
+# 19.51 [rate2/(shape2-1)]  # now 12.64 seconds # now 12.41 seconds
 # 10.10 [dispstar=0.6452614]
  
  min(sim2$dispersion)

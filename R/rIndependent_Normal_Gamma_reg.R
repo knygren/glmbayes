@@ -444,10 +444,6 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   #################################################################################
   
-  
-  
-  
-  
   ########################  End of test ############################
   
   
@@ -465,100 +461,48 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     
     while(a1==0){
       
-      ## Now updated to use modified shape from adjustment below
-      
       #p=rgamma(1,shape=shape2,rate=rate2)  
-
-      # Simulate from a restricted gamma distribution
       dispersion=r_invgamma(1,shape=shape3,rate=rate2,disp_upper=upp,disp_lower=low)
       p=1/dispersion
-      
-      #dispersion=1/p
-      
-      ## Update wt2
-      
       wt2=wt/rep(dispersion,length(y))
-      
-      # calculate new_thetabars for new dispersion - should be similar
-      # but slightly different from original thetabars
-      
-      New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), as.vector(alpha), as.vector(wt2))
-      Env_temp$thetabars=New_thetabars
-      
-      
-      LL_New=-f2_gaussian_vector(t(Env_temp$thetabars), y, as.matrix(x2), as.matrix(mu2,ncol=1),
+      New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
+      as.vector(alpha), as.vector(wt2))
+      LL_New=-f2_gaussian_vector(t(New_thetabars), y, as.matrix(x2), as.matrix(mu2,ncol=1),
                                  as.matrix(P2), as.vector(alpha), as.vector(wt2))
       
-      ## This should now use the modified PLSD with rejection
-      ## rates now different across envelope to adjust based on dispersion
       
+
       sim=.rindep_norm_gamma_reg_std_cpp(n=1,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt2,
-                                         f2=f2,Envelope=Env2,family="gaussian",link="identity",as.integer(0))
-      
-      
+      f2=f2,Envelope=Env2,family="gaussian",link="identity",as.integer(0))
       
       J_out=sim$J+1
       log_U2=sim$log_U2
-      
       disp_out[i,1]=dispersion
       beta_out[i,1:ncol(x)]=sim$out[1,1:ncol(x)]
       
       LL_Test=-f2_gaussian_vector(as.matrix(beta_out[i,1:ncol(x)],ncol=1), y, as.matrix(x2), as.matrix(mu2,ncol=1),
                                   as.matrix(P2), as.vector(alpha), as.vector(wt2))
       
-      
-      ## These should match original - can run check
-      
-      #cbars_new=f3(as.matrix(New_thetabars[J_out,],ncol=1), y, as.matrix(x2), as.matrix(mu2,ncol=1),
-      #             as.matrix(P2), as.vector(alpha), as.vector(wt2))
-      
-      
-      #print("cbars old")
-      #print(Env2$cbars[J_out,1:ncol(x)])
-      
-      #print("cbars_new")
-      #print(cbars_new)
-      
-      
       ntheta=as.matrix(New_thetabars[J_out,1:ncol(x)],ncol=1)
-      
-      
-      #ntheta_star=as.matrix(P2%*%as.matrix(cbars_new,ncol=1),ncol=1)  
-      
-      ## This should really be the inverse here....
-      #ntheta_star=as.matrix(solve(P2)%*%as.matrix(cbars_new,ncol=1),ncol=1)  
       ntheta_star=as.matrix(thetastars1[J_out,],ncol=1)
-      
       betadiff=as.matrix(sim$out[1,1:ncol(x)],ncol=1)-as.matrix(New_thetabars[J_out,1:ncol(x)],ncol=1)
-      
-      test=0
-      
-      ## This is an Upper bound for LL in terms of LL at tangent point and the gradient 
 
+      ## Series of Upper Bounds
+  
+      # Block 1: UB1
       
-      #UB1=LL_New[J_out]-t(cbars_new)%*%(betadiff)
-      
-      #print("UB1 old method")
-      #print(UB1)
-
       UB1=LL_New[J_out]-Env2$cbars[J_out,1:ncol(x)]%*%(betadiff)
 
-      
-      #print("UB1 new method")
-      #print(UB1)
-      
-      #stop("cbars comparison above")
-      
       ## UB1 contains a term that involves -0.5*(1/dispersion) * RSS(ntheta)
-      ## This term is then re-entered here and bounded
+      ## This term is re-entered here and bounded using term also shifted to gamma candidate
+      
+      ## Block 2: UB2
       
       yxbeta=(y-alpha-x2%*%ntheta)*sqrt(wt)
-      
       RSS_ntheta=t(yxbeta)%*%(yxbeta)
-      
-      # -0.5*(1/dispersion)*RSS_ntheta <= -0.5*(1/dispersion) RSS_ML
-      
       UB2  =  0.5*(1/dispersion)*(RSS_ntheta-RSS_ML)
+      
+      ## Block 3: UB3A
       
       ##    UB1 contains a term that is quadratic in New_thetabars[J_out,1:ncol(x)]
       ##    When there is more than one Likelihood subgradient density, 
@@ -569,33 +513,15 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
         
         theta_bars_temp=as.matrix(New_thetabars[j,1:ncol(x)],ncol=1)
         cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
-        
-        # New formula - This should likely replace: -NegLL(i)+arma::as_scalar(G3row.t() * cbarrow)
-        
         New_LL[j]=-0.5*t(theta_bars_temp)%*%P2%*%theta_bars_temp+t(cbars_temp)%*% theta_bars_temp
-        
         #logP(i,1)=logP(i,0)-NegLL(i)+0.5*arma::as_scalar(cbarrow.t() * cbarrow)+arma::as_scalar(G3row.t() * cbarrow);
       }
-      
-
-      
-      LL_temp=log_P_diff+New_LL
-      
-
-      max_New_LL=max(LL_temp)
-      
-      #print(max_New_LL)
-      #print(LL_temp-max_New_LL)
-            
-      ntheta=as.matrix(New_thetabars[J_out,1:ncol(x)],ncol=1)
-      
-      ##    UB3 subtracts that same term and bounds the term using ntheta_star 
-      ##    Bounding term involving ntheta_star should be pre-calculated
-      ##    for now, do it here
     
-      
-      
+      LL_temp=log_P_diff+New_LL
+      max_New_LL=max(LL_temp)
       UB3A =max_New_LL -LL_temp[J_out]
+      
+      ## max_new_LL depends on the dispersion and in turn needs to be bounded
       
       ## max_new_LL appears to be linear in the dispersion
       ## Let's consider a function New_LL_log_disp (linear in log_dispersion)
@@ -632,34 +558,7 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
         #print("Dispersion for Unexpected UB3B")
         #print(dispersion)
       }
-      
-      
-      #print("Max Difference - New Method")
-      
-    #  print(max_New_LL_UB-max_LL_log_disp)
-     # print("UB3B - new Method")
-    #  print(UB3B)
-  
-    #  print("dispersion")    
-    #  print(dispersion)    
-    #  stop("UB3B tests above")
-      
-            #UB3B=max_New_LL_UB2-max_New_LL
-      
-    #  UB3= (0.5 * t(ntheta)%*%P2%*%ntheta -t(cbars_new)%*% ntheta 
-    #        -(0.5*t(ntheta_star)%*%P2%*%ntheta_star-t(cbars_new)%*% ntheta_star ) )
-      
-            
-    # UB3= (0.5 * t(ntheta)%*%P2%*%ntheta -t(cbars_new)%*% ntheta 
-    #        -(0.5*t(ntheta_star)%*%P2%*%ntheta_star-t(cbars_new)%*% ntheta_star ) )
-      
-      
-      
-            
-      ## Terms for dealing with multiple envelopes....
-      
-      #UB4= (0.5*t(ntheta_star)%*%P2%*%ntheta_star-t(cbars_new)%*% ntheta_star ) -max_new_LL
-      
+
       test1= LL_Test-UB1
       test2= LL_Test-(UB1+UB2)
       test3A= LL_Test-(UB1+UB2+UB3A)
@@ -673,7 +572,7 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
       }
       
       
-            #test4= LL_Test-(UB1+UB2+UB3A+UB4)
+      #test4= LL_Test-(UB1+UB2+UB3A+UB4)
       
       ## For now use test3A here (will likely need to further bound across dispersion values)
       ## but this could be close
