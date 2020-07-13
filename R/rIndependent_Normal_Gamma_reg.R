@@ -448,7 +448,7 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   
   
-  sim_temp=rindep_norm_gamma_reg_std_R(n=1,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt,
+  sim_temp=rindep_norm_gamma_reg_std_R(n=n,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt,
   f2=f2,Envelope=Env2,
   gamma_list=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low),
   RSS_ML=RSS_ML,max_New_LL_UB=max_New_LL_UB,
@@ -456,6 +456,52 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   log_P_diff=log_P_diff,
   family="gaussian",link="identity",as.integer(0))
 
+#########################################  Post Processing for simulation function handling loop
+  
+  beta_out=sim_temp$beta_out
+  disp_out=sim_temp$disp_out
+  iters_out=sim_temp$iters_out
+  weight_out=sim_temp$weight_out
+  
+
+  out=L2Inv%*%L3Inv%*%t(beta_out)
+
+  for(i in 1:n){
+    out[,i]=out[,i]+mu
+  }
+  
+  
+  famfunc=glmbfamfunc(gaussian())  
+  f1=famfunc$f1
+  
+  outlist=list(
+    coefficients=t(out), 
+    coef.mode=betastar,  ## For now, use the conditional mode (not universal)
+    dispersion=disp_out,
+    ## For now, name items in list like this-eventually make format/names
+    ## consistent with true prior (current names needed by summary function)
+    Prior=list(mean=mu,Sigma=Sigma,shape=shape,rate=rate,Precision=solve(Sigma)), 
+    family=gaussian(),
+    prior.weights=wt,
+    y=y,
+    x=x,
+    call=call,
+    famfunc=famfunc,
+    iters=iters_out,
+    Envelope=NULL,
+    loglike=NULL,
+    weight_out=weight_out
+    #,test_out=test_out
+  )
+  
+  colnames(outlist$coefficients)<-colnames(x)
+  outlist$offset2<-offset2
+  class(outlist)<-c(outlist$class,"rglmb")
+  
+  return(outlist)  
+  
+  ########################################################################################3
+  
   #################################################################################
   
   ########################  End of test ############################
