@@ -448,7 +448,7 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   
   
-  sim_temp=rindep_norm_gamma_reg_std_R(n=1,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt2,
+  sim_temp=rindep_norm_gamma_reg_std_R(n=1,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt,
   f2=f2,Envelope=Env2,
   gamma_list=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low),
   RSS_ML=RSS_ML,max_New_LL_UB=max_New_LL_UB,
@@ -721,6 +721,7 @@ rindep_norm_gamma_reg_std_R <- function(n, y, x, mu, P, alpha, wt, f2, Envelope,
       RSS_ntheta=t(yxbeta)%*%(yxbeta)
       UB2  =  0.5*(1/dispersion)*(RSS_ntheta-RSS_ML)
       
+
       ## Block 3: UB3A [Shifts factors for components in grid as a function of New_thetabars and New_LL]
       ##          If the variance for the dispersion is low, this term should be small
       
@@ -744,13 +745,36 @@ rindep_norm_gamma_reg_std_R <- function(n, y, x, mu, P, alpha, wt, f2, Envelope,
       ## Block UB3B - Adjusts for different max factors for different dispersions
       
       New_LL_log_disp=lm_log1+lm_log2*log(dispersion)
-      #max_LL_log_disp=lm_log1+lm_log2*log(max_disp_f) ## From above
-
-      #UB3B=max_New_LL_UB-max_New_LL
       UB3B=(max_New_LL_UB-max_LL_log_disp)-(max_New_LL-New_LL_log_disp)
+
+      test1= LL_Test-UB1
+      test2= LL_Test-(UB1+UB2)
+      test3A= LL_Test-(UB1+UB2+UB3A)
+      test3B= LL_Test-(UB1+UB2+UB3A+UB3B)
       
-                 
-    test=1  # edit out later
+            
+    test3B= LL_Test-(UB1+UB2+UB3A+UB3B)
+      
+    if(test3B>0){ 
+      warning("Candidate with Positive Log-Acceptance. Bounding function may need adjustment")  
+    }
+    
+#    print("tests 1, 2, 3A, and 3B")
+#    print(test1)
+#    print(test2)
+#    print(test3A)
+#    print(test3B)
+    
+    test=test3B-log_U2
+
+#    print("test")
+#    print(test)
+    
+#    stop("test 3B and test above")
+    
+        weight_out[i]=max_New_LL
+    
+    #test=1  # edit out later
     #a1=1
     if(test>=0) a1=1
     else{iters_out[i]=iters_out[i]+1}        
