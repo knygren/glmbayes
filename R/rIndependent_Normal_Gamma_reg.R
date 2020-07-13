@@ -441,7 +441,13 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   print(shape3)
   print(rate2)
   
+
   
+  sim_temp=rindep_norm_gamma_reg_std_R(n=1,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt2,
+  f2=f2,Envelope=Env2,
+  gamma_list=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low)
+  ,family="gaussian",link="identity",as.integer(0))
+
   #################################################################################
   
   ########################  End of test ############################
@@ -628,6 +634,60 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
 }
 
+
+
+rindep_norm_gamma_reg_std_R <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, 
+  gamma_list, family, link, progbar = 1L) {
+
+  ## Pull constants from Env2 and gamma_list
+  
+  Env2=Envelope
+  shape3=gamma_list$shape3
+  rate2=gamma_list$rate2
+  disp_upper=gamma_list$disp_upper
+  disp_lower=gamma_list$disp_lower
+  
+  
+  
+  
+  # Initialized Objects that will be populated during the loop
+  
+  iters_out<-rep(1,length(y))
+  disp_out<-matrix(0,nrow=n,ncol=1)
+  beta_out<-matrix(0,nrow=n,ncol=ncol(x))
+  weight_out<-0*c(1:n)
+  
+  for(i in 1:n){  
+    a1=0  
+  
+    while(a1==0){
+      
+      dispersion=r_invgamma(1,shape=shape3,rate=rate2,
+        disp_upper=disp_upper,disp_lower=disp_lower)
+      p=1/dispersion
+      wt2=wt/rep(dispersion,length(y))
+      New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x),as.matrix(mu,ncol=1), as.matrix(P), 
+                                    as.vector(alpha), as.vector(wt2))
+      LL_New=-f2_gaussian_vector(t(New_thetabars), y, as.matrix(x), as.matrix(mu,ncol=1),
+                                 as.matrix(P), as.vector(alpha), as.vector(wt2))
+      
+
+           
+    test=1  # edit out later
+    #a1=1
+    if(test>=0) a1=1
+    else{iters_out[i]=iters_out[i]+1}        
+    
+       
+    }
+    
+    
+  }
+  
+  return(list(beta_out=beta_out,disp_out=disp_out,iters_out=iters_out, weight_out=weight_out))
+  
+}
+  
 
 
 ## This function is used by the above (not sure why Neg_logLik is not working)
