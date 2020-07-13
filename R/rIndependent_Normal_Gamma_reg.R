@@ -582,19 +582,18 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   rate2 =rate + (RSS_ML/2)
   rate3 =rate + (RSS2_post/2)
 
-  lm_log2=5.555805   # Also used above
+#  lm_log2=5.555805   # Also used above
   
-  shape3=shape2-lm_log2
+#  shape3=shape2-lm_log2
   
   print("Old Candidate shape and rate are")
   print(shape2)
   print(rate2)
   
-  print("New Candidate shape and rate are")
-  print(shape3)
-  print(rate2)
   
-  #print(rate3)
+  print("shape and rate for approximate posterior are")
+  print(shape2)
+  print(rate3)
   
   
   print("99st percentile for Inverse Gamma candidates density is")
@@ -607,7 +606,31 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   max_disp2=1/qgamma(c(0.01),shape,rate)
   
   print("99th percentile for approximate Inverse  Gamma posterior density is")
-  print(1/qgamma(c(0.01),shape2,rate3))
+  
+  upp=1/qgamma(c(0.01),shape2,rate3)
+  low=1/qgamma(c(0.99),shape2,rate3)
+  
+  print(upp)
+  
+  
+  print("1st percentile for approximate Inverse  Gamma posterior density is")
+  #print(1/qgamma(c(0.99),shape2,rate3))
+  print(low)
+  
+  a1=2
+  b1=(upp-low)
+  c1=-log(upp/low)
+  
+  dispstar_new= (-b1+ sqrt(b1^2-4*a1*c1))/(2*a1)
+
+  print("dispstar_old")
+  print(dispstar)
+  
+  dispstar=dispstar_new
+  print("dispstar_new")
+  print(dispstar_new)
+  
+    
   max_disp3=1/qgamma(c(0.01),shape2,rate3)
   
  
@@ -651,15 +674,6 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   
   
   
-  
-  
-  
-#  print("cbars")
-#  print(cbars)
-  
-#  print("Env2$thetabars")
-#  print(Env2$thetabars)
-
   New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), as.vector(alpha), as.vector(wt2))
   
 #  print("New_thetabars that should match")
@@ -672,28 +686,14 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   # than the prior or the candidata distribution as starting point
   # for now, link this to the 99th percentile for dispersion under approximate posterior
   
+  
   max_disp_f=max_disp3
-  
-  
   wt2=wt/rep(max_disp_f,length(y))
-  
     
   thetastars1=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
                               as.vector(alpha), as.vector(wt2))
   
-#  print("thetastars at 0 weight")
-#  print(thetastars1)
-  
-    
-#  print("theta_star")
-#  print(theta_star)
-  
-#  print("logP1")
-#  print(logP1)
 
-#  print("New_LL")
-#  print(New_LL)
-  
   maxlogP=max(New_logP2)
   
   PLSD_new=exp(New_logP2-maxlogP)
@@ -706,9 +706,9 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
 
   log_P_diff=log(Env_temp$PLSD)-log(Env2$PLSD)
   
-  #################################
+  #################  this Block sets overall upper bound for LL_temp   #################
   
-  
+## Upper boundvalue for LL_temp using thetastars (based on upper bound dispersion)  
   
   for(j in 1:gs){
     
@@ -729,6 +729,82 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   
   print("max_New_LL_UB")  
   print(max_New_LL_UB)  
+  
+  #######################################  Use this block to find linear function
+  
+  
+  
+  dep_out<-matrix(0,nrow=100,ncol=1)
+  disp_temp_out<-matrix(0,nrow=100,ncol=1)
+    
+  for(k in 1:100){
+  
+  # Generate some values based on unrestricted candidate density
+  
+  p=rgamma(1,shape=shape2,rate=rate2)  
+  dispersion=1/p
+  
+  disp_temp_out[k]=dispersion
+  
+  wt2=wt/rep(dispersion,length(y))
+  
+  New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), 
+                                as.matrix(P2), as.vector(alpha), as.vector(wt2))
+  
+  LL_New=-f2_gaussian_vector(t(Env_temp$thetabars), y, as.matrix(x2), as.matrix(mu2,ncol=1),
+                             as.matrix(P2), as.vector(alpha), as.vector(wt2))
+  
+
+  for(j in 1:gs){
+    
+    theta_bars_temp=as.matrix(New_thetabars[j,1:ncol(x)],ncol=1)
+    cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
+    
+    # New formula - This should likely replace: -NegLL(i)+arma::as_scalar(G3row.t() * cbarrow)
+    
+    New_LL[j]=-0.5*t(theta_bars_temp)%*%P2%*%theta_bars_temp+t(cbars_temp)%*% theta_bars_temp
+    
+    #logP(i,1)=logP(i,0)-NegLL(i)+0.5*arma::as_scalar(cbarrow.t() * cbarrow)+arma::as_scalar(G3row.t() * cbarrow);
+  }
+  
+  
+  LL_temp=log_P_diff+New_LL
+  max_New_LL=max(LL_temp)
+  
+  dep_out[k]=max_New_LL
+  
+  }
+  
+  lm_test2=lm(dep_out~disp_temp_out)
+  lmc=lm_test2$coefficients
+
+  print("lmc output - check if matches outside of function")  
+  print(lmc)
+  
+  print("dispstar")
+  print(dispstar)
+  #dispstar=0.61
+  lm_log2=lmc[2]*dispstar
+  lm_log1=lmc[1]+lm_log2-lm_log2*log(dispstar)
+  
+
+  print("lm_log")
+  
+  print(lm_log1)
+  print(lm_log2)
+  
+    
+  shape3=shape2-lm_log2
+
+  print("New Candidate shape and rate are")
+  print(shape3)
+  print(rate2)
+  
+  
+  #################################################################################
+  
+  
+  
   
   
   ########################  End of test ############################
@@ -751,8 +827,7 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       ## Now updated to use modified shape from adjustment below
       
       #p=rgamma(1,shape=shape2,rate=rate2)  
-      #p=rgamma(1,shape=shape3,rate=rate2)  
-      
+
       # Simulate from a restricted gamma distribution
       dispersion=r_invgamma(1,shape=shape3,rate=rate2,disp_upper=max_disp_f)
       p=1/dispersion
@@ -830,9 +905,6 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       
       UB2  =  0.5*(1/dispersion)*(RSS_ntheta-RSS_ML)
       
-
-      
-      
       ##    UB1 contains a term that is quadratic in New_thetabars[J_out,1:ncol(x)]
       ##    When there is more than one Likelihood subgradient density, 
       ##    This term varies across the likelihood subgradient densities
@@ -847,29 +919,17 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
         
         New_LL[j]=-0.5*t(theta_bars_temp)%*%P2%*%theta_bars_temp+t(cbars_temp)%*% theta_bars_temp
         
-        #New_logP2[i]=logP1[i]+New_LL[i]+0.5*t(cbars_temp)%*%cbars_temp
-        #New_logP2[i]=logP1[i]+0.5*t(cbars_temp)%*%cbars_temp
-        
         #logP(i,1)=logP(i,0)-NegLL(i)+0.5*arma::as_scalar(cbarrow.t() * cbarrow)+arma::as_scalar(G3row.t() * cbarrow);
       }
       
-      #print("log_P_diff")
-      #print(log_P_diff)
-      
-      #print("New_LL for Draw")
-      #print(New_LL)
 
       
       LL_temp=log_P_diff+New_LL
       
-      #print("LL_temp")
-      #print(LL_temp)
-      
-      
+
       max_New_LL=max(LL_temp)
       
       #print(max_New_LL)
-      
       #print(LL_temp-max_New_LL)
             
       ntheta=as.matrix(New_thetabars[J_out,1:ncol(x)],ncol=1)
@@ -893,8 +953,10 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       ## so that difference is bounded below that upper bound
       ## As a test, we hard code this function here (will then generalize)
       
-      lm_log1=6.637078
-      lm_log2=5.555805   # Also used above
+      #lm_log1=6.637078
+      #lm_log2=5.555805   # Also used above
+      
+      
       #New_LL_log_disp=0
       New_LL_log_disp=lm_log1+lm_log2*log(dispersion)
       max_LL_log_disp=lm_log1+lm_log2*log(max_disp_f) ## From above
@@ -905,6 +967,17 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       #print("UB3B - Old Method")
       #print(UB3B)
       UB3B=(max_New_LL_UB-max_LL_log_disp)-(max_New_LL-New_LL_log_disp)
+      
+      if(UB3B<0){
+        
+        # This does fail for some values close to lower bound
+        # could be small inacurracies - adjust sampling
+        # to also use lower bound
+        #print("UB3B was negative with dispersion:")
+        #print("Dispersion for Unexpected UB3B")
+        #print(dispersion)
+      }
+      
       
       #print("Max Difference - New Method")
       
@@ -937,7 +1010,7 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
       test3A= LL_Test-(UB1+UB2+UB3A)
       test3B= LL_Test-(UB1+UB2+UB3A+UB3B)
 
-      if(test3B<0){ 
+      if(test3B>0){ 
         warning("Candidate with Positive Log-Acceptance. Bounding function may need adjustment")  
         #cat("\nAssociated value for UB3B was:",UB3B)
         #cat("\nAssociated value for candidate dispersion was:",dispersion)

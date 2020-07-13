@@ -76,37 +76,25 @@ shape=(n_prior/2)
 rate=n_prior*RSS/n_data
 
 
-# For now, pass Precision as well as it is needed by the rglmb summary function
-prior_list=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,
-shape=shape,rate=rate,Precision=solve(Sigma_prior))
-
-## Using new function
-
-#ptm <- proc.time()
-#sim1=rindependent_norm_gamma_reg(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1)
-# proc.time()-ptm
-
- # Try a model where prior mean is equal to maximum likelihood estimate
-
-#mu_temp=lm.D9$coefficients
-mu_temp=mu
 
  ## Temporarily make prior dispersion very large 
 #disp_temp=100*dispersion
-prior_list2=list(mu=mu_temp,Sigma=Sigma_prior,dispersion=dispersion,
+prior_list=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,
                  shape=shape,rate=rate,Precision=solve(Sigma_prior))
 
 #Note: max_disp=0.9 seened to require just 8.552 candidates per acceptance
-# if max_disp =1.5, this seems much higher and algorith seems to possibly hang
+# if max_disp =1.5, this seems much higher and algorithm seems to possibly hang
 
  ptm <- proc.time()
- sim2=rindependent_norm_gamma_reg_v2(n=1000,y,x,prior_list=prior_list2,offset=NULL,weights=1,max_disp=0.9)
+ sim2=rindependent_norm_gamma_reg_v2(n=1000,y,x,prior_list=prior_list,offset=NULL,weights=1,max_disp=0.9)
  proc.time()-ptm
 
-#hist(log(sim2$weight_out),30)
-#max(log(sim2$weight_out))  
-#sim2$weight_out[1:10] 
+ 
+ min(sim2$dispersion)
+ max(sim2$dispersion)
+ summary(sim2) 
 
+ 
 hist(sim2$dispersion,50)
 quantile(sim2$dispersion,probs=c(0.01,0.99))
 mean(sim2$iters)  # Strength of Prior did not impact much on this 
@@ -114,16 +102,15 @@ mean(sim2$iters)  # Strength of Prior did not impact much on this
 
 mean(sim2$dispersion)
 
-plot(log(sim2$weight_out)~log(1/sim2$dispersion))
 
 lm_test2=lm(sim2$weight_out~sim2$dispersion)
 lmc=lm_test2$coefficients
+
 lmc[1]+lmc[2]*0.9
 lmc[1]+lmc[2]*0.45
 
 dispstar=0.61
 lm_log2=lmc[2]*dispstar
-
 lm_log1=lmc[1]+lm_log2-lm_log2*log(dispstar)
 
 pred3=lm_log1+lm_log2*log(sim2$dispersion)
@@ -132,7 +119,6 @@ plot(sim2$weight_out~sim2$dispersion)
 
 disp_new <- seq(0, 2, 0.1)
 pred4=lm_log1+lm_log2*log(disp_new)
-
 lines(disp_new,pred4,lty=2)
 
 plot(sim2$weight_out-pred3)
@@ -145,8 +131,6 @@ lmc[1]+lmc[2]*disp_UB -(lm_log1+lm_log2*log(disp_UB))
 disp_UB=2
 lmc[1]+lmc[2]*disp_UB
 lmc[1]+lmc[2]*disp_UB -(lm_log1+lm_log2*log(disp_UB))
-
-
 
 
 lines(sim2$dispersion,lm_test2$fitted.values,lty=2)
@@ -163,54 +147,9 @@ fit_test=2.15-1.5*log(1/sim2$dispersion)
 
 lines(log(1/sim2$dispersion),fit_test,lty=2)
 
-#max(sim2$dispersion) 
-
-#cov_out$center
-#cov_out=cov.wt(sim2$coefficients,sim2$weight_out)
-#cov_out$cov
-cov(sim1$coefficients)  
 cov(sim2$coefficients)  
 
-#cov_disp=cov.wt(sim2$dispersion,sim2$weight_out)
-#cov_disp$center
-cov_disp$cov
-
-mean(sim1$dispersion)
-mean(sim2$dispersion)
-#weighted.mean(sim2$dispersion,sim2$weight_out)
-#mean(disp_out)
-var(disp_out)
-
-#hist(sim2$dispersion,30)
-#hist(1/sim2$dispersion,30)
-
-#plot(sim2$weight_out~sim2$dispersion)
-
-#prec_out=(1/sim2$dispersion)
-#plot(sim2$weight_out~prec_out)
-
-#weighted.mean(1/sim2$dispersion,sim2$weight_out)
-#mean(1/sim1$dispersion)
-#mean(1/sim2$dispersion)
-#mean(1/disp_out)
-
-
-#cov(sim3$coefficients)  
-## With 10,000 iterations, this now seems much closer to the output from the function....
-#cov(beta_out)
-
-
-summary(sim1)
-summary(sim2)
-
-mean(sim1$iters)  # Stronger prior made this a lot worse
 mean(sim2$iters)  # Strength of Prior did not impact much on this 
-
-mu=mu_temp
-
-mean(sim1$dispersion) 
-mean(1/sim1$dispersion)  # should be ~1.8 ## Estimate with only base terms --> 2.07 =(shape/rate)
-
 
 
 disp_temp=rate/shape
@@ -221,7 +160,6 @@ summary(glmb.D9_v3)
 
 mean(glmb.D9_v3$dispersion)
 
-cov(sim1$coefficients)
 cov(sim2$coefficients)
 cov(glmb.D9_v3$coefficients)
 
@@ -307,14 +245,8 @@ dispersion
 # New sampler (when prior=maximum likelihood estimate seemed to match Two-Block Gibbs)
 ## Dispersion is a bit too low - consistent with high precision needed to be penalized more
 
-mean(sim1$dispersion)
-var(sim1$dispersion)
-
 mean(sim2$dispersion)
 var(sim2$dispersion)
-
-#mean(sim3$dispersion)
-#var(sim3$dispersion)
 mean(glmb.D9_v3$dispersion)
 ## Two-block Gibbs
 
@@ -330,21 +262,13 @@ var(disp_out)
 
 # new sampler
 
-mean(1/sim1$dispersion)
-var(1/sim1$dispersion)
-
-
 mean(1/sim2$dispersion)
 var(1/sim2$dispersion)
-
-#mean(1/sim3$dispersion)
-#var(1/sim3$dispersion)
 
 ##  Two-block Gibbs
 
 mean(1/disp_out)
 var(1/disp_out)
-
 
 ## Look at regression parameters
 
@@ -361,9 +285,7 @@ t(glmb.D9_v2$coef.means)
 ## Estimates seem to match those from sampler with fixed dispersion
 ## instead of those with variable dispersion from two-block Givvs
 
-colMeans(sim1$coefficients)
 colMeans(sim2$coefficients)
-#colMeans(sim3$coefficients)
 
 ## mean for two-block Gibbs
 colMeans(beta_out)
@@ -376,7 +298,6 @@ colMeans(beta_out)
 
 cov(glmb.D9_v2$coefficients)  
 cov(glmb.D9_v3$coefficients)  
-cov(sim1$coefficients)  
 cov(sim2$coefficients)  
 #cov(sim3$coefficients)  
 ## With 10,000 iterations, this now seems much closer to the output from the function....
@@ -386,23 +307,18 @@ cov(beta_out)
 ## to those from fixed dispersion - could difference be due to chance?
 
 solve(cov(glmb.D9_v2$coefficients) ) 
-solve(cov(sim1$coefficients)  )
+solve(cov(sim2$coefficients)  )
 solve(cov(beta_out))
 
-cor(beta_out[,1],disp_out[,1])  # -0.4168 
-cor(beta_out[,2],disp_out[,1])  # 0.2615
 
 sd1=sqrt(diag(cov(glmb.D9$coefficients)))
-sd2=sqrt(diag(cov(sim1$coefficients)))
 sd3=sqrt(diag(cov(sim2$coefficients)))
 sd4=sqrt(diag(cov(beta_out)))
 
-sd2
 sd3
 sd4
 
 
-rbind(colMeans(sim1$coefficients),sd2)
 rbind(colMeans(sim2$coefficients),sd3)
 rbind(colMeans(beta_out),sd4)
 
@@ -414,10 +330,4 @@ t.test(sim1$coefficients[,2],beta_out[,2])
 
 t.test(sim2$coefficients[,1],beta_out[,1])
 t.test(sim2$coefficients[,2],beta_out[,2])
-
-#####################################################################3
-
-mean(sim1$test_out)
-mean(sim1$iters)  
-1/mean(sim1$iters)  ## 4.9% acceptance rate for current example - prior not too far
 
