@@ -443,11 +443,18 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   print(rate2)
   
 
+  max_LL_log_disp=lm_log1+lm_log2*log(max_disp_f) ## From above
+  
+  
+  
   
   sim_temp=rindep_norm_gamma_reg_std_R(n=1,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt2,
   f2=f2,Envelope=Env2,
   gamma_list=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low),
-  RSS_ML=RSS_ML,family="gaussian",link="identity",as.integer(0))
+  RSS_ML=RSS_ML,max_New_LL_UB=max_New_LL_UB,
+  max_LL_log_disp=max_LL_log_disp,lm_log1=lm_log1,lm_log2=lm_log2, 
+  log_P_diff=log_P_diff,
+  family="gaussian",link="identity",as.integer(0))
 
   #################################################################################
   
@@ -638,7 +645,9 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
 
 
 rindep_norm_gamma_reg_std_R <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, 
-  gamma_list, RSS_ML,family, link, progbar = 1L) {
+  gamma_list, RSS_ML,max_New_LL_UB,max_LL_log_disp,
+  lm_log1,lm_log2, log_P_diff,
+  family, link, progbar = 1L) {
 
   ## Pull constants from Env2 and gamma_list
   
@@ -647,9 +656,8 @@ rindep_norm_gamma_reg_std_R <- function(n, y, x, mu, P, alpha, wt, f2, Envelope,
   rate2=gamma_list$rate2
   disp_upper=gamma_list$disp_upper
   disp_lower=gamma_list$disp_lower
-  
-  
-  
+  gs=nrow(Env2$cbars) # Size of grid
+  New_LL=c(1:gs)
   
   # Initialized Objects that will be populated during the loop
   
@@ -666,7 +674,7 @@ rindep_norm_gamma_reg_std_R <- function(n, y, x, mu, P, alpha, wt, f2, Envelope,
       # Generate Candidate for dispersion from Restricted Gamma
       dispersion=r_invgamma(1,shape=shape3,rate=rate2,
         disp_upper=disp_upper,disp_lower=disp_lower)
-      p=1/dispersion   # This may not be needed
+      #p=1/dispersion   # This may not be needed
       
       
       ## Setup for Candidate Generation from Restricted Multivariate Normal
@@ -702,18 +710,45 @@ rindep_norm_gamma_reg_std_R <- function(n, y, x, mu, P, alpha, wt, f2, Envelope,
 
       ## Series of Upper Bounds
     
-      # Block 1: UB1
+      # Block 1: UB1 [Same form as in fixed dispersion case]
       betadiff=as.matrix(sim$out[1,1:ncol(x)],ncol=1)-as.matrix(New_thetabars[J_out,1:ncol(x)],ncol=1)
       UB1=LL_New[J_out]-Env2$cbars[J_out,1:ncol(x)]%*%(betadiff)
       
-      ## Block 2: UB2
+      ## Block 2: UB2 [Bounded by shifting RSS_ML to Gamma]
       
       ntheta=as.matrix(New_thetabars[J_out,1:ncol(x)],ncol=1)
       yxbeta=(y-alpha-x%*%ntheta)*sqrt(wt)
       RSS_ntheta=t(yxbeta)%*%(yxbeta)
       UB2  =  0.5*(1/dispersion)*(RSS_ntheta-RSS_ML)
       
-    
+      ## Block 3: UB3A [Shifts factors for components in grid as a function of New_thetabars and New_LL]
+      ##          If the variance for the dispersion is low, this term should be small
+      
+      ##    UB1 contains a term that is quadratic in New_thetabars[J_out,1:ncol(x)]
+      ##    When there is more than one Likelihood subgradient density, 
+      ##    This term varies across the likelihood subgradient densities
+      ##    and therefore needs to be handled across them
+      
+      for(j in 1:gs){
+        
+        theta_bars_temp=as.matrix(New_thetabars[j,1:ncol(x)],ncol=1)
+        cbars_temp=as.matrix(Env2$cbars[j,1:ncol(x)],ncol=1)
+        New_LL[j]=-0.5*t(theta_bars_temp)%*%P%*%theta_bars_temp+t(cbars_temp)%*% theta_bars_temp
+        #logP(i,1)=logP(i,0)-NegLL(i)+0.5*arma::as_scalar(cbarrow.t() * cbarrow)+arma::as_scalar(G3row.t() * cbarrow);
+      }
+      
+      LL_temp=log_P_diff+New_LL
+      max_New_LL=max(LL_temp)
+      UB3A =max_New_LL -LL_temp[J_out]
+
+      ## Block UB3B - Adjusts for different max factors for different dispersions
+      
+      New_LL_log_disp=lm_log1+lm_log2*log(dispersion)
+      #max_LL_log_disp=lm_log1+lm_log2*log(max_disp_f) ## From above
+
+      #UB3B=max_New_LL_UB-max_New_LL
+      UB3B=(max_New_LL_UB-max_LL_log_disp)-(max_New_LL-New_LL_log_disp)
+      
                  
     test=1  # edit out later
     #a1=1
