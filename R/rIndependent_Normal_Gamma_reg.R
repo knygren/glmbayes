@@ -266,7 +266,6 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   a1=2
   b1=(upp-low)
   c1=-log(upp/low)
-  
   dispstar_new= (-b1+ sqrt(b1^2-4*a1*c1))/(2*a1)
 
   print("dispstar_old")
@@ -323,34 +322,14 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
                                 as.vector(alpha), as.vector(wt2))
   
-#  print("New_thetabars that should match")
-#  print(New_thetabars)
 
-  #max_disp2=max_disp/2
-  #max_disp_f=max(max_disp1)
+#  maxlogP=max(New_logP2)
+#  PLSD_new=exp(New_logP2-maxlogP)
+#  sumP=sum(PLSD_new)
+#  PLSD_new=PLSD_new/sumP
+#  Env_temp$PLSD=PLSD_new
+#  log_P_diff=log(Env_temp$PLSD)-log(Env2$PLSD)
   
-  # max_disp3 is the approximation to posterior- makes more sense
-  # than the prior or the candidata distribution as starting point
-  # for now, link this to the 99th percentile for dispersion under approximate posterior
-  
-  
-  max_disp_f=max_disp3
-  wt2=wt/rep(max_disp_f,length(y))
-    
-  thetastars1=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
-                              as.vector(alpha), as.vector(wt2))
-  
-
-  maxlogP=max(New_logP2)
-  
-  PLSD_new=exp(New_logP2-maxlogP)
-  
-  sumP=sum(PLSD_new)
-  
-  PLSD_new=PLSD_new/sumP
-  
-  Env_temp$PLSD=PLSD_new
-  log_P_diff=log(Env_temp$PLSD)-log(Env2$PLSD)
   
   #################  this Block Does evaluations at lower and upper bounds   #################
   
@@ -379,147 +358,97 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     
     # New formula - This should likely replace: -NegLL(i)+arma::as_scalar(G3row.t() * cbarrow)
     
+    New_logP2[i]=logP1[i]+0.5*t(cbars_temp)%*%cbars_temp
     New_LL_upp[j]=-0.5*t(theta_temp_upp)%*%P2%*%theta_temp_upp+t(cbars_temp)%*% theta_temp_upp
     New_LL_low[j]=-0.5*t(theta_temp_low)%*%P2%*%theta_temp_low+t(cbars_temp)%*% theta_temp_low
     
+        
   }
+
+  maxlogP=max(New_logP2)
+  PLSD_new=exp(New_logP2-maxlogP)
+  sumP=sum(PLSD_new)
+  PLSD_new=PLSD_new/sumP
+  log_P_diff=log(PLSD_new)-log(Env2$PLSD)
   
+    
   LL_temp_upp=log_P_diff+New_LL_upp
   LL_temp_low=log_P_diff+New_LL_low
   
   max_New_LL_upp=max(LL_temp_upp)
   max_New_LL_low=max(LL_temp_low)
-  
+
   slope_out=(max_New_LL_upp-max_New_LL_low)/(upp-low)
   int_out=max_New_LL_low-slope_out*low
-  print("slope out calculated")
-  print(slope_out)
-  
-  print("intercept out calculated")
-  print(int_out)
-
   lmc=c(int_out,slope_out)
-  print(lmc)
+  
+  a1=2
+  b1=(upp-low)
+  c1=-log(upp/low)
+  dispstar= (-b1+ sqrt(b1^2-4*a1*c1))/(2*a1) # Point of tangency
+  
   
   lm_log2=lmc[2]*dispstar
-  lm_log1=lmc[1]+lm_log2-lm_log2*log(dispstar)
+  #lm_log1=lmc[1]+lm_log2-lm_log2*log(dispstar)
+  lm_log1=lmc[1]+lmc[2]*dispstar-lm_log2*log(dispstar)
   
   shape3=shape2-lm_log2
   
+  # Compute log_P_diff
   
+  max_New_LL_UB = max_New_LL_upp
+  max_LL_log_disp=lm_log1+lm_log2*log(upp) ## From above
+  
+  ## Outputs from this block
+  
+  
+  ## 1) upp, low
+  ## 2) log_P_diff
+  ## 3) lm_log1,lm_log2
+  ## 4) shape3
+  ## 5) max_New_LL_UB
+  ## 6) max_LL_log_disp
     
+  ## Not currently from block: RSS_ML, rate2 
+  
   #####################################################################################
 
   
   
   ## Upper boundvalue for LL_temp using thetastars (based on upper bound dispersion)  
-  
-  for(j in 1:gs){
-    
-    theta_bars_temp=as.matrix(thetastars1[j,1:ncol(x)],ncol=1)
-    cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
-    
-    # New formula - This should likely replace: -NegLL(i)+arma::as_scalar(G3row.t() * cbarrow)
-    
-    New_LL[j]=-0.5*t(theta_bars_temp)%*%P2%*%theta_bars_temp+t(cbars_temp)%*% theta_bars_temp
-    
-  }
-  
-  
-  LL_temp=log_P_diff+New_LL
-  max_New_LL_UB=max(LL_temp)
 
   
+  #max_disp_f=max_disp3
+  #wt2=wt/rep(max_disp_f,length(y))
   
-  
+  #thetastars1=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
+  #                              as.vector(alpha), as.vector(wt2))
   
     
-  print("max_New_LL_UB")  
-  print(max_New_LL_UB)  
-  
-  #######################################  Use this block to find linear function
-  
-  
-  
-  dep_out<-matrix(0,nrow=100,ncol=1)
-  disp_temp_out<-matrix(0,nrow=100,ncol=1)
-   
-  
-  ## 100 simulations from preliminary gamma candidate
-  
-  #for(k in 1:100){
-  
-  # Generate some values based on unrestricted candidate density
-  
-  #p=rgamma(1,shape=shape2,rate=rate2)  
-  #dispersion=1/p
-  
-  #disp_temp_out[k]=dispersion
-  
-  #wt2=wt/rep(dispersion,length(y))
-  
-  #New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), 
-  #                              as.matrix(P2), as.vector(alpha), as.vector(wt2))
-  
-  #LL_New=-f2_gaussian_vector(t(Env_temp$thetabars), y, as.matrix(x2), as.matrix(mu2,ncol=1),
-  #                           as.matrix(P2), as.vector(alpha), as.vector(wt2))
-  
-  
-  
   #for(j in 1:gs){
     
-  #  theta_bars_temp=as.matrix(New_thetabars[j,1:ncol(x)],ncol=1)
-  #  cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
+  #  theta_bars_temp=as.matrix(thetastars1[j,1:ncol(x)],ncol=1)
+   # cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
     
     # New formula - This should likely replace: -NegLL(i)+arma::as_scalar(G3row.t() * cbarrow)
     
   #  New_LL[j]=-0.5*t(theta_bars_temp)%*%P2%*%theta_bars_temp+t(cbars_temp)%*% theta_bars_temp
     
-    #logP(i,1)=logP(i,0)-NegLL(i)+0.5*arma::as_scalar(cbarrow.t() * cbarrow)+arma::as_scalar(G3row.t() * cbarrow);
   #}
   
   
   #LL_temp=log_P_diff+New_LL
-  #max_New_LL=max(LL_temp)
-  
-  #dep_out[k]=max_New_LL
-  
-  #}
-  
-  
-  
-  #lm_test2=lm(dep_out~disp_temp_out)
-  #lmc=lm_test2$coefficients
+  #max_New_LL_UB=max(LL_temp)
 
-  #print("lm Regression")
-  #print(summary(lm_test2))
-  max_New_LL_UB  
-  
-  #stop("error associated with approximation")  
-  
-  #print("lmc output - check if matches outside of function")  
-  #print(lmc)
-  
-  #lm_log2=lmc[2]*dispstar
-  #lm_log1=lmc[1]+lm_log2-lm_log2*log(dispstar)
-  
-  #shape3=shape2-lm_log2
-  
+  #print("max_New_LL_UB")  
+  #print(max_New_LL_UB)  
+  #max_New_LL_UB  
 
+  #print("max_New_LL_Upp")
+  #print(max_New_LL_upp)  
+  #max_LL_log_disp=lm_log1+lm_log2*log(upp) ## From above
   
-  #print("dispstar")
-  #print(dispstar)
-  #dispstar=0.61
-  #print("lm_log")
-  #print(lm_log1)
-  #print(lm_log2)
   
-  #print("New Candidate shape and rate are")
-  #print(shape3)
-  #print(rate2)
-  
-
-  max_LL_log_disp=lm_log1+lm_log2*log(upp) ## From above
   
   gamma_list=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low)
   
@@ -527,6 +456,9 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
                max_LL_log_disp=max_LL_log_disp,lm_log1=lm_log1,lm_log2=lm_log2, 
                log_P_diff=log_P_diff)
   
+  
+  
+  ### Call standard simulation function
   
   sim_temp=rindep_norm_gamma_reg_std_R(n=n,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt,
   f2=f2,Envelope=Env2,
@@ -540,7 +472,6 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   disp_out=sim_temp$disp_out
   iters_out=sim_temp$iters_out
   weight_out=sim_temp$weight_out
-  
 
   out=L2Inv%*%L3Inv%*%t(beta_out)
 
