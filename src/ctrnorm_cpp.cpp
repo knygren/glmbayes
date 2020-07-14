@@ -14,7 +14,8 @@
 using namespace Rcpp;
 
 double ctrnorm_cpp(double lgrt,double lglt,double mu,double sigma){
-  RNGScope scope;
+
+  //RNGScope scope;
   
   double U=0;
   double out=0;

@@ -17,7 +17,6 @@
 using namespace Rcpp;
 
 
-
 // [[Rcpp::export(".rindep_norm_gamma_reg_std_cpp")]]
 
 Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
@@ -25,6 +24,7 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
                                           Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
 {
   RNGScope scope;
+
   int l1 = mu.nrow();
   //  int l2=pow(3,l1);
   

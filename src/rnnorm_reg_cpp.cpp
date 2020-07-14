@@ -195,7 +195,10 @@ Rcpp::List  rnnorm_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
 NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,
 Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
 {
-  RNGScope scope;
+  
+  
+  
+  //RNGScope scope;
   int l1 = mu.nrow();
 //  int l2=pow(3,l1);
   
