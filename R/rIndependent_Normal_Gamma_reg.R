@@ -44,6 +44,8 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   offset2=offset
   wt=weights
   
+  if(length(wt)==1) wt=rep(wt,length(y))
+  
   ### Initial implementation of Likelihood subgradient Sampling 
   ### Currently uses as single point for conditional tangencis
   ### (at conditional posterior modes)
@@ -65,21 +67,19 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     else rate=NULL
   }
   
-  lm_out=lm(y ~ x-1) # run classical regression to get maximum likelhood estimate
+  lm_out=lm(y ~ x-1,weights=wt,offset=offset2) # run classical regression to get maximum likelhood estimate
   RSS=sum(residuals(lm_out)^2)
   
   RSS_ML=sum(residuals(lm_out)^2)
-  
   n_obs=length(y)
   
   
   dispersion2=dispersion
-  
-  RSS_temp<-matrix(0,nrow=1000)
+    RSS_temp<-matrix(0,nrow=1000)
   
   for(j in 1:10){
-    prior=list(mu=mu,Sigma=Sigma, dispersion=dispersion2)
-    glmb_out1=glmb(y~x-1,family=gaussian(),dNormal(mu=mu,Sigma=Sigma,dispersion=dispersion2))
+    glmb_out1=glmb(y~x-1,family=gaussian(),
+    dNormal(mu=mu,Sigma=Sigma,dispersion=dispersion2),weights=wt,offset=offset2)
     
     res_temp=residuals(glmb_out1)
     
@@ -88,80 +88,21 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     }
     
     RSS_Post2=mean(RSS_temp)
-    
     b_old=glmb_out1$coef.mode
-    
     xbetastar=x%*%b_old
-    
-    ## Residual SUM of SQUARES at current conditional posterior mode estimate
-    ## Should perhaps use approximate Expectation of this instead
-    
-    
     RSS2_post=t(y-xbetastar)%*%(y-xbetastar)  
-
-    print(j)
-    print("RSS at posterior mode")
-    print(RSS2_post)
-    
-    print("Average Simulated RSS for dispersion")
-    print(RSS_Post2)
-    
     shape2= shape + n_obs/2
   #  rate2 =rate + RSS2_post/2  # 38 candidates per acceptance
     rate2=rate + RSS_Post2/2    # 35.7 candidates per acceptance [though some with positive acceptance]
-    
-    rate_temp=rate + RSS_Post2/2
-    
-        
-    # Inverse of implied expectation for precision used here
-    # Seems consistent with first order Taylor series approximation for mean of betas 
-    
+  
     dispersion2=rate2/(shape2-1)
-  #  dispersion_temp=rate_temp/(shape2-1)
-    
-  #  print(j)
-  #  print("dispersion using mode vs simulation" )
-  #  print(dispersion2)
-  #  print(dispersion_temp)
-    
+
   }
   
   
-  
-  # Temporarily make dispersion2 very large
-  
-
-  #prior_list2=list(mu=mu,Sigma=Sigma, dispersion=dispersion2,RSS2_post=RSS2_post)
-  #glmb_out1=glmb(y~x-1,family=gaussian(),dNormal(mu=mu,Sigma=Sigma,dispersion=dispersion2))
-  
-  #  glmb_out1=glmb(n=1,y~x-1,family=gaussian(),prior=prior_list2)
-  
-  ## Temporarily use maximum likelihood estimates as betastar
-  
   betastar=glmb_out1$coef.mode
-  
-  
-  #xbetastar=x%*%betastar
-  #RSS2_post=t(y-xbetastar)%*%(y-xbetastar)  ## Residual SUM of SQUARES at post model
-  
-  ## Updated version (when using the likelihood subgradient approach
-  ## The RSS at the tangent point gets shifted to the gamma distribution
-  
-  #shape2= shape + n_obs/2
-  #rate2 =rate + RSS2_post/2
-  
-  #  print("dispersion from optimization")
-  #  print(dispersion2)
-  
-  #gm<-gamma_median1(shape2,rate2)
-  #print("dispersion Median estimate")
-  #print(gm$v3)
-  
-  #dispstar=RSS2_post/n_obs
-  #dispstar=rate2/shape2
   dispstar=rate2/(shape2-1)
-  #dispstar=0.6452614  # Hard code to result of calculated further below
-  
+
   
   ## Get family functions for gaussian()  
   
@@ -244,10 +185,7 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   
   #### End of Standardization - Steps below might change  
-#  print("RSS - Post and ML")
-#  print(RSS2_post)
-#  print(RSS_ML)
-  
+
   ## Update Gamma parameters
   
   shape2= shape + n_obs/2
@@ -255,64 +193,6 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   #rate3 =rate + (RSS2_post/2)
   rate3 =rate + (RSS_Post2/2)
   
-#  lm_log2=5.555805   # Also used above
-  
-#  shape3=shape2-lm_log2
-  
-#  print("Old Candidate shape and rate are")
-#  print(shape2)
-#  print(rate2)
-  
-  
-  print("shape and rate for approximate posterior are")
-  print(shape2)
-  print(rate3)
-  
-  
-  #print("99st percentile for Inverse Gamma candidates density is")
-  #print(1/qgamma(c(0.01),shape2,rate2))
-  #max_disp1=1/qgamma(c(0.01),shape2,rate2)
-  
-
-  #print("99th percentile for Inverse Gamma prior density is")
-  #print(1/qgamma(c(0.01),shape,rate))
-  #max_disp2=1/qgamma(c(0.01),shape,rate)
-  
-  print("1st and 99th percentile for approximate Inverse  Gamma posterior density are")
-  
-  
-  # set upper and lower based on percentiles
-  
-  #upp=1/qgamma(c(0.01),shape2,rate3)
-  #low=1/qgamma(c(0.99),shape2,rate3)
-  
-  #print(upp)
-  
-  
-  #print("1st percentile for approximate Inverse  Gamma posterior density is")
-  #print(1/qgamma(c(0.99),shape2,rate3))
-  #print(low)
-  
-  #a1=2
-  #b1=(upp-low)
-  #c1=-log(upp/low)
-  #dispstar_new= (-b1+ sqrt(b1^2-4*a1*c1))/(2*a1)
-
-  #print("dispstar_old")
-  #print(dispstar)
-  
-  #dispstar=dispstar_new
-  #print("dispstar_new")
-  #print(dispstar_new)
-  
-    
-  #max_disp3=1/qgamma(c(0.01),shape2,rate3)
-  
- 
-#  print("max_disp3")
-#  print(max_disp3)
-  
-
 
   #################  this Block Does evaluations at lower and upper bounds   #################
 
@@ -326,8 +206,6 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
 
   upp=1/qgamma(c(0.01),shape2,rate3)
   low=1/qgamma(c(0.99),shape2,rate3)
-  print(upp)
-  print(low)
   wt_upp=wt/rep(upp,length(y))
   wt_low=wt/rep(low,length(y))
   
@@ -411,7 +289,6 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   UB_list=list(RSS_ML=RSS_ML,max_New_LL_UB=max_New_LL_UB,
                max_LL_log_disp=max_LL_log_disp,lm_log1=lm_log1,lm_log2=lm_log2, 
                log_P_diff=log_P_diff)
-  
   
   
   ### Call standard simulation function
