@@ -248,15 +248,20 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   print("99th percentile for approximate Inverse  Gamma posterior density is")
   
+  # set upper and lower based on percentiles
+  
   upp=1/qgamma(c(0.01),shape2,rate3)
   low=1/qgamma(c(0.99),shape2,rate3)
   
-  print(upp)
+  
+
+  
+  #print(upp)
   
   
   print("1st percentile for approximate Inverse  Gamma posterior density is")
   #print(1/qgamma(c(0.99),shape2,rate3))
-  print(low)
+  #print(low)
   
   a1=2
   b1=(upp-low)
@@ -315,7 +320,8 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   
   
-  New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), as.vector(alpha), as.vector(wt2))
+  New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
+                                as.vector(alpha), as.vector(wt2))
   
 #  print("New_thetabars that should match")
 #  print(New_thetabars)
@@ -344,12 +350,69 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   PLSD_new=PLSD_new/sumP
   
   Env_temp$PLSD=PLSD_new
-
   log_P_diff=log(Env_temp$PLSD)-log(Env2$PLSD)
   
-  #################  this Block sets overall upper bound for LL_temp   #################
+  #################  this Block Does evaluations at lower and upper bounds   #################
   
-## Upper boundvalue for LL_temp using thetastars (based on upper bound dispersion)  
+
+  upp=1/qgamma(c(0.01),shape2,rate3)
+  low=1/qgamma(c(0.99),shape2,rate3)
+  wt_upp=wt/rep(upp,length(y))
+  wt_low=wt/rep(low,length(y))
+  
+  theta_upp=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
+                            as.vector(alpha), as.vector(wt_upp))
+
+  theta_low=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
+                            as.vector(alpha), as.vector(wt_low))
+
+  
+  New_LL_upp=c(1:gs)
+  New_LL_low=c(1:gs)
+  
+    
+  for(j in 1:gs){
+    
+    theta_temp_upp=as.matrix(theta_upp[j,1:ncol(x)],ncol=1)
+    theta_temp_low=as.matrix(theta_low[j,1:ncol(x)],ncol=1)
+    cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
+    
+    # New formula - This should likely replace: -NegLL(i)+arma::as_scalar(G3row.t() * cbarrow)
+    
+    New_LL_upp[j]=-0.5*t(theta_temp_upp)%*%P2%*%theta_temp_upp+t(cbars_temp)%*% theta_temp_upp
+    New_LL_low[j]=-0.5*t(theta_temp_low)%*%P2%*%theta_temp_low+t(cbars_temp)%*% theta_temp_low
+    
+  }
+  
+  LL_temp_upp=log_P_diff+New_LL_upp
+  LL_temp_low=log_P_diff+New_LL_low
+  
+  max_New_LL_upp=max(LL_temp_upp)
+  max_New_LL_low=max(LL_temp_low)
+  
+  slope_out=(max_New_LL_upp-max_New_LL_low)/(upp-low)
+  int_out=max_New_LL_low-slope_out*low
+  print("slope out calculated")
+  print(slope_out)
+  
+  print("intercept out calculated")
+  print(int_out)
+
+  lmc=c(int_out,slope_out)
+  print(lmc)
+  
+  lm_log2=lmc[2]*dispstar
+  lm_log1=lmc[1]+lm_log2-lm_log2*log(dispstar)
+  
+  shape3=shape2-lm_log2
+  
+  
+    
+  #####################################################################################
+
+  
+  
+  ## Upper boundvalue for LL_temp using thetastars (based on upper bound dispersion)  
   
   for(j in 1:gs){
     
@@ -364,10 +427,13 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   
   LL_temp=log_P_diff+New_LL
-  
-  
   max_New_LL_UB=max(LL_temp)
+
   
+  
+  
+  
+    
   print("max_New_LL_UB")  
   print(max_New_LL_UB)  
   
@@ -377,83 +443,95 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   dep_out<-matrix(0,nrow=100,ncol=1)
   disp_temp_out<-matrix(0,nrow=100,ncol=1)
-    
-  for(k in 1:100){
+   
+  
+  ## 100 simulations from preliminary gamma candidate
+  
+  #for(k in 1:100){
   
   # Generate some values based on unrestricted candidate density
   
-  p=rgamma(1,shape=shape2,rate=rate2)  
-  dispersion=1/p
+  #p=rgamma(1,shape=shape2,rate=rate2)  
+  #dispersion=1/p
   
-  disp_temp_out[k]=dispersion
+  #disp_temp_out[k]=dispersion
   
-  wt2=wt/rep(dispersion,length(y))
+  #wt2=wt/rep(dispersion,length(y))
   
-  New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), 
-                                as.matrix(P2), as.vector(alpha), as.vector(wt2))
+  #New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), 
+  #                              as.matrix(P2), as.vector(alpha), as.vector(wt2))
   
-  LL_New=-f2_gaussian_vector(t(Env_temp$thetabars), y, as.matrix(x2), as.matrix(mu2,ncol=1),
-                             as.matrix(P2), as.vector(alpha), as.vector(wt2))
+  #LL_New=-f2_gaussian_vector(t(Env_temp$thetabars), y, as.matrix(x2), as.matrix(mu2,ncol=1),
+  #                           as.matrix(P2), as.vector(alpha), as.vector(wt2))
   
   
   
-  for(j in 1:gs){
+  #for(j in 1:gs){
     
-    theta_bars_temp=as.matrix(New_thetabars[j,1:ncol(x)],ncol=1)
-    cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
+  #  theta_bars_temp=as.matrix(New_thetabars[j,1:ncol(x)],ncol=1)
+  #  cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
     
     # New formula - This should likely replace: -NegLL(i)+arma::as_scalar(G3row.t() * cbarrow)
     
-    New_LL[j]=-0.5*t(theta_bars_temp)%*%P2%*%theta_bars_temp+t(cbars_temp)%*% theta_bars_temp
+  #  New_LL[j]=-0.5*t(theta_bars_temp)%*%P2%*%theta_bars_temp+t(cbars_temp)%*% theta_bars_temp
     
     #logP(i,1)=logP(i,0)-NegLL(i)+0.5*arma::as_scalar(cbarrow.t() * cbarrow)+arma::as_scalar(G3row.t() * cbarrow);
-  }
+  #}
   
   
-  LL_temp=log_P_diff+New_LL
-  max_New_LL=max(LL_temp)
+  #LL_temp=log_P_diff+New_LL
+  #max_New_LL=max(LL_temp)
   
-  dep_out[k]=max_New_LL
+  #dep_out[k]=max_New_LL
   
-  }
+  #}
   
-  lm_test2=lm(dep_out~disp_temp_out)
-  lmc=lm_test2$coefficients
+  
+  
+  #lm_test2=lm(dep_out~disp_temp_out)
+  #lmc=lm_test2$coefficients
 
-  print("lmc output - check if matches outside of function")  
-  print(lmc)
+  #print("lm Regression")
+  #print(summary(lm_test2))
+  max_New_LL_UB  
   
-  print("dispstar")
-  print(dispstar)
+  #stop("error associated with approximation")  
+  
+  #print("lmc output - check if matches outside of function")  
+  #print(lmc)
+  
+  #lm_log2=lmc[2]*dispstar
+  #lm_log1=lmc[1]+lm_log2-lm_log2*log(dispstar)
+  
+  #shape3=shape2-lm_log2
+  
+
+  
+  #print("dispstar")
+  #print(dispstar)
   #dispstar=0.61
-  lm_log2=lmc[2]*dispstar
-  lm_log1=lmc[1]+lm_log2-lm_log2*log(dispstar)
+  #print("lm_log")
+  #print(lm_log1)
+  #print(lm_log2)
+  
+  #print("New Candidate shape and rate are")
+  #print(shape3)
+  #print(rate2)
   
 
-  print("lm_log")
+  max_LL_log_disp=lm_log1+lm_log2*log(upp) ## From above
   
-  print(lm_log1)
-  print(lm_log2)
+  gamma_list=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low)
   
-    
-  shape3=shape2-lm_log2
-
-  print("New Candidate shape and rate are")
-  print(shape3)
-  print(rate2)
-  
-
-  max_LL_log_disp=lm_log1+lm_log2*log(max_disp_f) ## From above
-  
-  
+  UB_list=list(RSS_ML=RSS_ML,max_New_LL_UB=max_New_LL_UB,
+               max_LL_log_disp=max_LL_log_disp,lm_log1=lm_log1,lm_log2=lm_log2, 
+               log_P_diff=log_P_diff)
   
   
   sim_temp=rindep_norm_gamma_reg_std_R(n=n,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt,
   f2=f2,Envelope=Env2,
-  gamma_list=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low),
-  RSS_ML=RSS_ML,max_New_LL_UB=max_New_LL_UB,
-  max_LL_log_disp=max_LL_log_disp,lm_log1=lm_log1,lm_log2=lm_log2, 
-  log_P_diff=log_P_diff,
+  gamma_list=gamma_list,
+  UB_list=UB_list,
   family="gaussian",link="identity",as.integer(0))
 
 #########################################  Post Processing for simulation function handling loop
@@ -506,11 +584,11 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
 
 
 rindep_norm_gamma_reg_std_R <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, 
-  gamma_list, RSS_ML,max_New_LL_UB,max_LL_log_disp,
-  lm_log1,lm_log2, log_P_diff,
+  gamma_list, 
+  UB_list,
   family, link, progbar = 1L) {
 
-  ## Pull constants from Env2 and gamma_list
+  ## Pull constants from Env2, gamma_list, and UB_list
   
   Env2=Envelope
   shape3=gamma_list$shape3
@@ -519,6 +597,15 @@ rindep_norm_gamma_reg_std_R <- function(n, y, x, mu, P, alpha, wt, f2, Envelope,
   disp_lower=gamma_list$disp_lower
   gs=nrow(Env2$cbars) # Size of grid
   New_LL=c(1:gs)
+  
+  RSS_ML=UB_list$RSS_ML
+  max_New_LL_UB=UB_list$max_New_LL_UB
+  max_LL_log_disp=UB_list$max_LL_log_disp
+  lm_log1=UB_list$lm_log1
+  lm_log2=UB_list$lm_log2 
+  log_P_diff=UB_list$log_P_diff
+  
+  
   
   # Initialized Objects that will be populated during the loop
   
