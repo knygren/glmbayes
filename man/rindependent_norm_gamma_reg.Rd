@@ -147,8 +147,6 @@ rate=n_prior*RSS/n_data
 prior_list=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,
                  shape=shape,rate=rate,Precision=solve(Sigma_prior))
 
-#Note: max_disp=0.9 seened to require just 8.552 candidates per acceptance
-# if max_disp =1.5, this seems much higher and algorithm seems to possibly hang
 
 set.seed(360)
 
