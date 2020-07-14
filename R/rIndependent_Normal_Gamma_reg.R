@@ -287,51 +287,49 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   ## Copy Envelope for use in simulation (as needed update components)
   
-  Env_temp=Env2
+  #Env_temp=Env2
   
   ## get cbars
   
-  cbars=Env2$cbars
+  #cbars=Env2$cbars
   
   ## Calculate theta_star [Inv_f3_gaussian suggest positive sign for thetastar]
   ##
-  theta_star=t(as.matrix(solve(P2)%*%as.matrix(t(cbars),ncol=1),ncol=1)) 
+  #theta_star=t(as.matrix(solve(P2)%*%as.matrix(t(cbars),ncol=1),ncol=1)) 
   
-  gs=nrow(theta_star)
-  
-  
-  logP1=Env2$logP
-  New_LL=c(1:gs)
-  New_logP2=c(1:gs)
+  #gs=nrow(theta_star)
+  #logP1=Env2$logP
+  #New_LL=c(1:gs)
+  #New_logP2=c(1:gs)
   
 #  print("logP - Old Envelope")
 #  print(Env2$logP)
   
-  for(i in 1:gs){
+  #for(i in 1:gs){
     
-    cbars_temp=as.matrix(cbars[i,1:ncol(x)],ncol=1)
+  #  cbars_temp=as.matrix(cbars[i,1:ncol(x)],ncol=1)
     
     #New_logP2[i]=logP1[i]+New_LL[i]+0.5*t(cbars_temp)%*%cbars_temp
-    New_logP2[i]=logP1[i]+0.5*t(cbars_temp)%*%cbars_temp
+  #  New_logP2[i]=logP1[i]+0.5*t(cbars_temp)%*%cbars_temp
     
     #logP(i,1)=logP(i,0)-NegLL(i)+0.5*arma::as_scalar(cbarrow.t() * cbarrow)+arma::as_scalar(G3row.t() * cbarrow);
-  }
+  #}
   
   
   
-  New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
-                                as.vector(alpha), as.vector(wt2))
+  #New_thetabars=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
+  #                              as.vector(alpha), as.vector(wt2))
   
 
-#  maxlogP=max(New_logP2)
-#  PLSD_new=exp(New_logP2-maxlogP)
-#  sumP=sum(PLSD_new)
-#  PLSD_new=PLSD_new/sumP
-#  Env_temp$PLSD=PLSD_new
-#  log_P_diff=log(Env_temp$PLSD)-log(Env2$PLSD)
-  
   
   #################  this Block Does evaluations at lower and upper bounds   #################
+
+  cbars=Env2$cbars
+  
+  gs=nrow(Env2$cbars)
+  logP1=Env2$logP
+  New_LL=c(1:gs)
+  New_logP2=c(1:gs)
   
 
   upp=1/qgamma(c(0.01),shape2,rate3)
@@ -358,7 +356,7 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     
     # New formula - This should likely replace: -NegLL(i)+arma::as_scalar(G3row.t() * cbarrow)
     
-    New_logP2[i]=logP1[i]+0.5*t(cbars_temp)%*%cbars_temp
+    New_logP2[j]=logP1[j]+0.5*t(cbars_temp)%*%cbars_temp
     New_LL_upp[j]=-0.5*t(theta_temp_upp)%*%P2%*%theta_temp_upp+t(cbars_temp)%*% theta_temp_upp
     New_LL_low[j]=-0.5*t(theta_temp_low)%*%P2%*%theta_temp_low+t(cbars_temp)%*% theta_temp_low
     
@@ -386,7 +384,7 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   b1=(upp-low)
   c1=-log(upp/low)
   dispstar= (-b1+ sqrt(b1^2-4*a1*c1))/(2*a1) # Point of tangency
-  
+   
   
   lm_log2=lmc[2]*dispstar
   #lm_log1=lmc[1]+lm_log2-lm_log2*log(dispstar)
@@ -413,42 +411,6 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   #####################################################################################
 
-  
-  
-  ## Upper boundvalue for LL_temp using thetastars (based on upper bound dispersion)  
-
-  
-  #max_disp_f=max_disp3
-  #wt2=wt/rep(max_disp_f,length(y))
-  
-  #thetastars1=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
-  #                              as.vector(alpha), as.vector(wt2))
-  
-    
-  #for(j in 1:gs){
-    
-  #  theta_bars_temp=as.matrix(thetastars1[j,1:ncol(x)],ncol=1)
-   # cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
-    
-    # New formula - This should likely replace: -NegLL(i)+arma::as_scalar(G3row.t() * cbarrow)
-    
-  #  New_LL[j]=-0.5*t(theta_bars_temp)%*%P2%*%theta_bars_temp+t(cbars_temp)%*% theta_bars_temp
-    
-  #}
-  
-  
-  #LL_temp=log_P_diff+New_LL
-  #max_New_LL_UB=max(LL_temp)
-
-  #print("max_New_LL_UB")  
-  #print(max_New_LL_UB)  
-  #max_New_LL_UB  
-
-  #print("max_New_LL_Upp")
-  #print(max_New_LL_upp)  
-  #max_LL_log_disp=lm_log1+lm_log2*log(upp) ## From above
-  
-  
   
   gamma_list=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low)
   
