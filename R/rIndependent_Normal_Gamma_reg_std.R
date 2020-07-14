@@ -72,7 +72,7 @@ rindep_norm_gamma_reg_std_R <- function(n, y, x, mu, P, alpha, wt, f2, Envelope,
       # Generate Candidate for Restricted Multivariate Normal
       
       sim=.rindep_norm_gamma_reg_std_cpp(n=1,y=y,x=x,mu=mu,P=P,alpha=alpha,wt=wt2,
-                                         f2=f2,Envelope=Env2,family="gaussian",link="identity",as.integer(0))
+      f2=f2,Envelope=Env2,family="gaussian",link="identity",as.integer(0))
       
       # Get Key output from *.cpp function
       J_out=sim$J+1

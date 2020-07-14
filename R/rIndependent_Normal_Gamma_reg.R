@@ -291,6 +291,17 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
                log_P_diff=log_P_diff)
   
   
+  ## Dummy calls -currently should return list of items with the number 1
+  print("Entering *.cpp function")
+  
+  sim_temp=.rindep_norm_gamma_reg_std_V2_cpp (n=n, y=y, x=x2, mu=mu2, P=P2, alpha=alpha, wt,
+  f2=f2, Envelope=Env2, 
+  gamma_list=gamma_list,
+  UB_list=UB_list,
+  family="gaussian",link="identity", progbar = as.integer(0))
+    
+  
+  print("Exited *.cpp function")  
   ### Call standard simulation function
   
   sim_temp=rindep_norm_gamma_reg_std_R(n=n,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt,
