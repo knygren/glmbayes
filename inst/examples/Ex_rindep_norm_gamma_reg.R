@@ -85,15 +85,14 @@ prior_list=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,
 #Note: max_disp=0.9 seened to require just 8.552 candidates per acceptance
 # if max_disp =1.5, this seems much higher and algorithm seems to possibly hang
 
-set.seed(333)
+set.seed(360)
 
  ptm <- proc.time()
  sim2=rindependent_norm_gamma_reg(n=1000,y,x,prior_list=prior_list,
 offset=NULL,weights=1,max_disp=0.9)
  proc.time()-ptm
 
- 
- 
+
  
  # 100 iterations took: 
 #  90.53 [RSS_Old2/n_obs]
@@ -186,8 +185,8 @@ dispersion2=dispersion
 
 # Loop through two-block-Gibbs sampler
 
-low=0.2845312
-upp=1.126446
+low=sim2$sim_bounds$low 
+upp=sim2$sim_bounds$upp 
 #### Burn-in iterations
 
 for(i in 1:1000){
