@@ -187,6 +187,7 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
 {
 
   int l1 = mu.nrow();
+  int l2 = x.nrow();
   
   
   // Get various inputs frm the provided lists
@@ -213,7 +214,7 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
   NumericVector wt2(l1);
   
   
-//  arma::vec wt1b(wt.begin(), x.nrow());
+  arma::vec wt1b(wt.begin(), x.nrow());
 //  arma::vec wt2b(wt2.begin(), x.nrow());
   
 
@@ -226,8 +227,14 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
   arma::mat thetabarsb(thetabars.begin(), thetabars.nrow(), thetabars.ncol(), false);
   cbarstb=trans(cbarsb);
   
+  arma::vec y2(y.begin(),l2);
+  arma::vec alpha2(alpha.begin(),l2);
+  arma::mat x2(x.begin(),l2,l1);
+  
+  
   double UB1;
-
+  double UB2;
+  
   
     
   int a1=0;
@@ -290,14 +297,26 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
       
       arma::colvec betadiff=trans(b_out2)-thetabars_temp2;
       UB1=LL_New(J_out(0)) -arma::as_scalar(trans(cbars_temp2)*betadiff);
+      
+      //Block 2: UB2 [RSS Term bounded by shifting it to the gamma candidate]
+      
+      // % is element wise multiplication
+      
+      arma::colvec yxbeta=(y2-alpha2-x2*thetabars_temp2)%sqrt(wt1b); 
+      UB2=0.5*(1/dispersion)*(arma::as_scalar(trans(yxbeta)*yxbeta)-RSS_ML);
+      
       //  UB1=arma::as_scalar(trans(cbars_temp2)*betadiff);
       //  UB1=LL_New[J_out]-Env2$cbars[J_out,1:ncol(x)]%*%(betadiff)
     
-    
-    
+  
       test= LL_Test[0]-UB1;  // Should be all negative - apparently not now...
 
 //        Rcpp::Rcout << "test1 " << std::flush << test << std::endl;
+
+      test= LL_Test[0]-(UB1+UB2);  // Should be all negative - apparently not now...
+
+      Rcpp::Rcout << "test2 " << std::flush << test << std::endl;
+      
         //      P4.print("P4 after step 1");  
         //      epsilon.print("epsilon after step 1");  
 
