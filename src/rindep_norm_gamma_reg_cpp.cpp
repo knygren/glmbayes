@@ -239,8 +239,9 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
   double UB1;
   double UB2;
   double UB3A;
+  double UB3B;
   double max_New_LL;
-  
+  double New_LL_log_disp;
     
   int a1=0;
   double test=0;
@@ -334,20 +335,28 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
         UB3A=max_New_LL-LL_temp(J_out(0));
   
   
+      // Block 4: UB3B  
+      
+      New_LL_log_disp=lm_log1+lm_log2*log(dispersion);
+      UB3B=(max_New_LL_UB-max_LL_log_disp)-(max_New_LL-New_LL_log_disp);
   
-      test= LL_Test[0]-UB1;  // Should be all negative - apparently not now...
+  
+      test= LL_Test[0]-UB1;  // Should be all negative 
 
 //        Rcpp::Rcout << "test1 " << std::flush << test << std::endl;
 
-      test= LL_Test[0]-(UB1+UB2);  // Should be all negative - apparently not now...
+      test= LL_Test[0]-(UB1+UB2);  // Should be all negative 
 
 //      Rcpp::Rcout << "test2 " << std::flush << test << std::endl;
 
-      test= LL_Test[0]-(UB1+UB2+UB3A);  // Should be all negative - apparently not now...
+      test= LL_Test[0]-(UB1+UB2+UB3A);  // Should be all negative 
 
-      Rcpp::Rcout << "test3 " << std::flush << test << std::endl;
+      //Rcpp::Rcout << "test3 " << std::flush << test << std::endl;
       
-        //      P4.print("P4 after step 1");  
+      test= LL_Test[0]-(UB1+UB2+UB3A+UB3B);  // Should be all negative 
+      
+      //Rcpp::Rcout << "test3 " << std::flush << test << std::endl;
+      //      P4.print("P4 after step 1");  
         //      epsilon.print("epsilon after step 1");  
 
         // Block 1: UB1 
@@ -355,7 +364,8 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
         //   So all components that include thetabar must now be bounded as well
         
         
-                
+      test=test-log_U2;
+          
       
      disp_out[i]=dispersion;  
      beta_out(i,_)=sim_out(0,_);
@@ -372,7 +382,7 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
   // Temporarily just return non-sense constants equal to all 1
   
   return Rcpp::List::create(Rcpp::Named("beta_out")=beta_out,Rcpp::Named("disp_out")=disp_out,
-                            Rcpp::Named("iters_out")=1,Rcpp::Named("weight_out"));  
+                            Rcpp::Named("iters_out")=iters_out,Rcpp::Named("weight_out"));  
   
   
   //  int l2=pow(3,l1);

@@ -299,11 +299,20 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     ## Dummy calls -currently should return list of items with the number 1
   print("Entering *.cpp function")
   
+  ptm <- proc.time()
+  
   sim_temp=.rindep_norm_gamma_reg_std_V2_cpp (n=n, y=y, x=x2, mu=mu2, P=P2, alpha=alpha, wt,
   f2=f2, Envelope=Env2, 
   gamma_list=gamma_list,
   UB_list=UB_list,
   family="gaussian",link="identity", progbar = as.integer(0))
+  
+  print("time for *.cpp function")
+  print(proc.time()-ptm)
+
+  print("mean candidates per acceptance - *.cpp function")
+  print(mean(sim_temp$iters_out))
+  
     
   beta_out=sim_temp$beta_out
   disp_out=sim_temp$disp_out
@@ -317,15 +326,18 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   }
   
   
-  print("out")
-  print(out)
-  print("disp_out")
-  print(disp_out)  
+  
+  
+  ## print("out")
+  ## print(out)
+  ## print("disp_out")
+  ##  print(disp_out)  
 
-  stop("Output from sim_temp abobe")
+  ## stop("Output from sim_temp above") 8.39 second if stopped here
   
   print("Exited *.cpp function")  
   ### Call standard simulation function
+  ptm <- proc.time()
   
   sim_temp=rindep_norm_gamma_reg_std_R(n=n,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt,
   f2=f2,Envelope=Env2,
@@ -333,6 +345,13 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   UB_list=UB_list,
   family="gaussian",link="identity",as.integer(0))
 
+  print("time for *.R function")
+  print(proc.time()-ptm)
+  
+  print("mean candidates per acceptance *.R function")
+  print(mean(sim_temp$iters_out))
+  
+  
 #########################################  Post Processing for simulation function handling loop
   
   beta_out=sim_temp$beta_out

@@ -52,7 +52,6 @@ rindep_norm_gamma_reg_std_R <- function(n, y, x, mu, P, alpha, wt, f2, Envelope,
   
   for(i in 1:n){  
     a1=0  
-    
     while(a1==0){
       
       # Generate Candidate for dispersion from Restricted Gamma
@@ -161,7 +160,9 @@ rindep_norm_gamma_reg_std_R <- function(n, y, x, mu, P, alpha, wt, f2, Envelope,
       #test=1  # edit out later
       #a1=1
       if(test>=0) a1=1
-      else{iters_out[i]=iters_out[i]+1}        
+      else{
+        iters_out[i]=iters_out[i]+1
+        }        
       
       
     }
