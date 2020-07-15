@@ -145,7 +145,8 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
 //      test_data=test-test_int;
 
 
-  return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("test")=test,Rcpp::Named("J")=J,
+  return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("test")=test,
+                                        Rcpp::Named("J")=J,
                                         Rcpp::Named("log_U2")=log(U2)
 //                                      ,  Rcpp::Named("test_int")=test_int,
 //                                        Rcpp::Named("test_data")=test_data
@@ -200,6 +201,7 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
   double lm_log1 =UB_list["lm_log1"];
   double lm_log2 =UB_list["lm_log2"];
   NumericVector log_P_diff =UB_list["log_P_diff"];
+  NumericMatrix cbars=Envelope["cbars"];
   
 
   NumericVector iters_out(n);
@@ -208,8 +210,28 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
   NumericMatrix beta_out(n,l1);
   double dispersion;
   
+  NumericVector wt2(l1);
   
+  
+//  arma::vec wt1b(wt.begin(), x.nrow());
+//  arma::vec wt2b(wt2.begin(), x.nrow());
+  
+
+  NumericMatrix cbarst(cbars.ncol(),cbars.nrow());
+  NumericMatrix thetabars(cbars.nrow(),cbars.ncol());
+  
+  arma::mat cbarsb(cbars.begin(), cbars.nrow(), cbars.ncol(), false);
+  arma::mat cbarstb(cbarst.begin(), cbarst.nrow(), cbarst.ncol(), false);
+
+  arma::mat thetabarsb(thetabars.begin(), thetabars.nrow(), thetabars.ncol(), false);
+  cbarstb=trans(cbarsb);
+  
+  double UB1;
+
+  
+    
   int a1=0;
+  double test=0;
   //Rcpp::Function r_invgamma("r_invgamma");
   
   
@@ -220,8 +242,77 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
     
     while(a1==0){
       
-//      dispersion=r_invgamma(_["shape"]=shape3,_["rate"]=rate2,_["disp_upper"]=disp_upper,
-//                         _["disp_lower"]=disp_lower);
+      dispersion=r_invgamma(shape3,rate2,disp_upper,disp_lower);
+
+      //Rcpp::Rcout << "wt original" << std::flush << wt << std::endl;
+      
+      //wt1b.print("original weight");
+      //wt2b=wt1b/dispersion;
+      wt2=wt/dispersion;
+      
+//      wt2b.print("updated weight");
+//      Rcpp::Rcout << "wt2 -should match wt2b" << std::flush << wt2 << std::endl;
+      
+      arma::mat theta =Inv_f3_gaussian(transpose(cbars), y,x, mu, P, alpha, wt2);  
+//      theta.print("new thetabars");
+      thetabarsb=theta;
+      
+//      Rcpp::Rcout << "thetabars_new - actual " << std::flush << thetabars << std::endl;
+      
+      NumericVector LL_New=-f2_gaussian(transpose(thetabars),  y, x, mu, P, alpha, wt2);  
+      
+      Rcpp::List  sim_list=rindep_norm_gamma_reg_std_cpp(1,y,x,mu, P,alpha,wt2,
+      f2,Envelope,family,link,  progbar); 
+      
+      NumericVector J_out=sim_list["J"];
+
+//      Rcpp::Rcout << "J_out " << std::flush << J_out << std::endl;
+      
+      double log_U2=sim_list["log_U2"];
+      NumericMatrix sim_out=sim_list["out"];  
+      NumericVector b_out=sim_out(0,_);
+      arma::rowvec b_out2(b_out.begin(),l1,false);
+      NumericVector thetabars_temp=thetabars(J_out(0),_);
+      arma::vec  thetabars_temp2(thetabars_temp.begin(), l1);
+      NumericVector cbars_temp=cbars(J_out(0),_);
+      arma::vec  cbars_temp2(cbars_temp.begin(), l1);
+      
+      
+//            thetabars_temp2.print("Selected thetabars");
+
+      // Passing transpose of sim_out here might work because sim_out has only one row
+
+      NumericVector LL_Test=-f2_gaussian(transpose(sim_out),  y, x, mu, P, alpha, wt2);  
+      
+      // Block 1: UB1 
+      //   Same form as in fixed dispersion case but thetabar is a function of the dispersion
+      //   So all components that include thetabar must now be bounded as well
+      
+      arma::colvec betadiff=trans(b_out2)-thetabars_temp2;
+      UB1=LL_New(J_out(0)) -arma::as_scalar(trans(cbars_temp2)*betadiff);
+      //  UB1=arma::as_scalar(trans(cbars_temp2)*betadiff);
+      //  UB1=LL_New[J_out]-Env2$cbars[J_out,1:ncol(x)]%*%(betadiff)
+    
+    
+    
+      test= LL_Test[0]-UB1;  // Should be all negative - apparently not now...
+
+//        Rcpp::Rcout << "test1 " << std::flush << test << std::endl;
+        //      P4.print("P4 after step 1");  
+        //      epsilon.print("epsilon after step 1");  
+
+        // Block 1: UB1 
+        //   Same form as in fixed dispersion case but thetabar is a function of the dispersion
+        //   So all components that include thetabar must now be bounded as well
+        
+        
+                
+      
+     disp_out[i]=dispersion;  
+     beta_out(i,_)=sim_out(0,_);
+     
+     
+     
       
       a1=1;
     }  
@@ -230,9 +321,8 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
   
   // Temporarily just return non-sense constants equal to all 1
   
-  return Rcpp::List::create(Rcpp::Named("out")=1,Rcpp::Named("draws")=1,
-                            Rcpp::Named("test")=1,Rcpp::Named("J")=1,
-                                        Rcpp::Named("log_U2")=1);  
+  return Rcpp::List::create(Rcpp::Named("beta_out")=beta_out,Rcpp::Named("disp_out")=disp_out,
+                            Rcpp::Named("iters_out")=1,Rcpp::Named("weight_out"));  
   
   
   //  int l2=pow(3,l1);
@@ -247,7 +337,7 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
   //double a1=0;
   double a2=0;
   double U=0;
-  double test=0;
+  //double test=0;
   //  double test_int=0;
   //  double test_data=0;
   double U2=0;
@@ -257,7 +347,7 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
   NumericVector PLSD=Envelope["PLSD"];
   NumericMatrix loglt=Envelope["loglt"];
   NumericMatrix logrt=Envelope["logrt"];
-  NumericMatrix cbars=Envelope["cbars"];
+//  NumericMatrix cbars=Envelope["cbars"];
   
   
   //  NumericMatrix cbars_int=Envelope["cbars_int"];

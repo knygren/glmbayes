@@ -290,8 +290,13 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
                max_LL_log_disp=max_LL_log_disp,lm_log1=lm_log1,lm_log2=lm_log2, 
                log_P_diff=log_P_diff)
   
+  print("cbars - Should not Change")
+  print(Env2$cbars)
   
-  ## Dummy calls -currently should return list of items with the number 1
+  print("thetabars - Should change but not by that much")
+  print(Env2$thetabars)
+
+    ## Dummy calls -currently should return list of items with the number 1
   print("Entering *.cpp function")
   
   sim_temp=.rindep_norm_gamma_reg_std_V2_cpp (n=n, y=y, x=x2, mu=mu2, P=P2, alpha=alpha, wt,
@@ -300,6 +305,24 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   UB_list=UB_list,
   family="gaussian",link="identity", progbar = as.integer(0))
     
+  beta_out=sim_temp$beta_out
+  disp_out=sim_temp$disp_out
+  iters_out=sim_temp$iters_out
+  weight_out=sim_temp$weight_out
+
+  out=L2Inv%*%L3Inv%*%t(beta_out)
+  
+  for(i in 1:n){
+    out[,i]=out[,i]+mu
+  }
+  
+  
+  print("out")
+  print(out)
+  print("disp_out")
+  print(disp_out)  
+
+  stop("Output from sim_temp abobe")
   
   print("Exited *.cpp function")  
   ### Call standard simulation function

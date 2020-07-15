@@ -63,6 +63,7 @@ Generates iid samples from the posterior density for the
 independent normal-gamma regression
 }
 \examples{
+
 ## Annette Dobson (1990) "An Introduction to Generalized Linear Models".
 ## Page 9: Plant Weight Data.
 ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
@@ -151,10 +152,9 @@ prior_list=list(mu=mu,Sigma=Sigma_prior,dispersion=dispersion,
 set.seed(360)
 
  ptm <- proc.time()
- sim2=rindependent_norm_gamma_reg(n=1000,y,x,prior_list=prior_list,
+ sim2=rindependent_norm_gamma_reg(n=100,y,x,prior_list=prior_list,
 offset=NULL,weights=1,max_disp=0.9)
  proc.time()-ptm
-
 
  
  # 100 iterations took: 
