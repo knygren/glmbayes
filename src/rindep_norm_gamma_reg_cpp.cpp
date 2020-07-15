@@ -210,7 +210,6 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
   NumericVector weight_out(n);
   NumericMatrix beta_out(n,l1);
   double dispersion;
-  
   NumericVector wt2(l1);
   
   
@@ -220,6 +219,9 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
 
   NumericMatrix cbarst(cbars.ncol(),cbars.nrow());
   NumericMatrix thetabars(cbars.nrow(),cbars.ncol());
+  NumericVector New_LL(cbars.nrow());
+  
+  
   
   arma::mat cbarsb(cbars.begin(), cbars.nrow(), cbars.ncol(), false);
   arma::mat cbarstb(cbarst.begin(), cbarst.nrow(), cbarst.ncol(), false);
@@ -230,11 +232,14 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
   arma::vec y2(y.begin(),l2);
   arma::vec alpha2(alpha.begin(),l2);
   arma::mat x2(x.begin(),l2,l1);
+  arma::mat P2(P.begin(),l1,l1);
+//  arma::vec log_P_diff2(log_P_diff.begin(),cbars.nrow());
   
   
   double UB1;
   double UB2;
-  
+  double UB3A;
+  double max_New_LL;
   
     
   int a1=0;
@@ -246,7 +251,7 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
   for(int i=0;i<n;i++){
     
    a1=0;
-    
+    iters_out[i]=1;  
     while(a1==0){
       
       dispersion=r_invgamma(shape3,rate2,disp_upper,disp_lower);
@@ -308,6 +313,27 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
       //  UB1=arma::as_scalar(trans(cbars_temp2)*betadiff);
       //  UB1=LL_New[J_out]-Env2$cbars[J_out,1:ncol(x)]%*%(betadiff)
     
+      // Block 3: UB3A (adjusts because probabilities of components in grid are different from original grid)
+      // Investigate whether changing probabilities of grid componets for proposal
+      // allows us to do away with this term and to thereby improve the acceptance rate
+    
+        for(int j=0;j<cbars.nrow();j++){
+          thetabars_temp=thetabars(j,_);
+          cbars_temp=cbars(j,_);
+          arma::vec  thetabars_temp2(thetabars_temp.begin(), l1);
+          arma::vec  cbars_temp2(cbars_temp.begin(), l1);
+
+          New_LL(j)=arma::as_scalar(-0.5*trans(thetabars_temp2)*P2*thetabars_temp2
+                                      +trans(cbars_temp2)*thetabars_temp2);
+                    
+        }
+    
+        //arma::vec New_LL2(New_LL.begin(),cbars.nrow());
+        NumericVector LL_temp=log_P_diff+ New_LL;
+        max_New_LL=max(LL_temp);
+        UB3A=max_New_LL-LL_temp(J_out(0));
+  
+  
   
       test= LL_Test[0]-UB1;  // Should be all negative - apparently not now...
 
@@ -315,7 +341,11 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
 
       test= LL_Test[0]-(UB1+UB2);  // Should be all negative - apparently not now...
 
-      Rcpp::Rcout << "test2 " << std::flush << test << std::endl;
+//      Rcpp::Rcout << "test2 " << std::flush << test << std::endl;
+
+      test= LL_Test[0]-(UB1+UB2+UB3A);  // Should be all negative - apparently not now...
+
+      Rcpp::Rcout << "test3 " << std::flush << test << std::endl;
       
         //      P4.print("P4 after step 1");  
         //      epsilon.print("epsilon after step 1");  
@@ -331,9 +361,10 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
      beta_out(i,_)=sim_out(0,_);
      
      
-     
-      
-      a1=1;
+     if(test>=0) a1=1;
+     else{iters_out[i]=iters_out[i]+1;}        
+
+    //  a1=1;
     }  
     
   }
