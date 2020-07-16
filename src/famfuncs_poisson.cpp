@@ -11,11 +11,27 @@ void progress_bar2(double x, double N);
 // f3 is gradient for log-posterior
 
 
+double dpois2(double x,double lambda,int lg){
+  
+  //test=max(abs(round(x)-x))
+  
+  //if(test>0){
+  //  warning("Non-Integer Values to Poisson Density - Switching to Gamma Function to Evaluate Factorial")
+    return(-lambda+x*log(lambda)-lgamma(x+1));
+  
+  //} 
+  
+  //return(dpois(x,lambda,log=TRUE))
+}
+
+
+
 NumericVector dpois_glmb( NumericVector x, NumericVector means, int lg){
     int n = x.size() ;
     NumericVector res(n) ;
 
-    for( int i=0; i<n; i++) res[i] = R::dpois( x[i], means[i], lg ) ;
+//    for( int i=0; i<n; i++) res[i] = R::dpois( x[i], means[i], lg ) ;
+    for( int i=0; i<n; i++) res[i] = dpois2( x[i], means[i], lg ) ;
     return res ;
 }
 

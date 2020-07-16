@@ -190,7 +190,6 @@ mu[1,1]=mean(weight)
 Prior_Check(weight ~ group,family =gaussian(),
            pfamily=dNormal(mu=mu,Sigma=V))
 
-## May move this step inside the Prior_Check function
 lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
 disp_ML=sigma(lm.D9)^2
 n_prior=2

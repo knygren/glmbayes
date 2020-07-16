@@ -101,11 +101,16 @@ glmbfamfunc<-function(family){
   {
     f1<-function(b,y,x,alpha=0,wt=1){
       lambda<-t(exp(alpha+x%*%b))
-      -sum(dpois(y, lambda,log=TRUE)*wt)
+      #-sum(dpois(y, lambda,log=TRUE)*wt)
+      -sum(dpois2(y, lambda,log=TRUE)*wt)
+      
+      
+      
     }
     f2<-function(b,y,x,mu,P,alpha=0,wt=1){
       lambda<-t(exp(alpha+x%*%b))
-      -sum(dpois(y, lambda,log=TRUE)*wt)+0.5*t((b-mu))%*%P%*%(b-mu)
+      #-sum(dpois(y, lambda,log=TRUE)*wt)+0.5*t((b-mu))%*%P%*%(b-mu)
+      -sum(dpois2(y, lambda,log=TRUE)*wt)+0.5*t((b-mu))%*%P%*%(b-mu)
     }
     f3<-function(b,y,x,mu,P,alpha=0,wt=1){
       -t(x)%*%((y-exp(alpha+x%*%b))*wt)+P%*%(b-mu)
@@ -395,3 +400,18 @@ print.glmbfamfunc<-function(x,...)
   
   
 }
+
+
+dpois2<-function(x,lambda,log=TRUE){
+  
+  test=max(abs(round(x)-x))
+  
+  if(test>0){
+    warning("Non-Integer Values to Poisson Density - Switching to Gamma Function to Evaluate Factorial")
+    return(-lambda+x*log(lambda)-log(gamma(x+1)))
+    
+  } 
+      
+    return(dpois(x,lambda,log=TRUE))
+}
+

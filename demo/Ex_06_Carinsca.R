@@ -1,14 +1,98 @@
+data(carinsca)
+carinsca$Merit <- ordered(carinsca$Merit)
+carinsca$Class <- factor(carinsca$Class)
+options(contrasts=c("contr.treatment","contr.treatment"))
+Claims=carinsca$Claims
+Insured=carinsca$Insured
+Merit=carinsca$Merit
+Class=carinsca$Class
+Cost=carinsca$Cost
+
+ps=Prior_Setup(Claims/Insured~Merit+Class)
+mu=ps$mu
+V=ps$Sigma
+mu[1,1]=log(mean(Claims/Insured))
+
+Prior_Check(Claims/Insured~Merit+Class,family="poisson",pfamily=dNormal(mu=mu,Sigma=V))
+
+## The # of Insured is very large
+
+out1=glm(Claims/Insured~Merit+Class,family="poisson",weights=Insured,x=TRUE,y=TRUE)
+summary(out1)
+out2 <- glmb(Claims/Insured~Merit+Class,family="poisson",dNormal(mu=mu,Sigma=V),weights=Insured)
+summary(out2)
+
+#mu=out1$coefficients
+#V=vcov(out1)
+
+out1b=glm(Claims~offset(Insured)+Merit+Class,family="poisson",weights=Insured,x=TRUE,y=TRUE)
+out1b=glm(Claims~offset(Insured)+Merit+Class,family="poisson",x=TRUE,y=TRUE)
+
+log(Claims/Insured)
+b=out1$coefficients
+x=out1$x
+y=out1$y
+alpha=rep(0,length(y))  
+
+f2_temp(b,y,x,mu,solve(V),alpha=rep(0,length(y)),wt=Insured)  
+lambda<-t(exp(alpha+x%*%b))
+wt=Insured
+P=solve(V)
+-sum(dpois(y, lambda,log=TRUE)*wt)+0.5*t((b-mu))%*%P%*%(b-mu)
+-sum(dpois2(y, lambda,log=TRUE)*wt)+0.5*t((b-mu))%*%P%*%(b-mu)
+
+
+sum(dpois2(y, lambda,log=TRUE))
+
+y2=round(100*y)
+lambda2=100*lambda
+
+dpois(y2, lambda2,log=TRUE)
+(-lambda2+y2*log(lambda2)-log(gamma(y2+1)))
+
+(-lambda+y*log(lambda)-log(gamma(y+1)))*wt
+
+y*log(lambda)
+is.integer(y)
+
+dpois(y, lambda,log=FALSE)
+
+dpois2<-function(x,lambda,log=TRUE){
+  
+  if(is.integer(x)) return(dpois(x,lambda,log=TRUE))
+  else{warning("Non-Integer Values to Poisson Density - Switching to Gamma Function to Evaluate Factorial")
+    return(-lambda+x*log(lambda)-log(gamma(x+1)))
+    
+  }
+}
+
+
+
+
+
+
+f2_temp<-function(b,y,x,mu,P,alpha=0,wt=1){
+  lambda<-t(exp(alpha+x%*%b))
+  -sum(dpois(y, lambda,log=TRUE)*wt)+0.5*t((b-mu))%*%P%*%(b-mu)
+}
+
+
+log(Claims)
+
+solve(V)
+
+summary(out1,cor=F)
+
+out1$prior.weights
+
+
+
 
 data(carinsca)
 carinsca$Merit <- ordered(carinsca$Merit)
 carinsca$Class <- factor(carinsca$Class)
 options(contrasts=c("contr.treatment","contr.treatment"))
 
-Claims=carinsca$Claims
-Insured=carinsca$Insured
-Merit=carinsca$Merit
-Class=carinsca$Class
-Cost=carinsca$Cost
 
 scale<-0.1275 # SAS estimate
 

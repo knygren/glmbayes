@@ -142,7 +142,10 @@ is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numer
   x <- as.matrix(x)
   mu<-as.matrix(as.vector(mu))
   P<-as.matrix(P)    
-  start <- mu
+  
+  ## Start value should be contingent on the family and link
+  
+    start <- mu
   
 ## Allow function to be called without offset2
   
@@ -219,6 +222,8 @@ if(family$family=="gaussian"){
 else{
   if(is.null(dispersion)){dispersion2=1}
   else{dispersion2=dispersion}
+  
+  #  stop("Inputs to function above")
   outlist<-.rnnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset=offset2,wt=wt,
 dispersion=dispersion2,
 ##famfunc=famfunc,f1=f1,

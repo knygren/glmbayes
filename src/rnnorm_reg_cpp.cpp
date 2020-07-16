@@ -233,6 +233,12 @@ Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterV
   arma::mat btemp2(btemp.begin(),l1,1,false); 
   NumericVector testll(1);
 
+  //Rcout << "PLSD"  << PLSD << std::endl;
+  //Rcout << "cbars"  << cbars << std::endl;
+  //Rcout << "LLconst"  << LLconst << std::endl;
+  
+//  Rcpp::stop("Envelope Components Above");
+  
   if(progbar==1){ Rcpp::Rcout << "Starting Simulation:" << std::endl;  };
     for(int i=0;i<n;i++){
       
@@ -357,17 +363,17 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   int l1c=P.ncol();
   int l1d=P.nrow();
   
-  if(l1b!=l1) Rcpp::stop("Number of rows in mu not consistent with number of columns in matrix x");;
-  if(l1c!=l1) Rcpp::stop("Number of columns in matrix P not consistent with number of columns in matrix x");;
-  if(l1d!=l1) Rcpp::stop("Number of rows in matrix P not consistent with number of columns in matrix x");;
+  if(l1b!=l1) Rcpp::stop("Number of rows in mu not consistent with number of columns in matrix x");
+  if(l1c!=l1) Rcpp::stop("Number of columns in matrix P not consistent with number of columns in matrix x");
+  if(l1d!=l1) Rcpp::stop("Number of rows in matrix P not consistent with number of columns in matrix x");
   
   int l2b=y.length();
   int l2c=offset2.length();
   int l2d=wt.length();
   
-  if(l2b!=l2) Rcpp::stop("Number of rows in y not consistent with number of rows in matrix x");;
-  if(l2c!=l2) Rcpp::stop("Number of rows in offset2 vector not consistent with number of rows in matrix x");;
-  if(l2d!=l2) Rcpp::stop("Number of rows in wt vector not consistent with number of rows in matrix x");;
+  if(l2b!=l2) Rcpp::stop("Number of rows in y not consistent with number of rows in matrix x");
+  if(l2c!=l2) Rcpp::stop("Number of rows in offset2 vector not consistent with number of rows in matrix x");
+  if(l2d!=l2) Rcpp::stop("Number of rows in wt vector not consistent with number of rows in matrix x");
   
   
   double dispersion2;
@@ -409,10 +415,17 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   // This is a bit complex - may make a difference for larger problems or problems
   // where BFGS method for other reasons fails to find True optimmum.
 
+  //NumericVector qc=f2_poisson(parin,y,x,mu1,P,alpha,wt2);
+
+  //Rcout << "Entering optimization" << std::endl;
+  
+    
   List opt=optfun(_["par"]=parin,_["fn"]=f2, _["gr"]=f3,_["y"]=y,
                   _["x"]=x,
                   _["mu"]=mu1,_["P"]=P,_["alpha"]=alpha,_["wt"]=wt2,_["method"]="BFGS",_["hessian"]=true);
   
+
+  //Rcout << "Completed optimization"  << std::endl;
   
   NumericMatrix b2a=asMat(opt[0]);  // optimized value
   NumericVector min1=opt[1]; // Not clear this is used - should be minimum
@@ -431,6 +444,9 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   // Step 3: Standardize the model 
   
 //  Rcpp::Rcout << "Standardizing the model:" << std::endl;
+
+//Rcout << "Standardizing Model" <<  std::endl;
+  
   
   Rcpp::List Standard_Mod=glmb_Standardize_Model(
     y, 
@@ -439,6 +455,8 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
     b2a, // Posterior Mode from optimization (to be adjusted)
     A1  // Precision for Log-Posterior at posterior mode (to be adjusted)
   );
+
+  //Rcout << "Finished Standardizing Model"  << std::endl;
   
   // Get output from call to glmb_Standardize_Model (not sure if they really need to be allocated)     
   // Advantage of allocating may be due to clarity of code in below
@@ -460,8 +478,8 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   // Step 4: Build the Envelope required to simulate from the Standardized Model
   
-//  Rcpp::Rcout << "Starting Envelope Creation:" << std::endl;
-  
+  //Rcpp::Rcout << "Starting Envelope Creation:" << std::endl;
+
   Rcpp::List Envelope; // Can move this towards top of the function
   
   
@@ -475,15 +493,19 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
                              P2_temp,alpha,wt2,family,link,Gridtype, n,true);
   }
   
-//  Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
+  //  Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
   
   // Step 5: Run the simulation 
+
+  // Rcout << "Starting Simulation"  << std::endl;
   
   int progbar=0;
   
   Rcpp::List sim=rnnorm_reg_std_cpp(n,y,x2_temp,mu2_temp,P2_temp,alpha,wt2,
                                     f2,Envelope,family,link,progbar);
   
+
+  // Rcout << "Finished Simulation"  << std::endl;
   
   //  Step 6: Undo standaridzation and do some post processing
   
@@ -513,7 +535,9 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
 //    LL[i]=as<double>(f1(_["b"]=out(_,i),_["y"]=y,_["x"]=x,offset2,wt2)); // Calculate log_likelihood
   }
   
+  //Rcout << "Leaving *.cpp function"  << std::endl;
   
+    
   Rcpp::List Prior=Rcpp::List::create(Rcpp::Named("mean")=mu,Rcpp::Named("Precision")=P);  
   
   

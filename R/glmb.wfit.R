@@ -87,8 +87,8 @@ glmb.wfit<-function(x,y,weights=rep.int(1, nobs),offset=rep.int(0, nobs),family=
   ## Should add comparison measure to see how close these are
   ## Add return a warning if not close [They should essentially match]
   
-   print(fit$coefficients)
-    print(betastar)
+  ## print(fit$coefficients)
+  ##  print(betastar)
   
   return(fit)
 }

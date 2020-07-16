@@ -95,6 +95,7 @@
 rlmb<-function(n=1,y,x,pfamily,offset=rep(0,nobs),weights=NULL)
   {
 
+
   ## Pull in information from the pfamily  
   pf=pfamily$pfamily
   #okfamilies=pfamily$okfamilies  
@@ -102,19 +103,17 @@ rlmb<-function(n=1,y,x,pfamily,offset=rep(0,nobs),weights=NULL)
   plinks=pfamily$plinks
   prior_list=pfamily$prior_list 
   simfun=pfamily$simfun
-  
+
   family=gaussian()
   
 #  if(is.numeric(n)==FALSE||is.numeric(y)==FALSE||is.numeric(x)==FALSE||
 #     is.numeric(mu)==FALSE||is.numeric(P)==FALSE) stop("non-numeric argument to numeric function")
 
-  P=solve(prior_list$Sigma)
+  #P=solve(prior_list$Sigma)
     
-  
-  
   x <- as.matrix(x)
-  mu<-as.matrix(as.vector(prior_list$mu))
-  P<-as.matrix(P)    
+  #mu<-as.matrix(as.vector(prior_list$mu))
+  #P<-as.matrix(P)    
   xnames <- dimnames(x)[[2L]]
   ynames <- if (is.matrix(y)) 
     rownames(y)
@@ -125,12 +124,16 @@ rlmb<-function(n=1,y,x,pfamily,offset=rep(0,nobs),weights=NULL)
   EMPTY <- nvars == 0
   if (is.null(offset)) 
     offset <- rep(0, nobs)
-  nvars2<-length(mu)	
-  if(!nvars==nvars2) stop("incompatible dimensions")
-  if (!all(dim(P) == c(nvars2, nvars2))) 
-    stop("incompatible dimensions")
-  if(!isSymmetric(P))stop("matrix P must be symmetric")
   
+  #nvars2<-length(mu)	
+  #if(!nvars==nvars2) stop("incompatible dimensions")
+  #if (!all(dim(P) == c(nvars2, nvars2))) 
+  #  stop("incompatible dimensions")
+  
+  
+  #if(!isSymmetric(P))stop("matrix P must be symmetric")
+
+    
   if(is.null(weights)) weights=rep(1,nobs)
   if(length(weights)==1) weights=rep(weights,nobs)
   nobs2=length(weights)
@@ -141,14 +144,14 @@ rlmb<-function(n=1,y,x,pfamily,offset=rep(0,nobs),weights=NULL)
   if(nobs3!=nobs) stop("matrix X must have same number of rows as y")
   if(nobs4!=nobs) stop("offset vector must have same number of rows as y")
   
-  tol<- 1e-06 # Link this to Magnitude of P	
-  eS <- eigen(P, symmetric = TRUE,only.values = FALSE)
-  ev <- eS$values
-  if (!all(ev >= -tol * abs(ev[1L]))) 
-    stop("'P' is not positive definite")
+  #tol<- 1e-06 # Link this to Magnitude of P	
+  #eS <- eigen(P, symmetric = TRUE,only.values = FALSE)
+  #ev <- eS$values
+  #if (!all(ev >= -tol * abs(ev[1L]))) 
+  #  stop("'P' is not positive definite")
 
-  if (is.null(start)) 
-    start <- mu
+  #if (is.null(start)) 
+  #  start <- mu
   if (is.null(offset)) 
     offset <- rep.int(0, nobs)
   if (is.character(family)) 
@@ -178,7 +181,6 @@ rlmb<-function(n=1,y,x,pfamily,offset=rep(0,nobs),weights=NULL)
   
 
 
-  
   outlist=simfun(n=n,y=y,x=x,prior_list=prior_list,offset=offset,weights=weights,family=family)
 
 

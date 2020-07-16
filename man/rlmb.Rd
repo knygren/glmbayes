@@ -96,58 +96,54 @@ ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
 trt <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
 group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
 weight <- c(ctl, trt)
+
+ps=Prior_Setup(weight ~ group)
+x=ps$x
+mu=ps$mu
+V=ps$Sigma
+mu[1,1]=mean(weight)
+
+Prior_Check(weight ~ group,family =gaussian(),
+            pfamily=dNormal(mu=mu,Sigma=V))
 lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
+y=lm.D9$y
 
-lm_summary=summary(lm.D9)
+## Dispersion for maximum likelihood estimate
+disp_ML=sigma(lm.D9)^2
+n_prior=2
+shape=n_prior/2
+rate= disp_ML*shape
 
-lm_summary
-lm.D9$coefficients
-
-n<-10000
-y<-lm.D9$y
-x<-as.matrix(lm.D9$x)
-
-### Set old regression and dispersion coefficients
-
-b_old=lm.D9$coefficients
-v_old=lm_summary$sigma^2
-
-#### Set up for rglmb_dispersion
-
-n0=0.1
-shape=n0/2
-rate=shape*v_old
-
-rate/(shape-1)
-rate/shape
-
-#a1<-shape+n1/2
-#b1<-rate+sum(SS)/2
-
-#out<-1/rgamma(n,shape=a1,rate=b1)
-## v0=sum(SS)/n1 ~ (2*rate+sum(SS))/(2*shape+n1)=[(2*rate+sum(SS))/2]/((2*shape+n1)/2) 
-n1=length(y)
-SS=v_old*n1
-
-n1 # This is equal to 20
+# Two-Block Gibbs sampler
+set.seed(180)
+dispersion2=disp_ML
+# Run 1000 burn-in iterations
+for(i in 1:1000){
+  out1=rlmb(n = 1, y=y, x=x, pfamily=dNormal(mu=mu,Sigma=V,dispersion=dispersion2))
+  out2=rlmb(n = 1, y=y, x=x, pfamily=dGamma(shape=shape,rate=rate,beta=out1$coefficients[1,]))
+  dispersions=out2$dispersion
+}
 
 
-n0=2 # Prior observations
-v_prior=v_old  # Prior point estimate for variance (the mean of (1/dispersion=1/v_prior))
-wt0=(n0/n1)  
+# Run 1000 additional iterations and store output
+beta_out<-matrix(0,nrow=1000, ncol=2)
+disp_out=rep(0,1000)
+for(i in 1:1000){
+  out1=rlmb(n = 1, y=y, x=x, pfamily=dNormal(mu=mu,Sigma=V,dispersion=dispersion2))
+  out2=rlmb(n = 1, y=y, x=x, pfamily=dGamma(shape=shape,rate=rate,beta=out1$coefficients[1,]))
+  dispersions=out2$dispersion
+  beta_out[i,1:2]=out1$coefficients[1,1:2]
+  disp_out[i]=out2$dispersion
+}
 
-## set shape=0.01*(n1/2)
-## set rate= 0.01*SS/2
+colMeans(beta_out)
+mean(disp_out)
 
-shape=wt0*(n1/2)   ###  Shape is prior observations /2
-rate=shape*v_prior  ### rate is essentiall prior SS - V in rmultireg should be this
-rate/shape ## Should match v_prior (currently also v_old)
+# Same model using Independent_Normal_Gamma_Prior
+lmb.D9_v2=lmb(weight ~ group,dIndependent_Normal_Gamma(mu,V,shape=shape,rate=rate))
+summary(lmb.D9_v2)
 
-mu<-c(0,0)
-mu=b_old  ### For testing purposes, set prior=b_old
-P<-0.1*diag(2)
 
-outtemp4=rlmb(n=1000,y=y,x=x,pfamily=dNormal_Gamma(mu=mu,Sigma=solve(P),shape=shape,rate=rate))
 }
 \references{
 Chambers, J.M.(1992) \emph{Linear models.} Chapter 4 of \emph{Statistical Models in S}
