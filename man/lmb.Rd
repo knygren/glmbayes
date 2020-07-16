@@ -197,8 +197,13 @@ n_prior=2
 shape=n_prior/2
 rate= disp_ML*shape
 
+# Conjugate Normal_Gamma Prior 
 lmb.D9=lmb(weight ~ group,dNormal_Gamma(mu,V/disp_ML,shape=shape,rate=rate))
 summary(lmb.D9)
+
+# Independent_Normal_Gamma_Prior
+lmb.D9_v2=lmb(weight ~ group,dIndependent_Normal_Gamma(mu,V,shape=shape,rate=rate))
+summary(lmb.D9_v2)
 }
 \references{
 Chambers, J.M.(1992) \emph{Linear models.} Chapter 4 of \emph{Statistical Models in S}

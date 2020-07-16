@@ -213,7 +213,7 @@ dNormal_Gamma<-function(mu, Sigma,shape, rate){
   if(is.numeric(shape)==FALSE||is.numeric(rate)==FALSE) stop("non-numeric argument to numeric function")
   
   if(length(shape)>1) stop("shape is not of length 1")
-  if(length(shape)>1) stop("rate is not of length 1")
+  if(length(rate)>1) stop("rate is not of length 1")
   if(shape<=0) stop("shape must be>0")
   if(rate<=0) stop("rate must be>0")
   
@@ -274,15 +274,14 @@ dIndependent_Normal_Gamma<-function(mu, Sigma,shape, rate){
   if(is.numeric(shape)==FALSE||is.numeric(rate)==FALSE) stop("non-numeric argument to numeric function")
   
   if(length(shape)>1) stop("shape is not of length 1")
-  if(length(shape)>1) stop("rate is not of length 1")
+  if(length(rate)>1) stop("rate is not of length 1")
   if(shape<=0) stop("shape must be>0")
   if(rate<=0) stop("rate must be>0")
   
   mu=as.matrix(mu,ncol=1) ## Force mu to matrix
   Sigma=as.matrix(Sigma)  ## Force Sigma to matrix 
   
-  
-  
+
   nvar=length(mu)
   nvar1=nrow(Sigma)
   nvar2=ncol(Sigma)

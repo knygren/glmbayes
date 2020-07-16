@@ -6,7 +6,7 @@
 #' prior distribution.
 #' @param offset an offset parameter
 #' @param weights a weighting variable
-#' @param max_disp parameter currently used to control upper bound in accept-reject procedure 
+#' @param max_disp_perc parameter currently used to control upper bound in accept-reject procedure 
 #' @inheritParams glmb
 #' @return Currently mainly the draws for the dispersion and the regression coefficients
 #' will be updated to return outputs consistent with other function
@@ -37,7 +37,7 @@
 
 
 rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
-                                         max_disp=0.9){
+                                         max_disp_perc=0.99){
   
   call<-match.call()
   
@@ -203,9 +203,8 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   New_LL=c(1:gs)
   New_logP2=c(1:gs)
   
-
-  upp=1/qgamma(c(0.01),shape2,rate3)
-  low=1/qgamma(c(0.99),shape2,rate3)
+  upp=1/qgamma(c(1-max_disp_perc),shape2,rate3)
+  low=1/qgamma(c(max_disp_perc),shape2,rate3)
   wt_upp=wt/rep(upp,length(y))
   wt_low=wt/rep(low,length(y))
   
@@ -219,7 +218,6 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   New_LL_upp=c(1:gs)
   New_LL_low=c(1:gs)
   
-    
   for(j in 1:gs){
     
     theta_temp_upp=as.matrix(theta_upp[j,1:ncol(x)],ncol=1)
@@ -460,16 +458,3 @@ r_invgamma<-function(n,shape,rate,disp_upper,disp_lower){
 }
 
 
-
-# From gamma distribution Wikipedia page
-
-gamma_median1<-function(k,rate){
-  
-  v1=k-(1/3) +(8/(405*k)) +184/(25515*k*k)+2248/(3444525*k*k*k)-19006408/(15345358875*k*k*k*k) 
-  
-  v2=1/v1
-  
-  v3=v2*rate
-  
-  return(list(v1=v1,v2=v2,v3=v3))
-}

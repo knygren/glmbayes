@@ -5,3 +5,4 @@ Ex_04_Dobsonlinreg_BG Two-Block Gibbs Sampling for Bayesian Linear Regression
 Ex_05_MultiReg        Multivariate Multiple Regression for AMI Overdose Data
 Ex_06_Carinsca        Gamma Regression models for Canadian Car Insurance Data
 Ex_A1_Methods         Illustrates the methods used in building the envelope
+Ex_A2_BG_vs_rindep_norm_gamma_reg         Illustrates the methods used in building the envelope
