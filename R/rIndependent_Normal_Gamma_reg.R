@@ -290,28 +290,18 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
                max_LL_log_disp=max_LL_log_disp,lm_log1=lm_log1,lm_log2=lm_log2, 
                log_P_diff=log_P_diff)
   
-  print("cbars - Should not Change")
-  print(Env2$cbars)
-  
-  print("thetabars - Should change but not by that much")
-  print(Env2$thetabars)
-
-    ## Dummy calls -currently should return list of items with the number 1
-  print("Entering *.cpp function")
-  
-  ptm <- proc.time()
-  
+##  ptm <- proc.time()
   sim_temp=.rindep_norm_gamma_reg_std_V2_cpp (n=n, y=y, x=x2, mu=mu2, P=P2, alpha=alpha, wt,
   f2=f2, Envelope=Env2, 
   gamma_list=gamma_list,
   UB_list=UB_list,
   family="gaussian",link="identity", progbar = as.integer(0))
   
-  print("time for *.cpp function")
-  print(proc.time()-ptm)
+##  print("time for *.cpp function")
+##  print(proc.time()-ptm)
 
-  print("mean candidates per acceptance - *.cpp function")
-  print(mean(sim_temp$iters_out))
+##  print("mean candidates per acceptance - *.cpp function")
+##  print(mean(sim_temp$iters_out))
   
     
   beta_out=sim_temp$beta_out
@@ -326,38 +316,30 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   }
   
   
+    ### Call standard simulation function
+##  ptm <- proc.time()
   
-  
-  ## print("out")
-  ## print(out)
-  ## print("disp_out")
-  ##  print(disp_out)  
+##  sim_temp=rindep_norm_gamma_reg_std_R(n=n,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt,
+##  f2=f2,Envelope=Env2,
+##  gamma_list=gamma_list,
+##  UB_list=UB_list,
+##  family="gaussian",link="identity",as.integer(0))
 
-  ## stop("Output from sim_temp above") 8.39 second if stopped here
+##  print("time for *.R function")
+##  print(proc.time()-ptm)
   
-  print("Exited *.cpp function")  
-  ### Call standard simulation function
-  ptm <- proc.time()
+##  print("mean candidates per acceptance *.R function")
+##  print(mean(sim_temp$iters_out))
   
-  sim_temp=rindep_norm_gamma_reg_std_R(n=n,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt,
-  f2=f2,Envelope=Env2,
-  gamma_list=gamma_list,
-  UB_list=UB_list,
-  family="gaussian",link="identity",as.integer(0))
-
-  print("time for *.R function")
-  print(proc.time()-ptm)
-  
-  print("mean candidates per acceptance *.R function")
-  print(mean(sim_temp$iters_out))
-  
+  ##  *.cpp function took 6.54 seconds and R function 83.71
+  ## Both had ~38 candidates per accepted simulated value
   
 #########################################  Post Processing for simulation function handling loop
   
-  beta_out=sim_temp$beta_out
-  disp_out=sim_temp$disp_out
-  iters_out=sim_temp$iters_out
-  weight_out=sim_temp$weight_out
+##  beta_out=sim_temp$beta_out
+##  disp_out=sim_temp$disp_out
+##  iters_out=sim_temp$iters_out
+##  weight_out=sim_temp$weight_out
 
   out=L2Inv%*%L3Inv%*%t(beta_out)
 

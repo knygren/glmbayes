@@ -369,7 +369,8 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
       
      disp_out[i]=dispersion;  
      beta_out(i,_)=sim_out(0,_);
-     
+     weight_out[i]=max_New_LL;
+       
      
      if(test>=0) a1=1;
      else{iters_out[i]=iters_out[i]+1;}        
@@ -382,7 +383,7 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
   // Temporarily just return non-sense constants equal to all 1
   
   return Rcpp::List::create(Rcpp::Named("beta_out")=beta_out,Rcpp::Named("disp_out")=disp_out,
-                            Rcpp::Named("iters_out")=iters_out,Rcpp::Named("weight_out"));  
+                            Rcpp::Named("iters_out")=iters_out,Rcpp::Named("weight_out")=weight_out);  
   
   
   //  int l2=pow(3,l1);
