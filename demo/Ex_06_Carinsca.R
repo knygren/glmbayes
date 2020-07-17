@@ -17,34 +17,203 @@ Prior_Check(Claims/Insured~Merit+Class,family="poisson",pfamily=dNormal(mu=mu,Si
 
 ## The # of Insured is very large
 
-out1=glm(Claims/Insured~Merit+Class,family="poisson",weights=Insured,x=TRUE,y=TRUE)
-summary(out1)
-
-
-out1b=glm(Claims/Insured~Merit+Class,family="quasipoisson",weights=Insured,x=TRUE,y=TRUE)
-summary(out1b)
-
-
+#out1=glm(Claims/Insured~Merit+Class,family="poisson",weights=Insured,x=TRUE,y=TRUE)
+#summary(out1)
+#out1b=glm(Claims/Insured~Merit+Class,family="quasipoisson",weights=Insured,x=TRUE,y=TRUE)
+#summary(out1b)
 
 out2 <- glmb(Claims/Insured~Merit+Class,family="poisson",dNormal(mu=mu,Sigma=V),weights=Insured)
 summary(out2)
-
-## This seesm to only adjust the standard errors and not the estimates themselves
-## Need to update code to hanlde 
-
-#dispersion=48.58325
-#out3 <- glmb(Claims/Insured~Merit+Class,family="poisson",dNormal(mu=mu,Sigma=V),weights=Insured/dispersion)
-
-
-#summary(out3)
-
-
 out3 <- glmb(Claims/Insured~Merit+Class,family="quasipoisson",dNormal(mu=mu,Sigma=V),weights=Insured)
-
-
-out3
-summary(out2)
 summary(out3)
+
+mean(out3$dispersion)
+
+# These ratios are nearly equal to the mean of out3$dispersion because the data overwhelms the prior in this model
+# In the classical model, they would be identical
+out2$Dbar/out3$Dbar  
+out2$Dthetabar/out3$Dthetabar
+
+out2$Dbar-out2$Dthetabar  # Effective number of parameters in original model
+out3$Dbar-out3$Dthetabar  # Effective number of parameters in quasi-poisson model (in this case higher)
+
+out2$Dbar+(out2$Dbar-out2$Dthetabar)  # DIC in original model
+out3$Dbar+(out3$Dbar-out3$Dthetabar)  # DIC in quasi-poisson model (in this case lower)
+
+# Because the first term in the DIC calculation dominates for this model, the DIC
+# For the first model is larger by nearly the estimate for the dispersion
+
+out2$DIC/out3$DIC  
+#extractAIC(out2)
+#extractAIC(out3)
+
+#######################################################################################################
+
+
+
+
+
+
+mean(out3$dispersion)
+
+## This should be formula for Expected Residual Deviance
+mean(rowSums(residuals(out3)*residuals(out3)))
+mean(rowSums(residuals(out2)*residuals(out2)))
+
+x=out3$x
+y=out3$y
+nobs=length(y)
+nvar=ncol(x)
+
+
+help(rglmb)
+xbeta=x%*%out2$coef.mode
+vtemp=out3$dispersion
+
+
+disp_ML=48
+n_prior=1
+shape=n_prior/2
+rate= disp_ML*shape
+
+n_sim=100
+beta_temp=matrix(0,nrow=nobs)
+b_out=matrix(0,nrow=n_sim,ncol=nobs)
+beta_out=matrix(0,nrow=n_sim,ncol=nobs)
+
+nu_out=matrix(0,nrow=n_sim,ncol=nvar)
+v_out=rep(0,n_sim)
+
+
+########################  Gibbs Sampler Burn-in
+
+n_sim1=100
+
+for(k in 1:n_sim1){
+  
+  ###  Update random effects
+  
+for(j in 1:nobs){
+outtemp=rglmb(n = 1, y=y[j], x=as.matrix(1,nrow=1,ncol=1), 
+      family=poisson, pfamily=dNormal(mu=xbeta[j],Sigma=vtemp), offset = NULL, weights = Insured[j])
+beta_temp[j]=outtemp$coefficients
+
+
+}
+  
+b_out[k,1:nobs]=b_temp
+  
+b_temp=t(beta_temp-xbeta)
+beta_out[k,1:nobs]=t(beta_temp)
+
+### Update Fixed Effects and Dispersion
+
+outtemp2=rglmb(n = 1, y=beta_temp, x=x, 
+               family=gaussian(), pfamily=dNormal_Gamma(mu=mu,Sigma=V/disp_ML,shape=shape,rate=rate), 
+               offset = NULL, weights = 1)
+
+xbeta=x%*%outtemp2$coefficients[1,1:nvar]
+vtemp=outtemp2$dispersion
+
+nu_out[k,1:nvar]=t(as.matrix(outtemp2$coefficients[1,1:nvar],nrow=1,ncol=nvar))
+
+v_out[k]=vtemp
+
+}
+
+########  End of Burn-In iterations
+
+
+########################  Gibbs Sampler Remaining Simulation
+
+
+for(k in 1:n_sim){
+  
+  ###  Update random effects
+  
+  for(j in 1:nobs){
+    outtemp=rglmb(n = 1, y=y[j], x=as.matrix(1,nrow=1,ncol=1), 
+                  family=poisson, pfamily=dNormal(mu=xbeta[j],Sigma=vtemp), offset = NULL, weights = Insured[j])
+    beta_temp[j]=outtemp$coefficients
+    
+    
+  }
+  
+  b_out[k,1:nobs]=b_temp
+  
+  b_temp=t(beta_temp-xbeta)
+  beta_out[k,1:nobs]=t(beta_temp)
+  
+  ### Update Fixed Effects and Dispersion
+  
+  outtemp2=rglmb(n = 1, y=beta_temp, x=x, 
+                 family=gaussian(), pfamily=dNormal_Gamma(mu=mu,Sigma=V/disp_ML,shape=shape,rate=rate), 
+                 offset = NULL, weights = 1)
+  
+  xbeta=x%*%outtemp2$coefficients[1,1:nvar]
+  vtemp=outtemp2$dispersion
+  
+  nu_out[k,1:nvar]=t(as.matrix(outtemp2$coefficients[1,1:nvar],nrow=1,ncol=nvar))
+  
+  v_out[k]=vtemp
+  
+}
+
+########  End of Burn-In iterations
+
+
+
+nu_out
+
+
+
+
+#colMeans(exp(beta_out))
+#y
+
+#outtemp2=rglmb(n = 1, y=beta_temp, x=x, 
+#      family=gaussian(), pfamily=dNormal(mu=mu,Sigma=V), offset = NULL, weights = Insured)
+
+
+outtemp2=rglmb(n = 1, y=beta_temp, x=x, 
+               family=gaussian(), pfamily=dNormal_Gamma(mu=mu,Sigma=V/disp_ML,shape=shape,rate=rate), 
+               offset = NULL, weights = Insured)
+
+xbeta=x%*%outtemp2$coefficients[1,1:nvar]
+
+
+
+outtemp2$dispersion
+
+outtemp2=rglmb(n = 1, y=beta_temp, x=x, 
+               family=gaussian(), pfamily=dIndependent_Normal_Gamma(mu=mu,Sigma=V,shape=shape,rate=rate), offset = NULL, weights = Insured)
+
+
+
+outtemp2$coefficients
+
+
+
+
+out2$coef.mode
+
+
+plot(b_out[,1])
+
+colMeans(b_out)
+colMeans(beta_out)
+colMeans(residuals(out2))
+
+
+#t(beta_temp)
+colMeans(residuals(out2))
+
+
+
+
+rglmb(n = 1, y=y[2], x=as.matrix(1,nrow=1,ncol=1), 
+      family="poisson", pfamily=dNormal(mu=xbeta[2],Sigma=vtemp), offset = NULL, weights = Insured[1])
+
 
 
 
