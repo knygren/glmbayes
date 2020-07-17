@@ -38,12 +38,17 @@ out2$Dbar-out2$Dthetabar  # Effective number of parameters in original model
 out3$Dbar-out3$Dthetabar  # Effective number of parameters in quasi-poisson model (in this case higher)
 
 out2$Dbar+(out2$Dbar-out2$Dthetabar)  # DIC in original model
-out3$Dbar+(out3$Dbar-out3$Dthetabar)  # DIC in quasi-poisson model (in this case lower)
+out3$Dbar+(out3$Dbar-out3$Dthetabar)  # DIC in quasi-poisson model without scaling (in this case lower)
+(out3$Dbar+(out3$Dbar-out3$Dthetabar))*mean(out3$dispersion)
 
 # Because the first term in the DIC calculation dominates for this model, the DIC
 # For the first model is larger by nearly the estimate for the dispersion
 
-out2$DIC/out3$DIC  
+out2$DIC/out3$DIC
+
+out3$DIC*mean(out3$dispersion)
+
+
 #extractAIC(out2)
 #extractAIC(out3)
 
