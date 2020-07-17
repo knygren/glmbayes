@@ -8,6 +8,36 @@ Merit=carinsca$Merit
 Class=carinsca$Class
 Cost=carinsca$Cost
 
+scale<-0.1275 # SAS estimate
+dispersion<-1/scale
+out <- glm(Cost/Claims~Merit+Class,family=Gamma(link="log"),weights=Claims,x=TRUE)
+summary(out)
+disp=gamma.dispersion(out)
+ps=Prior_Setup(Cost/Claims~Merit+Class)
+mu=ps$mu
+V=ps$Sigma
+mu[1,1]=log(mean(Cost/Claims))
+Prior_Check(Cost/Claims~Merit+Class,family=Gamma(link="log"),pfamily=dNormal(mu=mu,Sigma=V),weights=Claims/disp)
+
+out3 <- glmb(Cost/Claims~Merit+Class,family=Gamma(link="log"),pfamily=dNormal(mu=mu,Sigma=V,dispersion=disp),weights=Claims)
+summary(out,dispersion=gamma.dispersion(out))
+summary(out3)
+
+###########################################   Below part should not be part of final example ####################
+
+#out2 <- glmb(Cost/Claims~Merit+Class,family=Gamma(link="log"),pfamily=dNormal(mu=mu,Sigma=V),weights=Claims/disp)
+#
+#summary(out2)
+
+
+
+
+
+
+
+
+
+
 ps=Prior_Setup(Claims/Insured~Merit+Class)
 mu=ps$mu
 V=ps$Sigma
@@ -242,12 +272,7 @@ ytemp=Claims/Insured
 fittemp=fitted(out1)
 wt=Insured
 1/(m-k)*sum((ytemp-fittemp)^2*wt/fitted(out1))
-
-
-
-
 (1/(m-k))*sum((ytemp-fittemp)^2*wt/fitted(out1))
-
 (1/(m-k))*sum((ytemp-fitted(out1))^2/fitted(out1))
 
 
@@ -265,6 +290,24 @@ dispersion<-1/scale
 
 out <- glm(Cost/Claims~Merit+Class,family=Gamma(link="log"),weights=Claims,x=TRUE)
 summary(out)
+
+disp=gamma.dispersion(out)
+
+ps=Prior_Setup(Cost/Claims~Merit+Class)
+mu=ps$mu
+V=ps$Sigma
+
+mu[1,1]=log(mean(Cost/Claims))
+
+Prior_Check(Cost/Claims~Merit+Class,family=Gamma(link="log"),pfamily=dNormal(mu=mu,Sigma=V),weights=Claims/disp)
+
+
+
+out2 <- glmb(Cost/Claims~Merit+Class,family=Gamma(link="log"),pfamily=dNormal(mu=mu,Sigma=V),weights=Claims/disp)
+
+summary(out,dispersion=gamma.dispersion(out))
+summary(out2)
+
 
 V_Out=summary(out)$cov.scaled  
 P_Data=solve(V_Out)

@@ -21,12 +21,12 @@ y=glmb.D93$y
 x=glmb.D93$x
 n_obs=length(y)
 n_var=ncol(x)
-offset=rep(0,n_obs)
+offset2=rep(0,n_obs)
 wt=glmb.D93$prior.weights
 bbar=glmb.D93_v2$coef.means
 dispbar=glmb.D93_v2$dispersion
 
-xbeta=offset+x%*%bbar
+xbeta=offset2+x%*%bbar
 b1temp=rep(0,n_obs)
 
 n_sim1=100
@@ -47,7 +47,7 @@ for(i in 1:n_sim1){
   
   # Generate estimates for fixed effects
   
-  b2temp=rglmb(1,b1temp,x,family=gaussian(),pfamily=dNormal(mu,V0),offset=offset,weights=1/dispbar)$coefficients 
+  b2temp=rglmb(1,b1temp,x,family=gaussian(),pfamily=dNormal(mu,V0),offset=offset2,weights=1/dispbar)$coefficients 
   xbeta=offset+x%*%t(b2temp)
 }
 print(proc.time()-ptm)
@@ -64,7 +64,7 @@ for(i in 1:n_sim2){
   
   # Generate estimates for fixed effects
   
-  b2temp=rglmb(1,b1temp,x,family=gaussian(),pfamily=dNormal(mu,V0),offset=offset,weights=1/dispbar)$coefficients 
+  b2temp=rglmb(1,b1temp,x,family=gaussian(),pfamily=dNormal(mu,V0),offset=offset2,weights=1/dispbar)$coefficients 
   xbeta=offset+x%*%t(b2temp)
   
   b1out[i,1:n_obs]=b1temp[1:n_obs]
