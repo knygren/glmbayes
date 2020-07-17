@@ -11,14 +11,18 @@ V=ps$Sigma
 mu[1,1]=mean(weight)
 
 Prior_Check(weight ~ group,family =gaussian(),
-          pfamily=dNormal(mu=mu,Sigma=V))
+            pfamily=dNormal(mu=mu,Sigma=V))
 
-## May move this step inside the Prior_Check function
 lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
 disp_ML=sigma(lm.D9)^2
 n_prior=2
 shape=n_prior/2
 rate= disp_ML*shape
 
+# Conjugate Normal_Gamma Prior 
 lmb.D9=lmb(weight ~ group,dNormal_Gamma(mu,V/disp_ML,shape=shape,rate=rate))
 summary(lmb.D9)
+
+# Independent_Normal_Gamma_Prior
+lmb.D9_v2=lmb(weight ~ group,dIndependent_Normal_Gamma(mu,V,shape=shape,rate=rate))
+summary(lmb.D9_v2)
