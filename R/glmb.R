@@ -265,6 +265,8 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
   rownames(Prior$Variance)<-colnames(fit$x)
   
   
+  ### Set dispersion to null for quasi-families to prevent DIC from calculating
+
   if (!is.null(offset)) {
     if(length(dispersion2)==1){
         #    DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
@@ -293,6 +295,15 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
     linear.predictors<-t(x%*%t(sim$coefficients))
     
   }
+
+
+  # Set dispersion and DIC to null if quasipoisson or quasibinomial
+  
+#  if(family$family=="quasipoisson"||family$family=="quasibinomial"){
+#    dispersion2=NULL		
+#    DICinfo$DIC=NULL
+#  }
+  
   linkinv<-fit$family$linkinv
   fitted.values<-linkinv(linear.predictors)
   

@@ -36,12 +36,25 @@
 
 summary.glmb<-function(object,...){
   
-  mres<-colMeans(residuals(object))
+  
+  #est.disp <- FALSE
+  
+  #res<-residuals(object)
+  #nobs=length(object$y)
+  #n=nrow(object$coefficients)
+  #df.r <- length(object$y)-object$pD
+  
+  dispersion=get_dispersion(object)
+  #if(!is.null(object$DIC)) DIC=object$DIC
+  #else DIC=NA
+  #print("Mean Dispersion")
+    mres<-colMeans(residuals(object))
 
   l1<-length(object$coef.means)
   n<-length(object$coefficients[,1])
   percentiles<-matrix(0,nrow=l1,ncol=7)
   se<-sqrt(diag(var(object$coefficients)))
+#  if(object$family$family=="quasipoisson") se=se*sqrt(mean(dispersion))
   mc<-se/object$n
   mc<-se/n
   priorrank<-matrix(0,nrow=l1,ncol=1)
@@ -93,7 +106,9 @@ summary.glmb<-function(object,...){
             pD=object$pD,
             deviance=object$deviance,
             DIC=object$DIC,
+  #          DIC=DIC,
             dispersion=mean(object$dispersion),
+  #          dispersion=mean(dispersion),
             iters=mean(object$iters)
             )
   
@@ -128,4 +143,35 @@ print.summary.glmb<-function(x,digits = max(3, getOption("digits") - 3),...){
   
 }
 
+
+get_dispersion<-function(object){
+  
+  df.r <- length(object$y)-object$pD
+  
+  
+  if(!is.null(object$dispersion)) object$dispersion
+  else{
+    
+    if(object$family$family=="quasipoisson"){
+      n=nrow(object$coefficients)
+      disp_temp=rep(0,n)
+      m=length(object$y)  
+      k=ncol(object$x)    
+      res_temp=matrix(0,nrow=n,ncol=m)
+      fit_temp=object$x%*%t(object$coefficients)
+      for(l in 1:n){
+        if(is.null(object$fit$offset))         fit_temp[1:m,l]=exp(fit_temp[1:m,l])
+        else fit_temp[1:m,l]=exp(object$fit$offset+fit_temp[1:m,l])
+        
+        res_temp[l,1:m]=(object$y-fit_temp[1:m,l])
+        disp_temp[l]=(1/(m-k))*sum(res_temp[l,1:m]^2*object$prior.weights/fit_temp[1:m,l])
+  
+      }
+    
+     return(disp_temp) 
+    }
+    
+  }
+  
+}
 

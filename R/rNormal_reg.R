@@ -238,7 +238,61 @@ start=start,family=family$family,link=family$link,Gridtype=Gridtype)
   #offset=offset2   # Should return this from lower level functions
   weights=outlist$prior.weights
   
-  ## Check influence measures for original model
+  
+  if(family$family=="quasipoisson"||family$family=="quasibinomial"){
+
+    
+    linkinv<-family$linkinv
+    
+    ## Compute dispersion and then rerun
+    disp_temp=rep(0,n)
+    m=length(y)  
+    k=ncol(x)    
+    res_temp=matrix(0,nrow=n,ncol=m)
+    fit_temp=x%*%t(outlist$coefficients)
+    for(l in 1:n){
+      #fit_temp[1:m,l]=exp(offset2+fit_temp[1:m,l])
+      fit_temp[1:m,l]=linkinv(offset2+fit_temp[1:m,l])
+      res_temp[l,1:m]=(y-fit_temp[1:m,l])
+      disp_temp[l]=(1/(m-k))*sum(res_temp[l,1:m]^2*wt/fit_temp[1:m,l])
+      
+    }
+
+    #  stop("Inputs to function above")
+    # Rerun model with updated dispersion    
+    
+    outlist<-.rnnorm_reg_cpp(n=n,y=y,x=x,mu=mu,P=P,offset=offset2,
+#                             wt=wt/mean(disp_temp),
+                              wt=wt,
+                              dispersion=mean(disp_temp),
+#                              dispersion=dispersion2,
+                              ##famfunc=famfunc,f1=f1,
+                             f2=f2,f3=f3,
+                             start=start,family=family$family,link=family$link,Gridtype=Gridtype)
+    
+    
+    outlist$dispersion=mean(disp_temp)
+    
+        #print("Mean_residuals")
+    #print(colMeans(res_temp))
+    #print("Weights")
+    #print(wt)
+    #print("mean_fit_temp")
+    #print(rowMeans(fit_temp))
+    #print("Mean Dispersion")
+    #print(mean(disp_temp))
+    
+    # Update the dispersion
+    #outlist$dispersion=disp_temp
+  }
+  
+  if(family$family=="quasibinomial"){
+    
+    print("Hello quasibinomial")
+  }
+  
+  
+  ## get influence info for original model
   outlist$fit=glmb.wfit(x,y,weights,offset=offset2,family=family,Bbar=mu,P,betastar)
   
   
@@ -265,5 +319,8 @@ class(outlist)<-c(outlist$class,c("rglmb","glmb","glm","lm"))
 outlist
 
 }
+
+
+
 
 
