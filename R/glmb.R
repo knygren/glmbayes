@@ -277,8 +277,13 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
         DICinfo$Deviance=rowSums(res*res)    
         DICinfo$DIC=DICinfo$DIC*sim$dispersion    
       }
-      else  DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
-    }
+      #else  DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+      else{DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/sim$dispersion,dispersion=1)
+      res=residuals(summary(sim))
+      DICinfo$Deviance=rowSums(res*res)    
+      DICinfo$DIC=DICinfo$DIC*sim$dispersion    }
+      
+          }
     
     if(length(dispersion2)>1){
     #  DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=offset,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
@@ -295,11 +300,13 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
         DICinfo$DIC=DICinfo$DIC*sim$dispersion    
         #  DICinfo$DIC=NULL      
       }
-      else  DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+      #else  DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
+      else{ DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/sim$dispersion,dispersion=1)
+      res=residuals(summary(sim))
+      DICinfo$Deviance=rowSums(res*res)    
+      DICinfo$DIC=DICinfo$DIC*sim$dispersion   } 
       
-      #DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin/dispersion2,dispersion=dispersion2)
-  #    DICinfo<-DIC_Info(sim$coefficients,y=y,x=x,alpha=0,f1=famfunc$f1,f4=famfunc$f4,wt=wtin,dispersion=dispersion2)
-      
+
           }
     
     if(length(dispersion2)>1){

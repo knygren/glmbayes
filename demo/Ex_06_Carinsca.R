@@ -20,6 +20,7 @@ mu[1,1]=log(mean(Cost/Claims))
 Prior_Check(Cost/Claims~Merit+Class,family=Gamma(link="log"),pfamily=dNormal(mu=mu,Sigma=V),weights=Claims/disp)
 
 out3 <- glmb(Cost/Claims~Merit+Class,family=Gamma(link="log"),pfamily=dNormal(mu=mu,Sigma=V,dispersion=disp),weights=Claims)
+summary(out)
 summary(out,dispersion=gamma.dispersion(out))
 summary(out3)
 

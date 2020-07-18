@@ -29,7 +29,7 @@ dispersion2=disp_ML
 for(i in 1:1000){
   out1=rlmb(n = 1, y=y, x=x, pfamily=dNormal(mu=mu,Sigma=V,dispersion=dispersion2))
   out2=rlmb(n = 1, y=y, x=x, pfamily=dGamma(shape=shape,rate=rate,beta=out1$coefficients[1,]))
-  dispersions=out2$dispersion
+  dispersion2=out2$dispersion
 }
 
 
@@ -39,7 +39,7 @@ disp_out=rep(0,1000)
 for(i in 1:1000){
   out1=rlmb(n = 1, y=y, x=x, pfamily=dNormal(mu=mu,Sigma=V,dispersion=dispersion2))
   out2=rlmb(n = 1, y=y, x=x, pfamily=dGamma(shape=shape,rate=rate,beta=out1$coefficients[1,]))
-  dispersions=out2$dispersion
+  dispersion2=out2$dispersion
   beta_out[i,1:2]=out1$coefficients[1,1:2]
   disp_out[i]=out2$dispersion
 }
