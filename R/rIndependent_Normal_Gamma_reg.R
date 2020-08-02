@@ -618,115 +618,42 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   
   ###########################################################################################
   
-  
-  #print("thetabar_const_temp and thetabar_const_matrix")
-  #print(thetabar_const_temp)
-  #print(thetabar_const_matrix)
-  
-  #print("dispstar, low, and upp:")
-  
-  #print(dispstar)
-  #print(low)
-  #print(upp)
-  
-  #print("thetabar_const_base")
-  #print(thetabar_const_base)
-  
-  #print("thetabar_const_low and upp")
-  #print(thetabar_const_low)
-  #print(thetabar_const_upp)
-  
-  # pstar=1/dispstar
-  
-  
+
   New_LL_Slope=EnvBuildLinBound(thetabars,cbars,y,x2,P2,alpha,dispstar)
-  #print("New_LL_Slope_From Function")
-  #print(New_LL_Slope)  
-  
+
   for(j in 1:gs){
     
-    theta_temp_upp=as.matrix(theta_upp[j,1:ncol(x)],ncol=1)
-    theta_temp_low=as.matrix(theta_low[j,1:ncol(x)],ncol=1)
-    cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
-    thetabars_temp=as.matrix(thetabars[j,1:ncol(x)],ncol=1)
-    
+    #theta_temp_upp=as.matrix(theta_upp[j,1:ncol(x)],ncol=1)
+    #theta_temp_low=as.matrix(theta_low[j,1:ncol(x)],ncol=1)
+    #cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
+    #thetabars_temp=as.matrix(thetabars[j,1:ncol(x)],ncol=1)
     
     # New formula - This should likely replace: -NegLL(i)+arma::as_scalar(G3row.t() * cbarrow)
     
     New_logP2[j]=logP1[j]+0.5*t(cbars_temp)%*%cbars_temp
-    New_LL_upp[j]=-0.5*t(theta_temp_upp)%*%P2%*%theta_temp_upp+t(cbars_temp)%*% theta_temp_upp
-    New_LL_low[j]=-0.5*t(theta_temp_low)%*%P2%*%theta_temp_low+t(cbars_temp)%*% theta_temp_low
+  #  New_LL_upp[j]=-0.5*t(theta_temp_upp)%*%P2%*%theta_temp_upp+t(cbars_temp)%*% theta_temp_upp
+  #  New_LL_low[j]=-0.5*t(theta_temp_low)%*%P2%*%theta_temp_low+t(cbars_temp)%*% theta_temp_low
     
-    #    New_LL_Slope_test[j]=t(cbars_temp)%*%solve(t(x2)%*%x2)%*%cbars_temp
-    New_LL_Slope_test[j]=t(cbars_temp)%*%solve(t(x2)%*%x2+dispstar*P2)%*%cbars_temp
-    New_LL_Slope_test2[j]=(-t(thetabars_temp)%*%P2+t(cbars_temp))%*%solve(t(x2)%*%x2+dispstar*P2)%*%cbars_temp
+  #  New_LL_Slope_test[j]=t(cbars_temp)%*%solve(t(x2)%*%x2+dispstar*P2)%*%cbars_temp
+  #  New_LL_Slope_test2[j]=(-t(thetabars_temp)%*%P2+t(cbars_temp))%*%solve(t(x2)%*%x2+dispstar*P2)%*%cbars_temp
     
-    H1=-solve(t(x2)%*%x2+dispstar*P2)%*%P2%*%solve(t(x2)%*%x2+dispstar*P2)
-    New_LL_Slope_test3[j]=New_LL_Slope_test2[j]+(-t(thetabars_temp)%*%P2+t(cbars_temp))%*%H1%*%(t(x2)%*%(y-alpha)+dispstar*cbars_temp)
-    New_LL_Slope_diff[j]=(New_LL_upp[j]-New_LL_low[j])/(upp-low)    
+  #  H1=-solve(t(x2)%*%x2+dispstar*P2)%*%P2%*%solve(t(x2)%*%x2+dispstar*P2)
+  #  New_LL_Slope_test3[j]=New_LL_Slope_test2[j]+(-t(thetabars_temp)%*%P2+t(cbars_temp))%*%H1%*%(t(x2)%*%(y-alpha)+dispstar*cbars_temp)
+  #  New_LL_Slope_diff[j]=(New_LL_upp[j]-New_LL_low[j])/(upp-low)    
+  
   }
   
-  #  print("New_LL_Slope_Test")
-  #  print(New_LL_Slope_test)
-  #print("New_LL_Slope from old loop")
-  #print(New_LL_Slope_test3)
-  
-  max_base=max(thetabar_const_base)
-  
-  #print("prob factor based on base")
-  #print(thetabar_const_base-max_base)
-  
-  #  thetabar_const_upp_apprx=thetabar_const_base+(upp-dispstar)*New_LL_Slope_test
-  #  thetabar_const_low_apprx=thetabar_const_base+(low-dispstar)*New_LL_Slope_test
-  
-  #  print("thetabar_const_low and upp apprx1")
-  #  print(thetabar_const_low_apprx)
-  #  print(thetabar_const_upp_apprx)
-  
-  
-  #  thetabar_const_upp_apprx=thetabar_const_base+(upp-dispstar)*New_LL_Slope_test2
-  #  thetabar_const_low_apprx=thetabar_const_base+(low-dispstar)*New_LL_Slope_test2
-  
-  #  thetabar_const_upp_apprx2=thetabar_const_base+(upp-dispstar)*New_LL_Slope_test+((1/upp)-(1/dispstar))*New_LL_Slope_test2
-  #  thetabar_const_low_apprx2=thetabar_const_base+(low-dispstar)*New_LL_Slope_test+((1/low)-(1/dispstar))*New_LL_Slope_test2
-  
-  
-  #  print("thetabar_const_low and upp apprx2")
-  #  print(thetabar_const_low_apprx)
-  #  print(thetabar_const_upp_apprx)
-  
-  #thetabar_const_upp_apprx=thetabar_const_base+(upp-dispstar)*New_LL_Slope_test3
-  #thetabar_const_low_apprx=thetabar_const_base+(low-dispstar)*New_LL_Slope_test3
-  
-  #print("thetabar_const_low and upp apprx3")
-  #print(thetabar_const_low_apprx)
-  #print(thetabar_const_upp_apprx)
-  
+  #max_base=max(thetabar_const_base)
   
   thetabar_const_upp_apprx=thetabar_const_base+(upp-dispstar)*New_LL_Slope
   thetabar_const_low_apprx=thetabar_const_base+(low-dispstar)*New_LL_Slope
-  thetabar_const_int_apprx=thetabar_const_base-dispstar*New_LL_Slope
-  
-  #print("thetabar_const_low and upp apprx3_Function")
-  #print(thetabar_const_low_apprx)
-  #print(thetabar_const_upp_apprx)
-  #print(thetabar_const_int_apprx)
-  
-  
+  #thetabar_const_int_apprx=thetabar_const_base-dispstar*New_LL_Slope
+
   prob_factor<-c(1:gs)
   min_log_accept<-c(1:gs)
-  #  New_LL_upp=c(1:gs)
-  #  New_LL_low=c(1:gs)
   
   max_low=max(thetabar_const_low_apprx)
-  
-  #print("prob factor based on low")
-  #print(thetabar_const_low_apprx-max_low)
-  
   max_upp=max(thetabar_const_upp_apprx)
-  
-  #print("prob factor based on upp")
-  #print(thetabar_const_upp_apprx-max_upp)
   
   for(j in 1:gs){
     prob_factor[j]=max(thetabar_const_upp_apprx[j]-max_upp,thetabar_const_low_apprx[j]-max_low)
@@ -734,43 +661,11 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   }
   
   lg_prob_factor=prob_factor
-  #print("lg_prob_factor")
-  #print(lg_prob_factor)
-    
-  #print("New_logP2")
-  #print(New_logP2)
-  
-
-  #ptemp_base=exp(New_logP2+thetabar_const_base-max_base)
-  #ptemp_low=exp(New_logP2+thetabar_const_low-max_low)
-  #ptemp_upp=exp(New_logP2+thetabar_const_upp-max_upp)
   prob_factor=exp(New_logP2+prob_factor)
 
-  #ptemp_base=exp(logP1+thetabar_const_base-max_base)
-  #ptemp_low=exp(logP1+thetabar_const_low-max_low)
-  #ptemp_upp=exp(logP1+thetabar_const_upp-max_upp)
-  #prob_factor=exp(logP1+prob_factor)
-  
-  
-  #ptemp_base=ptemp_base/sum(ptemp_base)
-  #ptemp_low=ptemp_low/sum(ptemp_low)
-  #ptemp_upp=ptemp_upp/sum(ptemp_upp)
   prob_factor=prob_factor/sum(prob_factor)
-  
-
   new_slope=(max_upp-max_low)/(upp-low)
-  #print("new Derived slope")
-  #print(new_slope)
-  
   new_int=max_low-new_slope*low
-  
-  #maxlogP=max(New_logP2)
-  #PLSD_new=exp(New_logP2-maxlogP)
-  #sumP=sum(PLSD_new)
-  #PLSD_new=PLSD_new/sumP
-  #log_P_diff=log(PLSD_new)-log(Env2$PLSD)
-  
-
   b1=(upp-low)
   c1=-log(upp/low)
   
