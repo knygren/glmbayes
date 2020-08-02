@@ -513,3 +513,366 @@ Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
   
 }
 
+
+// [[Rcpp::export(".rindep_norm_gamma_reg_std_V3_cpp")]]
+
+Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix x,
+                                             NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,
+                                             Function f2,Rcpp::List  Envelope,
+                                             Rcpp::List  gamma_list,
+                                             Rcpp::List  UB_list,
+                                             Rcpp::CharacterVector   family,Rcpp::CharacterVector   link, int progbar=1)
+{
+  
+  int l1 = mu.nrow();
+  int l2 = x.nrow();
+  
+  
+  // Get various inputs frm the provided lists
+  
+  double shape3 =gamma_list["shape3"];
+  double rate2 =gamma_list["rate2"];
+  double disp_upper =gamma_list["disp_upper"];
+  double disp_lower =gamma_list["disp_lower"];
+  double RSS_ML =UB_list["RSS_ML"];
+  double max_New_LL_UB =UB_list["max_New_LL_UB"];
+  double max_LL_log_disp =UB_list["max_LL_log_disp"];
+  double lm_log1 =UB_list["lm_log1"];
+  double lm_log2 =UB_list["lm_log2"];
+  double lmc1 =UB_list["lmc1"];
+  double lmc2 =UB_list["lmc2"];
+  NumericVector log_P_diff =UB_list["log_P_diff"];
+  NumericVector lg_prob_factor =UB_list["lg_prob_factor"];
+  NumericMatrix cbars=Envelope["cbars"];
+  
+  
+  NumericVector iters_out(n);
+  NumericVector disp_out(n);
+  NumericVector weight_out(n);
+  NumericMatrix beta_out(n,l1);
+  double dispersion;
+  NumericVector wt2(l1);
+  
+  
+  arma::vec wt1b(wt.begin(), x.nrow());
+  //  arma::vec wt2b(wt2.begin(), x.nrow());
+  
+  
+  NumericMatrix cbarst(cbars.ncol(),cbars.nrow());
+  NumericMatrix thetabars(cbars.nrow(),cbars.ncol());
+  NumericVector New_LL(cbars.nrow());
+  
+  
+  
+  arma::mat cbarsb(cbars.begin(), cbars.nrow(), cbars.ncol(), false);
+  arma::mat cbarstb(cbarst.begin(), cbarst.nrow(), cbarst.ncol(), false);
+  
+  arma::mat thetabarsb(thetabars.begin(), thetabars.nrow(), thetabars.ncol(), false);
+  cbarstb=trans(cbarsb);
+  
+  arma::vec y2(y.begin(),l2);
+  arma::vec alpha2(alpha.begin(),l2);
+  arma::mat x2(x.begin(),l2,l1);
+  arma::mat P2(P.begin(),l1,l1);
+  //  arma::vec log_P_diff2(log_P_diff.begin(),cbars.nrow());
+  
+  
+  double UB1;
+  double UB2;
+  double UB3A;
+  double UB3B;
+  double max_New_LL;
+  double New_LL_log_disp;
+  
+  int a1=0;
+  double test=0;
+  //Rcpp::Function r_invgamma("r_invgamma");
+  
+  
+  
+  for(int i=0;i<n;i++){
+    
+    a1=0;
+    iters_out[i]=1;  
+    while(a1==0){
+      
+      dispersion=r_invgamma(shape3,rate2,disp_upper,disp_lower);
+      
+      //Rcpp::Rcout << "wt original" << std::flush << wt << std::endl;
+      
+      //wt1b.print("original weight");
+      //wt2b=wt1b/dispersion;
+      wt2=wt/dispersion;
+      
+      //      wt2b.print("updated weight");
+      //      Rcpp::Rcout << "wt2 -should match wt2b" << std::flush << wt2 << std::endl;
+      
+      arma::mat theta =Inv_f3_gaussian(transpose(cbars), y,x, mu, P, alpha, wt2);  
+      //      theta.print("new thetabars");
+      thetabarsb=theta;
+      
+      //      Rcpp::Rcout << "thetabars_new - actual " << std::flush << thetabars << std::endl;
+      
+      NumericVector LL_New=-f2_gaussian(transpose(thetabars),  y, x, mu, P, alpha, wt2);  
+      
+      Rcpp::List  sim_list=rindep_norm_gamma_reg_std_cpp(1,y,x,mu, P,alpha,wt2,
+                                                         f2,Envelope,family,link,  progbar); 
+      
+      NumericVector J_out=sim_list["J"];
+      
+      //      Rcpp::Rcout << "J_out " << std::flush << J_out << std::endl;
+      
+      double log_U2=sim_list["log_U2"];
+      NumericMatrix sim_out=sim_list["out"];  
+      NumericVector b_out=sim_out(0,_);
+      arma::rowvec b_out2(b_out.begin(),l1,false);
+      NumericVector thetabars_temp=thetabars(J_out(0),_);
+      arma::vec  thetabars_temp2(thetabars_temp.begin(), l1);
+      NumericVector cbars_temp=cbars(J_out(0),_);
+      arma::vec  cbars_temp2(cbars_temp.begin(), l1);
+      
+      
+      //            thetabars_temp2.print("Selected thetabars");
+      
+      // Passing transpose of sim_out here might work because sim_out has only one row
+      
+      NumericVector LL_Test=-f2_gaussian(transpose(sim_out),  y, x, mu, P, alpha, wt2);  
+      
+      // Block 1: UB1 
+      //   Same form as in fixed dispersion case but thetabar is a function of the dispersion
+      //   So all components that include thetabar must now be bounded as well
+      
+      arma::colvec betadiff=trans(b_out2)-thetabars_temp2;
+      UB1=LL_New(J_out(0)) -arma::as_scalar(trans(cbars_temp2)*betadiff);
+      
+      //Block 2: UB2 [RSS Term bounded by shifting it to the gamma candidate]
+      
+      // % is element wise multiplication
+      
+      arma::colvec yxbeta=(y2-alpha2-x2*thetabars_temp2)%sqrt(wt1b); 
+      UB2=0.5*(1/dispersion)*(arma::as_scalar(trans(yxbeta)*yxbeta)-RSS_ML);
+      
+      //  UB1=arma::as_scalar(trans(cbars_temp2)*betadiff);
+      //  UB1=LL_New[J_out]-Env2$cbars[J_out,1:ncol(x)]%*%(betadiff)
+      
+      // Block 3: UB3A (adjusts because probabilities of components in grid are different from original grid)
+      // Investigate whether changing probabilities of grid componets for proposal
+      // allows us to do away with this term and to thereby improve the acceptance rate
+      
+      for(int j=0;j<cbars.nrow();j++){
+        thetabars_temp=thetabars(j,_);
+        cbars_temp=cbars(j,_);
+        arma::vec  thetabars_temp2(thetabars_temp.begin(), l1);
+        arma::vec  cbars_temp2(cbars_temp.begin(), l1);
+        
+        // New_LL corresponds to K1(cbar,d) in technical note
+        
+        New_LL(j)=arma::as_scalar(-0.5*trans(thetabars_temp2)*P2*thetabars_temp2
+                                    +trans(cbars_temp2)*thetabars_temp2);
+        
+      }
+      
+      // Clarify this term
+      
+      // Note that UB3A+UB3B =(max_New_LL_UB-max_LL_log_disp) +(New_LL_log_disp-LL_temp(J_out(0)))
+      //                     =(max_New_LL_UB-max_LL_log_disp) +(New_LL_log_disp-New_LL(J_Out(0)))        
+            
+      //arma::vec New_LL2(New_LL.begin(),cbars.nrow());
+      NumericVector LL_temp=log_P_diff+ New_LL;
+      max_New_LL=max(LL_temp);
+      
+      // Modified UB3A 
+      
+      //UB3A= lmc1+lmc2*dispersion-LL_temp(J_out(0));
+      UB3A= lg_prob_factor(J_out(0))+lmc1+lmc2*dispersion-New_LL(J_out(0));
+      
+      //Rcpp::Rcout << "J_out " << std::flush << J_out(0) << std::endl;
+      //Rcpp::Rcout << "New UB3A " << std::flush << UB3A << std::endl;
+      
+      
+      //UB3A=max_New_LL-LL_temp(J_out(0));
+      
+      
+      // Block 4: UB3B  
+      
+      New_LL_log_disp=lm_log1+lm_log2*log(dispersion);
+      
+      UB3B=(max_New_LL_UB-max_LL_log_disp+New_LL_log_disp)-(lmc1+lmc2*dispersion);
+      //Rcpp::Rcout << "New UB3B " << std::flush << UB3B << std::endl;
+      
+      //UB3B=(max_New_LL_UB-max_LL_log_disp)-(max_New_LL-New_LL_log_disp);
+      
+      
+      test= LL_Test[0]-UB1;  // Should be all negative 
+      
+      //        Rcpp::Rcout << "test1 " << std::flush << test << std::endl;
+      
+      test= LL_Test[0]-(UB1+UB2);  // Should be all negative 
+      
+      //      Rcpp::Rcout << "test2 " << std::flush << test << std::endl;
+      
+      test= LL_Test[0]-(UB1+UB2+UB3A);  // Should be all negative 
+      
+      //Rcpp::Rcout << "test3 " << std::flush << test << std::endl;
+      
+      test= LL_Test[0]-(UB1+UB2+UB3A+UB3B);  // Should be all negative 
+      
+      //Rcpp::Rcout << "test3 " << std::flush << test << std::endl;
+      //      P4.print("P4 after step 1");  
+      //      epsilon.print("epsilon after step 1");  
+      
+      // Block 1: UB1 
+      //   Same form as in fixed dispersion case but thetabar is a function of the dispersion
+      //   So all components that include thetabar must now be bounded as well
+      
+      
+      test=test-log_U2;
+      
+      
+      disp_out[i]=dispersion;  
+      beta_out(i,_)=sim_out(0,_);
+      weight_out[i]=max_New_LL;
+      
+      
+      if(test>=0) a1=1;
+      else{iters_out[i]=iters_out[i]+1;}        
+      
+      //  a1=1;
+    }  
+    
+  }
+  
+  // Temporarily just return non-sense constants equal to all 1
+  
+  return Rcpp::List::create(Rcpp::Named("beta_out")=beta_out,Rcpp::Named("disp_out")=disp_out,
+                            Rcpp::Named("iters_out")=iters_out,Rcpp::Named("weight_out")=weight_out);  
+  
+  
+  //  int l2=pow(3,l1);
+  
+  std::string family2 = Rcpp::as<std::string>(family);
+  std::string link2 = Rcpp::as<std::string>(link);  
+  
+  
+  NumericVector J(n);
+  NumericVector draws(n);
+  NumericMatrix out(n,l1);
+  //double a1=0;
+  double a2=0;
+  double U=0;
+  //double test=0;
+  //  double test_int=0;
+  //  double test_data=0;
+  double U2=0;
+  
+  //out(0,0)=1;
+  
+  NumericVector PLSD=Envelope["PLSD"];
+  NumericMatrix loglt=Envelope["loglt"];
+  NumericMatrix logrt=Envelope["logrt"];
+  //  NumericMatrix cbars=Envelope["cbars"];
+  
+  
+  //  NumericMatrix cbars_int=Envelope["cbars_int"];
+  NumericVector LLconst=Envelope["LLconst"]; 
+  //  NumericVector LLconst_int=Envelope["LLconst_int"]; 
+  
+  NumericVector outtemp=out(0,_);
+  arma::rowvec outtemp2(outtemp.begin(),l1,false);
+  NumericVector cbartemp=cbars(0,_);
+  arma::rowvec cbartemp2(cbartemp.begin(),l1,false);
+  
+  // Add Corresponding prior terms here
+  
+  //  NumericVector cbartemp_int=cbars_int(0,_);
+  //  arma::rowvec cbartemp_int2(cbartemp_int.begin(),l1,false);
+  
+  
+  NumericMatrix testtemp(1,1);
+  arma::mat testtemp2(testtemp.begin(),1,1,false);
+  
+  NumericMatrix testtemp_int(1,1);
+  arma::mat testtemp_int2(testtemp_int.begin(),1,1,false);
+  
+  
+  NumericMatrix btemp(l1,1);
+  arma::mat btemp2(btemp.begin(),l1,1,false); 
+  NumericVector testll(1);
+  NumericVector testll_data(1);
+  
+  
+  
+  if(progbar==1){ Rcpp::Rcout << "Starting Simulation:" << std::endl;  };
+  
+  Rcpp::checkUserInterrupt();
+  if(progbar==1){
+    //      progress_bar2(i, n-1);
+    //      if(i==n-1) {Rcpp::Rcout << "" << std::endl;}
+  }
+  
+  
+  //a1=0;
+  
+  U=R::runif(0.0, 1.0);
+  a2=0;
+  J(0)=0;    
+  while(a2==0){
+    if(U<=PLSD(J(0))) a2=1;
+    if(U>PLSD(J(0))){ 
+      U=U-PLSD(J(0));
+      J(0)=J(0)+1;
+      
+    }
+    //a2=1; 
+  }
+  
+  
+  for(int j=0;j<l1;j++){  
+    
+    // Switch to using thetabars here
+    
+    out(0,j)=ctrnorm_cpp(logrt(J(0),j),loglt(J(0),j),-cbars(J(0),j),1.0);    
+    
+    
+  }
+  
+  
+  
+  // cbars_int2 holds the intercept part
+  
+  outtemp=out(0,_);   // Hopefully this doew not break link to outtemp2
+  cbartemp=cbars(J(0),_);
+  testtemp2=outtemp2 * trans(cbartemp2);
+  //      testtemp_int2=outtemp2 * trans(cbartemp_int2);
+  U2=R::runif(0.0, 1.0);
+  btemp2=trans(outtemp2);    
+  
+  // Need to modify to call correct f2 function based on family and link
+  
+  
+  if(family2=="Gamma"){  
+    testll=f2_gamma(btemp,y, x,mu,P,alpha,wt,0);
+  }
+  
+  if(family2=="gaussian"){  
+    testll=f2_gaussian(btemp,y, x,mu,P,alpha,wt);
+    testll_data=f1_gaussian(btemp,y, x,alpha,wt);
+  }
+  
+  
+  test=LLconst(J(0))+testtemp(0,0)-testll(0);
+  
+  
+  //      test_int=LLconst_int(J(0))+testtemp_int(0,0)-(testll(0)-testll_data(0));
+  //      test_data=test-test_int;
+  
+  
+  return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("test")=test,Rcpp::Named("J")=J,
+                                        Rcpp::Named("log_U2")=log(U2)
+                              //                                      ,  Rcpp::Named("test_int")=test_int,
+                              //                                        Rcpp::Named("test_data")=test_data
+  );      
+  
+}
+
+

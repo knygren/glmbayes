@@ -26,7 +26,7 @@
 #' \item{Envelope}{an object of class \code{"envelope"}  }
 #' \item{dispersion}{an \code{n} by \code{1} matrix with simulated values for the dispersion}
 #' \item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
-#' @details The \code{rglmb_norm_reg} function produces iid samples for Bayesian generalized linear 
+#' @details The \code{rNormal_reg} function produces iid samples for Bayesian generalized linear 
 #' models. with multivariate-normal priors. Core required inputs for the function include the data vector, 
 #' the design matrix and a prior specification (provided in a list when this function is called directly). Specifying
 #' the \code{\link{pfamily}} as \code{\link{dNormal}} in the \code{\link{lmb}} or \code{\link{glmb}} is equivalent

@@ -56,7 +56,7 @@ models with a normal prior. The model is specified by providing a data vector, a
 and 2 prior constants (mu and Sigma) for the normal prior.
 }
 \details{
-The \code{rglmb_norm_reg} function produces iid samples for Bayesian generalized linear 
+The \code{rNormal_reg} function produces iid samples for Bayesian generalized linear 
 models. with multivariate-normal priors. Core required inputs for the function include the data vector, 
 the design matrix and a prior specification (provided in a list when this function is called directly). Specifying
 the \code{\link{pfamily}} as \code{\link{dNormal}} in the \code{\link{lmb}} or \code{\link{glmb}} is equivalent

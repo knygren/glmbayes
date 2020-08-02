@@ -28,7 +28,28 @@
 #' one draw from the density}
 #' \item{draws}{A vector with the number of candidates required before 
 #' acceptance for each draw}
-#' @details Simulates from the posterior density of a model in standard form
+#' @details This function uses the information contained in the constructed envelope list in order to sample 
+#' from a model in standard form. The simulation proceeds as follows in order to generate each draw in the required
+#' number of samples.
+#' 
+#' 1)  A random number between 0 and 1 is generated and is used together with the information in the PLSD vector 
+#' (from the envelope) in order to identify the part of the grid from which a candidate is to be generated.
+#'
+#' 2) For the part of the grid selected, the dimensions are looped through and a candidate component for each dimension
+#' is generated from a restricted normal using information from the Envelope (in particular, the values for logrt, loglt, 
+#' and cbars corresponding to that the part of the grid selected and the dimension sampled)
+#' 
+#' 3) The log-likelihood for the standardized model is evaluated for the generated candidate (note that the 
+#' log-likelihood here includes the portion of the prior that was shifted to the log-likelihood)
+#' 
+#'  4) An additional random number is generated and the log of this random number is compared to a 
+#'  log-acceptance rate that is calculated based on the candidate and the LLconst component from the Envelope 
+#'  component selected in order to determine if the candidate should be accepted or rejected 
+#' 
+#' 5) If the candidate was not accepted, the process above is repeated from step 1 until a candidate is accepted
+#' 
+#' 
+#' 
 #' @keywords internal
 #' @example inst/examples/Ex_rnnorm_reg_std.R
 #' @export

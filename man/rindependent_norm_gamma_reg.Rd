@@ -2,9 +2,21 @@
 % Please edit documentation in R/rIndependent_Normal_Gamma_reg.R
 \name{rindependent_norm_gamma_reg}
 \alias{rindependent_norm_gamma_reg}
+\alias{rindependent_norm_gamma_reg_v2}
 \title{The Bayesian Indendepent Normal-Gamma Regression Distribution}
 \usage{
 rindependent_norm_gamma_reg(
+  n,
+  y,
+  x,
+  prior_list,
+  offset = NULL,
+  weights = 1,
+  family = gaussian(),
+  max_disp_perc = 0.99
+)
+
+rindependent_norm_gamma_reg_v2(
   n,
   y,
   x,
@@ -55,12 +67,54 @@ prior distribution.}
 \item{max_disp_perc}{parameter currently used to control upper bound in accept-reject procedure}
 }
 \value{
-Currently mainly the draws for the dispersion and the regression coefficients
-will be updated to return outputs consistent with other function
+\code{rindependent_norm_gamma_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 
+(i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
+The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
+\code{\link{residuals}}, and \code{\link{extractAIC}} can be used to extract
+various useful features of the value returned by \code{\link{rNormal_Gamma_reg}}.
+An object of class \code{"rglmb"} is a list containing at least the following components:
+\item{coefficients}{a \code{n} by \code{length(mu)} matrix with one sample in each row}
+\item{PostMode}{a vector of \code{length(mu)} with the estimated posterior mode coefficients}
+\item{Prior}{A list with two components. The first being the prior mean vector and the second the prior precision matrix}
+\item{iters}{an \code{n} by \code{1} matrix giving the number of candidates generated before acceptance for each sample.}
+\item{famfunc}{an object of class \code{"famfunc"}}
+\item{Envelope}{an object of class \code{"envelope"}  }
+\item{dispersion}{an \code{n} by \code{1} matrix with simulated values for the dispersion}
+\item{loglike}{a \code{n} by \code{1} matrix containing the negative loglikelihood for each sample.}
 }
 \description{
 Generates iid samples from the posterior density for the 
 independent normal-gamma regression
+}
+\details{
+The \code{rindependent_norm_gamma_reg} function produces iid samples for the Bayesian the Bayesian
+Independent Normal-Gamma Regression Distribution associated with the gaussian() family. 
+
+As this is a non-conjugate prior specification with a random dispersion parameter, we leverage methods 
+that build on those developed for log-concave likelihood functions with a fixed dispersion parameter.  
+A number of steps are first used in order to position an initial enveloping function for the main
+regression coefficients near the center of the posterior density and simultaneoulsy finding a modified 
+Gamma distribution from which to generate candidate samples for the inverse dispersion.
+
+During the simulation procedure, candidates are generated independently from the modified gamma distribution 
+and a specific likelihood subgradient density (corresponding to the center of the density). A series of 
+bounding functions are then used during the simulation process to determine if specific candidates
+should be accepted as follows 
+  
+1) Similar to the procedure in the fixed dispersion case, the (modified) log-likelihood function is 
+bounded using the value of the log-likelihood function at a specific point (which now depends on the dispersion
+and is picked to ensure the gradient vector is constant across simulated dispersion candidates)  
+and the gradient at that value (which is kept fixed for each component in the grid regardless of dispersion.
+
+2) A portion of the bounding function above is in turn bounded by using a term that has been shifted to rate parameter
+of the modified gamma candidate generating distribution.
+
+3) Because candidates 
+
+  
+matrix and a prior specification. The function returns the simulated Bayesian coefficients 
+and some associated outputs. The iid samples from the posterior density is genererated using 
+standard simulation procedures for multivariate normal and gamma distributions.
 }
 \examples{
 
