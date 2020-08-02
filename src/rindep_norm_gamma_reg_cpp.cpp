@@ -541,7 +541,7 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
   double lm_log2 =UB_list["lm_log2"];
   double lmc1 =UB_list["lmc1"];
   double lmc2 =UB_list["lmc2"];
-  NumericVector log_P_diff =UB_list["log_P_diff"];
+  //NumericVector log_P_diff =UB_list["log_P_diff"];
   NumericVector lg_prob_factor =UB_list["lg_prob_factor"];
   NumericMatrix cbars=Envelope["cbars"];
   
@@ -678,7 +678,8 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
       //                     =(max_New_LL_UB-max_LL_log_disp) +(New_LL_log_disp-New_LL(J_Out(0)))        
             
       //arma::vec New_LL2(New_LL.begin(),cbars.nrow());
-      NumericVector LL_temp=log_P_diff+ New_LL;
+//      NumericVector LL_temp=log_P_diff+ New_LL;
+      NumericVector LL_temp=New_LL;
       max_New_LL=max(LL_temp);
       
       // Modified UB3A 

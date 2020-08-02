@@ -783,29 +783,7 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   PLSD_new=PLSD_new/sumP
   log_P_diff=log(PLSD_new)-log(Env2$PLSD)
   
-  #print("log_P_diff")
-  #print(log_P_diff)
-  
-  
-  #LL_temp_upp=log_P_diff+New_LL_upp
-  #LL_temp_low=log_P_diff+New_LL_low
-  
-  #max_New_LL_upp=max(LL_temp_upp)
-  #max_New_LL_low=max(LL_temp_low)
-  
-  ## This is derived slope
-  ## Should be close to max (c^{T})(X^{T}X)^{-1} c
-  
-  #slope_out=(max_New_LL_upp-max_New_LL_low)/(upp-low)
-  
-  #print("Derived slope and int -old")
-  #print(slope_out)
-  
-  #int_out=max_New_LL_low-slope_out*low
-  #lmc=c(int_out,slope_out)
-  #print(int_out)
-  #a1=2
-  
+
   b1=(upp-low)
   c1=-log(upp/low)
   
@@ -841,7 +819,8 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   
   UB_list_new=list(RSS_ML=RSS_ML,max_New_LL_UB=max_upp,
                    max_LL_log_disp=max_LL_log_disp,lm_log1=lm_log1,lm_log2=lm_log2, 
-                   log_P_diff=log_P_diff_new,lg_prob_factor=lg_prob_factor,lmc1=new_int,lmc2=new_slope)
+                   #log_P_diff=log_P_diff_new,
+                   lg_prob_factor=lg_prob_factor,lmc1=new_int,lmc2=new_slope)
   
   ## log_P_Diff should no longer be used in the same way!
 
