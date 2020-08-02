@@ -777,31 +777,6 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   
   new_int=max_low-new_slope*low
   
-  #print("new Derived int")
-  #print(new_int)
-  
-  
-  #print("Diff at low")
-  #print(thetabar_const_low_apprx-thetabar_const_low)
-  
-  #print("Diff at upp")
-  #print(thetabar_const_upp_apprx-thetabar_const_upp)
-  
-  #print("thetabar_const_low and upp apprx2")
-  #print(thetabar_const_low_apprx2)
-  #print(thetabar_const_upp_apprx2)
-  
-  #print("New_LL_Slope_diff")
-  #print(New_LL_Slope_diff)
-  
-  #print("New_LL_low")
-  #print(New_LL_low)
-  
-  #print("New_LL_upp")
-  #print(New_LL_upp)
-  
-  
-  
   maxlogP=max(New_logP2)
   PLSD_new=exp(New_logP2-maxlogP)
   sumP=sum(PLSD_new)
@@ -812,49 +787,30 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   #print(log_P_diff)
   
   
-  LL_temp_upp=log_P_diff+New_LL_upp
-  LL_temp_low=log_P_diff+New_LL_low
+  #LL_temp_upp=log_P_diff+New_LL_upp
+  #LL_temp_low=log_P_diff+New_LL_low
   
-  max_New_LL_upp=max(LL_temp_upp)
-  max_New_LL_low=max(LL_temp_low)
+  #max_New_LL_upp=max(LL_temp_upp)
+  #max_New_LL_low=max(LL_temp_low)
   
   ## This is derived slope
   ## Should be close to max (c^{T})(X^{T}X)^{-1} c
   
-  slope_out=(max_New_LL_upp-max_New_LL_low)/(upp-low)
+  #slope_out=(max_New_LL_upp-max_New_LL_low)/(upp-low)
   
   #print("Derived slope and int -old")
   #print(slope_out)
   
-  int_out=max_New_LL_low-slope_out*low
-  lmc=c(int_out,slope_out)
+  #int_out=max_New_LL_low-slope_out*low
+  #lmc=c(int_out,slope_out)
   #print(int_out)
+  #a1=2
   
-  a1=2
   b1=(upp-low)
   c1=-log(upp/low)
-  dispstar= (-b1+ sqrt(b1^2-4*a1*c1))/(2*a1) # Point of tangency
   
-  
-  
-  #print("dispstar - old method")
-  #print(dispstar)
-
-  
-    
-  lm_log2=lmc[2]*dispstar
-  #lm_log1=lmc[1]+lm_log2-lm_log2*log(dispstar)
-  lm_log1=lmc[1]+lmc[2]*dispstar-lm_log2*log(dispstar)
-  
-  shape3=shape2-lm_log2
-  
-  # Compute log_P_diff
-  
-  max_New_LL_UB = max_New_LL_upp
-  max_LL_log_disp=lm_log1+lm_log2*log(upp) ## From above
-  
+  #dispstar= (-b1+ sqrt(b1^2-4*a1*c1))/(2*a1) # Point of tangency
   ## Outputs from this block
-  
   
   ## 1) upp, low
   ## 2) log_P_diff
@@ -865,50 +821,23 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   
   ## Not currently from block: RSS_ML, rate2 
   
-  
-  
-  #############################################################################
-  
-  gamma_list=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low)
-  
-  UB_list=list(RSS_ML=RSS_ML,max_New_LL_UB=max_New_LL_UB,
-               max_LL_log_disp=max_LL_log_disp,lm_log1=lm_log1,lm_log2=lm_log2, 
-               log_P_diff=log_P_diff)
-  
-  ##  ptm <- proc.time()
-  
-  #sim_temp=.rindep_norm_gamma_reg_std_V2_cpp (n=n, y=y, x=x2, mu=mu2, P=P2, alpha=alpha, wt,
-  #                                            f2=f2, Envelope=Env2, 
-  #                                            gamma_list=gamma_list,
-  #                                            UB_list=UB_list,
-  #                                           family="gaussian",link="identity", progbar = as.integer(0))
-
-  
-  
   #####################################  New Derivations ##################################
   
+  # Verify that this calculation is correct
+    
   dispstar=b1/(-c1)
   
-  #print("dispstar - new method")
-  #print(b1/(-c1))
-  
-  
   lm_log2=new_slope*dispstar
-  #lm_log1=lmc[1]+lm_log2-lm_log2*log(dispstar)
   lm_log1=new_int+new_slope*dispstar-new_slope*log(dispstar)
   
   shape3=shape2-lm_log2
   max_LL_log_disp=lm_log1+lm_log2*log(upp) ## From above
   
+  ## No longer used - can remove later 
   log_P_diff_new=0*log_P_diff
   
   ########################################
   gamma_list_new=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low)
-  
-  lmc1=lmc[1]
-  lmc2=lmc[2]
-  
-  ##New_LL_Slope
   
   UB_list_new=list(RSS_ML=RSS_ML,max_New_LL_UB=max_upp,
                    max_LL_log_disp=max_LL_log_disp,lm_log1=lm_log1,lm_log2=lm_log2, 
@@ -919,8 +848,6 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   Env3=Env2
   Env3$PLSD=prob_factor
   
-  ### Note: This could get stuck - include timer
-
   ##  ptm <- proc.time()
   
   sim_temp=.rindep_norm_gamma_reg_std_V3_cpp (n=n, y=y, x=x2, mu=mu2, P=P2, alpha=alpha, wt,
@@ -930,53 +857,13 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
                                               family="gaussian",link="identity", progbar = as.integer(0))
   
     
-  ##print(proc.time()-ptm)
-  
-  ####################################################################################################
-    
-  ##  print("time for *.cpp function")
-  ##  print(proc.time()-ptm)
-  
-  ##  print("mean candidates per acceptance - *.cpp function")
-  ##  print(mean(sim_temp$iters_out))
+  #proc.time()-ptm
   
   
   beta_out=sim_temp$beta_out
   disp_out=sim_temp$disp_out
   iters_out=sim_temp$iters_out
   weight_out=sim_temp$weight_out
-  
-  out=L2Inv%*%L3Inv%*%t(beta_out)
-  
-  for(i in 1:n){
-    out[,i]=out[,i]+mu
-  }
-  
-  
-  ### Call standard simulation function
-  ##  ptm <- proc.time()
-  
-  ##  sim_temp=rindep_norm_gamma_reg_std_R(n=n,y=y,x=x2,mu=mu2,P=P2,alpha=alpha,wt=wt,
-  ##  f2=f2,Envelope=Env2,
-  ##  gamma_list=gamma_list,
-  ##  UB_list=UB_list,
-  ##  family="gaussian",link="identity",as.integer(0))
-  
-  ##  print("time for *.R function")
-  ##  print(proc.time()-ptm)
-  
-  ##  print("mean candidates per acceptance *.R function")
-  ##  print(mean(sim_temp$iters_out))
-  
-  ##  *.cpp function took 6.54 seconds and R function 83.71
-  ## Both had ~38 candidates per accepted simulated value
-  
-  #########################################  Post Processing for simulation function handling loop
-  
-  ##  beta_out=sim_temp$beta_out
-  ##  disp_out=sim_temp$disp_out
-  ##  iters_out=sim_temp$iters_out
-  ##  weight_out=sim_temp$weight_out
   
   out=L2Inv%*%L3Inv%*%t(beta_out)
   
@@ -1024,32 +911,18 @@ EnvBuildLinBound<-function(thetabars,cbars,y,x2,P2,alpha,dispstar){
   gs=nrow(cbars)
   n_vars=ncol(cbars)
     
-  New_LL_Slope_test=c(1:gs)
   New_LL_Slope_test2=c(1:gs)
   New_LL_Slope_test3=c(1:gs)
   
   for(j in 1:gs){
 
-    
-#    theta_temp_upp=as.matrix(theta_upp[j,1:ncol(x)],ncol=1)
-#    theta_temp_low=as.matrix(theta_low[j,1:ncol(x)],ncol=1)
     cbars_temp=as.matrix(cbars[j,1:n_vars],ncol=1)
     thetabars_temp=as.matrix(thetabars[j,1:n_vars],ncol=1)
-    
-    # New formula - This should likely replace: -NegLL(i)+arma::as_scalar(G3row.t() * cbarrow)
-    
-#    New_logP2[j]=logP1[j]+0.5*t(cbars_temp)%*%cbars_temp
-#    New_LL_upp[j]=-0.5*t(theta_temp_upp)%*%P2%*%theta_temp_upp+t(cbars_temp)%*% theta_temp_upp
-#    New_LL_low[j]=-0.5*t(theta_temp_low)%*%P2%*%theta_temp_low+t(cbars_temp)%*% theta_temp_low
-    
-    #    New_LL_Slope_test[j]=t(cbars_temp)%*%solve(t(x2)%*%x2)%*%cbars_temp
-#    New_LL_Slope_test[j]=t(cbars_temp)%*%solve(t(x2)%*%x2+dispstar*P2)%*%cbars_temp
     New_LL_Slope_test2[j]=(-t(thetabars_temp)%*%P2+t(cbars_temp))%*%solve(t(x2)%*%x2+dispstar*P2)%*%cbars_temp
     
     H1=-solve(t(x2)%*%x2+dispstar*P2)%*%P2%*%solve(t(x2)%*%x2+dispstar*P2)
     New_LL_Slope_test3[j]=New_LL_Slope_test2[j]+(-t(thetabars_temp)%*%P2+t(cbars_temp))%*%H1%*%(t(x2)%*%(y-alpha)+dispstar*cbars_temp)
-#    New_LL_Slope_diff[j]=(New_LL_upp[j]-New_LL_low[j])/(upp-low)    
-    
+
     }
   
   return(New_LL_Slope_test3)
