@@ -741,9 +741,9 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   #print(New_logP2)
   
 
-  ptemp_base=exp(New_logP2+thetabar_const_base-max_base)
-  ptemp_low=exp(New_logP2+thetabar_const_low-max_low)
-  ptemp_upp=exp(New_logP2+thetabar_const_upp-max_upp)
+  #ptemp_base=exp(New_logP2+thetabar_const_base-max_base)
+  #ptemp_low=exp(New_logP2+thetabar_const_low-max_low)
+  #ptemp_upp=exp(New_logP2+thetabar_const_upp-max_upp)
   prob_factor=exp(New_logP2+prob_factor)
 
   #ptemp_base=exp(logP1+thetabar_const_base-max_base)
@@ -752,36 +752,23 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   #prob_factor=exp(logP1+prob_factor)
   
   
-  ptemp_base=ptemp_base/sum(ptemp_base)
-  ptemp_low=ptemp_low/sum(ptemp_low)
-  ptemp_upp=ptemp_upp/sum(ptemp_upp)
+  #ptemp_base=ptemp_base/sum(ptemp_base)
+  #ptemp_low=ptemp_low/sum(ptemp_low)
+  #ptemp_upp=ptemp_upp/sum(ptemp_upp)
   prob_factor=prob_factor/sum(prob_factor)
   
-  ## ptemp_low seems close to the original
-  
-  #print("Derived Prob_factor and min_log_acceptance")
-  #print(prob_factor)
-  #print(min_log_accept)
-  
-  #print("Derived Ptemp")
-  #print(ptemp_base)
-  #print(ptemp_low)
-  #print(ptemp_upp)
-  #print(Env2$PLSD)
-  
-  
-  
+
   new_slope=(max_upp-max_low)/(upp-low)
   #print("new Derived slope")
   #print(new_slope)
   
   new_int=max_low-new_slope*low
   
-  maxlogP=max(New_logP2)
-  PLSD_new=exp(New_logP2-maxlogP)
-  sumP=sum(PLSD_new)
-  PLSD_new=PLSD_new/sumP
-  log_P_diff=log(PLSD_new)-log(Env2$PLSD)
+  #maxlogP=max(New_logP2)
+  #PLSD_new=exp(New_logP2-maxlogP)
+  #sumP=sum(PLSD_new)
+  #PLSD_new=PLSD_new/sumP
+  #log_P_diff=log(PLSD_new)-log(Env2$PLSD)
   
 
   b1=(upp-low)
