@@ -577,44 +577,44 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   
   upp=1/qgamma(c(1-max_disp_perc),shape2,rate3)
   low=1/qgamma(c(max_disp_perc),shape2,rate3)
-  wt_upp=wt/rep(upp,length(y))
-  wt_low=wt/rep(low,length(y))
+  #wt_upp=wt/rep(upp,length(y))
+  #wt_low=wt/rep(low,length(y))
   
-  theta_upp=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
-                            as.vector(alpha), as.vector(wt_upp))
+  #theta_upp=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
+  #                          as.vector(alpha), as.vector(wt_upp))
   
-  theta_low=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
-                            as.vector(alpha), as.vector(wt_low))
+  #theta_low=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
+  #                          as.vector(alpha), as.vector(wt_low))
   
   
-  New_LL_upp=c(1:gs)
-  New_LL_low=c(1:gs)
-  New_LL_Slope_test=c(1:gs)
-  New_LL_Slope_test2=c(1:gs)
-  New_LL_Slope_test3=c(1:gs)
-  New_LL_Slope_diff=c(1:gs)
+  #New_LL_upp=c(1:gs)
+  #New_LL_low=c(1:gs)
+  #New_LL_Slope_test=c(1:gs)
+  #New_LL_Slope_test2=c(1:gs)
+  #New_LL_Slope_test3=c(1:gs)
+  #New_LL_Slope_diff=c(1:gs)
   
   thetabars=Env2$thetabars
   thetabar_const_base=thetabar_const(P2,cbars,Env2$thetabars)
-  thetabar_const_upp=thetabar_const(P2,cbars,theta_upp)
-  thetabar_const_low=thetabar_const(P2,cbars,theta_low)
+  #thetabar_const_upp=thetabar_const(P2,cbars,theta_upp)
+  #thetabar_const_low=thetabar_const(P2,cbars,theta_low)
   
   ###########################################################################################
   ### This part is currently used for QC - Move to inside function if needed at all
   
-  thetabar_const_matrix<-matrix(0,nrow=21,ncol=nrow(cbars))
+  #thetabar_const_matrix<-matrix(0,nrow=21,ncol=nrow(cbars))
   
-  for(i in 1:21){
+  #for(i in 1:21){
     
-    wt_temp=wt/rep(low+((i-1)/20)*(upp-low),length(y))
-    theta_temp=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
-                               as.vector(alpha), as.vector(wt_temp))
+  #  wt_temp=wt/rep(low+((i-1)/20)*(upp-low),length(y))
+  #  theta_temp=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
+  #                             as.vector(alpha), as.vector(wt_temp))
     
-    thetabar_const_temp=thetabar_const(P2,cbars,theta_temp)
-    thetabar_const_matrix[i,1:nrow(cbars)]=thetabar_const_temp
+  #  thetabar_const_temp=thetabar_const(P2,cbars,theta_temp)
+  #  thetabar_const_matrix[i,1:nrow(cbars)]=thetabar_const_temp
     
     
-  }
+  #}
   
   ###########################################################################################
   
