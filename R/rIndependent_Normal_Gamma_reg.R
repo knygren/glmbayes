@@ -621,33 +621,8 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
 
   New_LL_Slope=EnvBuildLinBound(thetabars,cbars,y,x2,P2,alpha,dispstar)
 
-  for(j in 1:gs){
-    
-    #theta_temp_upp=as.matrix(theta_upp[j,1:ncol(x)],ncol=1)
-    #theta_temp_low=as.matrix(theta_low[j,1:ncol(x)],ncol=1)
-    cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
-    #thetabars_temp=as.matrix(thetabars[j,1:ncol(x)],ncol=1)
-    
-    # New formula - This should likely replace: -NegLL(i)+arma::as_scalar(G3row.t() * cbarrow)
-    
-    New_logP2[j]=logP1[j]+0.5*t(cbars_temp)%*%cbars_temp
-  #  New_LL_upp[j]=-0.5*t(theta_temp_upp)%*%P2%*%theta_temp_upp+t(cbars_temp)%*% theta_temp_upp
-  #  New_LL_low[j]=-0.5*t(theta_temp_low)%*%P2%*%theta_temp_low+t(cbars_temp)%*% theta_temp_low
-    
-  #  New_LL_Slope_test[j]=t(cbars_temp)%*%solve(t(x2)%*%x2+dispstar*P2)%*%cbars_temp
-  #  New_LL_Slope_test2[j]=(-t(thetabars_temp)%*%P2+t(cbars_temp))%*%solve(t(x2)%*%x2+dispstar*P2)%*%cbars_temp
-    
-  #  H1=-solve(t(x2)%*%x2+dispstar*P2)%*%P2%*%solve(t(x2)%*%x2+dispstar*P2)
-  #  New_LL_Slope_test3[j]=New_LL_Slope_test2[j]+(-t(thetabars_temp)%*%P2+t(cbars_temp))%*%H1%*%(t(x2)%*%(y-alpha)+dispstar*cbars_temp)
-  #  New_LL_Slope_diff[j]=(New_LL_upp[j]-New_LL_low[j])/(upp-low)    
-  
-  }
-  
-  #max_base=max(thetabar_const_base)
-  
   thetabar_const_upp_apprx=thetabar_const_base+(upp-dispstar)*New_LL_Slope
   thetabar_const_low_apprx=thetabar_const_base+(low-dispstar)*New_LL_Slope
-  #thetabar_const_int_apprx=thetabar_const_base-dispstar*New_LL_Slope
 
   prob_factor<-c(1:gs)
   min_log_accept<-c(1:gs)
@@ -656,6 +631,9 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   max_upp=max(thetabar_const_upp_apprx)
   
   for(j in 1:gs){
+    cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
+    New_logP2[j]=logP1[j]+0.5*t(cbars_temp)%*%cbars_temp
+    
     prob_factor[j]=max(thetabar_const_upp_apprx[j]-max_upp,thetabar_const_low_apprx[j]-max_low)
     min_log_accept[j]=min(thetabar_const_upp_apprx[j]-max_upp,thetabar_const_low_apprx[j]-max_low)- prob_factor[j]  
   }
