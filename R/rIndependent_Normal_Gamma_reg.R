@@ -625,7 +625,7 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
     
     #theta_temp_upp=as.matrix(theta_upp[j,1:ncol(x)],ncol=1)
     #theta_temp_low=as.matrix(theta_low[j,1:ncol(x)],ncol=1)
-    #cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
+    cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
     #thetabars_temp=as.matrix(thetabars[j,1:ncol(x)],ncol=1)
     
     # New formula - This should likely replace: -NegLL(i)+arma::as_scalar(G3row.t() * cbarrow)
@@ -694,7 +694,7 @@ rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,
   max_LL_log_disp=lm_log1+lm_log2*log(upp) ## From above
   
   ## No longer used - can remove later 
-  log_P_diff_new=0*log_P_diff
+  #log_P_diff_new=0*log_P_diff
   
   ########################################
   gamma_list_new=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low)
