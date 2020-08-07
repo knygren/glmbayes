@@ -105,6 +105,8 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
       }
       
 
+      
+      
       for(int j=0;j<l1;j++){  
         
         // Switch to using thetabars here
@@ -138,14 +140,16 @@ Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
       }
       
 
-      test=LLconst(J(0))+testtemp(0,0)-testll(0);
+      //test=LLconst(J(0))+testtemp(0,0)-testll(0);
 
 
 //      test_int=LLconst_int(J(0))+testtemp_int(0,0)-(testll(0)-testll_data(0));
 //      test_data=test-test_int;
 
 
-  return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws,Rcpp::Named("test")=test,
+  return Rcpp::List::create(Rcpp::Named("out")=out,
+                          //  Rcpp::Named("draws")=draws,
+//                                    Rcpp::Named("test")=test,
                                         Rcpp::Named("J")=J,
                                         Rcpp::Named("log_U2")=log(U2)
 //                                      ,  Rcpp::Named("test_int")=test_int,
@@ -614,6 +618,10 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
       //      Rcpp::Rcout << "thetabars_new - actual " << std::flush << thetabars << std::endl;
       
       NumericVector LL_New=-f2_gaussian(transpose(thetabars),  y, x, mu, P, alpha, wt2);  
+      
+      
+      // This function likely contains un-necessary calculations
+      // Remove un-necessary parts and move outside of function
       
       Rcpp::List  sim_list=rindep_norm_gamma_reg_std_cpp(1,y,x,mu, P,alpha,wt2,
                                                          f2,Envelope,family,link,  progbar); 

@@ -118,6 +118,371 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     
   }
   
+  #print("RSS2_Post and RSS_Post2")
+  #print(RSS2_post)
+  #print(RSS_Post2)
+  
+  
+  betastar=glmb_out1$coef.mode
+  dispstar=rate2/(shape2-1)
+  
+  print("betastar from optimization")
+  print(betastar)
+  print("dispstar from optimization")
+  print(dispstar)
+  
+    
+  ## Get family functions for gaussian()  
+  
+  famfunc<-glmbfamfunc(gaussian())
+  
+  f1<-famfunc$f1
+  f2<-famfunc$f2
+  f3<-famfunc$f3
+  f5<-famfunc$f5
+  f6<-famfunc$f6
+  
+  start <- mu
+  
+  if(is.null(offset2))  offset2=rep(as.numeric(0.0),length(y))
+  P=solve(Sigma)
+  
+  ###### Adjust weight for dispersion
+  
+  dispersion2=dispstar
+  
+  if(is.null(wt))  wt=rep(1,length(y))
+  if(length(wt)==1)  wt=rep(wt,length(y))
+  
+  wt2=wt/rep(dispersion2,length(y))
+  
+  ######################### Shift mean vector to offset so that adjusted model has 0 mean
+  
+  alpha=x%*%as.vector(mu)+offset2
+  mu2=0*as.vector(mu)
+  P2=P
+  x2=x
+  
+  parin=start-mu
+  #parin=start
+  
+  #parin=glmb_out1$glm$coefficients
+  
+  # This step only used to get posterior precision it seems
+  # Since normal case, can likely be computed instead
+  
+  opt_out=optim(parin,f2,f3,y=as.vector(y),x=as.matrix(x2),mu=as.vector(mu2),
+                P=as.matrix(P),alpha=as.vector(alpha),wt=as.vector(wt2),
+                method="BFGS",hessian=TRUE
+  )
+  
+  bstar=opt_out$par  ## Posterior mode for adjusted model
+  
+  ## Temporarily use bstar as posterior mode
+  
+  
+  #  bstar
+  #  bstar+as.vector(mu)  # mode for actual model
+  A1=opt_out$hessian # Approximate Precision at mode
+  
+  
+  Standard_Mod=glmb_Standardize_Model(y=as.vector(y), x=as.matrix(x2),
+                                      P=as.matrix(P2),bstar=as.matrix(bstar,ncol=1), A1=as.matrix(A1))
+  
+  bstar2=Standard_Mod$bstar2  
+  A=Standard_Mod$A
+  x2=Standard_Mod$x2
+  mu2=Standard_Mod$mu2
+  P2=Standard_Mod$P2
+  L2Inv=Standard_Mod$L2Inv
+  L3Inv=Standard_Mod$L3Inv
+  
+  
+  ## Note, use Gridtype =4 here temporarily (Single Likelihood subgradient)
+  
+  Gridtype=as.integer(3)
+  
+  ## Pull the initial Envelope based on optimized values above
+  
+  Env2=EnvelopeBuild(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
+                     as.matrix(mu2,ncol=1),as.matrix(P2),as.vector(alpha),
+                     as.vector(wt2),
+                     family="gaussian",link="identity",
+                     Gridtype=Gridtype, n=as.integer(n),
+                     sortgrid=TRUE)
+  
+  
+  #### End of Standardization - Steps below might change  
+  
+  ## Update Gamma parameters [Should this be just RSS_Post2?]
+  
+  shape2= shape + n_obs/2
+  rate2 =rate + (RSS_ML/2)
+  #rate3 =rate + (RSS2_post/2)
+  rate3 =rate + (RSS_Post2/2)
+  
+  
+  #################  this Block Does evaluations at lower and upper bounds   #################
+  
+  cbars=Env2$cbars
+  
+  gs=nrow(Env2$cbars)
+  logP1=Env2$logP
+  New_LL=c(1:gs)
+  New_logP2=c(1:gs)
+  
+  upp=1/qgamma(c(1-max_disp_perc),shape2,rate3)
+  low=1/qgamma(c(max_disp_perc),shape2,rate3)
+  #wt_upp=wt/rep(upp,length(y))
+  #wt_low=wt/rep(low,length(y))
+  
+  #theta_upp=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
+  #                          as.vector(alpha), as.vector(wt_upp))
+  
+  #theta_low=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
+  #                          as.vector(alpha), as.vector(wt_low))
+  
+  
+  #New_LL_upp=c(1:gs)
+  #New_LL_low=c(1:gs)
+  #New_LL_Slope_test=c(1:gs)
+  #New_LL_Slope_test2=c(1:gs)
+  #New_LL_Slope_test3=c(1:gs)
+  #New_LL_Slope_diff=c(1:gs)
+  
+  thetabars=Env2$thetabars
+  thetabar_const_base=thetabar_const(P2,cbars,Env2$thetabars)
+  #thetabar_const_upp=thetabar_const(P2,cbars,theta_upp)
+  #thetabar_const_low=thetabar_const(P2,cbars,theta_low)
+  
+  ###########################################################################################
+  ### This part is currently used for QC - Move to inside function if needed at all
+  
+  #thetabar_const_matrix<-matrix(0,nrow=21,ncol=nrow(cbars))
+  
+  #for(i in 1:21){
+  
+  #  wt_temp=wt/rep(low+((i-1)/20)*(upp-low),length(y))
+  #  theta_temp=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
+  #                             as.vector(alpha), as.vector(wt_temp))
+  
+  #  thetabar_const_temp=thetabar_const(P2,cbars,theta_temp)
+  #  thetabar_const_matrix[i,1:nrow(cbars)]=thetabar_const_temp
+  
+  
+  #}
+  
+  ###########################################################################################
+  
+  
+  New_LL_Slope=EnvBuildLinBound(thetabars,cbars,y,x2,P2,alpha,dispstar)
+  
+  thetabar_const_upp_apprx=thetabar_const_base+(upp-dispstar)*New_LL_Slope
+  thetabar_const_low_apprx=thetabar_const_base+(low-dispstar)*New_LL_Slope
+  
+  prob_factor<-c(1:gs)
+  min_log_accept<-c(1:gs)
+  
+  max_low=max(thetabar_const_low_apprx)
+  max_upp=max(thetabar_const_upp_apprx)
+  
+  for(j in 1:gs){
+    cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
+    New_logP2[j]=logP1[j]+0.5*t(cbars_temp)%*%cbars_temp
+    
+    prob_factor[j]=max(thetabar_const_upp_apprx[j]-max_upp,thetabar_const_low_apprx[j]-max_low)
+    min_log_accept[j]=min(thetabar_const_upp_apprx[j]-max_upp,thetabar_const_low_apprx[j]-max_low)- prob_factor[j]  
+  }
+  
+  lg_prob_factor=prob_factor
+  prob_factor=exp(New_logP2+prob_factor)
+  
+  prob_factor=prob_factor/sum(prob_factor)
+  
+  
+  new_slope=(max_upp-max_low)/(upp-low)
+  new_int=max_low-new_slope*low
+  b1=(upp-low)
+  c1=-log(upp/low)
+  
+  #dispstar= (-b1+ sqrt(b1^2-4*a1*c1))/(2*a1) # Point of tangency
+  ## Outputs from this block
+  
+  ## 1) upp, low
+  ## 2) log_P_diff
+  ## 3) lm_log1,lm_log2
+  ## 4) shape3
+  ## 5) max_New_LL_UB
+  ## 6) max_LL_log_disp
+  
+  ## Not currently from block: RSS_ML, rate2 
+  
+  #####################################  New Derivations ##################################
+  
+  # Verify that this calculation is correct
+  
+  dispstar=b1/(-c1)
+  
+  lm_log2=new_slope*dispstar
+  lm_log1=new_int+new_slope*dispstar-new_slope*log(dispstar)
+  
+  shape3=shape2-lm_log2
+  max_LL_log_disp=lm_log1+lm_log2*log(upp) ## From above
+  
+  ## No longer used - can remove later 
+  #log_P_diff_new=0*log_P_diff
+  
+  ########################################
+
+  Env3=Env2
+  Env3$PLSD=prob_factor
+  
+  print("Starting Candidate Sampling using sample function")
+  cand1=sample(x=gs,size=n*413,replace=TRUE,prob=prob_factor)
+  
+  #print(cand1)
+  #print(length(cand1))
+  
+  print("Finished Sampling using Sample function")
+  
+  
+    gamma_list_new=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low)
+  
+  UB_list_new=list(RSS_ML=RSS_ML,max_New_LL_UB=max_upp,
+                   max_LL_log_disp=max_LL_log_disp,lm_log1=lm_log1,lm_log2=lm_log2, 
+                   #log_P_diff=log_P_diff_new,
+                   lg_prob_factor=lg_prob_factor,lmc1=new_int,lmc2=new_slope,cand=cand1)
+  
+  ## log_P_Diff should no longer be used in the same way!
+  
+    
+  ##  ptm <- proc.time()
+  
+  sim_temp=.rindep_norm_gamma_reg_std_V3_cpp (n=n, y=y, x=x2, mu=mu2, P=P2, alpha=alpha, wt,
+                                              f2=f2, Envelope=Env3, 
+                                              gamma_list=gamma_list_new,
+                                              UB_list=UB_list_new,
+                                              family="gaussian",link="identity", progbar = as.integer(0))
+  
+  
+  #proc.time()-ptm
+  
+  
+  beta_out=sim_temp$beta_out
+  disp_out=sim_temp$disp_out
+  iters_out=sim_temp$iters_out
+  weight_out=sim_temp$weight_out
+  
+  out=L2Inv%*%L3Inv%*%t(beta_out)
+  
+  for(i in 1:n){
+    out[,i]=out[,i]+mu
+  }
+  
+  
+  famfunc=glmbfamfunc(gaussian())  
+  f1=famfunc$f1
+  
+  outlist=list(
+    coefficients=t(out), 
+    coef.mode=betastar,  ## For now, use the conditional mode (not universal)
+    dispersion=disp_out,
+    ## For now, name items in list like this-eventually make format/names
+    ## consistent with true prior (current names needed by summary function)
+    Prior=list(mean=mu,Sigma=Sigma,shape=shape,rate=rate,Precision=solve(Sigma)), 
+    family=gaussian(),
+    prior.weights=wt,
+    y=y,
+    x=x,
+    call=call,
+    famfunc=famfunc,
+    iters=iters_out,
+    Envelope=NULL,
+    loglike=NULL,
+    weight_out=weight_out,
+    sim_bounds=list(low=low,upp=upp)
+    #,test_out=test_out
+  )
+  
+  colnames(outlist$coefficients)<-colnames(x)
+  outlist$offset2<-offset2
+  class(outlist)<-c(outlist$class,"rglmb")
+  
+  return(outlist)  
+  
+  
+}
+
+
+
+
+#' @rdname rindependent_norm_gamma_reg
+#' @export 
+
+
+rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
+                                         max_disp_perc=0.99){
+  
+  call<-match.call()
+  
+  offset2=offset
+  wt=weights
+  
+  if(length(wt)==1) wt=rep(wt,length(y))
+  
+  ### Initial implementation of Likelihood subgradient Sampling 
+  ### Currently uses as single point for conditional tangencis
+  ### (at conditional posterior modes)
+  ### Verify this yields correct results and then try to implement grid approach
+  
+  ## Use the prior list to set the prior elements if it is not missing
+  ## Error checking to verify that the correct elements are present
+  ## Shold be implemented
+  
+  if(missing(prior_list)) stop("Prior Specification Missing")
+  if(!missing(prior_list)){
+    if(!is.null(prior_list$mu)) mu=prior_list$mu
+    if(!is.null(prior_list$Sigma)) Sigma=prior_list$Sigma
+    if(!is.null(prior_list$dispersion)) dispersion=prior_list$dispersion
+    else dispersion=NULL
+    if(!is.null(prior_list$shape)) shape=prior_list$shape
+    else shape=NULL
+    if(!is.null(prior_list$rate)) rate=prior_list$rate
+    else rate=NULL
+  }
+  
+  lm_out=lm(y ~ x-1,weights=wt,offset=offset2) # run classical regression to get maximum likelhood estimate
+  RSS=sum(residuals(lm_out)^2)
+  
+  RSS_ML=sum(residuals(lm_out)^2)
+  n_obs=length(y)
+  
+  
+  dispersion2=dispersion
+  RSS_temp<-matrix(0,nrow=1000)
+  
+  for(j in 1:10){
+    glmb_out1=glmb(y~x-1,family=gaussian(),
+                   dNormal(mu=mu,Sigma=Sigma,dispersion=dispersion2),weights=wt,offset=offset2)
+    
+    res_temp=residuals(glmb_out1)
+    
+    for(k in 1:1000){
+      RSS_temp[k]=sum(res_temp[k,1:length(y)]*res_temp[k,1:length(y)])
+    }
+    
+    RSS_Post2=mean(RSS_temp)
+    b_old=glmb_out1$coef.mode
+    xbetastar=x%*%b_old
+    RSS2_post=t(y-xbetastar)%*%(y-xbetastar)  
+    shape2= shape + n_obs/2
+    #  rate2 =rate + RSS2_post/2  # 38 candidates per acceptance
+    rate2=rate + RSS_Post2/2    # 35.7 candidates per acceptance [though some with positive acceptance]
+    
+    dispersion2=rate2/(shape2-1)
+    
+  }
+  
   
   betastar=glmb_out1$coef.mode
   dispstar=rate2/(shape2-1)
@@ -399,350 +764,6 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
 }
 
-#' @rdname rindependent_norm_gamma_reg
-#' @export 
-
-
-
-rindependent_norm_gamma_reg_v2<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
-                                      max_disp_perc=0.99){
-  
-  call<-match.call()
-  
-  offset2=offset
-  wt=weights
-  
-  if(length(wt)==1) wt=rep(wt,length(y))
-  
-  ### Initial implementation of Likelihood subgradient Sampling 
-  ### Currently uses as single point for conditional tangencis
-  ### (at conditional posterior modes)
-  ### Verify this yields correct results and then try to implement grid approach
-  
-  ## Use the prior list to set the prior elements if it is not missing
-  ## Error checking to verify that the correct elements are present
-  ## Shold be implemented
-  
-  if(missing(prior_list)) stop("Prior Specification Missing")
-  if(!missing(prior_list)){
-    if(!is.null(prior_list$mu)) mu=prior_list$mu
-    if(!is.null(prior_list$Sigma)) Sigma=prior_list$Sigma
-    if(!is.null(prior_list$dispersion)) dispersion=prior_list$dispersion
-    else dispersion=NULL
-    if(!is.null(prior_list$shape)) shape=prior_list$shape
-    else shape=NULL
-    if(!is.null(prior_list$rate)) rate=prior_list$rate
-    else rate=NULL
-  }
-  
-  lm_out=lm(y ~ x-1,weights=wt,offset=offset2) # run classical regression to get maximum likelhood estimate
-  RSS=sum(residuals(lm_out)^2)
-  
-  RSS_ML=sum(residuals(lm_out)^2)
-  n_obs=length(y)
-  
-  
-  dispersion2=dispersion
-  RSS_temp<-matrix(0,nrow=1000)
-  
-  for(j in 1:10){
-    glmb_out1=glmb(y~x-1,family=gaussian(),
-                   dNormal(mu=mu,Sigma=Sigma,dispersion=dispersion2),weights=wt,offset=offset2)
-    
-    res_temp=residuals(glmb_out1)
-    
-    for(k in 1:1000){
-      RSS_temp[k]=sum(res_temp[k,1:length(y)]*res_temp[k,1:length(y)])
-    }
-    
-    RSS_Post2=mean(RSS_temp)
-    b_old=glmb_out1$coef.mode
-    xbetastar=x%*%b_old
-    RSS2_post=t(y-xbetastar)%*%(y-xbetastar)  
-    shape2= shape + n_obs/2
-    #  rate2 =rate + RSS2_post/2  # 38 candidates per acceptance
-    rate2=rate + RSS_Post2/2    # 35.7 candidates per acceptance [though some with positive acceptance]
-    
-    dispersion2=rate2/(shape2-1)
-    
-  }
-  
-  #print("RSS2_Post and RSS_Post2")
-  #print(RSS2_post)
-  #print(RSS_Post2)
-  
-  
-  betastar=glmb_out1$coef.mode
-  dispstar=rate2/(shape2-1)
-  
-  
-  ## Get family functions for gaussian()  
-  
-  famfunc<-glmbfamfunc(gaussian())
-  
-  f1<-famfunc$f1
-  f2<-famfunc$f2
-  f3<-famfunc$f3
-  f5<-famfunc$f5
-  f6<-famfunc$f6
-  
-  start <- mu
-  
-  if(is.null(offset2))  offset2=rep(as.numeric(0.0),length(y))
-  P=solve(Sigma)
-  
-  ###### Adjust weight for dispersion
-  
-  dispersion2=dispstar
-  
-  if(is.null(wt))  wt=rep(1,length(y))
-  if(length(wt)==1)  wt=rep(wt,length(y))
-  
-  wt2=wt/rep(dispersion2,length(y))
-  
-  ######################### Shift mean vector to offset so that adjusted model has 0 mean
-  
-  alpha=x%*%as.vector(mu)+offset2
-  mu2=0*as.vector(mu)
-  P2=P
-  x2=x
-  
-  parin=start-mu
-  #parin=start
-  
-  #parin=glmb_out1$glm$coefficients
-  
-  # This step only used to get posterior precision it seems
-  # Since normal case, can likely be computed instead
-  
-  opt_out=optim(parin,f2,f3,y=as.vector(y),x=as.matrix(x2),mu=as.vector(mu2),
-                P=as.matrix(P),alpha=as.vector(alpha),wt=as.vector(wt2),
-                method="BFGS",hessian=TRUE
-  )
-  
-  bstar=opt_out$par  ## Posterior mode for adjusted model
-  
-  ## Temporarily use bstar as posterior mode
-  
-  
-  #  bstar
-  #  bstar+as.vector(mu)  # mode for actual model
-  A1=opt_out$hessian # Approximate Precision at mode
-  
-  
-  Standard_Mod=glmb_Standardize_Model(y=as.vector(y), x=as.matrix(x2),
-                                      P=as.matrix(P2),bstar=as.matrix(bstar,ncol=1), A1=as.matrix(A1))
-  
-  bstar2=Standard_Mod$bstar2  
-  A=Standard_Mod$A
-  x2=Standard_Mod$x2
-  mu2=Standard_Mod$mu2
-  P2=Standard_Mod$P2
-  L2Inv=Standard_Mod$L2Inv
-  L3Inv=Standard_Mod$L3Inv
-  
-  
-  ## Note, use Gridtype =4 here temporarily (Single Likelihood subgradient)
-  
-  Gridtype=as.integer(3)
-  
-  ## Pull the initial Envelope based on optimized values above
-  
-  Env2=EnvelopeBuild(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
-                     as.matrix(mu2,ncol=1),as.matrix(P2),as.vector(alpha),
-                     as.vector(wt2),
-                     family="gaussian",link="identity",
-                     Gridtype=Gridtype, n=as.integer(n),
-                     sortgrid=TRUE)
-  
-  
-  #### End of Standardization - Steps below might change  
-  
-  ## Update Gamma parameters [Should this be just RSS_Post2?]
-  
-  shape2= shape + n_obs/2
-  rate2 =rate + (RSS_ML/2)
-  #rate3 =rate + (RSS2_post/2)
-  rate3 =rate + (RSS_Post2/2)
-  
-  
-  #################  this Block Does evaluations at lower and upper bounds   #################
-  
-  cbars=Env2$cbars
-  
-  gs=nrow(Env2$cbars)
-  logP1=Env2$logP
-  New_LL=c(1:gs)
-  New_logP2=c(1:gs)
-  
-  upp=1/qgamma(c(1-max_disp_perc),shape2,rate3)
-  low=1/qgamma(c(max_disp_perc),shape2,rate3)
-  #wt_upp=wt/rep(upp,length(y))
-  #wt_low=wt/rep(low,length(y))
-  
-  #theta_upp=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
-  #                          as.vector(alpha), as.vector(wt_upp))
-  
-  #theta_low=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
-  #                          as.vector(alpha), as.vector(wt_low))
-  
-  
-  #New_LL_upp=c(1:gs)
-  #New_LL_low=c(1:gs)
-  #New_LL_Slope_test=c(1:gs)
-  #New_LL_Slope_test2=c(1:gs)
-  #New_LL_Slope_test3=c(1:gs)
-  #New_LL_Slope_diff=c(1:gs)
-  
-  thetabars=Env2$thetabars
-  thetabar_const_base=thetabar_const(P2,cbars,Env2$thetabars)
-  #thetabar_const_upp=thetabar_const(P2,cbars,theta_upp)
-  #thetabar_const_low=thetabar_const(P2,cbars,theta_low)
-  
-  ###########################################################################################
-  ### This part is currently used for QC - Move to inside function if needed at all
-  
-  #thetabar_const_matrix<-matrix(0,nrow=21,ncol=nrow(cbars))
-  
-  #for(i in 1:21){
-    
-  #  wt_temp=wt/rep(low+((i-1)/20)*(upp-low),length(y))
-  #  theta_temp=Inv_f3_gaussian(t(Env2$cbars), y, as.matrix(x2),as.matrix(mu2,ncol=1), as.matrix(P2), 
-  #                             as.vector(alpha), as.vector(wt_temp))
-    
-  #  thetabar_const_temp=thetabar_const(P2,cbars,theta_temp)
-  #  thetabar_const_matrix[i,1:nrow(cbars)]=thetabar_const_temp
-    
-    
-  #}
-  
-  ###########################################################################################
-  
-
-  New_LL_Slope=EnvBuildLinBound(thetabars,cbars,y,x2,P2,alpha,dispstar)
-
-  thetabar_const_upp_apprx=thetabar_const_base+(upp-dispstar)*New_LL_Slope
-  thetabar_const_low_apprx=thetabar_const_base+(low-dispstar)*New_LL_Slope
-
-  prob_factor<-c(1:gs)
-  min_log_accept<-c(1:gs)
-  
-  max_low=max(thetabar_const_low_apprx)
-  max_upp=max(thetabar_const_upp_apprx)
-  
-  for(j in 1:gs){
-    cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
-    New_logP2[j]=logP1[j]+0.5*t(cbars_temp)%*%cbars_temp
-    
-    prob_factor[j]=max(thetabar_const_upp_apprx[j]-max_upp,thetabar_const_low_apprx[j]-max_low)
-    min_log_accept[j]=min(thetabar_const_upp_apprx[j]-max_upp,thetabar_const_low_apprx[j]-max_low)- prob_factor[j]  
-  }
-  
-  lg_prob_factor=prob_factor
-  prob_factor=exp(New_logP2+prob_factor)
-
-  prob_factor=prob_factor/sum(prob_factor)
-  new_slope=(max_upp-max_low)/(upp-low)
-  new_int=max_low-new_slope*low
-  b1=(upp-low)
-  c1=-log(upp/low)
-  
-  #dispstar= (-b1+ sqrt(b1^2-4*a1*c1))/(2*a1) # Point of tangency
-  ## Outputs from this block
-  
-  ## 1) upp, low
-  ## 2) log_P_diff
-  ## 3) lm_log1,lm_log2
-  ## 4) shape3
-  ## 5) max_New_LL_UB
-  ## 6) max_LL_log_disp
-  
-  ## Not currently from block: RSS_ML, rate2 
-  
-  #####################################  New Derivations ##################################
-  
-  # Verify that this calculation is correct
-    
-  dispstar=b1/(-c1)
-  
-  lm_log2=new_slope*dispstar
-  lm_log1=new_int+new_slope*dispstar-new_slope*log(dispstar)
-  
-  shape3=shape2-lm_log2
-  max_LL_log_disp=lm_log1+lm_log2*log(upp) ## From above
-  
-  ## No longer used - can remove later 
-  #log_P_diff_new=0*log_P_diff
-  
-  ########################################
-  gamma_list_new=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low)
-  
-  UB_list_new=list(RSS_ML=RSS_ML,max_New_LL_UB=max_upp,
-                   max_LL_log_disp=max_LL_log_disp,lm_log1=lm_log1,lm_log2=lm_log2, 
-                   #log_P_diff=log_P_diff_new,
-                   lg_prob_factor=lg_prob_factor,lmc1=new_int,lmc2=new_slope)
-  
-  ## log_P_Diff should no longer be used in the same way!
-
-  Env3=Env2
-  Env3$PLSD=prob_factor
-  
-  ##  ptm <- proc.time()
-  
-  sim_temp=.rindep_norm_gamma_reg_std_V3_cpp (n=n, y=y, x=x2, mu=mu2, P=P2, alpha=alpha, wt,
-                                              f2=f2, Envelope=Env3, 
-                                              gamma_list=gamma_list_new,
-                                              UB_list=UB_list_new,
-                                              family="gaussian",link="identity", progbar = as.integer(0))
-  
-    
-  #proc.time()-ptm
-  
-  
-  beta_out=sim_temp$beta_out
-  disp_out=sim_temp$disp_out
-  iters_out=sim_temp$iters_out
-  weight_out=sim_temp$weight_out
-  
-  out=L2Inv%*%L3Inv%*%t(beta_out)
-  
-  for(i in 1:n){
-    out[,i]=out[,i]+mu
-  }
-  
-  
-  famfunc=glmbfamfunc(gaussian())  
-  f1=famfunc$f1
-  
-  outlist=list(
-    coefficients=t(out), 
-    coef.mode=betastar,  ## For now, use the conditional mode (not universal)
-    dispersion=disp_out,
-    ## For now, name items in list like this-eventually make format/names
-    ## consistent with true prior (current names needed by summary function)
-    Prior=list(mean=mu,Sigma=Sigma,shape=shape,rate=rate,Precision=solve(Sigma)), 
-    family=gaussian(),
-    prior.weights=wt,
-    y=y,
-    x=x,
-    call=call,
-    famfunc=famfunc,
-    iters=iters_out,
-    Envelope=NULL,
-    loglike=NULL,
-    weight_out=weight_out,
-    sim_bounds=list(low=low,upp=upp)
-    #,test_out=test_out
-  )
-  
-  colnames(outlist$coefficients)<-colnames(x)
-  outlist$offset2<-offset2
-  class(outlist)<-c(outlist$class,"rglmb")
-  
-  return(outlist)  
-  
-  
-}
 
 
 EnvBuildLinBound<-function(thetabars,cbars,y,x2,P2,alpha,dispstar){
