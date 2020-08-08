@@ -472,6 +472,8 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
   
   NumericMatrix cbarst(cbars.ncol(),cbars.nrow());
   NumericMatrix thetabars(cbars.nrow(),cbars.ncol());
+  NumericMatrix thetabars_new(1,cbars.ncol());
+  
   NumericVector New_LL(cbars.nrow());
   
   
@@ -480,6 +482,7 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
   arma::mat cbarstb(cbarst.begin(), cbarst.nrow(), cbarst.ncol(), false);
   
   arma::mat thetabarsb(thetabars.begin(), thetabars.nrow(), thetabars.ncol(), false);
+  arma::mat thetabarsb_new(thetabars_new.begin(), thetabars_new.nrow(), thetabars_new.ncol(), false);
   cbarstb=trans(cbarsb);
   
   arma::vec y2(y.begin(),l2);
@@ -542,7 +545,7 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
       
       //      Rcpp::Rcout << "thetabars_new - actual " << std::flush << thetabars << std::endl;
       
-      NumericVector LL_New=-f2_gaussian(transpose(thetabars),  y, x, mu, P, alpha, wt2);  
+      //NumericVector LL_New=-f2_gaussian(transpose(thetabars),  y, x, mu, P, alpha, wt2);  
       
       
       // This function likely contains un-necessary calculations
@@ -564,7 +567,20 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
         }
       }
       
+      // Try moving code here and use just selected component of grid 
       
+      NumericMatrix cbars_small = cbars( Range(J(0),J(0)) , Range(0,cbars.ncol()-1) );
+      
+      arma::mat theta2 =Inv_f3_gaussian(transpose(cbars_small), y,x, mu, P, alpha, wt2);  
+
+      thetabarsb_new=theta2;
+      NumericVector LL_New2=-f2_gaussian(transpose(thetabars_new),  y, x, mu, P, alpha, wt2);  
+      
+      
+    //   Rcpp::Rcout << "LL_New2 " << std::flush << LL_New2 << std::endl;
+    //   Rcpp::Rcout << "LL_New(J(0)) " << std::flush << LL_New(J(0)) << std::endl;
+       
+            
       
       for(int j=0;j<l1;j++){  out(0,j)=ctrnorm_cpp(logrt(J(0),j),loglt(J(0),j),-cbars(J(0),j),1.0);          }
       U2=R::runif(0.0, 1.0);
@@ -596,7 +612,8 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
       //   So all components that include thetabar must now be bounded as well
       
       arma::colvec betadiff=trans(b_out2)-thetabars_temp2;
-      UB1=LL_New(J_out(0)) -arma::as_scalar(trans(cbars_temp2)*betadiff);
+//      UB1=LL_New(J_out(0)) -arma::as_scalar(trans(cbars_temp2)*betadiff);
+      UB1=LL_New2(0) -arma::as_scalar(trans(cbars_temp2)*betadiff);
       
       //Block 2: UB2 [RSS Term bounded by shifting it to the gamma candidate]
       
