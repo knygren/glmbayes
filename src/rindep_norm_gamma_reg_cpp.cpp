@@ -493,7 +493,7 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
   double UB2;
   double UB3A;
   double UB3B;
-  double max_New_LL;
+//  double max_New_LL;
   double New_LL_log_disp;
   
   int a1=0;
@@ -503,17 +503,17 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
   
   NumericVector J(n);
   NumericVector draws(n);
-//  NumericMatrix out(n,l1);
+  //  NumericMatrix out(n,l1);
   NumericMatrix out(1,l1);
   double a2=0;
   double U=0;
-//  double test=0;
+  //  double test=0;
   double U2=0;
   
   NumericVector PLSD=Envelope["PLSD"];
   NumericMatrix loglt=Envelope["loglt"];
   NumericMatrix logrt=Envelope["logrt"];
-//  NumericMatrix cbars=Envelope["cbars"];
+  //  NumericMatrix cbars=Envelope["cbars"];
   
   
   
@@ -547,8 +547,11 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
       
       // This function likely contains un-necessary calculations
       // Remove un-necessary parts and move outside of function
-
+      
       // Simulate from discrete distribution
+      
+      
+      
       U=R::runif(0.0, 1.0);
       a2=0;
       J(0)=0;    
@@ -560,37 +563,18 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
           
         }
       }
-
       
-            
+      
+      
       for(int j=0;j<l1;j++){  out(0,j)=ctrnorm_cpp(logrt(J(0),j),loglt(J(0),j),-cbars(J(0),j),1.0);          }
       U2=R::runif(0.0, 1.0);
       
       double log_U2=log(U2);
       NumericVector J_out=J;
-    //  NumericMatrix sim_out=out;
+      //  NumericMatrix sim_out=out;
       NumericVector b_out=out(0,_);
       
       
-//      Rcpp::Rcout << "J_out Candidate " << std::flush << J_out << std::endl;
-//      Rcpp::Rcout << "sim_out Candidate " << std::flush << sim_out << std::endl;
-//      Rcpp::Rcout << "log_U2 Candidate " << std::flush << log_U2 << std::endl;
-//      Rcpp::Rcout << "b_out_temp " << std::flush << b_out_temp << std::endl;
-      
-//        NumericVector b_out=out;
-      
-//      Rcpp::List  sim_list=rindep_norm_gamma_reg_std_cpp(1,y,x,mu, P,alpha,wt2,
-//                                                         f2,Envelope,family,link,  progbar); 
-      
-      // J_out=sim_list["J"];
-      //NumericVector J_out=sim_list["J"];
-      
-      //      Rcpp::Rcout << "J_out " << std::flush << J_out << std::endl;
-      
-//      log_U2=sim_list["log_U2"];
-//        double log_U2=sim_list["log_U2"];
-//      NumericMatrix sim_out=sim_list["out"];  
-//      NumericVector b_out=sim_out(0,_);
       arma::rowvec b_out2(b_out.begin(),l1,false);
       NumericVector thetabars_temp=thetabars(J_out(0),_);
       arma::vec  thetabars_temp2(thetabars_temp.begin(), l1);
@@ -602,10 +586,10 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
       
       // Passing transpose of sim_out here might work because sim_out has only one row
       
-//      NumericVector LL_Test=-f2_gaussian(transpose(b_out),  y, x, mu, P, alpha, wt2);
+      //      NumericVector LL_Test=-f2_gaussian(transpose(b_out),  y, x, mu, P, alpha, wt2);
       
       NumericVector LL_Test=-f2_gaussian(transpose(out),  y, x, mu, P, alpha, wt2);
-//      NumericVector LL_Test=-f2_gaussian(transpose(sim_out),  y, x, mu, P, alpha, wt2);  
+      //      NumericVector LL_Test=-f2_gaussian(transpose(sim_out),  y, x, mu, P, alpha, wt2);  
       
       // Block 1: UB1 
       //   Same form as in fixed dispersion case but thetabar is a function of the dispersion
@@ -628,8 +612,11 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
       // Investigate whether changing probabilities of grid componets for proposal
       // allows us to do away with this term and to thereby improve the acceptance rate
       
-      for(int j=0;j<cbars.nrow();j++){
-        thetabars_temp=thetabars(j,_);
+      // This is likely time consuming part
+      
+//      for(int j=0;j<cbars.nrow();j++){
+        for(int j=J_out(0);j<(J_out(0)+1);j++){
+          thetabars_temp=thetabars(j,_);
         cbars_temp=cbars(j,_);
         arma::vec  thetabars_temp2(thetabars_temp.begin(), l1);
         arma::vec  cbars_temp2(cbars_temp.begin(), l1);
@@ -645,11 +632,11 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
       
       // Note that UB3A+UB3B =(max_New_LL_UB-max_LL_log_disp) +(New_LL_log_disp-LL_temp(J_out(0)))
       //                     =(max_New_LL_UB-max_LL_log_disp) +(New_LL_log_disp-New_LL(J_Out(0)))        
-            
+      
       //arma::vec New_LL2(New_LL.begin(),cbars.nrow());
-//      NumericVector LL_temp=log_P_diff+ New_LL;
-      NumericVector LL_temp=New_LL;
-      max_New_LL=max(LL_temp);
+      //      NumericVector LL_temp=log_P_diff+ New_LL;
+      //NumericVector LL_temp=New_LL;
+      //max_New_LL=max(LL_temp);
       
       // Modified UB3A 
       
@@ -702,8 +689,8 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
       
       disp_out[i]=dispersion;  
       beta_out(i,_)=out(0,_);
-//      beta_out(i,_)=sim_out(0,_);
-      weight_out[i]=max_New_LL;
+      //      beta_out(i,_)=sim_out(0,_);
+//      weight_out[i]=max_New_LL;
       
       
       if(test>=0) a1=1;
@@ -712,7 +699,7 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
       //  a1=1;
     }  
     
-//    Rcpp::Rcout << "iteration_Complete " << std::flush << i << std::endl;
+    //    Rcpp::Rcout << "iteration_Complete " << std::flush << i << std::endl;
     
   }
   
@@ -722,7 +709,5 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
                             Rcpp::Named("iters_out")=iters_out,Rcpp::Named("weight_out")=weight_out);  
   
   
-
+  
 }
-
-
