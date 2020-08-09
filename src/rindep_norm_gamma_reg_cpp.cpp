@@ -519,9 +519,6 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
   //  NumericMatrix cbars=Envelope["cbars"];
   
   
-  
-  
-  
   for(int i=0;i<n;i++){
     
     a1=0;
@@ -539,9 +536,9 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
       //      wt2b.print("updated weight");
       //      Rcpp::Rcout << "wt2 -should match wt2b" << std::flush << wt2 << std::endl;
       
-      arma::mat theta =Inv_f3_gaussian(transpose(cbars), y,x, mu, P, alpha, wt2);  
+      //arma::mat theta =Inv_f3_gaussian(transpose(cbars), y,x, mu, P, alpha, wt2);  
       //      theta.print("new thetabars");
-      thetabarsb=theta;
+      //thetabarsb=theta;
       
       //      Rcpp::Rcout << "thetabars_new - actual " << std::flush << thetabars << std::endl;
       
@@ -552,8 +549,6 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
       // Remove un-necessary parts and move outside of function
       
       // Simulate from discrete distribution
-      
-      
       
       U=R::runif(0.0, 1.0);
       a2=0;
@@ -592,7 +587,10 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
       
       
       arma::rowvec b_out2(b_out.begin(),l1,false);
-      NumericVector thetabars_temp=thetabars(J_out(0),_);
+      //NumericVector thetabars_temp=thetabars(J_out(0),_);
+      NumericVector thetabars_temp=thetabars_new(0,_); // Changed
+      
+      
       arma::vec  thetabars_temp2(thetabars_temp.begin(), l1);
       NumericVector cbars_temp=cbars(J_out(0),_);
       arma::vec  cbars_temp2(cbars_temp.begin(), l1);
@@ -633,7 +631,10 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
       
 //      for(int j=0;j<cbars.nrow();j++){
         for(int j=J_out(0);j<(J_out(0)+1);j++){
-          thetabars_temp=thetabars(j,_);
+//          thetabars_temp=thetabars(j,_);
+        thetabars_temp=thetabars_new(0,_); // Changed
+        
+        
         cbars_temp=cbars(j,_);
         arma::vec  thetabars_temp2(thetabars_temp.begin(), l1);
         arma::vec  cbars_temp2(cbars_temp.begin(), l1);
