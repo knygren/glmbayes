@@ -198,6 +198,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rindep_norm_gamma_reg_std_v4_cpp
+Rcpp::List rindep_norm_gamma_reg_std_v4_cpp(int n, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, Function f2, Rcpp::List Envelope, Rcpp::List gamma_list, Rcpp::List UB_list, Rcpp::CharacterVector family, Rcpp::CharacterVector link, int progbar);
+RcppExport SEXP _glmbayes_rindep_norm_gamma_reg_std_v4_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP f2SEXP, SEXP EnvelopeSEXP, SEXP gamma_listSEXP, SEXP UB_listSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP progbarSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< Function >::type f2(f2SEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type Envelope(EnvelopeSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type gamma_list(gamma_listSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type UB_list(UB_listSEXP);
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type family(familySEXP);
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type link(linkSEXP);
+    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
+    rcpp_result_gen = Rcpp::wrap(rindep_norm_gamma_reg_std_v4_cpp(n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar));
+    return rcpp_result_gen;
+END_RCPP
+}
 // glmb_Standardize_Model
 Rcpp::List glmb_Standardize_Model(NumericVector y, NumericMatrix x, NumericMatrix P, NumericMatrix bstar, NumericMatrix A1);
 RcppExport SEXP _glmbayes_glmb_Standardize_Model(SEXP ySEXP, SEXP xSEXP, SEXP PSEXP, SEXP bstarSEXP, SEXP A1SEXP) {
@@ -295,6 +319,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_rindep_norm_gamma_reg_std_cpp", (DL_FUNC) &_glmbayes_rindep_norm_gamma_reg_std_cpp, 12},
     {"_glmbayes_rindep_norm_gamma_reg_std_v2_cpp", (DL_FUNC) &_glmbayes_rindep_norm_gamma_reg_std_v2_cpp, 14},
     {"_glmbayes_rindep_norm_gamma_reg_std_v3_cpp", (DL_FUNC) &_glmbayes_rindep_norm_gamma_reg_std_v3_cpp, 14},
+    {"_glmbayes_rindep_norm_gamma_reg_std_v4_cpp", (DL_FUNC) &_glmbayes_rindep_norm_gamma_reg_std_v4_cpp, 14},
     {"_glmbayes_glmb_Standardize_Model", (DL_FUNC) &_glmbayes_glmb_Standardize_Model, 5},
     {"_glmbayes_rnnorm_reg_std_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_std_cpp, 12},
     {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 14},

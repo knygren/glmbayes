@@ -118,20 +118,11 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
     
   }
   
-  #print("RSS2_Post and RSS_Post2")
-  #print(RSS2_post)
-  #print(RSS_Post2)
-  
-  
+
   betastar=glmb_out1$coef.mode
   dispstar=rate2/(shape2-1)
   
-  print("betastar from optimization")
-  print(betastar)
-  print("dispstar from optimization")
-  print(dispstar)
-  
-    
+
   ## Get family functions for gaussian()  
   
   famfunc<-glmbfamfunc(gaussian())
@@ -285,6 +276,16 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   max_low=max(thetabar_const_low_apprx)
   max_upp=max(thetabar_const_upp_apprx)
+
+  print("max low and max upp")
+  print(max_low)
+  print(max_upp)
+  
+  max_low=max_low+0.1*(max_upp-max_low)
+  
+  print("max low adjusted")
+  print(max_low)
+  
   
   for(j in 1:gs){
     cbars_temp=as.matrix(cbars[j,1:ncol(x)],ncol=1)
@@ -299,8 +300,11 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   
   prob_factor=prob_factor/sum(prob_factor)
   
-  
   new_slope=(max_upp-max_low)/(upp-low)
+  
+  print("new_slope")
+  print(new_slope)
+  
   new_int=max_low-new_slope*low
   b1=(upp-low)
   c1=-log(upp/low)
@@ -337,13 +341,13 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   Env3=Env2
   Env3$PLSD=prob_factor
   
-  print("Starting Candidate Sampling using sample function")
-  cand1=sample(x=gs,size=n*413,replace=TRUE,prob=prob_factor)
+#  print("Starting Candidate Sampling using sample function")
+#  cand1=sample(x=gs,size=n*413,replace=TRUE,prob=prob_factor)
   
   #print(cand1)
   #print(length(cand1))
   
-  print("Finished Sampling using Sample function")
+#  print("Finished Sampling using Sample function")
   
   
     gamma_list_new=list(shape3=shape3,rate2=rate2,disp_upper=upp,disp_lower=low)
@@ -351,7 +355,8 @@ rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,fam
   UB_list_new=list(RSS_ML=RSS_ML,max_New_LL_UB=max_upp,
                    max_LL_log_disp=max_LL_log_disp,lm_log1=lm_log1,lm_log2=lm_log2, 
                    #log_P_diff=log_P_diff_new,
-                   lg_prob_factor=lg_prob_factor,lmc1=new_int,lmc2=new_slope,cand=cand1)
+                   lg_prob_factor=lg_prob_factor,lmc1=new_int,lmc2=new_slope)
+#                   ,cand=cand1)
   
   ## log_P_Diff should no longer be used in the same way!
   

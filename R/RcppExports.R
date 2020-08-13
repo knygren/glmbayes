@@ -41,6 +41,10 @@
     .Call('_glmbayes_rindep_norm_gamma_reg_std_v3_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar)
 }
 
+.rindep_norm_gamma_reg_std_V4_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar = 1L) {
+    .Call('_glmbayes_rindep_norm_gamma_reg_std_v4_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar)
+}
+
 .glmb_Standardize_Model_cpp <- function(y, x, P, bstar, A1) {
     .Call('_glmbayes_glmb_Standardize_Model', PACKAGE = 'glmbayes', y, x, P, bstar, A1)
 }
