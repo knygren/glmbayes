@@ -33,6 +33,15 @@ Prior_Setup<-function(formula,data=NULL, subset = NULL, na.action = na.fail,
   var_names=colnames(x)
   #nvar=length(object$coefficients)
   mu=matrix(0,nrow=nvar,ncol=1)
+  
+  if(var_names[1]=='(Intercept)'){
+    lm_out=lm(formula,data=mf,y=TRUE)
+    y=lm_out$y
+    mu[1,1]=mean(y)
+    
+  } 
+  
+  
   Sigma=as.matrix(diag(nvar))
   
   rownames(mu)=var_names

@@ -2,10 +2,22 @@
 % Please edit documentation in R/rIndependent_Normal_Gamma_reg.R
 \name{rindependent_norm_gamma_reg}
 \alias{rindependent_norm_gamma_reg}
+\alias{rindependent_norm_gamma_reg_v3}
 \alias{rindependent_norm_gamma_reg_v2}
 \title{The Bayesian Indendepent Normal-Gamma Regression Distribution}
 \usage{
 rindependent_norm_gamma_reg(
+  n,
+  y,
+  x,
+  prior_list,
+  offset = NULL,
+  weights = 1,
+  family = gaussian(),
+  max_disp_perc = 0.99
+)
+
+rindependent_norm_gamma_reg_v3(
   n,
   y,
   x,

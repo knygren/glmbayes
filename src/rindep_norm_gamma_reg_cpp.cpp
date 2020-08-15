@@ -17,6 +17,40 @@
 using namespace Rcpp;
 
 
+void progress_bar3(double x, double N)
+{
+  // how wide you want the progress meter to be
+  int totaldotz=40;
+  double fraction = x / N;
+  // part of the progressmeter that's already "full"
+  int dotz = round(fraction * totaldotz);
+  
+  Rcpp::Rcout.precision(3);
+  Rcout << "\r                                                                 " << std::flush ;
+  Rcout << "\r" << std::flush ;
+  Rcout << std::fixed << fraction*100 << std::flush ;
+  Rcout << "% [" << std::flush ;
+  int ii=0;
+  for ( ; ii < dotz;ii++) {
+    Rcout << "=" << std::flush ;
+  }
+  // remaining part (spaces)
+  for ( ; ii < totaldotz;ii++) {
+    Rcout << " " << std::flush ;
+  }
+  // and back to line begin 
+  
+  Rcout << "]" << std::flush ;
+  
+  // and back to line begin 
+  
+  Rcout << "\r" << std::flush ;
+  
+}
+
+
+
+
 // [[Rcpp::export(".rindep_norm_gamma_reg_std_cpp")]]
 
 Rcpp::List  rindep_norm_gamma_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
@@ -508,8 +542,21 @@ Rcpp::List  rindep_norm_gamma_reg_std_v3_cpp(int n,NumericVector y,NumericMatrix
   NumericMatrix logrt=Envelope["logrt"];
 
   
+  if(progbar==1){ Rcpp::Rcout << "Starting Simulation:" << std::endl;  };
+  
+  
+  
+  
   for(int i=0;i<n;i++){
+
+    Rcpp::checkUserInterrupt();
+    if(progbar==1){
+            progress_bar3(i, n-1);
+            if(i==n-1) {Rcpp::Rcout << "" << std::endl;}
+    }
     
+    
+        
     a1=0;
     iters_out[i]=1;  
     while(a1==0){
@@ -734,10 +781,20 @@ Rcpp::List  rindep_norm_gamma_reg_std_v4_cpp(int n,NumericVector y,NumericMatrix
   NumericVector PLSD=Envelope["PLSD"];
   NumericMatrix loglt=Envelope["loglt"];
   NumericMatrix logrt=Envelope["logrt"];
+
+  if(progbar==1){ Rcpp::Rcout << "Starting Simulation:" << std::endl;  };
   
   
   for(int i=0;i<n;i++){
+
+    Rcpp::checkUserInterrupt();
+    if(progbar==1){
+      progress_bar3(i, n-1);
+      if(i==n-1) {Rcpp::Rcout << "" << std::endl;}
+    }
     
+    
+        
     a1=0;
     iters_out[i]=1;  
     while(a1==0){
