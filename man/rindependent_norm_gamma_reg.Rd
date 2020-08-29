@@ -4,6 +4,7 @@
 \alias{rindependent_norm_gamma_reg}
 \alias{rindependent_norm_gamma_reg_v3}
 \alias{rindependent_norm_gamma_reg_v2}
+\alias{rindependent_norm_gamma_reg_v4}
 \title{The Bayesian Indendepent Normal-Gamma Regression Distribution}
 \usage{
 rindependent_norm_gamma_reg(
@@ -29,6 +30,17 @@ rindependent_norm_gamma_reg_v3(
 )
 
 rindependent_norm_gamma_reg_v2(
+  n,
+  y,
+  x,
+  prior_list,
+  offset = NULL,
+  weights = 1,
+  family = gaussian(),
+  max_disp_perc = 0.99
+)
+
+rindependent_norm_gamma_reg_v4(
   n,
   y,
   x,
