@@ -36,7 +36,7 @@ sum is used.  See \code{model.offset}.}
 
 \item{digits}{the number of significant digits to use when printing.}
 
-\item{...}{additional arguments to be passed to the low level
+\item{...}{For \code{lm()}: additional arguments to be passed to the low level
     regression fitting functions (see below).}
 }
 \value{

@@ -62,22 +62,7 @@ uses iteratively reweighted least squares (IWLS): the alternative \code{"model.f
 User-supplied fitting functions can be supplied either as a function or a character string naming a 
 function, with a function which takes the same arguments as \code{glm.fit}. If specified as a character string it is looked up from within the \pkg{stats} namespace.}
 
-\item{model}{logicals.  If \code{TRUE} the corresponding
-    components of the fit (the model frame, the model matrix, the
-    response, the QR decomposition) are returned.
-  }
-
-\item{x}{logicals.  If \code{TRUE} the corresponding
-    components of the fit (the model frame, the model matrix, the
-    response, the QR decomposition) are returned.
-  }
-
-\item{y}{logicals.  If \code{TRUE} the corresponding
-    components of the fit (the model frame, the model matrix, the
-    response, the QR decomposition) are returned.
-  }
-
-\item{qr}{logicals.  If \code{TRUE} the corresponding
+\item{model, x, y, qr}{logicals.  If \code{TRUE} the corresponding
     components of the fit (the model frame, the model matrix, the
     response, the QR decomposition) are returned.
   }
@@ -95,7 +80,7 @@ matching those of the response.  One or more \code{offset} terms can be
 included in the formula instead or as well, and if more than one are specified their 
 sum is used.  See \code{model.offset}.}
 
-\item{...}{additional arguments to be passed to the low level
+\item{...}{For \code{lm()}: additional arguments to be passed to the low level
     regression fitting functions (see below).}
 
 \item{digits}{the number of significant digits to use when printing.}

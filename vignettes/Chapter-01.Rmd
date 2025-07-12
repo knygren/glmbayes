@@ -46,7 +46,7 @@ glm.D93 <- glm(counts ~ outcome + treatment,
               family = poisson())
 ```
 
-To use the *glmb* function, we first sue a call to a function *Prior_Setup" to initialize the prior and to get the variable names needed.
+To use the *glmb* function, we first use a call to a function *Prior_Setup" to initialize the prior and to get the variable names needed.
 
 ```{r Prior_Setup,results = "hide"}
 ## Using glmb
@@ -56,9 +56,8 @@ mu=ps$mu
 V=ps$Sigma
 ```
 
-We next check what whether using the initilized values for the prior would yield a model where 
-the data is consistent with the prior (it typically won't be so this step can/should normally be 
-skipped).
+We next check whether using the initilized values for the prior would yield a model where 
+the data is consistent with the prior.
 
 ```{r Prior_Check1,results = "hide"}
 # Step2A: Check the Prior
@@ -103,11 +102,11 @@ print(glm.D93)
 print(glmb.D93)
 ```
 
-In addition to the posterior means, the *glmb* printed output also returned three pieces of information that are similar to (but not quite the same) as the classical output. The "Effective Number of Parameters" should in general be close to (but not exactly the same) as the number of parameters estimated while the Expected Residual Deviance in general will be higher than the corresponding maximum likelihood estimate for the Residual Deviance (since the latter is designed to minimize it). Finally, the DIC is a Baysesian version of the AIC. These measures will be discussed in greater detail in one of our later vingettes.
+In addition to the posterior means, the *glmb* printed output also returned three pieces of information that are similar to (but not quite the same) as the classical output. The "Effective Number of Parameters" should in general be close to (but not exactly the same) as the number of parameters estimated while the Expected Residual Deviance in general will be higher than the corresponding maximum likelihood estimate for the Residual Deviance (since the latter is designed to minimize it). Finally, the DIC is essentially a Bayesian version of the AIC. These measures will be discussed in greater detail in one of our later vignettes.
 
 **Methods Available**
 
-In addition to the basic print function output, the glmb function returns an object with an assigned class "glmb" for which a number of generic functions (or methods) are available. The class "glmb" inherits from "glm" and "lm" and a such many functions for those classes work directly for "glmb". For some of the instances where the inherited methods fail and/or could produce incorrect results, we have implemented methods specifically for the *glmb* class. The methods for classes *lm*, *glm*, and *glmb* are listed below. We will use mant of these later in this vignette.
+In addition to the basic print function output, the glmb function returns an object with an assigned class "glmb" for which a number of generic functions (or methods) are available. The class "glmb" inherits from "glm" and "lm" and as such many functions for those classes work directly for "glmb". For some of the instances where the inherited methods fail and/or could produce incorrect results, we have implemented methods specifically for the *glmb* class. The methods for classes *lm*, *glm*, and *glmb* are listed below. We will use many of these later in this vignette.
 
 ```{r lm_Methods}
 ## Methods for class "lm"
@@ -139,7 +138,7 @@ summary(glm.D93)
 
 *glmb summary output*
 
-The summary for the glmb function follow a similar structure but adds a table containing information related to the prior and the maximum likelihood in above the table with the means for the estimated Bayesian coefficients. The output below the main table with coefficients is also modified to contain similar (but slightly different) pieces of information (the details of which are discussed elsewhere).
+The summary for the glmb function follow a similar structure but adds a table containing information related to the prior and the maximum likelihood above the table with the means for the estimated Bayesian coefficients. The output below the main table with coefficients is also modified to contain similar (but slightly different) pieces of information (the details of which are discussed elsewhere).
 
 ```{r glmb_summary}
 ## summary output for the "glm" class

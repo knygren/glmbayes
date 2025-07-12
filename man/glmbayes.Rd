@@ -2,6 +2,7 @@
 % Please edit documentation in R/glmbayes-package.R
 \docType{package}
 \name{glmbayes}
+\alias{glmbayes-package}
 \alias{glmbayes}
 \title{Bayesian Generalized Linear Models (iid Samples)}
 \description{

@@ -10,17 +10,7 @@ Inv_f3_gaussian(cbars, y, x, mu, P, alpha, wt)
 \item{cbars}{Gradient vectors desired for new thetabars. Typically the output of an initial call to 
 Envelopebuild.}
 
-\item{y}{For \code{glm}:
-    logical values indicating whether the response vector and model
-    matrix used in the fitting process should be returned as components
-    of the returned value.
-
-    For \code{glm.fit}: \code{x} is a design matrix of dimension
-    \code{n * p}, and \code{y} is a vector of observations of length
-    \code{n}.
-  }
-
-\item{x}{For \code{glm}:
+\item{x, y}{For \code{glm}:
     logical values indicating whether the response vector and model
     matrix used in the fitting process should be returned as components
     of the returned value.

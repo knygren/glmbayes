@@ -18,15 +18,18 @@ Prior_Setup(
 \item{formula}{a model \code{\link[stats]{formula}} or \code{\link[stats]{terms}}
     object or an \R object.}
 
-\item{data}{a data.frame, list or environment (or object
-    coercible by \code{\link{as.data.frame}} to a data.frame),
+\item{data}{a data frame, list or environment (or object
+    coercible by \code{\link{as.data.frame}} to a data frame),
     containing the variables in \code{formula}.  Neither a matrix nor an
     array will be accepted.}
 
-\item{subset}{a specification of the rows to be used: defaults to all
-    rows. This can be any valid indexing vector (see
-    \code{\link{[.data.frame}}) for the rows of \code{data} or if that is not
-    supplied, a data frame made up of the variables used in \code{formula}.}
+\item{subset}{a specification of the rows/observations to be used:
+    defaults to all. This can be any valid indexing vector (see
+    \code{\link{[.data.frame}}) for the rows of \code{data}, or
+    a (logical) expression using variables in \code{data} or
+    if that is not supplied, in
+    \code{formula}.  (See additional details about how this argument
+    interacts with data-dependent bases under \sQuote{Details} below.)}
 
 \item{na.action}{how \code{NAs} are treated. The default is first, any \code{\link{na.action}} attribute of 
 data, second a \code{na.action} setting of \link{options}, and third \code{na.fail} if that is unset. 
@@ -71,8 +74,6 @@ V=ps$Sigma
 print(ps)
 }
 \seealso{
-
-
 Other prior utility Functions:
 \code{\link{Prior_Check}()}
 }

@@ -163,7 +163,7 @@ Age_Diff=ref_age2-ref_age1
 
 # Setting prior point estimates, associated credible intervals, and correlation
 
-We are now ready to specify our two point estimates with associated prior credible intervals and an assumed correlation (on the link scale). For the first reference age (13), we will provide a point estimate of 0.5 (50%) for the percentage of girls who have had their first period by age 13.  To account for the possibility that this percentage was a bit lower in Warsaw at the time data was collected, we will assumed that the lower end of a 90% credible interval is at 0.3 (30%).  
+We are now ready to specify our two point estimates with associated prior credible intervals and an assumed correlation (on the link scale). For the first reference age (13), we will provide a point estimate of 0.5 (50%) for the percentage of girls who have had their first period by age 13.  To account for the possibility that this percentage was a bit lower in Warsaw at the time data was collected, we will assume that the lower end of a 90% credible interval is at 0.3 (30%).  
 
 For the second reference age (15), we have not accessed as much meaningful data from other sources to inform the prior estimate, but we have a general sense that *"most"* girls likely have had their period by that age. Based on this, we select 0.9 (90%) as a prior point estimate and select 0.7 (70%) as the lower end of our associated credible interval.
 
@@ -321,7 +321,7 @@ This table gives a side-by-side comparison of the prior and the data driven maxi
 
 *Interpreting the "Bayesian Estimates Based on 1000 iid draws table*
 
-This table gives more information related to the estimates seen in the print output. We now have a view of both the posterior mode and posterior mean. If these were substantially different, it would indicated that the posterior density had substantial asymmetry.  The posterior standard deviation will generally be smaller than both the prior and the likelihood standard deviations.  In this case, the posterior standard deviation for the *intercept* appears to be nearly the same as the likelihood standard deviation while the posterior standard deviation for *Age2* is substantially smaller (suggesting some weight on the prior). 
+This table gives more information related to the estimates seen in the print output. We now have a view of both the posterior mode and posterior mean. If these were substantially different, it would indicate that the posterior density had substantial asymmetry.  The posterior standard deviation will generally be smaller than both the prior and the likelihood standard deviations.  In this case, the posterior standard deviation for the *intercept* appears to be nearly the same as the likelihood standard deviation while the posterior standard deviation for *Age2* is substantially smaller (suggesting some weight on the prior). 
 
 The tail probability gives the probability (under the posterior density) of the true coefficient being at least as far away from the center as the prior point estimate.  In this case, there is ~44% probability of the intercept being greater than 0 but only a ~0.01% chance that the Age2 coefficient is smaller than the prior point estimate of 1.098.  The latter is flagged as highly significant suggesting that the true slope coefficient is substantially larger than the prior point estimate. 
 
