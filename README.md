@@ -1,6 +1,5 @@
 # glmbayes
 
-<<<<<<< HEAD
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/knygren/glmbayes?label=version)
 ![License: GPL-3](https://img.shields.io/badge/license-GPL--3-blue.svg)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/knygren/glmbayes/R-CMD-check.yaml?label=R%20CMD%20Check)
@@ -42,7 +41,7 @@ library(glmbayes)
 # Setup prior
 ps <- Prior_Setup(counts ~ outcome + treatment)
 
->>>>>>> f98b84a9ca45edd79584a165efa5b3000c8fabc1
+
 # Fit Bayesian GLM
 fit <- glmb(counts ~ outcome + treatment,
             family = poisson(),
