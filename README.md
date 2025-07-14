@@ -1,5 +1,6 @@
 # glmbayes
 
+<<<<<<< HEAD
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/knygren/glmbayes?label=version)
 ![License: GPL-3](https://img.shields.io/badge/license-GPL--3-blue.svg)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/knygren/glmbayes/R-CMD-check.yaml?label=R%20CMD%20Check)
@@ -23,6 +24,25 @@ library(glmbayes)
 # Setup prior
 ps <- Prior_Setup(counts ~ outcome + treatment)
 
+=======
+**glmbayes** provides independent and identically distributed (iid) samples for Bayesian Generalized Linear Models (GLMs), serving as a Bayesian counterpart to R’s classical `glm()` function. It supports Gaussian, Poisson, Binomial, and Gamma families using log-concave likelihoods and leverages accept-reject sampling via likelihood subgradients (Nygren & Nygren, 2006).
+
+## 📦 Installation
+
+```r
+# Install the beta release from GitHub
+devtools::install_github("knygren/glmbayes@v0.1.0-beta")
+```
+
+## 🧪 Minimal Working Example
+
+```r
+library(glmbayes)
+
+# Setup prior
+ps <- Prior_Setup(counts ~ outcome + treatment)
+
+>>>>>>> f98b84a9ca45edd79584a165efa5b3000c8fabc1
 # Fit Bayesian GLM
 fit <- glmb(counts ~ outcome + treatment,
             family = poisson(),
