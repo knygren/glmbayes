@@ -11,7 +11,7 @@
 #' \item{model}{The model frame from \code{object} if it exists}
 #' \item{x}{The design matrix from \code{object} if it exists}
 #' @family prior
-#' @seealso 
+
 
 #' @example inst/examples/Ex_Prior_Setup.R
 #' @export
@@ -67,7 +67,6 @@ Prior_Setup<-function(formula,data=NULL, subset = NULL, na.action = na.fail,
 #' prior and maximum likelihood estimate divided by the length of the sum of half of the two intervals 
 #' (where normality is assumed)
 #' @family prior
-#' @seealso 
 #' @example inst/examples/Ex_Prior_Check.R
 #' @export
 #' @rdname Prior_Check

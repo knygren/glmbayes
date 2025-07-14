@@ -93,8 +93,8 @@ predict.glmb<-function(object,newdata=NULL,type="link",
     newdata_frame=try(model.frame(formula(object$model),newdata),silent=TRUE)
     
     #if(class(newdata_frame)=="data.frame") print("newdata built a model frame")    
-    if(class(newdata_frame)=="try-error") newdata_ok=0    
-    
+#    if(class(newdata_frame)=="try-error") newdata_ok=0    
+    if (inherits(newdata_frame, "try-error")) newdata_ok=0
 
     ## Attempt comparison of newdata_frame to original_frame
     ## This should pass if all variables (including dependent variables) are contained in 

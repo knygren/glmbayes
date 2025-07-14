@@ -1,3 +1,5 @@
+Yaml
+
 ---
 title: "Chapter 4: Reviewing Model Predictions, Deviance Residuals and Model Statistics"
 author: "Kjell Nygren"
@@ -595,9 +597,9 @@ summary(glmb.out4)
 
 ## Comparing the DIC Statistics
 
-The Deviance Information Criterion (DIC) statistic is a Bayesian version of the AIC useful to compare different model specifications for the same likelihood function. Generally, smaller DIC statistic are preferred. Like other information criteria, the DIC favors models with a better fit but includes a penalty for model complexity. The DIC is computed from the Monte Carlo simulation output.  In addition to the DIC itself, the *extractAIC* function provides an "expected number of parameter" output (which tends to be more relevant for Hierarchical models).
+The Deviance Information Criterion (DIC) statistic is a Bayesian version of the AIC useful to compare different model specifications for the same likelihood function. Generally, smaller DIC statistic are preferred. Like other information criteria, the DIC favors models with a better but includes a penalty for model complexity. The DIC is computed from the Monte Carlo simulation output.  In addition to the DIC itself, the *extractAIC* function provides an "expected number of parameter" output (which tends to be more relevant for Hierarchical models).
 
-As we can see from the below output, the DIC for the two Clog-Log models are much worse than for the other two models suggesting they do a worse job of approximating the relationship between age and the percentage of girls who had experienced their first period. The difference in the DIC between the Logit and Probit models are smaller although the Probit model appears to have the lower DIC. Below the DIC table, we also provide the same kind of output from the Classical models and the associated AIC, which shows a similar pattern.
+As we can see from the below output, the DIC for the two Clog-Log models are much worse than for the other two models suggesting they do a worse job of approximating the relationship between age and the percentage of girls who had experienced their first period. The difference in the DIC between the Logit and Probit models are smaller although the Probit model appears to have the lower DIC. Below the DIC table, the also provide the same kind of output from the Classical models and the associated AIC, which shows a similar pattern.
 
 ```{r Compare_DIC}
 DIC_Out=rbind(

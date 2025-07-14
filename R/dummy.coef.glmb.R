@@ -16,7 +16,7 @@
 #' contrasts, as the missing coefficients are by definition zero. 
 #' @return A list giving for each term the draws for the coefficients. 
 #' @example inst/examples/Ex_dummy.coef.glmb.R
-#' @exportClass  dummy.coef.glmb
+# #' @exportClass  dummy.coef.glmb # temporarily disabled -no current exportclass
 #' @method dummy.coef glmb
 #' @export
 

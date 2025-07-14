@@ -1,3 +1,5 @@
+#' @keywords internal
+"_PACKAGE"
 #' Bayesian Generalized Linear Models (iid Samples)
 #'
 #' Generates iid samples for Bayesian Generalized Linear Models.
@@ -72,11 +74,11 @@
 #' 
 #' 
 #' @example inst/examples/Ex_glmbayes-package.R
-#' @docType package
 #' @author Kjell Nygren
 #' @import stats Rcpp RcppArmadillo
 #' @importFrom Rcpp evalCpp
 #' @importFrom MASS mvrnorm
 #' @useDynLib glmbayes
 #' @name glmbayes
-NULL
+#' @keywords internal
+PackageOverview <- NULL

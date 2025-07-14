@@ -1,3 +1,5 @@
+Yaml
+
 ---
 title: "Chapter 9: Using Two-Block Gibbs Sampling for Hierarchical Bayesian Models: Part 1"
 output: rmarkdown::html_vignette

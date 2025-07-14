@@ -1,3 +1,5 @@
+Yaml
+
 ---
 title: "Chapter 7: Using Custom Prior Families"
 output: rmarkdown::html_vignette

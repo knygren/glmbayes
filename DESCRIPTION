@@ -10,9 +10,11 @@ License: GPL-2
 Imports:
     stats, Rcpp (>= 1.0.4.6), RcppArmadillo
 LinkingTo: Rcpp, RcppArmadillo
-Depends: MASS
+Depends: MASS, R (>= 3.5.0)
 Suggests:
     knitr,
     rmarkdown
+SystemRequirements: Optional OpenCL support. If available, GPU acceleration will be used; otherwise, computation runs on CPU. 
+Encoding: UTF-8
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr

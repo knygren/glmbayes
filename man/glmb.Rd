@@ -123,7 +123,7 @@ can be useful.}
 \code{glmb} returns an object of class \code{"glmb"}. The function \code{summary} (i.e., 
 \code{\link{summary.glmb}}) can be used to obtain or print a summary of the results.  The generic accessor functions 
 \code{\link{coefficients}}, \code{\link{fitted.values}}, \code{\link{residuals}}, and \code{\link{extractAIC}} can be used 
-to extract various useful features of the value returned by code{\link{glmb}}.
+to extract various useful features of the value returned by \code{\link{glmb}}.
 
 An object of class \code{"glmb"} is a list containing at least the following components:
 \item{glm}{an object of class \code{"glm"} containing the output from a call to the function \code{\link{glm}}}

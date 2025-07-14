@@ -1,3 +1,5 @@
+Yaml
+
 ---
 title: "Chapter 1: Getting started with glmbayes"
 author: "Kjell Nygren"
@@ -313,17 +315,3 @@ nobs(glmb.D93)
 *show*
 
 The show method returns the same output as the print function
-
-```{r glm show}
-## show for the glm function
-show(glm.D93)
-```
-
-```{r glmb show}
-## show for the glm function
-## works without a "glmb" class specific generic function
-show(glmb.D93)
-```
-
-
-

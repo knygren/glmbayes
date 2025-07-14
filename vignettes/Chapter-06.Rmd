@@ -1,3 +1,5 @@
+Yaml
+
 ---
 title: "Chapter 6: Estimating Bayesian Linear Models"
 output: rmarkdown::html_vignette

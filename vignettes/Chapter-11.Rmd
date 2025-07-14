@@ -1,3 +1,5 @@
+Yaml
+
 ---
 title: "Chapter 11: An overview of the glmbayes examples"
 output: rmarkdown::html_vignette

@@ -31,7 +31,7 @@
 #' @return \code{glmb} returns an object of class \code{"glmb"}. The function \code{summary} (i.e., 
 #' \code{\link{summary.glmb}}) can be used to obtain or print a summary of the results.  The generic accessor functions 
 #' \code{\link{coefficients}}, \code{\link{fitted.values}}, \code{\link{residuals}}, and \code{\link{extractAIC}} can be used 
-#' to extract various useful features of the value returned by code{\link{glmb}}.
+#' to extract various useful features of the value returned by \code{\link{glmb}}.
 #' 
 #' An object of class \code{"lmb"} is a list containing at least the following components:
 
@@ -136,7 +136,7 @@
 #' @example inst/examples/Ex_lmb.R
 #' 
 #' @export lmb
-#' @exportClass lmb
+# #' @exportClass lmb  # temporarily disabled  - no current exportclass
 
 
 lmb <- function ( formula, pfamily, n=1000,data, subset, weights, na.action,method = "qr", model = TRUE, x = TRUE, 
