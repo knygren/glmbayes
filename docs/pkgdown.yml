@@ -1,0 +1,18 @@
+pandoc: '3.4'
+pkgdown: 2.1.3
+pkgdown_sha: ~
+articles:
+  chapter-01: chapter-01.html
+  Chapter-02: Chapter-02.html
+  Chapter-03: Chapter-03.html
+  Chapter-04: Chapter-04.html
+  Chapter-05: Chapter-05.html
+  Chapter-06: Chapter-06.html
+  Chapter-07: Chapter-07.html
+  Chapter-08: Chapter-08.html
+  Chapter-09: Chapter-09.html
+  Chapter-10: Chapter-10.html
+  Chapter-11: Chapter-11.html
+  Chapter-A1: Chapter-A1.html
+  Chapter-A2: Chapter-A2.html
+last_built: 2025-07-15T00:22Z

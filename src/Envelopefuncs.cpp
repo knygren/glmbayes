@@ -235,8 +235,14 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
 
   cbars3=cbars2;
   
-  Set_Grid_C2(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
+  // July 2024 - Parallelization Implementation in steps
   
+  // 1) Set_Grid_C2_pointwise changes loop to enable parallel processing (suggested by Copilot)
+  
+//  Set_Grid_C2(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
+  Set_Grid_C2_pointwise(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
+  
+    
   setlogP_C2(logP,NegLL,cbars,G3,LLconst);
   
   NumericMatrix::Column logP2 = logP( _, 1);

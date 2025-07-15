@@ -12,10 +12,109 @@
 
 using namespace Rcpp;
 
+/// New Pointwise implementation (suggested by COPILOT)
+
+void Set_Grid_C2_pointwise(
+    NumericMatrix GIndex,
+    NumericMatrix cbars,
+    NumericMatrix Lint,
+    NumericMatrix Down,
+    NumericMatrix Up,
+    NumericMatrix lglt,
+    NumericMatrix lgrt,
+    NumericMatrix lgct,
+    NumericMatrix logU,
+    NumericMatrix logP
+) {
+  int nGrid  = GIndex.nrow();
+  int kParam = GIndex.ncol();
+  
+  // zero‐initialize logP
+  for (int j = 0; j < nGrid; ++j) {
+    logP(j, 0) = 0.0;
+  }
+  
+  for (int j = 0; j < nGrid; ++j) {
+    double logPj = 0.0;
+    
+    for (int i = 0; i < kParam; ++i) {
+      int code = static_cast<int>(GIndex(j, i));
+      double cb  = cbars(j, i);
+      
+      // 1. Determine [down, up]
+      double down, up;
+      if (code == 1) {
+        down = R_NegInf;
+        up   = Lint(0, i) + cb;
+      }
+      else if (code == 2) {
+        down = Lint(0, i) + cb;
+        up   = Lint(1, i) + cb;
+      }
+      else if (code == 3) {
+        down = Lint(1, i) + cb;
+        up   = R_PosInf;
+      }
+      else {  // code == 4
+        down = R_NegInf;
+        up   = R_PosInf;
+      }
+      Down(j, i) = down;
+      Up(j,   i) = up;
+      
+      // 2. Compute CDFs and log‐CDFs
+      // P(Z <= up), log P(Z <= up)
+      double p_up_nl    = R::pnorm(up,   0.0, 1.0, /*lower_tail=*/ true,  /*log_p=*/ false);
+      double logp_up    = R::pnorm(up,   0.0, 1.0, /*lower_tail=*/ true,  /*log_p=*/ true);
+      
+      // P(Z > down), log P(Z > down)
+      double p_down_gt  = R::pnorm(down, 0.0, 1.0, /*lower_tail=*/ false, /*log_p=*/ false);
+      double logp_down_gt = R::pnorm(down, 0.0, 1.0, /*lower_tail=*/ false, /*log_p=*/ true);
+      
+      // log‐tails for pure lower/upper
+      lglt(j, i) = logp_up;         // log P(Z <= up)
+      lgrt(j, i) = logp_down_gt;   // log P(Z >  down)
+      
+      // 3. Stable mid‐interval probability
+      // p_mid = P(down < Z <= up)
+      double p_mid;
+      double g1 = -down;
+      double g2 =  up;
+      
+      if (g1 >= g2) {
+        // use P(Z <= up) * (1 - exp(log P(Z<=down) - log P(Z<=up)))
+        double logp_down_le = R::pnorm(down, 0.0,1.0, /*lower_tail=*/ true, /*log_p=*/ true);
+        p_mid = p_up_nl * (1.0 - exp(logp_down_le - logp_up));
+      } else {
+        // use P(Z > down) * (1 - exp(log P(Z>up)  - log P(Z>down)))
+        double logp_up_gt = R::pnorm(up, 0.0,1.0, /*lower_tail=*/ false, /*log_p=*/ true);
+        p_mid = p_down_gt * (1.0 - exp(logp_up_gt - logp_down_gt));
+      }
+      
+      // log of the mid‐interval
+      double logp_mid = (p_mid > 0.0) ? std::log(p_mid) : R_NaReal;
+      lgct(j, i) = logp_mid;
+      
+      // 4. Choose the correct log‐density for this cell
+      double uji = 0.0;
+      if      (code == 1) uji = logp_up;
+      else if (code == 2) uji = logp_mid;
+      else if (code == 3) uji = logp_down_gt;
+      // code == 4 ⇒ uji = 0
+      
+      logU(j, i)  = uji;
+      logPj      += uji;
+    }
+    
+    logP(j, 0) = logPj;
+  }
+}
+
+
 // Set_Grid creates new objects and returns them is a list
 // Set_Grid_C is likely an intermediate implementation that takes objects as inputs 
 // and the returns them
-// Set_Grid_C2 take exising allocated objects and populates them
+// Set_Grid_C2 take existing allocated objects and populates them
 // In cases where the function is called repeatedly the last approach is preferred
 
 void Set_Grid_C2(Rcpp::NumericMatrix GIndex,  

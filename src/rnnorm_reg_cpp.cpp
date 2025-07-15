@@ -486,7 +486,10 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   if(n==1){
     Envelope=EnvelopeBuild_c(bstar2_temp, A_temp,y, x2_temp,mu2_temp,
                              P2_temp,alpha,wt2,family,link,Gridtype, n,false);
-  }
+
+
+    
+      }
   
   if(n>1){
     Envelope=EnvelopeBuild_c(bstar2_temp, A_temp,y, x2_temp,mu2_temp,
