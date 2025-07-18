@@ -248,7 +248,7 @@ NumericVector  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix 
 //using namespace Rcpp;
 //using namespace arma;
 
-NumericVector f2_binomial_logit_arma(NumericMatrix b, NumericVector y,
+arma::vec f2_binomial_logit_arma(NumericMatrix b, NumericVector y,
                                 NumericMatrix x, NumericMatrix mu,
                                 NumericMatrix P, NumericVector alpha,
                                 NumericVector wt, int progbar = 0) {
@@ -263,10 +263,13 @@ NumericVector f2_binomial_logit_arma(NumericMatrix b, NumericVector y,
   arma::colvec xb2(xb.begin(), l1, false);
   
   NumericVector yy(l1);
-  NumericVector res(m1);
+//  NumericVector res(m1);
   NumericMatrix bmu(l2, 1);
   arma::mat mu2(mu.begin(), l2, 1, false);
   arma::mat bmu2(bmu.begin(), l2, 1, false);
+
+  arma::vec res2(m1);  // Owning allocation
+  
   
   for (int i = 0; i < m1; i++) {
     Rcpp::checkUserInterrupt();
@@ -291,11 +294,11 @@ NumericVector f2_binomial_logit_arma(NumericMatrix b, NumericVector y,
     yy=-dbinom_glmb(y,wt,xb,true);
     
     
-    res(i) =std::accumulate(yy.begin(), yy.end(), res1);
-    
+    //res(i) =std::accumulate(yy.begin(), yy.end(), res1);
+    res2(i) = std::accumulate(yy.begin(), yy.end(), res1);
   }
   
-  return res;
+  return res2;
 }
 
 
@@ -516,7 +519,7 @@ NumericVector  f2_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix
 
 
 
-NumericVector  f2_binomial_probit_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
+arma::vec  f2_binomial_probit_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
   
   // Get dimensions of x - Note: should match dimensions of
@@ -545,11 +548,12 @@ NumericVector  f2_binomial_probit_arma(NumericMatrix b,NumericVector y, NumericM
   // Moving Loop inside the function is key for speed
   
   NumericVector yy(l1);
-  NumericVector res(m1);
+//  NumericVector res(m1);
   NumericMatrix bmu(l2,1);
   
   arma::mat mu2(mu.begin(), l2, 1, false); 
   arma::mat bmu2(bmu.begin(), l2, 1, false); 
+  arma::vec res2(m1);  // Owning allocation
   
   double res1=0;
   
@@ -578,11 +582,11 @@ NumericVector  f2_binomial_probit_arma(NumericMatrix b,NumericVector y, NumericM
     yy=-dbinom_glmb(y,wt,xb,true);
     
     
-    res(i) =std::accumulate(yy.begin(), yy.end(), res1);
-    
+    //res(i) =std::accumulate(yy.begin(), yy.end(), res1);
+    res2(i) = std::accumulate(yy.begin(), yy.end(), res1);
   }
   
-  return res;      
+  return res2;      
 }
 
 
@@ -812,7 +816,7 @@ NumericVector  f2_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatri
 
 
 
-NumericVector  f2_binomial_cloglog_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
+arma::vec  f2_binomial_cloglog_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
   
   // Get dimensions of x - Note: should match dimensions of
@@ -841,11 +845,12 @@ NumericVector  f2_binomial_cloglog_arma(NumericMatrix b,NumericVector y, Numeric
   // Moving Loop inside the function is key for speed
   
   NumericVector yy(l1);
-  NumericVector res(m1);
+//  NumericVector res(m1);
   NumericMatrix bmu(l2,1);
   
   arma::mat mu2(mu.begin(), l2, 1, false); 
   arma::mat bmu2(bmu.begin(), l2, 1, false); 
+  arma::vec res2(m1);  // Owning allocation
   
   double res1=0;
   
@@ -876,11 +881,12 @@ NumericVector  f2_binomial_cloglog_arma(NumericMatrix b,NumericVector y, Numeric
     yy=-dbinom_glmb(y,wt,xb,true);
     
     
-    res(i) =std::accumulate(yy.begin(), yy.end(), res1);
+    //res(i) =std::accumulate(yy.begin(), yy.end(), res1);
+    res2(i) = std::accumulate(yy.begin(), yy.end(), res1);
     
   }
   
-  return res;      
+  return res2;      
 }
 
 

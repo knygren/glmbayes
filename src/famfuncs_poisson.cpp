@@ -159,7 +159,7 @@ NumericVector  f2_poisson(NumericMatrix b,NumericVector y, NumericMatrix x,Numer
 }
 
 
-NumericVector  f2_poisson_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
+arma::vec  f2_poisson_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
 {
   
   // Get dimensions of x - Note: should match dimensions of
@@ -188,12 +188,15 @@ NumericVector  f2_poisson_arma(NumericMatrix b,NumericVector y, NumericMatrix x,
   // Moving Loop inside the function is key for speed
   
   NumericVector yy(l1);
-  NumericVector res(m1);
+//  NumericVector res(m1);
   NumericMatrix bmu(l2,1);
   
   arma::mat mu2(mu.begin(), l2, 1, false); 
   arma::mat bmu2(bmu.begin(), l2, 1, false); 
+  //arma::vec res2(res.begin(), m1, false);  // Shallow view into res
   
+  arma::vec res2(m1);  // Owning allocation
+
   double res1=0;
   
   
@@ -222,11 +225,13 @@ NumericVector  f2_poisson_arma(NumericMatrix b,NumericVector y, NumericMatrix x,
       yy[j]=yy[j]*wt[j];  
     }
     
-    res(i) =std::accumulate(yy.begin(), yy.end(), res1);
-    
+  //  res(i) =std::accumulate(yy.begin(), yy.end(), res1);
+      res2(i) = std::accumulate(yy.begin(), yy.end(), res1);  
   }
   
-  return res;      
+//  return res;      
+  return res2;      
+  
 }
 
 

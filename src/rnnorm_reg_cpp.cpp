@@ -332,6 +332,7 @@ struct rnnorm_reg_worker : public Worker {
     arma::rowvec        cbartemp2(cbartemp_buf.data(), l1, false);
 
     
+    
     //NumericVector cbartemp=cbars(0,_);
     //arma::rowvec cbartemp2(cbartemp.begin(),l1,false);
     
@@ -343,8 +344,9 @@ struct rnnorm_reg_worker : public Worker {
 
     
     arma::mat testtemp2(1, 1);  // Allocated directly on the heap
-    NumericVector       testll(1);
-
+//    NumericVector       testll(1);
+    arma::vec testll2(1, arma::fill::none);  // Uninitialized vector of size m1
+    
     /////////////////////////////////////////////////////////
     
 
@@ -410,40 +412,49 @@ struct rnnorm_reg_worker : public Worker {
                     
           // compute testll for all families/links
           if (fam2 == "binomial") {
-            if (lnk2 == "logit")      testll = f2_binomial_logit(btemp,y,x,mu,P,alpha,wt,0);
+//            if (lnk2 == "logit")      testll = f2_binomial_logit(btemp,y,x,mu,P,alpha,wt,0);
+            if (lnk2 == "logit")      testll2 = f2_binomial_logit(btemp,y,x,mu,P,alpha,wt,0);
             //if (lnk2 == "logit")      testll = f2_binomial_logit_arma(btemp,y,x,mu,P,alpha,wt,0);
             
                     //else if (lnk2 == "probit") testll = f2_binomial_probit(btemp,y,x,mu,P,alpha,wt,0);
-                    else if (lnk2 == "probit") testll = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
-//                    else                       testll = f2_binomial_cloglog(btemp,y,x,mu,P,alpha,wt,0);
-                    else                       testll = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
+//                    else if (lnk2 == "probit") testll = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
+                    else if (lnk2 == "probit") testll2 = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
+                    //                    else                       testll = f2_binomial_cloglog(btemp,y,x,mu,P,alpha,wt,0);
+//                    else                       testll = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
+                    else                       testll2 = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
           }
           else if (fam2 == "quasibinomial") {
 //            if (lnk2 == "logit")      testll = f2_binomial_logit(btemp,y,x,mu,P,alpha,wt,0);
-            if (lnk2 == "logit")      testll = f2_binomial_logit_arma(btemp,y,x,mu,P,alpha,wt,0);
+            if (lnk2 == "logit")      testll2 = f2_binomial_logit_arma(btemp,y,x,mu,P,alpha,wt,0);
 //            else if (lnk2 == "probit") testll = f2_binomial_probit(btemp,y,x,mu,P,alpha,wt,0);
-            else if (lnk2 == "probit") testll = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
-//            else                       testll = f2_binomial_cloglog(btemp,y,x,mu,P,alpha,wt,0);
-            else                       testll = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
+//            else if (lnk2 == "probit") testll = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
+            else if (lnk2 == "probit") testll2 = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
+            //            else                       testll = f2_binomial_cloglog(btemp,y,x,mu,P,alpha,wt,0);
+//            else                       testll = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
+            else                       testll2 = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
           }
           else if (fam2 == "poisson"   || fam2 == "quasipoisson") {
 
 //            testll = f2_poisson(btemp,y,x,mu,P,alpha,wt,0);
-            testll = f2_poisson_arma(btemp,y,x,mu,P,alpha,wt,0);
-            
+//            testll = f2_poisson_arma(btemp,y,x,mu,P,alpha,wt,0);
+            testll2 = f2_poisson_arma(btemp,y,x,mu,P,alpha,wt,0);
+//            testll[0]=testll2[0];  
           }
           else if (fam2 == "Gamma") {
 //            testll = f2_gamma(btemp,y,x,mu,P,alpha,wt,0);
-            testll = f2_gamma_arma(btemp,y,x,mu,P,alpha,wt,0);
+//            testll = f2_gamma_arma(btemp,y,x,mu,P,alpha,wt,0);
+            testll2 = f2_gamma_arma(btemp,y,x,mu,P,alpha,wt,0);
           }
           else { // gaussian
 //            testll = f2_gaussian(btemp,y,x,mu,P,alpha,wt);
-            testll = f2_gaussian_arma(btemp,y,x,mu,P,alpha,wt);
+//            testll = f2_gaussian_arma(btemp,y,x,mu,P,alpha,wt);
+            testll2 = f2_gaussian_arma(btemp,y,x,mu,P,alpha,wt);
           }
           
           // calculate and print the acceptance statistic
-          double test = LLconst[J]+ testtemp2(0,0) - std::log(U2)- testll[0];
-  
+//          double test = LLconst[J]+ testtemp2(0,0) - std::log(U2)- testll[0];
+          double test = LLconst[J]+ testtemp2(0,0) - std::log(U2)- testll2[0];
+          
             // 5) Accept/reject logic
             
             if (test >= 0.0) {
