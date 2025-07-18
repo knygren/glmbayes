@@ -11,13 +11,34 @@ using namespace Rcpp;
 void progress_bar2(double x, double N);
 
 
-NumericVector dbinom_glmb( NumericVector x, NumericVector N, NumericVector means, int lg){
-    int n = x.size() ;
-    NumericVector res(n) ;
-    for( int i=0; i<n; i++) res[i] = R::dbinom( round(x[i]*N[i]),round(N[i]), means[i], lg ) ;
-    return res ;
-}
+//NumericVector dbinom_glmb( NumericVector x, NumericVector N, NumericVector means, int lg){
+//    int n = x.size() ;
+//    NumericVector res(n) ;
+//    for( int i=0; i<n; i++) res[i] = R::dbinom( round(x[i]*N[i]),round(N[i]), means[i], lg ) ;
+//    return res ;
+//}
 
+
+NumericVector dbinom_glmb(NumericVector x, NumericVector N, NumericVector means, int lg) {
+  int n = x.size();
+  NumericVector res(n);
+  
+  for (int i = 0; i < n; i++) {
+    // Round to nearest integer for trial count and success count
+    int trials  = static_cast<int>(std::round(N[i]));
+    int success = static_cast<int>(std::round(x[i] * N[i]));
+    
+    // Clamp probabilities to avoid extreme values
+    double p = std::min(1.0, std::max(0.0, means[i]));
+    
+    // Evaluate binomial log-likelihood
+    res[i] = R::dbinom(success, trials, p, lg);
+
+    
+      }
+  
+  return res;
+}
 
 NumericVector dbinom_glmb2( NumericVector x, NumericVector N, NumericVector means, int lg){
   
@@ -189,6 +210,8 @@ NumericVector  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix 
 
 
     for(int i=0;i<m1;i++){
+      
+      
       Rcpp::checkUserInterrupt();
       if(progbar==1){ 
         progress_bar2(i, m1-1);
@@ -221,6 +244,59 @@ NumericVector  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix 
 }
 
 
+//#include <RcppArmadillo.h>
+//using namespace Rcpp;
+//using namespace arma;
+
+NumericVector f2_binomial_logit_arma(NumericMatrix b, NumericVector y,
+                                NumericMatrix x, NumericMatrix mu,
+                                NumericMatrix P, NumericVector alpha,
+                                NumericVector wt, int progbar = 0) {
+  int l1 = x.nrow(), l2 = x.ncol();
+  int m1 = b.ncol();
+  
+  Rcpp::NumericMatrix b2temp(l2, 1);
+  arma::mat x2(x.begin(), l1, l2, false);
+  arma::mat alpha2(alpha.begin(), l1, 1, false);
+  
+  Rcpp::NumericVector xb(l1);
+  arma::colvec xb2(xb.begin(), l1, false);
+  
+  NumericVector yy(l1);
+  NumericVector res(m1);
+  NumericMatrix bmu(l2, 1);
+  arma::mat mu2(mu.begin(), l2, 1, false);
+  arma::mat bmu2(bmu.begin(), l2, 1, false);
+  
+  for (int i = 0; i < m1; i++) {
+    Rcpp::checkUserInterrupt();
+    if (progbar == 1) {
+      progress_bar2(i, m1 - 1);
+      if (i == m1 - 1) { Rcpp::Rcout << "" << std::endl; }
+    }
+    
+    b2temp = b(Range(0, l2 - 1), Range(i, i));
+    arma::mat b2(b2temp.begin(), l2, 1, false);
+    arma::mat P2(P.begin(), l2, l2, false);
+    
+    bmu2 = b2 - mu2;
+    double res1 = 0.5 * arma::as_scalar(bmu2.t() * P2 * bmu2);
+    
+    xb2 = exp(-alpha2 - x2 * b2);  // eta = -alpha - Xb
+ 
+    for (int j = 0; j < l1; j++) {
+      xb(j) = 1.0 / (1.0 + xb(j));  // logistic link
+    }
+    
+    yy=-dbinom_glmb(y,wt,xb,true);
+    
+    
+    res(i) =std::accumulate(yy.begin(), yy.end(), res1);
+    
+  }
+  
+  return res;
+}
 
 
 arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
@@ -438,6 +514,76 @@ NumericVector  f2_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix
     return res;      
 }
 
+
+
+NumericVector  f2_binomial_probit_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
+{
+  
+  // Get dimensions of x - Note: should match dimensions of
+  //  y, b, alpha, and wt (may add error checking)
+  
+  // May want to add method for dealing with alpha and wt when 
+  // constants instead of vectors
+  
+  int l1 = x.nrow(), l2 = x.ncol();
+  int m1 = b.ncol();
+  
+  //    int lalpha=alpha.nrow();
+  //    int lwt=wt.nrow();
+  
+  Rcpp::NumericMatrix b2temp(l2,1);
+  
+  arma::mat x2(x.begin(), l1, l2, false); 
+  arma::mat alpha2(alpha.begin(), l1, 1, false); 
+  
+  Rcpp::NumericVector xb(l1);
+  arma::colvec xb2(xb.begin(),l1,false); // Reuse memory - update both below
+  
+  //   Note: Does not seem to be used-- Editing out        
+  //    NumericVector invwt=1/sqrt(wt);
+  
+  // Moving Loop inside the function is key for speed
+  
+  NumericVector yy(l1);
+  NumericVector res(m1);
+  NumericMatrix bmu(l2,1);
+  
+  arma::mat mu2(mu.begin(), l2, 1, false); 
+  arma::mat bmu2(bmu.begin(), l2, 1, false); 
+  
+  double res1=0;
+  
+  
+  for(int i=0;i<m1;i++){
+    Rcpp::checkUserInterrupt();
+    if(progbar==1){ 
+      progress_bar2(i, m1-1);
+      if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
+    };  
+    
+    
+    
+    b2temp=b(Range(0,l2-1),Range(i,i));
+    arma::mat b2(b2temp.begin(), l2, 1, false); 
+    arma::mat P2(P.begin(), l2, l2, false); 
+    
+    bmu2=b2-mu2;
+    
+    res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+    
+    
+    xb2=alpha2+ x2 * b2;   
+    xb=pnorm(xb,0.0,1.0);
+    
+    yy=-dbinom_glmb(y,wt,xb,true);
+    
+    
+    res(i) =std::accumulate(yy.begin(), yy.end(), res1);
+    
+  }
+  
+  return res;      
+}
 
 
 
@@ -661,6 +807,80 @@ NumericVector  f2_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatri
     }
     
     return res;      
+}
+
+
+
+
+NumericVector  f2_binomial_cloglog_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar=0)
+{
+  
+  // Get dimensions of x - Note: should match dimensions of
+  //  y, b, alpha, and wt (may add error checking)
+  
+  // May want to add method for dealing with alpha and wt when 
+  // constants instead of vectors
+  
+  int l1 = x.nrow(), l2 = x.ncol();
+  int m1 = b.ncol();
+  
+  //    int lalpha=alpha.nrow();
+  //    int lwt=wt.nrow();
+  
+  Rcpp::NumericMatrix b2temp(l2,1);
+  
+  arma::mat x2(x.begin(), l1, l2, false); 
+  arma::mat alpha2(alpha.begin(), l1, 1, false); 
+  
+  Rcpp::NumericVector xb(l1);
+  arma::colvec xb2(xb.begin(),l1,false); // Reuse memory - update both below
+  
+  //   Note: Does not seem to be used-- Editing out      
+  //    NumericVector invwt=1/sqrt(wt);
+  
+  // Moving Loop inside the function is key for speed
+  
+  NumericVector yy(l1);
+  NumericVector res(m1);
+  NumericMatrix bmu(l2,1);
+  
+  arma::mat mu2(mu.begin(), l2, 1, false); 
+  arma::mat bmu2(bmu.begin(), l2, 1, false); 
+  
+  double res1=0;
+  
+  
+  for(int i=0;i<m1;i++){
+    Rcpp::checkUserInterrupt();
+    
+    if(progbar==1){ 
+      progress_bar2(i, m1-1);
+      if(i==m1-1) {Rcpp::Rcout << "" << std::endl;}
+    };  
+    
+    
+    b2temp=b(Range(0,l2-1),Range(i,i));
+    arma::mat b2(b2temp.begin(), l2, 1, false); 
+    arma::mat P2(P.begin(), l2, l2, false); 
+    
+    bmu2=b2-mu2;
+    
+    res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
+    
+    xb2=alpha2+ x2 * b2;   
+    
+    for(int j=0;j<l1;j++){
+      xb(j)=1-exp(-exp(xb(j)));
+    }
+    
+    yy=-dbinom_glmb(y,wt,xb,true);
+    
+    
+    res(i) =std::accumulate(yy.begin(), yy.end(), res1);
+    
+  }
+  
+  return res;      
 }
 
 

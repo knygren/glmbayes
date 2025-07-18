@@ -1,13 +1,24 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 
+// [[Rcpp::depends(RcppParallel)]]
 // we only include RcppArmadillo.h which pulls Rcpp.h in for us
 #include "RcppArmadillo.h"
+#include "RcppParallel.h"
+
 #include "famfuncs.h"
 #include "Envelopefuncs.h"
 #include "Set_Grid.h"
 #include <math.h>
+#include <tbb/mutex.h>
+#include <thread>
+#include "rng_utils.h"
+
+// [[Rcpp::plugins(cpp11)]]
+// [[Rcpp::depends(RcppParallel)]]
 
 using namespace Rcpp;
+using namespace RcppParallel;
+
 
 // Outside Function declarations (move or delete)
 
@@ -189,6 +200,279 @@ Rcpp::List glmb_Standardize_Model(
   
 }
 
+
+//-----------------------------------------------------------------------------
+// Forward-declare your serial sampler (no change)
+//-----------------------------------------------------------------------------
+Rcpp::List rnnorm_reg_std_cpp(
+    int                   n,
+    Rcpp::NumericVector   y,
+    Rcpp::NumericMatrix   x,
+    Rcpp::NumericMatrix   mu,
+    Rcpp::NumericMatrix   P,
+    Rcpp::NumericVector   alpha,
+    Rcpp::NumericVector   wt,
+    Rcpp::Function        f2,
+    Rcpp::List            Envelope,
+    Rcpp::CharacterVector family,
+    Rcpp::CharacterVector link,
+    int                   progbar 
+);
+
+
+
+// mutex to protect Rcpp calls
+static std::mutex f2_mutex;
+
+
+//static tbb::mutex rng_mutex;
+
+//inline double safe_runif() {
+//  tbb::mutex::scoped_lock lock(rng_mutex);
+//  return R::runif(0.0, 1.0);
+//}
+
+
+
+//-----------------------------------------------------------------------------
+// rnnorm_reg_worker: full sampler worker with debug print of `test`
+//-----------------------------------------------------------------------------
+struct rnnorm_reg_worker : public Worker {
+  // inputs
+  int                   n;
+  NumericVector         y;
+  NumericMatrix         x;
+  NumericMatrix         mu;
+  NumericMatrix         P;
+  NumericVector         alpha;
+  NumericVector         wt;
+//  Function              f2;
+  //List                  Envelope;
+  // NEW: envelope components in arma format
+  arma::vec PLSD, LLconst;
+  arma::mat loglt, logrt, cbars;
+  
+    CharacterVector       family;
+  CharacterVector       link;
+  int                   progbar;
+  
+  
+  
+  // outputs
+  RMatrix<double>       out;
+  RVector<double>       draws;
+  int                   ncol;
+  
+  // constructor
+  rnnorm_reg_worker(
+    int                   n_,
+    const NumericVector&  y_,
+    const NumericMatrix&  x_,
+    const NumericMatrix&  mu_,
+    const NumericMatrix&  P_,
+    const NumericVector&  alpha_,
+    const NumericVector&  wt_,
+//    const Rcpp::List& Envelope_,
+    const arma::vec& PLSD_,
+    const arma::vec& LLconst_,
+    const arma::mat& loglt_,
+    const arma::mat& logrt_,
+    const arma::mat& cbars_,
+    
+//    const Function&       f2_,
+    const CharacterVector& family_,
+    const CharacterVector& link_,
+    int                   progbar_,
+    NumericMatrix&        out_,
+    NumericVector&        draws_
+  )
+    : n(n_), y(y_), x(x_), mu(mu_), P(P_),
+      alpha(alpha_), wt(wt_),
+//      Envelope(Envelope_),
+      PLSD(PLSD_),  LLconst(LLconst_),
+      loglt(loglt_), logrt(logrt_), cbars(cbars_),
+      //f2(f2_),
+       family(family_), link(link_),
+      progbar(progbar_),
+      out(out_), draws(draws_),
+      ncol(out_.ncol())
+  {}
+  
+
+
+  // operator() implements the parallel loop
+  void operator()(std::size_t begin, std::size_t end) {
+    Rcpp::RNGScope scope;  // enable RNG in threads
+
+
+
+        
+    // Convert NumericMatrix and NumericVector inputs to Armadillo
+    arma::vec y2(y.begin(), y.size(), false);
+    arma::vec alpha2(alpha.begin(), alpha.size(), false);
+    arma::vec wt2(wt.begin(), wt.size(), false);
+    
+    arma::mat x2(x.begin(), x.nrow(), x.ncol(), false);
+    arma::mat mu2(mu.begin(), mu.nrow(), mu.ncol(), false);
+    arma::mat P2(P.begin(), P.nrow(), P.ncol(), false);        
+
+        
+    // Precompute dimensions and envelope pieces
+    int l1 = mu.nrow();
+
+
+            // Convert family/link once per thread
+    std::string fam2 = as<std::string>(family);
+    std::string lnk2 = as<std::string>(link);
+
+
+    // Thread‐local buffers and views
+    std::vector<double> outtemp_buf(l1), cbartemp_buf(l1);
+    arma::rowvec        outtemp2(outtemp_buf.data(),   l1, false);
+    arma::rowvec        cbartemp2(cbartemp_buf.data(), l1, false);
+
+    
+    //NumericVector cbartemp=cbars(0,_);
+    //arma::rowvec cbartemp2(cbartemp.begin(),l1,false);
+    
+
+            
+    NumericMatrix       btemp(l1,1);
+    arma::mat           btemp2(btemp.begin(),     l1,1,false);
+    
+
+    
+    arma::mat testtemp2(1, 1);  // Allocated directly on the heap
+    NumericVector       testll(1);
+
+    /////////////////////////////////////////////////////////
+    
+
+    // Main loop over indices
+    for (std::size_t i = begin; i < end; ++i) {
+
+        
+      draws[i] = 1.0;  
+      
+     
+      //Rcpp::Rcout << "i=" << i << " draws=" << draws[i] << "\n";
+      
+      double a1 = 0.0;
+      
+      while (a1 == 0.0) {
+        // 1) slice selection
+        //double U  = R::runif(0.0, 1.0)
+        double U = safe_runif();
+        double a2 = 0.0;
+        int    J  = 0;
+        while (a2 == 0.0) {
+          if (U <= PLSD[J]) {
+          //if (U <= PLSD2[J]) {
+              a2 = 1.0;
+          } else {
+            U -= PLSD[J];
+            ++J;
+          }
+        }
+        
+        // 2) draw truncated‐normal candidates
+        for (int j = 0; j < l1; ++j) {
+          out(i, j) = ctrnorm_cpp(logrt(J, j),loglt(J, j),-cbars(J, j), 1.0 );
+        //  out(i, j) = ctrnorm_cpp(logrt2(J, j),loglt2(J, j),-cbars2(J, j), 1.0 );
+        }
+        
+        // 3) prepare for test
+        for (int j = 0; j < l1; ++j) {
+          outtemp_buf[j]  = out(i, j);
+          cbartemp_buf[j] = cbars(J, j);
+          //cbartemp_buf[j] = cbars2(J, j);
+          
+          
+        }
+        testtemp2 = outtemp2 * trans(cbartemp2);
+  //      double U2 = R::runif(0.0, 1.0);
+
+        double U2 = safe_runif();
+        
+          
+        btemp2   = trans(outtemp2);
+        
+        // declare test here so it’s in scope below
+        //double test;
+        
+        
+        
+        // 4) compute log‐lik and print test under lock
+        {
+          std::lock_guard<std::mutex> guard(f2_mutex);
+
+          
+                    
+          // compute testll for all families/links
+          if (fam2 == "binomial") {
+            if (lnk2 == "logit")      testll = f2_binomial_logit(btemp,y,x,mu,P,alpha,wt,0);
+            //if (lnk2 == "logit")      testll = f2_binomial_logit_arma(btemp,y,x,mu,P,alpha,wt,0);
+            
+                    //else if (lnk2 == "probit") testll = f2_binomial_probit(btemp,y,x,mu,P,alpha,wt,0);
+                    else if (lnk2 == "probit") testll = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
+//                    else                       testll = f2_binomial_cloglog(btemp,y,x,mu,P,alpha,wt,0);
+                    else                       testll = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
+          }
+          else if (fam2 == "quasibinomial") {
+//            if (lnk2 == "logit")      testll = f2_binomial_logit(btemp,y,x,mu,P,alpha,wt,0);
+            if (lnk2 == "logit")      testll = f2_binomial_logit_arma(btemp,y,x,mu,P,alpha,wt,0);
+//            else if (lnk2 == "probit") testll = f2_binomial_probit(btemp,y,x,mu,P,alpha,wt,0);
+            else if (lnk2 == "probit") testll = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
+//            else                       testll = f2_binomial_cloglog(btemp,y,x,mu,P,alpha,wt,0);
+            else                       testll = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
+          }
+          else if (fam2 == "poisson"   || fam2 == "quasipoisson") {
+
+//            testll = f2_poisson(btemp,y,x,mu,P,alpha,wt,0);
+            testll = f2_poisson_arma(btemp,y,x,mu,P,alpha,wt,0);
+            
+          }
+          else if (fam2 == "Gamma") {
+//            testll = f2_gamma(btemp,y,x,mu,P,alpha,wt,0);
+            testll = f2_gamma_arma(btemp,y,x,mu,P,alpha,wt,0);
+          }
+          else { // gaussian
+//            testll = f2_gaussian(btemp,y,x,mu,P,alpha,wt);
+            testll = f2_gaussian_arma(btemp,y,x,mu,P,alpha,wt);
+          }
+          
+          // calculate and print the acceptance statistic
+          double test = LLconst[J]+ testtemp2(0,0) - std::log(U2)- testll[0];
+  
+            // 5) Accept/reject logic
+            
+            if (test >= 0.0) {
+                  
+              a1 = 1.0;            // accept
+            } else {
+              
+              draws[i]=draws[i]+1.0;     // reject and try again
+              
+                    }
+            
+
+        }
+        
+       
+                  
+         
+
+             } // while(a1)
+    }   // for(i)
+  }     // operator()
+};
+
+
+
+
+
+
+
 // [[Rcpp::export(".rnnorm_reg_std_cpp")]]
 
 Rcpp::List  rnnorm_reg_std_cpp(int n,NumericVector y,NumericMatrix x,
@@ -271,6 +555,7 @@ Function f2,Rcpp::List  Envelope,Rcpp::CharacterVector   family,Rcpp::CharacterV
 
           
         }
+       
      outtemp=out(i,_);
      cbartemp=cbars(J(i),_);
      testtemp2=outtemp2 * trans(cbartemp2);
@@ -338,8 +623,86 @@ return Rcpp::List::create(Rcpp::Named("out")=out,Rcpp::Named("draws")=draws);
 
 
 
-// [[Rcpp::export(".rnnorm_reg_cpp")]]
 
+
+//-----------------------------------------------------------------------------
+// test_all_args: wrapper matching rnnorm_reg_std_cpp signature
+//-----------------------------------------------------------------------------
+// [[Rcpp::export("test_all_args")]]
+List rnnorm_reg_std_cpp_parallel(
+    int                   n,
+    NumericVector         y,
+    NumericMatrix         x,
+    NumericMatrix         mu,
+    NumericMatrix         P,
+    NumericVector         alpha,
+    NumericVector         wt,
+    Function              f2,
+    List                  Envelope,
+    CharacterVector       family,
+    CharacterVector       link,
+    int                   progbar = 1
+) {
+  // allocate output buffers
+  int p = mu.nrow();
+  NumericMatrix out(n, p);
+  NumericVector draws(n);
+  
+  // Extract from Envelope List
+
+  Rcpp::NumericVector PLSD    = Envelope["PLSD"];
+  Rcpp::NumericMatrix loglt   = Envelope["loglt"];
+  Rcpp::NumericMatrix logrt   = Envelope["logrt"];
+  Rcpp::NumericMatrix cbars   = Envelope["cbars"];
+  Rcpp::NumericVector LLconst = Envelope["LLconst"];
+  
+  // Convert to Armadillo (deep-safe versions)
+  arma::vec PLSD2    = Rcpp::as<arma::vec>(PLSD);
+  arma::vec LLconst2 = Rcpp::as<arma::vec>(LLconst);
+  arma::mat loglt2   = Rcpp::as<arma::mat>(loglt);
+  arma::mat logrt2   = Rcpp::as<arma::mat>(logrt);
+  arma::mat cbars2   = Rcpp::as<arma::mat>(cbars);
+  
+  
+//  Rcpp::Rcout << " 1.0 Launching Worker \n" <<;
+//  Rcpp::Rcout << "1.0 Launching Worker " <<  std::endl;
+  
+  // launch parallel worker
+  
+  rnnorm_reg_worker worker(
+      n, y, x, mu, P,
+      alpha, wt,
+    //  Envelope,
+      PLSD2,LLconst2, loglt2, logrt2, cbars2, 
+      family, link,
+      progbar,
+      out, draws
+  );
+  
+     /// Calling the workers (Paralle or - for testing - serially)
+    
+//      RcppParallel::parallelFor(0, n, worker);  // grain size == n → serial chunk
+      worker(0, n);  // Call serially
+
+    
+    //  RcppParallel::parallelFor(0, n, worker, n);  // grain size == n → serial chunk
+    //int cores = std::thread::hardware_concurrency();
+    //int grainSize = std::max(n / cores, 1);
+    //parallelFor(0, n, worker, grainSize);
+    //parallelFor(0, n, worker);
+    
+
+  // return complete out + draws
+  return List::create(
+    Named("out")   = out,
+    Named("draws") = draws
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+
+// [[Rcpp::export(".rnnorm_reg_cpp")]]
 Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x, 
                           NumericVector mu,NumericMatrix P,NumericVector offset,NumericVector wt,
                           double dispersion,
@@ -504,8 +867,27 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   int progbar=0;
   
-  Rcpp::List sim=rnnorm_reg_std_cpp(n,y,x2_temp,mu2_temp,P2_temp,alpha,wt2,
-                                    f2,Envelope,family,link,progbar);
+//  Rcpp::List sim=rnnorm_reg_std_cpp(n,y,x2_temp,mu2_temp,P2_temp,alpha,wt2,
+//                                    f2,Envelope,family,link,progbar);
+  
+  Rcpp::List sim;
+  
+  if (n == 1) {
+    sim = rnnorm_reg_std_cpp(n, y, x2_temp, mu2_temp, P2_temp, alpha, wt2,
+                             f2, Envelope, family, link, progbar);
+  } else {
+//    sim = rnnorm_reg_std_parallel(n, y, x2_temp, mu2_temp, P2_temp, alpha, wt2,
+//                                  f2, Envelope, family, link, progbar);
+
+   // sim = test_parallel(n, y, x2_temp, mu2_temp, P2_temp, alpha, wt2,
+  //                                f2, Envelope, family, link, progbar);
+    
+    
+    sim = rnnorm_reg_std_cpp_parallel(n, y, x2_temp, mu2_temp, P2_temp, alpha, wt2, f2, Envelope, family, link, progbar);
+  //  test_all_args
+    //sim=test_parallel( n, l1);
+      }
+  
   
 
   // Rcout << "Finished Simulation"  << std::endl;

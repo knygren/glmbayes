@@ -288,6 +288,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rnnorm_reg_std_cpp_parallel
+List rnnorm_reg_std_cpp_parallel(int n, NumericVector y, NumericMatrix x, NumericMatrix mu, NumericMatrix P, NumericVector alpha, NumericVector wt, Function f2, List Envelope, CharacterVector family, CharacterVector link, int progbar);
+RcppExport SEXP _glmbayes_rnnorm_reg_std_cpp_parallel(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP f2SEXP, SEXP EnvelopeSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP progbarSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< Function >::type f2(f2SEXP);
+    Rcpp::traits::input_parameter< List >::type Envelope(EnvelopeSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type family(familySEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type link(linkSEXP);
+    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
+    rcpp_result_gen = Rcpp::wrap(rnnorm_reg_std_cpp_parallel(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rnnorm_reg_cpp
 Rcpp::List rnnorm_reg_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P, NumericVector offset, NumericVector wt, double dispersion, Function f2, Function f3, NumericVector start, std::string family, std::string link, int Gridtype);
 RcppExport SEXP _glmbayes_rnnorm_reg_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP offsetSEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP) {
@@ -352,6 +374,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_rindep_norm_gamma_reg_std_v5_cpp", (DL_FUNC) &_glmbayes_rindep_norm_gamma_reg_std_v5_cpp, 14},
     {"_glmbayes_glmb_Standardize_Model", (DL_FUNC) &_glmbayes_glmb_Standardize_Model, 5},
     {"_glmbayes_rnnorm_reg_std_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_std_cpp, 12},
+    {"_glmbayes_rnnorm_reg_std_cpp_parallel", (DL_FUNC) &_glmbayes_rnnorm_reg_std_cpp_parallel, 12},
     {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 14},
     {"_glmbayes_rnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnorm_reg_cpp, 14},
     {NULL, NULL, 0}

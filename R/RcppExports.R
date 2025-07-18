@@ -57,6 +57,10 @@
     .Call('_glmbayes_rnnorm_reg_std_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
 }
 
+test_all_args <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar = 1L) {
+    .Call('_glmbayes_rnnorm_reg_std_cpp_parallel', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
+}
+
 .rnnorm_reg_cpp <- function(n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L) {
     .Call('_glmbayes_rnnorm_reg_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family, link, Gridtype)
 }

@@ -276,10 +276,10 @@ We are now ready to run a Logit model using the above specification. As a best p
 The below code performs the step creating the Model data frame and then submits the model. 
 
 ```{r Run Logit,results = "hide"}
-Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,
-Menarche=menarche2$Menarche,Age2)
+Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=as.integer(menarche2$Total),
+Menarche=as.integer(menarche2$Menarche),Age2)
 
-glmb.out1<-glmb(n=10000,cbind(Menarche, Total-Menarche) ~Age2,family=binomial(logit),
+glmb.out1<-glmb(n=1000,cbind(Menarche, as.integer(Total-Menarche)) ~Age2,family=binomial(logit),
 pfamily=dNormal(mu=mu1,Sigma=V1),data=Menarche_Model_Data)
 
 ```
