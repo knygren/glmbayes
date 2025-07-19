@@ -1,6 +1,34 @@
 #include "RcppArmadillo.h"
+#include <RcppParallel.h>
+
 #include <Rcpp.h>
+#include "nmath_local.h"
+#include "dpq_local.h"
+
+
 using namespace Rcpp;
+
+
+
+using namespace RcppParallel;
+
+void neg_dnorm_glmb_rmat(const RcppParallel::RVector<double>& x,         // observed values
+                         const RcppParallel::RVector<double>& means,     // normal means
+                         const RcppParallel::RVector<double>& sds,       // standard deviations
+                         RcppParallel::RVector<double>& res,             // output buffer
+                         const int lg)                                   // log=TRUE?
+{
+  std::size_t n = x.length();
+  
+  for (std::size_t i = 0; i < n; ++i) {
+    double mu    = means[i];   // mean parameter
+    double sigma = sds[i];     // standard deviation
+    //res[i] = -R::dnorm(x[i], mu, sigma, lg);  // R-native normal density
+    res[i] = -dnorm4_local(x[i], mu, sigma, lg);  // Mathlib-native normal density
+    
+      }
+}
+
 
 
 NumericVector dnorm_glmb( NumericVector x, NumericVector means, NumericVector sds,int lg)
@@ -202,6 +230,8 @@ arma::vec   f2_gaussian_arma(NumericMatrix b,NumericVector y, NumericMatrix x,Nu
   //    int lalpha=alpha.nrow();
   //    int lwt=wt.nrow();
   
+  arma::mat b2full(b.begin(), l2, m1, false);  // Shallow view over b
+  
   Rcpp::NumericMatrix b2temp(l2,1);
   
   arma::mat x2(x.begin(), l1, l2, false); 
@@ -228,7 +258,9 @@ arma::vec   f2_gaussian_arma(NumericMatrix b,NumericVector y, NumericMatrix x,Nu
   
   for(int i=0;i<m1;i++){
     b2temp=b(Range(0,l2-1),Range(i,i));
-    arma::mat b2(b2temp.begin(), l2, 1, false); 
+    //arma::mat b2(b2temp.begin(), l2, 1, false); 
+    arma::mat b2(b2full.colptr(i), l2, 1, false);  // View of column i, size l2 × 1
+    
     arma::mat P2(P.begin(), l2, l2, false); 
     
     bmu2=b2-mu2;
@@ -237,7 +269,18 @@ arma::vec   f2_gaussian_arma(NumericMatrix b,NumericVector y, NumericMatrix x,Nu
     
     xb2=alpha2+ x2 * b2;
     
-    yy=-dnorm_glmb(y,xb,invwt,true);
+    // Wrap existing R memory buffers
+    RcppParallel::RVector<double> y_view(y);
+    RcppParallel::RVector<double> xb_view(xb);
+    RcppParallel::RVector<double> invwt_view(invwt);
+    RcppParallel::RVector<double> yy_view(yy); //must be preallocated to match y.size()
+    
+    // In-place evaluation using your log-scale accurate backend
+    neg_dnorm_glmb_rmat(y_view,  xb_view,invwt_view, yy_view,1.0);
+    
+ 
+    
+ //   yy=-dnorm_glmb(y,xb,invwt,true);
     
 //  res(i) =std::accumulate(yy.begin(), yy.end(), res1);
     res2(i) = std::accumulate(yy.begin(), yy.end(), res1);

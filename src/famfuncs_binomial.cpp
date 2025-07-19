@@ -1,12 +1,18 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 
 // we only include RcppArmadillo.h which pulls Rcpp.h in for us
-
+#include <cmath>
 #include "RcppArmadillo.h"
+#include <limits>
+#include <RcppParallel.h>
+#define MATHLIB_STANDALONE
+#include "nmath_local.h"
+#include "dpq_local.h"
+
 
 
 using namespace Rcpp;
-
+using namespace RcppParallel;
 
 void progress_bar2(double x, double N);
 
@@ -17,6 +23,74 @@ void progress_bar2(double x, double N);
 //    for( int i=0; i<n; i++) res[i] = R::dbinom( round(x[i]*N[i]),round(N[i]), means[i], lg ) ;
 //    return res ;
 //}
+
+//constexpr double MY_PI = 3.14159265358979323846;
+//constexpr double MY_2PI = 2.0 * MY_PI;
+
+
+//extern "C" {
+//  double dbinom_raw(double x, double n, double p, double q, int give_log);
+//}
+
+/////////////////////////////////////////////////////////////
+
+
+inline double dbinom_raw_local(double x, double n, double p, double q, int give_log) {
+  // Pass-through version for now
+  return dbinom_raw(x, n, p, q, give_log);
+}
+
+
+///////////////////////////////////////////////////////////
+
+
+void neg_dbinom_glmb_rmat(const RVector<double>& x,         // success proportion
+                          const RVector<double>& N,         // trial count
+                          const RVector<double>& p_vec,     // standard-scale probabilities
+                          RVector<double>& res,             // output buffer
+                          const int lg) {
+  std::size_t n = x.length();
+  
+  for (std::size_t i = 0; i < n; ++i) {
+    // Input transformation: round values like dbinom_glmb()
+    double trials  = std::round(N[i]);
+    double success = std::round(x[i] * N[i]);
+    
+    double p = p_vec[i];         // success probability
+    double q = 1.0 - p;          // failure probability
+  
+//  Rcpp::Rcout << "success: " << success <<  "\n";
+//  Rcpp::Rcout << "trials: " << trials <<  "\n";
+//  Rcpp::Rcout << "p: " << p <<  "\n";
+//  Rcpp::Rcout << "q: " << q <<  "\n";
+  
+    
+    // Evaluate negative log-likelihood using R-accurate approximation
+//    res[i] = -dbinom_raw_log(success, trials, p, q);
+    
+//         Rcpp::Rcout << "c++: " << res[i] <<  "\n";
+    
+    res[i] = - dbinom_raw(success, trials, p, q, 1);  // log=TRUE
+
+    //Rcpp::Rcout << "dbinom_raw: " << res[i] <<  "\n";
+    
+    //res[i] = - dbinom_raw_local(success, trials, p, q, 1);  // log=TRUE
+    
+//    Rcpp::Rcout << "dbinom_raw_local: " << res[i] <<  "\n";
+    
+  //      res[i] = - R::dbinom(success, trials, p, true);
+  //  Rcpp::Rcout << "R: " << res[i] <<  "\n";
+    
+      }
+}
+
+
+
+////////////////////////////////////////////////////////////
+
+
+
+
 
 
 NumericVector dbinom_glmb(NumericVector x, NumericVector N, NumericVector means, int lg) {
@@ -39,6 +113,8 @@ NumericVector dbinom_glmb(NumericVector x, NumericVector N, NumericVector means,
   
   return res;
 }
+
+
 
 NumericVector dbinom_glmb2( NumericVector x, NumericVector N, NumericVector means, int lg){
   
@@ -255,6 +331,8 @@ arma::vec f2_binomial_logit_arma(NumericMatrix b, NumericVector y,
   int l1 = x.nrow(), l2 = x.ncol();
   int m1 = b.ncol();
   
+  arma::mat b2full(b.begin(), l2, m1, false);  // Shallow view over b
+  
   Rcpp::NumericMatrix b2temp(l2, 1);
   arma::mat x2(x.begin(), l1, l2, false);
   arma::mat alpha2(alpha.begin(), l1, 1, false);
@@ -279,7 +357,9 @@ arma::vec f2_binomial_logit_arma(NumericMatrix b, NumericVector y,
     }
     
     b2temp = b(Range(0, l2 - 1), Range(i, i));
-    arma::mat b2(b2temp.begin(), l2, 1, false);
+    //arma::mat b2(b2temp.begin(), l2, 1, false);
+    arma::mat b2(b2full.colptr(i), l2, 1, false);  // View of column i, size l2 × 1
+    
     arma::mat P2(P.begin(), l2, l2, false);
     
     bmu2 = b2 - mu2;
@@ -290,13 +370,24 @@ arma::vec f2_binomial_logit_arma(NumericMatrix b, NumericVector y,
     for (int j = 0; j < l1; j++) {
       xb(j) = 1.0 / (1.0 + xb(j));  // logistic link
     }
+
     
-    yy=-dbinom_glmb(y,wt,xb,true);
+    // Wrap existing R memory buffers
+    RcppParallel::RVector<double> y_view(y);
+    RcppParallel::RVector<double> wt_view(wt);
+    RcppParallel::RVector<double> xb_view(xb);
+    RcppParallel::RVector<double> yy_view(yy); //must be preallocated to match y.size()
+    
+    // In-place evaluation using your log-scale accurate backend
+    neg_dbinom_glmb_rmat(y_view, wt_view, xb_view, yy_view,1.0);
+        
+//    yy=-dbinom_glmb(y,wt,xb,true);
     
     
     //res(i) =std::accumulate(yy.begin(), yy.end(), res1);
     res2(i) = std::accumulate(yy.begin(), yy.end(), res1);
-  }
+
+      }
   
   return res2;
 }
@@ -534,6 +625,7 @@ arma::vec  f2_binomial_probit_arma(NumericMatrix b,NumericVector y, NumericMatri
   //    int lalpha=alpha.nrow();
   //    int lwt=wt.nrow();
   
+  arma::mat b2full(b.begin(), l2, m1, false);  // Shallow view over b
   Rcpp::NumericMatrix b2temp(l2,1);
   
   arma::mat x2(x.begin(), l1, l2, false); 
@@ -557,7 +649,9 @@ arma::vec  f2_binomial_probit_arma(NumericMatrix b,NumericVector y, NumericMatri
   
   double res1=0;
   
+//  Rcpp::Rcout << "m1=" << m1 <<  "\n";
   
+    
   for(int i=0;i<m1;i++){
     Rcpp::checkUserInterrupt();
     if(progbar==1){ 
@@ -568,7 +662,9 @@ arma::vec  f2_binomial_probit_arma(NumericMatrix b,NumericVector y, NumericMatri
     
     
     b2temp=b(Range(0,l2-1),Range(i,i));
-    arma::mat b2(b2temp.begin(), l2, 1, false); 
+    //arma::mat b2(b2temp.begin(), l2, 1, false); 
+    arma::mat b2(b2full.colptr(i), l2, 1, false);  // View of column i, size l2 × 1
+    
     arma::mat P2(P.begin(), l2, l2, false); 
     
     bmu2=b2-mu2;
@@ -578,13 +674,43 @@ arma::vec  f2_binomial_probit_arma(NumericMatrix b,NumericVector y, NumericMatri
     
     xb2=alpha2+ x2 * b2;   
     xb=pnorm(xb,0.0,1.0);
+
+    // Wrap existing R memory buffers
+    RcppParallel::RVector<double> y_view(y);
+    RcppParallel::RVector<double> wt_view(wt);
+    RcppParallel::RVector<double> xb_view(xb);
+    RcppParallel::RVector<double> yy_view(yy); //must be preallocated to match y.size()
     
-    yy=-dbinom_glmb(y,wt,xb,true);
+    // In-place evaluation using your log-scale accurate backend
+    
+//    Rcpp::Rcout << " Entering neg_dbin_glmb_rmat  " << "\n";
+
+
+//  Rcout << "y: " << y << std::endl;
+//  Rcout << "wt: " << wt << std::endl;
+//  Rcout << "xb: " << xb << std::endl;
+  
+    neg_dbinom_glmb_rmat(y_view, wt_view, xb_view, yy_view,1.0);
+
+//    Rcout << "yy: " << yy << std::endl;
+    
+        
+//    Rcpp::Rcout << " Exiting neg_dbin_glmb_rmat  " << "\n";
+    
+    //yy=-dbinom_glmb(y,wt,xb,true);
     
     
     //res(i) =std::accumulate(yy.begin(), yy.end(), res1);
     res2(i) = std::accumulate(yy.begin(), yy.end(), res1);
+    
+//    Rcpp::Rcout << "i=" << i << " draws=" << draws[i] << "\n";
+  
+//    Rcpp::Rcout << "res2=" << res2(i) <<  "\n";
+  
   }
+
+  //    Rcpp::Rcout << " Returning res2  " << "\n";
+  //  Rcpp::Rcout << "m1=" << m1 <<  "\n";
   
   return res2;      
 }
@@ -831,6 +957,7 @@ arma::vec  f2_binomial_cloglog_arma(NumericMatrix b,NumericVector y, NumericMatr
   //    int lalpha=alpha.nrow();
   //    int lwt=wt.nrow();
   
+  arma::mat b2full(b.begin(), l2, m1, false);  // Shallow view over b
   Rcpp::NumericMatrix b2temp(l2,1);
   
   arma::mat x2(x.begin(), l1, l2, false); 
@@ -865,7 +992,9 @@ arma::vec  f2_binomial_cloglog_arma(NumericMatrix b,NumericVector y, NumericMatr
     
     
     b2temp=b(Range(0,l2-1),Range(i,i));
-    arma::mat b2(b2temp.begin(), l2, 1, false); 
+    //arma::mat b2(b2temp.begin(), l2, 1, false); 
+    arma::mat b2(b2full.colptr(i), l2, 1, false);  // View of column i, size l2 × 1
+    
     arma::mat P2(P.begin(), l2, l2, false); 
     
     bmu2=b2-mu2;
@@ -878,7 +1007,19 @@ arma::vec  f2_binomial_cloglog_arma(NumericMatrix b,NumericVector y, NumericMatr
       xb(j)=1-exp(-exp(xb(j)));
     }
     
-    yy=-dbinom_glmb(y,wt,xb,true);
+    
+    
+    // Wrap existing R memory buffers
+    RcppParallel::RVector<double> y_view(y);
+    RcppParallel::RVector<double> wt_view(wt);
+    RcppParallel::RVector<double> xb_view(xb);
+    RcppParallel::RVector<double> yy_view(yy); //must be preallocated to match y.size()
+    
+    // In-place evaluation using your log-scale accurate backend
+    neg_dbinom_glmb_rmat(y_view, wt_view, xb_view, yy_view,1.0);
+    
+    
+    //yy=-dbinom_glmb(y,wt,xb,true);
     
     
     //res(i) =std::accumulate(yy.begin(), yy.end(), res1);

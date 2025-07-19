@@ -357,7 +357,7 @@ struct rnnorm_reg_worker : public Worker {
       draws[i] = 1.0;  
       
      
-      //Rcpp::Rcout << "i=" << i << " draws=" << draws[i] << "\n";
+//      Rcpp::Rcout << "i=" << i << " draws=" << draws[i] << "\n";
       
       double a1 = 0.0;
       
@@ -428,8 +428,16 @@ struct rnnorm_reg_worker : public Worker {
             if (lnk2 == "logit")      testll2 = f2_binomial_logit_arma(btemp,y,x,mu,P,alpha,wt,0);
 //            else if (lnk2 == "probit") testll = f2_binomial_probit(btemp,y,x,mu,P,alpha,wt,0);
 //            else if (lnk2 == "probit") testll = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
-            else if (lnk2 == "probit") testll2 = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
-            //            else                       testll = f2_binomial_cloglog(btemp,y,x,mu,P,alpha,wt,0);
+            else if (lnk2 == "probit") 
+              
+            {
+//              Rcout << "Enter f2"  << std::endl;
+              
+              testll2 = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
+//            Rcout << "Exit f2"  << std::endl;
+            }
+            
+                        //            else                       testll = f2_binomial_cloglog(btemp,y,x,mu,P,alpha,wt,0);
 //            else                       testll = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
             else                       testll2 = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
           }

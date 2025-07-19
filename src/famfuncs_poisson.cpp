@@ -2,7 +2,10 @@
 
 // we only include RcppArmadillo.h which pulls Rcpp.h in for us
 #include "RcppArmadillo.h"
+#include <RcppParallel.h>
+
 using namespace Rcpp;
+using namespace RcppParallel;
 void progress_bar2(double x, double N);
 
 
@@ -24,6 +27,21 @@ double dpois2(double x,double lambda,int lg){
   //return(dpois(x,lambda,log=TRUE))
 }
 
+
+void neg_dpois_glmb_rmat(const RVector<double>& x,         // observed counts
+                         const RVector<double>& means,     // Poisson rates
+                         RVector<double>& res,             // output buffer
+                         const int lg)                     // log=TRUE?
+{
+  std::size_t n = x.length();
+  
+  for (std::size_t i = 0; i < n; ++i) {
+    double count  = std::round(x[i]);     // match integer behavior
+    double lambda = means[i];             // rate parameter
+    
+    res[i] = -dpois2(count, lambda, lg);  // thread-safe Poisson backend
+  }
+}
 
 
 NumericVector dpois_glmb( NumericVector x, NumericVector means, int lg){
@@ -174,6 +192,8 @@ arma::vec  f2_poisson_arma(NumericMatrix b,NumericVector y, NumericMatrix x,Nume
   //    int lalpha=alpha.nrow();
   //    int lwt=wt.nrow();
   
+  arma::mat b2full(b.begin(), l2, m1, false);  // Shallow view over b
+  
   Rcpp::NumericMatrix b2temp(l2,1);
   
   arma::mat x2(x.begin(), l1, l2, false); 
@@ -210,7 +230,9 @@ arma::vec  f2_poisson_arma(NumericMatrix b,NumericVector y, NumericMatrix x,Nume
     
     
     b2temp=b(Range(0,l2-1),Range(i,i));
-    arma::mat b2(b2temp.begin(), l2, 1, false); 
+//    arma::mat b2(b2temp.begin(), l2, 1, false);
+    arma::mat b2(b2full.colptr(i), l2, 1, false);  // View of column i, size l2 × 1
+    
     arma::mat P2(P.begin(), l2, l2, false); 
     
     bmu2=b2-mu2;
@@ -218,8 +240,19 @@ arma::vec  f2_poisson_arma(NumericMatrix b,NumericVector y, NumericMatrix x,Nume
     res1=0.5*arma::as_scalar(bmu2.t() * P2 *  bmu2);
     
     xb2=exp(alpha2+ x2 * b2);
+
+    // Wrap existing R memory buffers
+    RcppParallel::RVector<double> y_view(y);
+    RcppParallel::RVector<double> wt_view(wt);
+    RcppParallel::RVector<double> xb_view(xb);
+    RcppParallel::RVector<double> yy_view(yy); //must be preallocated to match y.size()
     
-    yy=-dpois_glmb(y,xb,true);
+    // In-place evaluation using your log-scale accurate backend
+    neg_dpois_glmb_rmat(y_view, xb_view, yy_view,1.0);
+    
+
+            
+    //yy=-dpois_glmb(y,xb,true);
     
     for(int j=0;j<l1;j++){
       yy[j]=yy[j]*wt[j];  
@@ -233,6 +266,8 @@ arma::vec  f2_poisson_arma(NumericMatrix b,NumericVector y, NumericMatrix x,Nume
   return res2;      
   
 }
+
+
 
 
 
