@@ -305,6 +305,14 @@ struct rnnorm_reg_worker : public Worker {
     Rcpp::RNGScope scope;  // enable RNG in threads
 
 
+    // Wrap R-native inputs into thread-safe views
+    RcppParallel::RVector<double> y_r(y);           // observed counts
+    RcppParallel::RMatrix<double> x_r(x);           // design matrix
+    RcppParallel::RMatrix<double> mu_r(mu);         // mode vector
+    RcppParallel::RMatrix<double> P_r(P);           // precision matrix
+    RcppParallel::RVector<double> alpha_r(alpha);   // predictor offset
+    RcppParallel::RVector<double> wt_r(wt);         // observation weights
+    
 
         
     // Convert NumericMatrix and NumericVector inputs to Armadillo
@@ -338,10 +346,19 @@ struct rnnorm_reg_worker : public Worker {
     
 
             
-    NumericMatrix       btemp(l1,1);
-    arma::mat           btemp2(btemp.begin(),     l1,1,false);
+//    NumericMatrix       btemp(l1,1);
+//    arma::mat           btemp2(btemp.begin(),     l1,1,false);
     
-
+    Rcpp::NumericMatrix btemp(l1,1);                     // stays for interface
+    RcppParallel::RMatrix<double> btemp_r(btemp);        // thread-safe wrapper
+    arma::mat btemp2(btemp_r.begin(), l1, 1, false);     // links directly to RMatrix view
+    
+//    std::vector<double> btemp_buf(l1);                   // thread-local buffer
+//    RcppParallel::RMatrix<double> btemp(btemp_buf.data(), l1, 1);  // synthetic RMatrix view
+//    arma::mat btemp2(btemp.begin(), l1, 1, false);     // same binding
+    
+    
+    
     
     arma::mat testtemp2(1, 1);  // Allocated directly on the heap
 //    NumericVector       testll(1);
@@ -350,14 +367,18 @@ struct rnnorm_reg_worker : public Worker {
     /////////////////////////////////////////////////////////
     
 
+//    Rcpp::Rcout << "1.0 Launching Worker: " << begin << std::endl;
+    
     // Main loop over indices
     for (std::size_t i = begin; i < end; ++i) {
 
+ 
+      
         
       draws[i] = 1.0;  
       
      
-//      Rcpp::Rcout << "i=" << i << " draws=" << draws[i] << "\n";
+//      Rcpp::Rcout << "i=" << i  << "\n";
       
       double a1 = 0.0;
       
@@ -445,7 +466,21 @@ struct rnnorm_reg_worker : public Worker {
 
 //            testll = f2_poisson(btemp,y,x,mu,P,alpha,wt,0);
 //            testll = f2_poisson_arma(btemp,y,x,mu,P,alpha,wt,0);
-            testll2 = f2_poisson_arma(btemp,y,x,mu,P,alpha,wt,0);
+
+            testll2 = f2_poisson_rmat(btemp_r,y_r,x_r,mu_r,P_r,alpha_r,wt_r,0);
+            
+//            Rcpp::Rcout << "rmat version v2: " << testll2  << "\n";
+            
+            
+//            testll2 = f2_poisson_rmat(btemp,y,x,mu,P,alpha,wt,0);
+
+//            Rcpp::Rcout << "rmat version: " << testll2  << "\n";
+            
+//            testll2 = f2_poisson_arma(btemp,y,x,mu,P,alpha,wt,0);
+            
+//            Rcpp::Rcout << "arma version: " << testll2  << "\n";
+            
+            
 //            testll[0]=testll2[0];  
           }
           else if (fam2 == "Gamma") {
@@ -483,6 +518,8 @@ struct rnnorm_reg_worker : public Worker {
 
              } // while(a1)
     }   // for(i)
+  //  Rcpp::Rcout << "Exiting Worker: " << end << std::endl;
+    
   }     // operator()
 };
 
@@ -717,6 +754,7 @@ List rnnorm_reg_std_cpp_parallel(
     Named("draws") = draws
   );
 }
+
 
 ///////////////////////////////////////////////////////////////////////////
 
