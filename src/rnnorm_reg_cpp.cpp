@@ -302,7 +302,7 @@ struct rnnorm_reg_worker : public Worker {
 
   // operator() implements the parallel loop
   void operator()(std::size_t begin, std::size_t end) {
-    Rcpp::RNGScope scope;  // enable RNG in threads
+//    Rcpp::RNGScope scope;  // enable RNG in threads
 
 
     // Wrap R-native inputs into thread-safe views
@@ -316,14 +316,24 @@ struct rnnorm_reg_worker : public Worker {
 
         
     // Convert NumericMatrix and NumericVector inputs to Armadillo
-    arma::vec y2(y.begin(), y.size(), false);
-    arma::vec alpha2(alpha.begin(), alpha.size(), false);
-    arma::vec wt2(wt.begin(), wt.size(), false);
+//    arma::vec y2(y.begin(), y.size(), false);
+//    arma::vec alpha2(alpha.begin(), alpha.size(), false);
+//    arma::vec wt2(wt.begin(), wt.size(), false);
     
-    arma::mat x2(x.begin(), x.nrow(), x.ncol(), false);
-    arma::mat mu2(mu.begin(), mu.nrow(), mu.ncol(), false);
-    arma::mat P2(P.begin(), P.nrow(), P.ncol(), false);        
+//    arma::mat x2(x.begin(), x.nrow(), x.ncol(), false);
+//    arma::mat mu2(mu.begin(), mu.nrow(), mu.ncol(), false);
+//    arma::mat P2(P.begin(), P.nrow(), P.ncol(), false);        
 
+        
+    // Create Armadillo views directly from RMatrix/RVector memory
+    arma::vec y2(y_r.begin(), y_r.length(), false);
+    arma::vec alpha2(alpha_r.begin(), alpha_r.length(), false);
+    arma::vec wt2(wt_r.begin(), wt_r.length(), false);
+        
+    arma::mat x2(x_r.begin(), x_r.nrow(), x_r.ncol(), false);
+    arma::mat mu2(mu_r.begin(), mu_r.nrow(), mu_r.ncol(), false);
+    arma::mat P2(P_r.begin(), P_r.nrow(), P_r.ncol(), false);
+        
         
     // Precompute dimensions and envelope pieces
     int l1 = mu.nrow();
@@ -349,15 +359,13 @@ struct rnnorm_reg_worker : public Worker {
 //    NumericMatrix       btemp(l1,1);
 //    arma::mat           btemp2(btemp.begin(),     l1,1,false);
     
-    Rcpp::NumericMatrix btemp(l1,1);                     // stays for interface
-    RcppParallel::RMatrix<double> btemp_r(btemp);        // thread-safe wrapper
-    arma::mat btemp2(btemp_r.begin(), l1, 1, false);     // links directly to RMatrix view
+//    Rcpp::NumericMatrix btemp(l1,1);                     // stays for interface
+//    RcppParallel::RMatrix<double> btemp_r(btemp);        // thread-safe wrapper
+//    arma::mat btemp2(btemp_r.begin(), l1, 1, false);     // links directly to RMatrix view
     
-//    std::vector<double> btemp_buf(l1);                   // thread-local buffer
-//    RcppParallel::RMatrix<double> btemp(btemp_buf.data(), l1, 1);  // synthetic RMatrix view
-//    arma::mat btemp2(btemp.begin(), l1, 1, false);     // same binding
-    
-    
+    std::vector<double> btemp_buf(l1);
+    arma::mat btemp2(btemp_buf.data(), l1, 1, false);
+    RcppParallel::RMatrix<double> btemp_r(btemp_buf.data(), l1, 1); // optional: only if still needed
     
     
     arma::mat testtemp2(1, 1);  // Allocated directly on the heap
