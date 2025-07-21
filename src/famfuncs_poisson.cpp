@@ -47,6 +47,8 @@ void neg_dpois_glmb_rmat(const RVector<double>& x,     // observed counts
   }
 }
 
+
+
 // void neg_dpois_glmb_rmat_old(const RVector<double>& x,         // observed counts
 //                          const RVector<double>& means,     // Poisson rates
 //                          RVector<double>& res,             // output buffer

@@ -10,17 +10,60 @@ using namespace RcppParallel;
 NumericVector dbinom_glmb( NumericVector x, NumericVector N, NumericVector means, int lg);
 NumericVector  f1_binomial_logit(NumericMatrix b,NumericVector y,NumericMatrix x,NumericVector alpha,NumericVector wt);
 NumericVector  f2_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar);
-arma::vec  f2_binomial_logit_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar);
+// arma::vec  f2_binomial_logit_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar);
+arma::vec f2_binomial_logit_rmat(
+    // NumericMatrix b, NumericVector y,
+    //                              NumericMatrix x, NumericMatrix mu,
+    //                              NumericMatrix P, NumericVector alpha,
+    //                              NumericVector wt, int progbar = 0
+    const RMatrix<double>& b,
+    const RVector<double>& y,
+    const RMatrix<double>& x,
+    const RMatrix<double>& mu,
+    const RMatrix<double>& P,
+    const RVector<double>& alpha,
+    const RVector<double>& wt,
+    int progbar);
+
 arma::mat  f3_binomial_logit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar);
 
 NumericVector  f1_binomial_probit(NumericMatrix b,NumericVector y,NumericMatrix x,NumericVector alpha,NumericVector wt);
 NumericVector  f2_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar);
-arma::vec  f2_binomial_probit_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar);
+// arma::vec  f2_binomial_probit_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar);
+arma::vec f2_binomial_probit_rmat(
+    // NumericMatrix b, NumericVector y,
+    //                              NumericMatrix x, NumericMatrix mu,
+    //                              NumericMatrix P, NumericVector alpha,
+    //                              NumericVector wt, int progbar = 0
+    const RMatrix<double>& b,
+    const RVector<double>& y,
+    const RMatrix<double>& x,
+    const RMatrix<double>& mu,
+    const RMatrix<double>& P,
+    const RVector<double>& alpha,
+    const RVector<double>& wt,
+    int progbar);
+
 arma::mat  f3_binomial_probit(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar);
 
 NumericVector  f1_binomial_cloglog(NumericMatrix b,NumericVector y,NumericMatrix x,NumericVector alpha,NumericVector wt);
 NumericVector  f2_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar);
-arma::vec  f2_binomial_cloglog_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar);
+// arma::vec  f2_binomial_cloglog_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt, int progbar);
+arma::vec f2_binomial_cloglog_rmat(
+    // NumericMatrix b, NumericVector y,
+    //                              NumericMatrix x, NumericMatrix mu,
+    //                              NumericMatrix P, NumericVector alpha,
+    //                              NumericVector wt, int progbar = 0
+    const RMatrix<double>& b,
+    const RVector<double>& y,
+    const RMatrix<double>& x,
+    const RMatrix<double>& mu,
+    const RMatrix<double>& P,
+    const RVector<double>& alpha,
+    const RVector<double>& wt,
+    int progbar);
+
+
 arma::mat  f3_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt,int progbar);
 
 void neg_dpois_glmb_rmat(const RVector<double>& x,     // observed counts

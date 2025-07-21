@@ -249,7 +249,17 @@ extern "C" {
 #endif
   
 attribute_hidden  double dgamma_local(double x, double shape, double scale, int give_log);
+
   
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+  
+  attribute_hidden  double pnorm5_local(double x, double mu, double sigma, int lower_tail, int log_p);  
 #ifdef __cplusplus
 }
 #endif

@@ -434,19 +434,60 @@ struct rnnorm_reg_worker : public Worker {
           // compute testll for all families/links
           if (fam2 == "binomial") {
 //            if (lnk2 == "logit")      testll = f2_binomial_logit(btemp,y,x,mu,P,alpha,wt,0);
-            if (lnk2 == "logit")      testll2 = f2_binomial_logit(btemp,y,x,mu,P,alpha,wt,0);
+            if (lnk2 == "logit") 
+            {
+              testll2 = f2_binomial_logit_rmat(btemp_r,y_r,x_r,mu_r,P_r,alpha_r,wt_r,0);
+              
+              //Rcpp::Rcout << "rmat version: " << testll2  << "\n";
+              
+              //testll2 = f2_binomial_logit_arma(btemp,y,x,mu,P,alpha,wt,0);
+
+//              Rcpp::Rcout << "arma version: " << testll2  << "\n";
+                            
+//              testll2 = f2_binomial_logit(btemp,y,x,mu,P,alpha,wt,0);
+//              Rcpp::Rcout << "original version: " << testll2  << "\n";
+              
+            }
             //if (lnk2 == "logit")      testll = f2_binomial_logit_arma(btemp,y,x,mu,P,alpha,wt,0);
             
                     //else if (lnk2 == "probit") testll = f2_binomial_probit(btemp,y,x,mu,P,alpha,wt,0);
 //                    else if (lnk2 == "probit") testll = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
-                    else if (lnk2 == "probit") testll2 = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
+                    else if (lnk2 == "probit") 
+                    {
+                      
+                      testll2 = f2_binomial_probit_rmat(btemp_r,y_r,x_r,mu_r,P_r,alpha_r,wt_r,0);
+//                      Rcpp::Rcout << "rmat version: " << testll2  << "\n";
+                      
+//                      testll2 = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
+                      
+//                      Rcpp::Rcout << "arma version: " << testll2  << "\n";
+                      
+//                      testll2 = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
+                      }
                     //                    else                       testll = f2_binomial_cloglog(btemp,y,x,mu,P,alpha,wt,0);
 //                    else                       testll = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
-                    else                       testll2 = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
+                    else    
+                    {
+
+                      testll2 = f2_binomial_cloglog_rmat(btemp_r,y_r,x_r,mu_r,P_r,alpha_r,wt_r,0);
+//                                            Rcpp::Rcout << "rmat version: " << testll2  << "\n";
+                      
+//                      testll2 = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
+                      
+//                                            Rcpp::Rcout << "arma version: " << testll2  << "\n";
+                      
+                                          }
           }
           else if (fam2 == "quasibinomial") {
 //            if (lnk2 == "logit")      testll = f2_binomial_logit(btemp,y,x,mu,P,alpha,wt,0);
-            if (lnk2 == "logit")      testll2 = f2_binomial_logit_arma(btemp,y,x,mu,P,alpha,wt,0);
+            if (lnk2 == "logit")
+              
+            {
+              testll2 = f2_binomial_logit_rmat(btemp_r,y_r,x_r,mu_r,P_r,alpha_r,wt_r,0);
+//              testll2 = f2_binomial_logit_arma(btemp,y,x,mu,P,alpha,wt,0);
+//              testll2 = f2_binomial_logit(btemp,y,x,mu,P,alpha,wt,0);
+              
+            }
 //            else if (lnk2 == "probit") testll = f2_binomial_probit(btemp,y,x,mu,P,alpha,wt,0);
 //            else if (lnk2 == "probit") testll = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
             else if (lnk2 == "probit") 
@@ -454,13 +495,26 @@ struct rnnorm_reg_worker : public Worker {
             {
 //              Rcout << "Enter f2"  << std::endl;
               
-              testll2 = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
+              testll2 = f2_binomial_probit_rmat(btemp_r,y_r,x_r,mu_r,P_r,alpha_r,wt_r,0);
+//                        Rcpp::Rcout << "rmat version: " << testll2  << "\n";
+              
+//              testll2 = f2_binomial_probit_arma(btemp,y,x,mu,P,alpha,wt,0);
+              
+//                          Rcpp::Rcout << "arma version: " << testll2  << "\n";
+              
 //            Rcout << "Exit f2"  << std::endl;
             }
             
                         //            else                       testll = f2_binomial_cloglog(btemp,y,x,mu,P,alpha,wt,0);
 //            else                       testll = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
-            else                       testll2 = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
+            else
+              
+            {
+              testll2 = f2_binomial_cloglog_rmat(btemp_r,y_r,x_r,mu_r,P_r,alpha_r,wt_r,0);
+              
+//              testll2 = f2_binomial_cloglog_arma(btemp,y,x,mu,P,alpha,wt,0);
+              
+            }
           }
           else if (fam2 == "poisson"   || fam2 == "quasipoisson") {
 
