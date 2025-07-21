@@ -540,7 +540,10 @@ struct rnnorm_reg_worker : public Worker {
           else if (fam2 == "Gamma") {
 //            testll = f2_gamma(btemp,y,x,mu,P,alpha,wt,0);
 //            testll = f2_gamma_arma(btemp,y,x,mu,P,alpha,wt,0);
-            testll2 = f2_gamma_arma(btemp,y,x,mu,P,alpha,wt,0);
+            testll2 = f2_gamma_rmat(btemp_r,y_r,x_r,mu_r,P_r,alpha_r,wt_r,0);
+//                        Rcpp::Rcout << "rmat version v2: " << testll2  << "\n";
+//            testll2 = f2_gamma_arma(btemp,y,x,mu,P,alpha,wt,0);
+//                        Rcpp::Rcout << "arma version: " << testll2  << "\n";
           }
           else { // gaussian
 //            testll = f2_gaussian(btemp,y,x,mu,P,alpha,wt);
