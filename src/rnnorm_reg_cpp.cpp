@@ -240,12 +240,20 @@ static std::mutex f2_mutex;
 struct rnnorm_reg_worker : public Worker {
   // inputs
   int                   n;
-  NumericVector         y;
-  NumericMatrix         x;
-  NumericMatrix         mu;
-  NumericMatrix         P;
-  NumericVector         alpha;
-  NumericVector         wt;
+  // NumericVector         y;
+  // NumericMatrix         x;
+  // NumericMatrix         mu;
+  // NumericMatrix         P;
+  // NumericVector         alpha;
+  // NumericVector         wt;
+  
+  RcppParallel::RVector<double> y_r;
+  RcppParallel::RMatrix<double> x_r;
+  RcppParallel::RMatrix<double> mu_r;
+  RcppParallel::RMatrix<double> P_r;
+  RcppParallel::RVector<double> alpha_r;
+  RcppParallel::RVector<double> wt_r;
+  
 //  Function              f2;
   //List                  Envelope;
   // NEW: envelope components in arma format
@@ -266,12 +274,20 @@ struct rnnorm_reg_worker : public Worker {
   // constructor
   rnnorm_reg_worker(
     int                   n_,
-    const NumericVector&  y_,
-    const NumericMatrix&  x_,
-    const NumericMatrix&  mu_,
-    const NumericMatrix&  P_,
-    const NumericVector&  alpha_,
-    const NumericVector&  wt_,
+    // const NumericVector&  y_,
+    // const NumericMatrix&  x_,
+    // const NumericMatrix&  mu_,
+    // const NumericMatrix&  P_,
+    // const NumericVector&  alpha_,
+    // const NumericVector&  wt_,
+
+    const RcppParallel::RVector<double>& y_r_,
+    const RcppParallel::RMatrix<double>& x_r_,
+    const RcppParallel::RMatrix<double>& mu_r_,
+    const RcppParallel::RMatrix<double>& P_r_,
+    const RcppParallel::RVector<double>& alpha_r_,
+    const RcppParallel::RVector<double>& wt_r_,
+    
 //    const Rcpp::List& Envelope_,
     const arma::vec& PLSD_,
     const arma::vec& LLconst_,
@@ -283,19 +299,31 @@ struct rnnorm_reg_worker : public Worker {
     const CharacterVector& family_,
     const CharacterVector& link_,
     int                   progbar_,
-    NumericMatrix&        out_,
-    NumericVector&        draws_
+    RcppParallel::RMatrix<double>& out_,
+    RcppParallel::RVector<double>& draws_
+  
+  // RcppParallel::RMatrix<double>& out_,
+  // RcppParallel::RVector<double>& draws_
   )
-    : n(n_), y(y_), x(x_), mu(mu_), P(P_),
-      alpha(alpha_), wt(wt_),
-//      Envelope(Envelope_),
-      PLSD(PLSD_),  LLconst(LLconst_),
+//     : n(n_), y(y_), x(x_), mu(mu_), P(P_),
+//       alpha(alpha_), wt(wt_),
+// //      Envelope(Envelope_),
+//       PLSD(PLSD_),  LLconst(LLconst_),
+//       loglt(loglt_), logrt(logrt_), cbars(cbars_),
+//       //f2(f2_),
+//        family(family_), link(link_),
+//       progbar(progbar_),
+//       out(out_), draws(draws_),
+//       ncol(out_.ncol())
+    : n(n_),
+      y_r(y_r_), x_r(x_r_), mu_r(mu_r_), P_r(P_r_),
+      alpha_r(alpha_r_), wt_r(wt_r_),
+      PLSD(PLSD_), LLconst(LLconst_),
       loglt(loglt_), logrt(logrt_), cbars(cbars_),
-      //f2(f2_),
-       family(family_), link(link_),
-      progbar(progbar_),
-      out(out_), draws(draws_),
-      ncol(out_.ncol())
+      family(family_), link(link_), progbar(progbar_),
+      out(out_), draws(draws_), ncol(out_.ncol())
+
+    
   {}
   
 
@@ -306,12 +334,12 @@ struct rnnorm_reg_worker : public Worker {
 
 
     // Wrap R-native inputs into thread-safe views
-    RcppParallel::RVector<double> y_r(y);           // observed counts
-    RcppParallel::RMatrix<double> x_r(x);           // design matrix
-    RcppParallel::RMatrix<double> mu_r(mu);         // mode vector
-    RcppParallel::RMatrix<double> P_r(P);           // precision matrix
-    RcppParallel::RVector<double> alpha_r(alpha);   // predictor offset
-    RcppParallel::RVector<double> wt_r(wt);         // observation weights
+    // RcppParallel::RVector<double> y_r(y);           // observed counts
+    // RcppParallel::RMatrix<double> x_r(x);           // design matrix
+    // RcppParallel::RMatrix<double> mu_r(mu);         // mode vector
+    // RcppParallel::RMatrix<double> P_r(P);           // precision matrix
+    // RcppParallel::RVector<double> alpha_r(alpha);   // predictor offset
+    // RcppParallel::RVector<double> wt_r(wt);         // observation weights
     
 
         
@@ -336,7 +364,7 @@ struct rnnorm_reg_worker : public Worker {
         
         
     // Precompute dimensions and envelope pieces
-    int l1 = mu.nrow();
+    int l1 = mu_r.nrow();
 
 
             // Convert family/link once per thread
@@ -797,22 +825,42 @@ List rnnorm_reg_std_cpp_parallel(
 //  Rcpp::Rcout << " 1.0 Launching Worker \n" <<;
 //  Rcpp::Rcout << "1.0 Launching Worker " <<  std::endl;
   
+  // Create thread-safe views from R-native containers
+  RcppParallel::RVector<double> y_r(y);
+  RcppParallel::RMatrix<double> x_r(x);
+  RcppParallel::RMatrix<double> mu_r(mu);
+  RcppParallel::RMatrix<double> P_r(P);
+  RcppParallel::RVector<double> alpha_r(alpha);
+  RcppParallel::RVector<double> wt_r(wt);
+  RcppParallel::RMatrix<double> out_r(out);
+  RcppParallel::RVector<double> draws_r(draws);
+  
   // launch parallel worker
   
+  // rnnorm_reg_worker worker(
+  //     n, y, x, mu, P,
+  //     alpha, wt,
+  //   //  Envelope,
+  //     PLSD2,LLconst2, loglt2, logrt2, cbars2, 
+  //     family, link,
+  //     progbar,
+  //     out, draws
+  // );
+  
   rnnorm_reg_worker worker(
-      n, y, x, mu, P,
-      alpha, wt,
-    //  Envelope,
-      PLSD2,LLconst2, loglt2, logrt2, cbars2, 
+      n,
+      y_r, x_r, mu_r, P_r,
+      alpha_r, wt_r,
+      PLSD2, LLconst2, loglt2, logrt2, cbars2, 
       family, link,
       progbar,
-      out, draws
+      out_r, draws_r
   );
   
      /// Calling the workers (Paralle or - for testing - serially)
     
-//      RcppParallel::parallelFor(0, n, worker);  // grain size == n → serial chunk
-      worker(0, n);  // Call serially
+      RcppParallel::parallelFor(0, n, worker);  // grain size == n → serial chunk
+//      worker(0, n);  // Call serially
 
     
     //  RcppParallel::parallelFor(0, n, worker, n);  // grain size == n → serial chunk
