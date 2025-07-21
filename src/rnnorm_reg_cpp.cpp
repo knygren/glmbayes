@@ -548,8 +548,17 @@ struct rnnorm_reg_worker : public Worker {
           else { // gaussian
 //            testll = f2_gaussian(btemp,y,x,mu,P,alpha,wt);
 //            testll = f2_gaussian_arma(btemp,y,x,mu,P,alpha,wt);
-            testll2 = f2_gaussian_arma(btemp,y,x,mu,P,alpha,wt);
-          }
+
+          //  Note: This Envelope based sampling method for the Gaussian
+          //        is not currently used. May implement future option
+          //        to use as this is of theoretica interest
+          //        and can be used to validate upper bounds
+            testll2 = f2_gaussian_rmat(btemp_r,y_r,x_r,mu_r,P_r,alpha_r,wt_r,0);
+          //  Rcpp::Rcout << "rmat version: " << testll2  << "\n";
+//            testll2 = f2_gaussian_arma(btemp,y,x,mu,P,alpha,wt);
+//            Rcpp::Rcout << "arma version: " << testll2  << "\n";
+            
+                      }
           
           // calculate and print the acceptance statistic
 //          double test = LLconst[J]+ testtemp2(0,0) - std::log(U2)- testll[0];

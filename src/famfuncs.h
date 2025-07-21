@@ -115,6 +115,15 @@ NumericVector dnorm_glmb( NumericVector x, NumericVector means, NumericVector sd
 NumericVector  f1_gaussian(NumericMatrix b,NumericVector y,NumericMatrix x,NumericVector alpha,NumericVector wt);
 NumericVector  f2_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
 arma::vec  f2_gaussian_arma(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
+arma::vec f2_gaussian_rmat(const RMatrix<double>& b,       // candidate coefficients
+                        const RVector<double>& y,       // observed counts
+                        const RMatrix<double>& x,       // design matrix
+                        const RMatrix<double>& mu,      // mode vector
+                        const RMatrix<double>& P,       // precision matrix
+                        const RVector<double>& alpha,   // predictor offset
+                        const RVector<double>& wt,      // observation weights
+                        int progbar );          // progress toggle
+
 arma::mat  f3_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);
 NumericVector RSS(NumericVector y, NumericMatrix x,NumericMatrix b,NumericVector alpha,NumericVector wt);
 arma::mat  Inv_f3_gaussian(NumericMatrix cbars,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt);

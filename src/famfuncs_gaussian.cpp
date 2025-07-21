@@ -13,6 +13,24 @@ using namespace Rcpp;
 using namespace RcppParallel;
 
 void neg_dnorm_glmb_rmat(const RcppParallel::RVector<double>& x,         // observed values
+                         const std::vector<double>& means,     // normal means
+                             std::vector<double>& sds,       // standard deviations
+                             std::vector<double>& res,         // output buffer
+                             const int lg)                                   // log=TRUE?
+{
+  std::size_t n = x.length();
+  
+  for (std::size_t i = 0; i < n; ++i) {
+    double mu    = means[i];   // mean parameter
+    double sigma = sds[i];     // standard deviation
+    //res[i] = -R::dnorm(x[i], mu, sigma, lg);  // R-native normal density
+    res[i] = -dnorm4_local(x[i], mu, sigma, lg);  // Mathlib-native normal density
+    
+  }
+}
+
+
+void neg_dnorm_glmb_rmat_old(const RcppParallel::RVector<double>& x,         // observed values
                          const RcppParallel::RVector<double>& means,     // normal means
                          const RcppParallel::RVector<double>& sds,       // standard deviations
                          RcppParallel::RVector<double>& res,             // output buffer
@@ -276,7 +294,7 @@ arma::vec   f2_gaussian_arma(NumericMatrix b,NumericVector y, NumericMatrix x,Nu
     RcppParallel::RVector<double> yy_view(yy); //must be preallocated to match y.size()
     
     // In-place evaluation using your log-scale accurate backend
-    neg_dnorm_glmb_rmat(y_view,  xb_view,invwt_view, yy_view,1.0);
+    neg_dnorm_glmb_rmat_old(y_view,  xb_view,invwt_view, yy_view,1.0);
     
  
     
@@ -288,6 +306,100 @@ arma::vec   f2_gaussian_arma(NumericMatrix b,NumericVector y, NumericMatrix x,Nu
   
   return res2;      
 }
+
+
+arma::vec f2_gaussian_rmat(
+    // NumericMatrix b, NumericVector y,
+    //                              NumericMatrix x, NumericMatrix mu,
+    //                              NumericMatrix P, NumericVector alpha,
+    //                              NumericVector wt, int progbar = 0
+    const RMatrix<double>& b,
+    const RVector<double>& y,
+    const RMatrix<double>& x,
+    const RMatrix<double>& mu,
+    const RMatrix<double>& P,
+    const RVector<double>& alpha,
+    const RVector<double>& wt,
+    const int progbar=0   
+) {
+  //  int l1 = x.nrow(), l2 = x.ncol();
+  //  int m1 = b.ncol();
+  
+  /////////////////////////////////////////////////////////////////////////////
+  
+  
+  
+  std::size_t l1 = x.nrow();
+  std::size_t l2 = x.ncol();
+  std::size_t m1 = b.ncol();
+  
+  // Armadillo views over RMatrix memory (using pointer cast for compatibility)
+  arma::mat b2full(const_cast<double*>(&*b.begin()), l2, m1, false);
+  arma::mat x2(const_cast<double*>(&*x.begin()), l1, l2, false);
+  arma::mat mu2(const_cast<double*>(&*mu.begin()), l2, 1, false);
+  arma::mat P2(const_cast<double*>(&*P.begin()), l2, l2, false);
+  arma::mat alpha2(const_cast<double*>(&*alpha.begin()), l1, 1, false);
+  
+  arma::vec res(m1, arma::fill::none);
+  
+  std::vector<double> invwt(l1);
+  
+
+    for (std::size_t i = 0; i < l1; ++i) {
+      invwt[i] = 1.0 / std::sqrt(wt[i]);
+    }
+
+    
+      arma::mat bmu(l2, 1, arma::fill::none);
+  
+  
+  std::vector<double> xb_temp(l1), yy_temp(l1);
+  arma::colvec xb_temp2(xb_temp.data(), l1, false);  // shallow Armadillo view
+  
+  ////////////////////////////////////////////////////////////
+  
+  
+  for (std::size_t i = 0; i < m1; ++i) {
+    
+    arma::mat b_i(b2full.colptr(i), l2, 1, false);
+    
+    bmu = b_i - mu2;
+    
+    double mahal = 0.5 * arma::as_scalar(bmu.t() * P2 * bmu);
+    
+    
+    //xb_temp2 = alpha2+  x2 * b_i;
+    
+    //    for (std::size_t j = 0; j < l1; j++) {
+    //      xb_temp[j] =1-  exp(-exp(xb_temp[j]));
+    //    }
+    
+    xb_temp2=exp(alpha2+ x2 * b_i);
+    
+    for (std::size_t  j = 0; j < l1; j++) {      
+      xb_temp[j]=xb_temp[j]/wt[j];  
+    }
+    
+    
+    //    for(int j=0;j<l1;j++){
+    //      xb(j)=1-exp(-exp(xb(j)));
+    //    }
+    
+    
+    // In-place evaluation using your log-scale accurate backend
+      //  neg_dnorm_glmb_rmat_old(y_view,  xb_view,invwt_view, yy_view,1.0);
+    
+        neg_dnorm_glmb_rmat(y, xb_temp, invwt, yy_temp,1.0);
+    
+    
+    res(i) =std::accumulate(yy_temp.begin(), yy_temp.end(), mahal);
+    
+  }
+  
+  return res;
+}
+
+
 
 
 arma::mat  f3_gaussian(NumericMatrix b,NumericVector y, NumericMatrix x,NumericMatrix mu,NumericMatrix P,NumericVector alpha,NumericVector wt)
