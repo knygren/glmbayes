@@ -235,7 +235,7 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
 
   cbars3=cbars2;
   
-  // July 2024 - Parallelization Implementation in steps
+  // July 2025 - Parallelization Implementation in steps
   
   // 1) Set_Grid_C2_pointwise changes loop to enable parallel processing (suggested by Copilot)
   
