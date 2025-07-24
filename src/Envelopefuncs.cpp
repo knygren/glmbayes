@@ -29,6 +29,10 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
                     bool sortgrid=false
 ){
   
+
+  Rcpp::Rcout << "Entering EnvelopeBuild_c: "
+              << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+              << "\n";
   
   int progbar=0;
   
@@ -77,7 +81,13 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
   
   NumericVector Temp1=G1( _, 0);
   double Temp2;
+
   
+  Rcpp::Rcout << "Entering Envelope Loop: "
+              << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+              << "\n";
+  
+      
   // Should write a small note with logic behind types 1 and 2
   
   for(i=0;i<l1;i++){
@@ -126,7 +136,13 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
     
     
   }
+
   
+//  Rcpp::Rcout << "Exiting Envelope Loop: "
+//              << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+//              << "\n";
+  
+    
   NumericMatrix G3=asMat(expGrid(G2));
   NumericMatrix GIndex=asMat(expGrid(GIndex1));
   NumericMatrix G4(G3.ncol(),G3.nrow());
@@ -162,10 +178,23 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
 //  Rcpp::Rcout << "Number of points in Grid are :"  << l2 << std::endl;
   
   if( family=="binomial" && link=="logit"){
+    
+    Rcpp::Rcout << "Initiating NegLL Calculations: "
+                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                << "\n";
+    
+        
     //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
     NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,progbar);  
     //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-    cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,progbar);
+    //Rcout << "Initiating Gradient Calculations: " << Rcpp::as<std::string>(Rcpp::Function("Sys.time")()) << "\n";
+
+    Rcpp::Rcout << "Initiating Gradient Calculations: "
+                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                << "\n";
+    
+        
+        cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,progbar);
   }
   if(family=="binomial"  && link=="probit"){
   //  Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
@@ -227,7 +256,12 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
     cbars2=f3_gaussian(G4,y, x,mu,P,alpha,wt);
   }
   
+
+//  Rcpp::Rcout << "Finished cbars Calculations: "
+//              << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+//              << "\n";
   
+    
   //  Rcpp::Rcout << "Finished Log-posterior evaluations:" << std::endl;
   
   // Do a temporary correction here cbars3 should point to correct memory
@@ -238,12 +272,31 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
   // July 2025 - Parallelization Implementation in steps
   
   // 1) Set_Grid_C2_pointwise changes loop to enable parallel processing (suggested by Copilot)
+
+
+//  Rcpp::Rcout << "Entering Set grid C2 pointwise: "
+//              << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+//              << "\n";
+  
   
 //  Set_Grid_C2(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
   Set_Grid_C2_pointwise(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
   
     
-  setlogP_C2(logP,NegLL,cbars,G3,LLconst);
+
+//    Rcpp::Rcout << "Entering setlogP_C2: "
+//                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+//                << "\n";
+    
+        
+      setlogP_C2(logP,NegLL,cbars,G3,LLconst);
+
+      
+//      Rcpp::Rcout << "Exiting setlogP_C2: "
+//                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+//                  << "\n";
+      
+
   
   NumericMatrix::Column logP2 = logP( _, 1);
   
@@ -255,7 +308,10 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
   double sumP=sum(PLSD);
   
   PLSD=PLSD/sumP;
+
+//  Rcout << "Entering Enveloped sort: " << Rcpp::as<std::string>(Rcpp::Function("Sys.time")()) << "\n";
   
+    
   if(sortgrid==true){
     
     Rcpp::List outlist=EnvSort(l1,l2,GIndex,G3,cbars,logU,logrt,loglt,logP,LLconst,PLSD,a_1);

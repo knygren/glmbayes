@@ -69,3 +69,7 @@ test_all_args <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link,
     .Call('_glmbayes_rnorm_reg_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family, link, Gridtype)
 }
 
+test_square_kernel <- function(inputR) {
+    .Call('_glmbayes_test_square_kernel', PACKAGE = 'glmbayes', inputR)
+}
+

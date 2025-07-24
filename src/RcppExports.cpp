@@ -358,6 +358,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// test_square_kernel
+Rcpp::NumericVector test_square_kernel(Rcpp::NumericVector inputR);
+RcppExport SEXP _glmbayes_test_square_kernel(SEXP inputRSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type inputR(inputRSEXP);
+    rcpp_result_gen = Rcpp::wrap(test_square_kernel(inputR));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_EnvelopeBuild_c", (DL_FUNC) &_glmbayes_EnvelopeBuild_c, 13},
@@ -377,6 +388,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_rnnorm_reg_std_cpp_parallel", (DL_FUNC) &_glmbayes_rnnorm_reg_std_cpp_parallel, 12},
     {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 14},
     {"_glmbayes_rnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnorm_reg_cpp, 14},
+    {"_glmbayes_test_square_kernel", (DL_FUNC) &_glmbayes_test_square_kernel, 1},
     {NULL, NULL, 0}
 };
 
