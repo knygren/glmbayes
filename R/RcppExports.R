@@ -17,6 +17,10 @@
     .Call('_glmbayes_setlogP', PACKAGE = 'glmbayes', logP, NegLL, cbars, G3)
 }
 
+run_test_kernel <- function() {
+    .Call('_glmbayes_run_test_kernel', PACKAGE = 'glmbayes')
+}
+
 .RSS <- function(y, x, b, alpha, wt) {
     .Call('_glmbayes_RSS', PACKAGE = 'glmbayes', y, x, b, alpha, wt)
 }

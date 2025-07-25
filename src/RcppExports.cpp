@@ -84,6 +84,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// run_test_kernel
+Rcpp::NumericVector run_test_kernel();
+RcppExport SEXP _glmbayes_run_test_kernel() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(run_test_kernel());
+    return rcpp_result_gen;
+END_RCPP
+}
 // RSS
 NumericVector RSS(NumericVector y, NumericMatrix x, NumericMatrix b, NumericVector alpha, NumericVector wt);
 RcppExport SEXP _glmbayes_RSS(SEXP ySEXP, SEXP xSEXP, SEXP bSEXP, SEXP alphaSEXP, SEXP wtSEXP) {
@@ -375,6 +385,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_EnvelopeBuild_Ind_Normal_Gamma", (DL_FUNC) &_glmbayes_EnvelopeBuild_Ind_Normal_Gamma, 13},
     {"_glmbayes_Set_Grid", (DL_FUNC) &_glmbayes_Set_Grid, 3},
     {"_glmbayes_setlogP", (DL_FUNC) &_glmbayes_setlogP, 4},
+    {"_glmbayes_run_test_kernel", (DL_FUNC) &_glmbayes_run_test_kernel, 0},
     {"_glmbayes_RSS", (DL_FUNC) &_glmbayes_RSS, 5},
     {"_glmbayes_f2_gaussian", (DL_FUNC) &_glmbayes_f2_gaussian, 7},
     {"_glmbayes_Inv_f3_gaussian", (DL_FUNC) &_glmbayes_Inv_f3_gaussian, 7},

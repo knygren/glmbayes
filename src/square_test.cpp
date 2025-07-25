@@ -40,6 +40,7 @@ Rcpp::NumericVector test_square_kernel(Rcpp::NumericVector inputR) {
   size_t src_len = kernelSource.size();
   program = clCreateProgramWithSource(context, 1, &src, &src_len, &status);
   status |= clBuildProgram(program, 0, nullptr, nullptr, nullptr, nullptr);
+  
   kernel = clCreateKernel(program, "square", &status);
 
   // Set up buffers
