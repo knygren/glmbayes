@@ -1,5 +1,5 @@
 // @depends dpq_prelude
-// @provides R_D__0
+// @provides R_D__0,R_D__1,R_DT_0,R_DT_1,R_D_half,R_D_Lval,R_D_Cval,R_D_val,R_D_qIv,R_D_exp,R_D_log,R_D_Clog,R_Log1_Exp,R_D_LExp,R_DT_val,R_DT_Cval,R_DT_qIv,R_DT_CIv,R_DT_exp,R_DT_Cexp,R_DT_log,R_DT_Clog,R_DT_Log,R_Q_P01_check,R_Q_P01_boundaries,R_P_bounds_01,R_P_bounds_Inf_01,R_D_fexp,R_D_negInonint,R_D_nonint_check
 
 // --- DPQ Macros for Distribution and Tail Handling ---
 
