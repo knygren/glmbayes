@@ -61,6 +61,10 @@ dpq_test_wrapper <- function() {
     .Call('_glmbayes_Inv_f3_gaussian', PACKAGE = 'glmbayes', cbars, y, x, mu, P, alpha, wt)
 }
 
+nmath_test_wrapper <- function() {
+    .Call('_glmbayes_nmath_test_wrapper', PACKAGE = 'glmbayes')
+}
+
 .rindep_norm_gamma_reg_std_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar = 1L) {
     .Call('_glmbayes_rindep_norm_gamma_reg_std_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
 }
