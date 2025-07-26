@@ -37,39 +37,90 @@ std::string load_kernel_source(const std::string& relative_path,
   return oss.str();
 }
 
-
-
-
-///////////////////////////////////////
-
-
-
-
 std::string load_kernel_library(const std::string& subdir, const std::string& package = "glmbayes") {
   std::string dir_path = Rcpp::as<std::string>(
     Rcpp::Function("system.file")("cl", subdir, Rcpp::Named("package") = package)
   );
   
-  std::vector<fs::path> cl_files;
+  std::map<std::string, std::set<std::string>> provides_map;
+  std::map<std::string, std::set<std::string>> depends_map;
+  std::map<std::string, fs::path> file_map;
+  
+  // Parse metadata
   for (const auto& entry : fs::directory_iterator(dir_path)) {
     if (entry.path().extension() == ".cl") {
-      cl_files.push_back(entry.path());
+      std::ifstream infile(entry.path());
+      std::string line;
+      std::set<std::string> provides, depends;
+      
+      while (std::getline(infile, line)) {
+        if (line.find("@provides") != std::string::npos) {
+          std::stringstream ss(line.substr(line.find("@provides") + 9));
+          std::string item;
+          while (ss >> item) provides.insert(item);
+        } else if (line.find("@depends") != std::string::npos) {
+          std::stringstream ss(line.substr(line.find("@depends") + 9));
+          std::string item;
+          while (ss >> item) depends.insert(item);
+        }
+      }
+      
+      std::string file_id = entry.path().filename().string();
+      file_map[file_id] = entry.path();
+      provides_map[file_id] = provides;
+      depends_map[file_id] = depends;
     }
   }
   
-  // Sort alphabetically by filename
-  std::sort(cl_files.begin(), cl_files.end(), [](const fs::path& a, const fs::path& b) {
-    return a.filename().string() < b.filename().string();
-  });
+  // Track fulfilled provides during sort
+  std::set<std::string> fulfilled;
+  std::set<std::string> unsorted;
+  for (const auto& [file, _] : file_map) {
+    unsorted.insert(file);
+  }
   
+  std::vector<std::string> sorted;
+  bool progress = true;
+  
+  while (progress) {
+    progress = false;
+    
+    for (auto it = unsorted.begin(); it != unsorted.end(); ) {
+      const std::string& file = *it;
+      const std::set<std::string>& deps = depends_map[file];
+      
+      bool all_satisfied = std::all_of(deps.begin(), deps.end(), [&](const std::string& dep) {
+        return fulfilled.count(dep);
+      });
+      
+      if (all_satisfied) {
+        sorted.push_back(file);
+        fulfilled.insert(provides_map[file].begin(), provides_map[file].end());
+        it = unsorted.erase(it);
+        progress = true;
+      } else {
+        ++it;
+      }
+    }
+  }
+  
+  // Anything remaining is unresolved—append at end
+  for (const std::string& file : unsorted) {
+    sorted.push_back(file);
+  }
+  
+  // 📤 Debug: Final sort order
+  std::cerr << "\n🔗 Final kernel load order (resolved first, unresolved last):\n";
+  for (const auto& file : sorted) {
+    std::cerr << " - " << file << "\n";
+  }
+  
+  // Concatenate sources
   std::string combined_source;
-  for (const auto& path : cl_files) {
-    std::string rel_path = subdir + "/" + path.filename().string();
+  for (const auto& file : sorted) {
+    std::string rel_path = subdir + "/" + file;
     combined_source += load_kernel_source(rel_path, package) + "\n";
   }
   
   return combined_source;
 }
-
-
-

@@ -8,14 +8,14 @@ __kernel void arithmetic_test(__global float* output) {
         output[2] = gpu_multiply(a, b);    // 10 * 3 = 30
         output[3] = divide(a, b);      // 10 / 3 ≈ 3.333
         output[4] = mod(a, b);         // 10 % 3 = 1
-        output[5] = xalpha_form(a, b, a, b);        // 10 % 3 = 1
+        output[5] = alpha_form(a, b, a, b);        // 10 % 3 = 1
         
-        //output[0] = 111.0f;
-        //output[1] = 222.0f;
-        //output[2] = 333.0f;
-        //output[3] = 444.0f;
-        //output[4] = 555.0f;
-       // output[5] = 666.0f;
+      //  output[0] = 111.0f;
+      //  output[1] = 222.0f;
+      //  output[2] = 333.0f;
+      //  output[3] = 444.0f;
+      //  output[4] = 555.0f;
+      //  output[5] = 666.0f;
         
     }
 }

@@ -84,13 +84,37 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// run_test_kernel
-Rcpp::NumericVector run_test_kernel();
-RcppExport SEXP _glmbayes_run_test_kernel() {
+// arithmetic_test_wrapper
+Rcpp::NumericVector arithmetic_test_wrapper();
+RcppExport SEXP _glmbayes_arithmetic_test_wrapper() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(run_test_kernel());
+    rcpp_result_gen = Rcpp::wrap(arithmetic_test_wrapper());
+    return rcpp_result_gen;
+END_RCPP
+}
+// arithmetic_test_v2_wrapper
+Rcpp::NumericVector arithmetic_test_v2_wrapper(float a, float b);
+RcppExport SEXP _glmbayes_arithmetic_test_v2_wrapper(SEXP aSEXP, SEXP bSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< float >::type a(aSEXP);
+    Rcpp::traits::input_parameter< float >::type b(bSEXP);
+    rcpp_result_gen = Rcpp::wrap(arithmetic_test_v2_wrapper(a, b));
+    return rcpp_result_gen;
+END_RCPP
+}
+// arithmetic_test_parallel_wrapper
+Rcpp::NumericMatrix arithmetic_test_parallel_wrapper(Rcpp::NumericVector a, Rcpp::NumericVector b);
+RcppExport SEXP _glmbayes_arithmetic_test_parallel_wrapper(SEXP aSEXP, SEXP bSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type a(aSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type b(bSEXP);
+    rcpp_result_gen = Rcpp::wrap(arithmetic_test_parallel_wrapper(a, b));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -385,7 +409,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_EnvelopeBuild_Ind_Normal_Gamma", (DL_FUNC) &_glmbayes_EnvelopeBuild_Ind_Normal_Gamma, 13},
     {"_glmbayes_Set_Grid", (DL_FUNC) &_glmbayes_Set_Grid, 3},
     {"_glmbayes_setlogP", (DL_FUNC) &_glmbayes_setlogP, 4},
-    {"_glmbayes_run_test_kernel", (DL_FUNC) &_glmbayes_run_test_kernel, 0},
+    {"_glmbayes_arithmetic_test_wrapper", (DL_FUNC) &_glmbayes_arithmetic_test_wrapper, 0},
+    {"_glmbayes_arithmetic_test_v2_wrapper", (DL_FUNC) &_glmbayes_arithmetic_test_v2_wrapper, 2},
+    {"_glmbayes_arithmetic_test_parallel_wrapper", (DL_FUNC) &_glmbayes_arithmetic_test_parallel_wrapper, 2},
     {"_glmbayes_RSS", (DL_FUNC) &_glmbayes_RSS, 5},
     {"_glmbayes_f2_gaussian", (DL_FUNC) &_glmbayes_f2_gaussian, 7},
     {"_glmbayes_Inv_f3_gaussian", (DL_FUNC) &_glmbayes_Inv_f3_gaussian, 7},

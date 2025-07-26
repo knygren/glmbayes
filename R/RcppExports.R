@@ -17,8 +17,16 @@
     .Call('_glmbayes_setlogP', PACKAGE = 'glmbayes', logP, NegLL, cbars, G3)
 }
 
-run_test_kernel <- function() {
-    .Call('_glmbayes_run_test_kernel', PACKAGE = 'glmbayes')
+arithmetic_test_wrapper <- function() {
+    .Call('_glmbayes_arithmetic_test_wrapper', PACKAGE = 'glmbayes')
+}
+
+arithmetic_test_v2_wrapper <- function(a, b) {
+    .Call('_glmbayes_arithmetic_test_v2_wrapper', PACKAGE = 'glmbayes', a, b)
+}
+
+arithmetic_test_parallel_wrapper <- function(a, b) {
+    .Call('_glmbayes_arithmetic_test_parallel_wrapper', PACKAGE = 'glmbayes', a, b)
 }
 
 .RSS <- function(y, x, b, alpha, wt) {
