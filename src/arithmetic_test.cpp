@@ -275,8 +275,19 @@ Rcpp::NumericMatrix arithmetic_test_parallel_wrapper(Rcpp::NumericVector a, Rcpp
   
 }
 
+
+
+//////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
 ///////////////////////////////////////////////////////////////////////
 
+
+// [[Rcpp::export]]
 Rcpp::NumericVector run_test_kernel() {
   const int n = 6;  // Expecting 5 arithmetic outputs
   std::vector<float> output(n);
@@ -302,7 +313,10 @@ Rcpp::NumericVector run_test_kernel() {
   std::string arithmetic_source = load_kernel_library("arithmetic");
   std::string test_kernel       = load_kernel_source("test/arithmetic_test.cl");
   
-  std::string test_program_source = nmath_source + arithmetic_source + test_kernel;
+  
+//  std::cout << nmath_source << std::endl;
+
+    std::string test_program_source = nmath_source + arithmetic_source + test_kernel;
   
   std::cout << test_program_source << std::endl;
   
@@ -337,3 +351,244 @@ Rcpp::NumericVector run_test_kernel() {
 
 
 
+void dpq_macro_kernel_runner(const std::string& test_program_source,
+                                  const char *kernel_name,
+                                  std::vector<float>& output,
+                                  float p_in,
+                                  bool logp_in,
+                                  bool lt_in) {
+  if (output.empty()) {
+    throw std::runtime_error("Output vector must be preallocated and non-empty.");
+  }
+  
+  cl_int status;
+  
+  // 🔍 Platform & Device
+  cl_platform_id platform;
+  cl_device_id device;
+  status = clGetPlatformIDs(1, &platform, nullptr);
+  status |= clGetDeviceIDs(platform, CL_DEVICE_TYPE_DEFAULT, 1, &device, nullptr);
+  
+  // 🌐 Context & Queue
+  cl_context context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &status);
+  cl_queue_properties props[] = {0};
+  cl_command_queue queue = clCreateCommandQueueWithProperties(context, device, props, &status);
+  
+  // 📦 Program & Kernel
+  const char* src_ptr = test_program_source.c_str();
+  size_t src_len = test_program_source.size();
+  cl_program program = clCreateProgramWithSource(context, 1, &src_ptr, &src_len, &status);
+  status |= clBuildProgram(program, 0, nullptr, nullptr, nullptr, nullptr);
+  cl_kernel kernel = clCreateKernel(program, kernel_name, &status);
+  
+  // 🧮 Device Buffers
+  cl_mem output_buf = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(float) * output.size(), nullptr, &status);
+  
+  // 🗳️ Set Kernel Args
+  clSetKernelArg(kernel, 0, sizeof(cl_mem), &output_buf);
+  clSetKernelArg(kernel, 1, sizeof(float), &p_in);
+  clSetKernelArg(kernel, 2, sizeof(cl_bool), &logp_in);
+  clSetKernelArg(kernel, 3, sizeof(cl_bool), &lt_in);
+  
+  // 🚀 Launch Parallel Kernel
+//  size_t global_size = output.size();  // Each work item writes one output entry
+  
+  size_t global_size = 4;
+  output.resize(4);  // Only one thread writing 4 floats
+//  size_t global_size = output.size();  // Each work item writes one output entry
+  clEnqueueNDRangeKernel(queue, kernel, 1, nullptr, &global_size, nullptr, 0, nullptr, nullptr);
+  
+  // 📥 Retrieve Output
+  clEnqueueReadBuffer(queue, output_buf, CL_TRUE, 0, sizeof(float) * output.size(), output.data(), 0, nullptr, nullptr);
+  
+  // 🧹 Cleanup
+  clReleaseMemObject(output_buf);
+  clReleaseKernel(kernel);
+  clReleaseProgram(program);
+  clReleaseCommandQueue(queue);
+  clReleaseContext(context);
+}
+
+
+
+
+// [[Rcpp::export]]
+Rcpp::NumericVector dpq_macro_usage_wrapper(double p, bool log_p, bool lower_tail) {
+  const size_t stride = 4;  // Number of macro probes we'll test
+  std::vector<float> output(stride);
+  
+  // 🚀 Load test kernel and required macro layers
+//    std::string nmath_source      = load_kernel_library("nmath");
+//  std::string dpq_macros = load_kernel_source("dpq");        // Contains the full macro set
+  //std::string dpq_prelude = load_kernel_source("nmath/dpq_prelude.cl"); 
+  std::string test_kernel = load_kernel_source("test/dpq_macro_usage.cl");
+  
+//  std::string kernel_code = nmath_source + test_kernel;
+//  std::string kernel_code = dpq_prelude + test_kernel;
+  std::string kernel_code = test_kernel;
+  
+  std::cout << kernel_code << std::endl;
+  
+  
+  // 👾 Dispatch kernel
+  dpq_macro_kernel_runner(kernel_code, "dpq_macro_usage", output, p, log_p, lower_tail);
+  
+  // 📤 Return result to R for inspection
+  return Rcpp::NumericVector(output.begin(), output.end());
+}
+
+
+
+
+
+void basic_kernel_runner(const std::string& test_program_source,
+                         const char* kernel_name,
+                         std::vector<float>& output) {
+  if (output.size() < 4) {
+    output.resize(4);  // Ensure space for 4 results
+  }
+  
+  cl_int status;
+  
+  // 🔍 Platform & Device
+  cl_platform_id platform;
+  cl_device_id device;
+  status = clGetPlatformIDs(1, &platform, nullptr);
+  status |= clGetDeviceIDs(platform, CL_DEVICE_TYPE_DEFAULT, 1, &device, nullptr);
+  
+  // 🌐 Context & Queue
+  cl_context context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &status);
+  cl_queue_properties props[] = {0};
+  cl_command_queue queue = clCreateCommandQueueWithProperties(context, device, props, &status);
+  
+  // 📦 Program & Kernel
+  const char* src_ptr = test_program_source.c_str();
+  size_t src_len = test_program_source.size();
+  cl_program program = clCreateProgramWithSource(context, 1, &src_ptr, &src_len, &status);
+  status |= clBuildProgram(program, 0, nullptr, nullptr, nullptr, nullptr);
+  
+  // 🐛 Optional Build Log Dump
+  char build_log[4096];
+  clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, sizeof(build_log), build_log, nullptr);
+  std::cerr << "Build Log:\n" << build_log << std::endl;
+  
+  cl_kernel kernel = clCreateKernel(program, kernel_name, &status);
+  
+  // 🧮 Device Buffers
+  cl_mem output_buf = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(float) * output.size(), nullptr, &status);
+  
+  // 🗳️ Set Kernel Arg
+  clSetKernelArg(kernel, 0, sizeof(cl_mem), &output_buf);
+  
+  // 🚀 Launch Kernel with One Work-Item
+  size_t global_size = 1;
+  clEnqueueNDRangeKernel(queue, kernel, 1, nullptr, &global_size, nullptr, 0, nullptr, nullptr);
+  
+  // 📥 Retrieve Results
+  clEnqueueReadBuffer(queue, output_buf, CL_TRUE, 0, sizeof(float) * output.size(), output.data(), 0, nullptr, nullptr);
+  
+  // 🧹 Cleanup
+  clReleaseMemObject(output_buf);
+  clReleaseKernel(kernel);
+  clReleaseProgram(program);
+  clReleaseCommandQueue(queue);
+  clReleaseContext(context);
+}
+
+
+
+// [[Rcpp::export]]
+Rcpp::NumericVector basic_kernel_wrapper() {
+  const size_t stride = 5;  // Number of values we expect back
+  std::vector<float> output(stride);
+  
+  //std::string dpq_prelude = load_kernel_source("nmath/dpq_prelude.cl"); 
+ //     std::string dpq_source      = load_kernel_library("dpq");
+  
+  
+    // 🚀 Load standalone test kernel
+  std::string test_kernel = load_kernel_source("test/test_dpq_kernel.cl");  // Should contain test_kernel()
+ 
+//   std::string kernel_code = dpq_source + test_kernel;
+ std::string kernel_code = test_kernel;
+  std::cout << kernel_code << std::endl;
+ 
+  // 👾 Dispatch minimal kernel
+  basic_kernel_runner(kernel_code, "test_dpq_kernel", output);
+  
+  // 📤 Return result to R
+  return Rcpp::NumericVector(output.begin(), output.end());
+}
+
+
+void basic_kernel_runner_v2(const std::string& source,
+                         const char* kernel_name,
+                         std::vector<float>& output) {
+  if (output.size() != 25) {
+    throw std::runtime_error("Output vector must be preallocated with size 4.");
+  }
+  
+  cl_int status;
+  
+  // 🔍 Platform & Device
+  cl_platform_id platform;
+  cl_device_id device;
+  status = clGetPlatformIDs(1, &platform, nullptr);
+  status |= clGetDeviceIDs(platform, CL_DEVICE_TYPE_DEFAULT, 1, &device, nullptr);
+  
+  // 🌐 Context & Queue
+  cl_context context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &status);
+  cl_queue_properties props[] = {0};
+  cl_command_queue queue = clCreateCommandQueueWithProperties(context, device, props, &status);
+  
+  // 📦 Program & Kernel
+  const char* src_ptr = source.c_str();
+  size_t src_len = source.size();
+  cl_program program = clCreateProgramWithSource(context, 1, &src_ptr, &src_len, &status);
+  status |= clBuildProgram(program, 0, nullptr, nullptr, nullptr, nullptr);
+  cl_kernel kernel = clCreateKernel(program, kernel_name, &status);
+  
+  // 🧮 Device Buffers
+  cl_mem output_buf = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
+                                     sizeof(float) * output.size(), nullptr, &status);
+  clSetKernelArg(kernel, 0, sizeof(cl_mem), &output_buf);
+  
+  // 🚀 Launch Kernel (Single Work-Item)
+  size_t global_size = 1;
+  clEnqueueNDRangeKernel(queue, kernel, 1, nullptr, &global_size, nullptr, 0, nullptr, nullptr);
+  
+  // 📥 Retrieve Output
+  clEnqueueReadBuffer(queue, output_buf, CL_TRUE, 0,
+                      sizeof(float) * output.size(), output.data(), 0, nullptr, nullptr);
+  
+  // 🧹 Cleanup
+  clReleaseMemObject(output_buf);
+  clReleaseKernel(kernel);
+  clReleaseProgram(program);
+  clReleaseCommandQueue(queue);
+  clReleaseContext(context);
+}
+
+
+// [[Rcpp::export]]
+Rcpp::NumericVector basic_kernel_wrapper_v2() {
+  const size_t stride = 25;  // Number of values we expect back
+  std::vector<float> output(stride);
+  
+  //std::string dpq_prelude = load_kernel_source("nmath/dpq_prelude.cl"); 
+       std::string dpq_source      = load_kernel_library("dpq");
+  
+  
+  // 🚀 Load standalone test kernel
+  std::string test_kernel = load_kernel_source("test/basic_kernel.cl");  // Should contain test_kernel()
+  
+     std::string kernel_code = dpq_source + test_kernel;
+ // std::string kernel_code = test_kernel;
+  std::cout << kernel_code << std::endl;
+  
+  // 👾 Dispatch minimal kernel
+  basic_kernel_runner_v2(kernel_code, "basic_kernel", output);
+  
+  // 📤 Return result to R
+  return Rcpp::NumericVector(output.begin(), output.end());
+}

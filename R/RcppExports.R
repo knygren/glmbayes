@@ -29,6 +29,26 @@ arithmetic_test_parallel_wrapper <- function(a, b) {
     .Call('_glmbayes_arithmetic_test_parallel_wrapper', PACKAGE = 'glmbayes', a, b)
 }
 
+run_test_kernel <- function() {
+    .Call('_glmbayes_run_test_kernel', PACKAGE = 'glmbayes')
+}
+
+dpq_macro_usage_wrapper <- function(p, log_p, lower_tail) {
+    .Call('_glmbayes_dpq_macro_usage_wrapper', PACKAGE = 'glmbayes', p, log_p, lower_tail)
+}
+
+basic_kernel_wrapper <- function() {
+    .Call('_glmbayes_basic_kernel_wrapper', PACKAGE = 'glmbayes')
+}
+
+basic_kernel_wrapper_v2 <- function() {
+    .Call('_glmbayes_basic_kernel_wrapper_v2', PACKAGE = 'glmbayes')
+}
+
+dpq_test_wrapper <- function() {
+    .Call('_glmbayes_dpq_test_wrapper', PACKAGE = 'glmbayes')
+}
+
 .RSS <- function(y, x, b, alpha, wt) {
     .Call('_glmbayes_RSS', PACKAGE = 'glmbayes', y, x, b, alpha, wt)
 }
