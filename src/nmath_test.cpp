@@ -76,6 +76,7 @@ Rcpp::NumericVector nmath_test_wrapper() {
   
   
   std::string chebyshev_source     = load_kernel_source("nmath/chebyshev.cl");
+  std::string d1mach_source     = load_kernel_source("nmath/d1mach.cl");
   std::string dnorm_source     = load_kernel_source("nmath/dnorm.cl");
   std::string fmax2_source     = load_kernel_source("nmath/fmax2.cl");
   std::string gammalims_source     = load_kernel_source("nmath/gammalims.cl");
@@ -105,24 +106,25 @@ Rcpp::NumericVector nmath_test_wrapper() {
     "\n" + dpq_source
   +  "\n" +nmath_source2 
   + "\n" + chebyshev_source
+  + "\n" + d1mach_source
   + "\n" + dnorm_source
-//  + "\n" + fmax2_source
-//  + "\n" + gammalims_source
-//  + "\n" + lgammacor_source
+  + "\n" + fmax2_source
+  + "\n" + gammalims_source
+  + "\n" + lgammacor_source
 //  + "\n" + log1p_source
-  + "\n" + pnorm_source
-  + "\n" + stirlerr_large_source
- // + "\n" + expm1_source
-  + "\n" + gamma_source
-  + "\n" + lgamma_source
-  + "\n" + lgamma1p_source
-  + "\n" + stirlerr_small_source
-  + "\n" + dgamma_source
-  + "\n" + stirlerr_source
-  + "\n" + bd0_source
-  + "\n" + dbinom_source
-  + "\n" + dpois_source
-  + "\n" + pgamma_source
+//  + "\n" + pnorm_source
+//  + "\n" + stirlerr_large_source
+//  + "\n" + expm1_source
+//  + "\n" + gamma_source
+//  + "\n" + lgamma_source
+//  + "\n" + lgamma1p_source
+//  + "\n" + stirlerr_small_source
+//  + "\n" + dgamma_source
+//  + "\n" + stirlerr_source
+//  + "\n" + bd0_source
+//  + "\n" + dbinom_source
+//  + "\n" + dpois_source
+//  + "\n" + pgamma_source
   + "\n" + test_kernel_code;
   std::cout << kernel_code << std::endl;
   

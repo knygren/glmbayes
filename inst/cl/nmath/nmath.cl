@@ -17,21 +17,22 @@
 #define R_forceint(x) round(x)
 
 
+// OpenCL compliant ML_ERROR DEFINITON
 
 #ifndef ML_ERROR
-  #define ML_ERROR(code, fname)                                       \
-    do {                                                               \
-      const char *_msg = "";                                           \
-      switch(code) {                                                   \
-        case ME_DOMAIN:    _msg = "argument out of domain in %s\n";    break; \
-        case ME_RANGE:     _msg = "value out of range in %s\n";        break; \
-        case ME_NOCONV:    _msg = "convergence failed in %s\n";        break; \
-        case ME_PRECISION: _msg = "precision lost in %s\n";            break; \
-        case ME_UNDERFLOW: _msg = "underflow occurred in %s\n";        break; \
-        default:          _msg = "math error %d in %s\n";              break; \
-      }                                                                \
-      MATHLIB_WARNING(_msg, fname);                                    \
-    } while(0)
+#define ML_ERROR(code, fname)                                        \
+  do {                                                               \
+    const __constant char *_msg = "";                                \
+    switch(code) {                                                   \
+      case ME_DOMAIN:    _msg = "argument out of domain in %s\n";    break; \
+      case ME_RANGE:     _msg = "value out of range in %s\n";        break; \
+      case ME_NOCONV:    _msg = "convergence failed in %s\n";        break; \
+      case ME_PRECISION: _msg = "precision lost in %s\n";            break; \
+      case ME_UNDERFLOW: _msg = "underflow occurred in %s\n";        break; \
+      default:           _msg = "math error %d in %s\n";             break; \
+    }                                                                \
+    MATHLIB_WARNING(_msg, fname);                                    \
+  } while(0)
 #endif
 
 
