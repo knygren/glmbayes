@@ -47,4 +47,7 @@
 // 5. Placeholder for other global utilities (e.g., work-item macros, typedefs)
 // -----------------------------------------------------------------------------
 
+#define R_NO_REMAP_RMATH
+
+
 #endif // OPENCL_CL
