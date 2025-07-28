@@ -35,6 +35,29 @@
   } while(0)
 #endif
 
+#define ML_WARNING(x, s) \
+    if ((x) > ME_DOMAIN) { \
+        const __constant char *_msg = ""; \
+        switch (x) { \
+            case ME_DOMAIN: \
+                _msg = "argument out of domain in '%s'"; \
+                break; \
+            case ME_RANGE: \
+                _msg = "value out of range in '%s'"; \
+                break; \
+            case ME_NOCONV: \
+                _msg = "convergence failed in '%s'"; \
+                break; \
+            case ME_PRECISION: \
+                _msg = "full precision may not have been achieved in '%s'"; \
+                break; \
+            case ME_UNDERFLOW: \
+                _msg = "underflow occurred in '%s'"; \
+                break; \
+        } \
+        MATHLIB_WARNING(_msg, s); \
+    }
+
 
 // nmath.cl - OpenCL math constants, macros & remaps for GPU kernels
 //@provides: ML_POSINF,ML_NEGINF,ML_NAN,ME_NONE,ME_DOMAIN,ME_RANGE,ME_NOCONV,ME_PRECISION,ME_UNDERFLOW,ISNAN,R_FINITE,ML_VALID,ML_ERR_return_NAN,ML_ERROR,WILCOX_MAX,_
