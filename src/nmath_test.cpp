@@ -113,7 +113,7 @@ Rcpp::NumericVector nmath_test_wrapper() {
   + "\n" + lgammacor_source
   + "\n" + log1p_source
   + "\n" + pnorm_source
-//  + "\n" + stirlerr_large_source
+  + "\n" + stirlerr_large_source
 //  + "\n" + expm1_source
 //  + "\n" + gamma_source
 //  + "\n" + lgamma_source
