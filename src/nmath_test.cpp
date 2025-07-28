@@ -111,7 +111,7 @@ Rcpp::NumericVector nmath_test_wrapper() {
   + "\n" + fmax2_source
   + "\n" + gammalims_source
   + "\n" + lgammacor_source
-//  + "\n" + log1p_source
+  + "\n" + log1p_source
 //  + "\n" + pnorm_source
 //  + "\n" + stirlerr_large_source
 //  + "\n" + expm1_source
