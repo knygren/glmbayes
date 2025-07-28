@@ -1,4 +1,5 @@
-
+// @test: nmath
+// @provides: nmath_test_kernel
 
 __kernel void nmath_test_kernel(__global float* output) {
     // Input sample values for testing ML_VALID and related checks
@@ -20,3 +21,4 @@ __kernel void nmath_test_kernel(__global float* output) {
     output[7] = ML_VALID(valid_x) ? 1.0f : 0.0f;  // should be 1
     output[8] = ML_VALID(nan_x)   ? 1.0f : 0.0f;  // should be 0
 }
+

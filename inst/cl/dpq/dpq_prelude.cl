@@ -1,9 +1,9 @@
 // @provides ML_NEGINF, ML_POSINF, ML_NAN, give_log, R_FINITE, R_nonint, safe_log, safe_log1p, safe_expm1
 
-// OpenCL-safe definitions for constants
-#define ML_NEGINF   (-INFINITY)
-#define ML_POSINF   (INFINITY)
-#define ML_NAN      (NAN)
+// OpenCL-safe definitions for constants - No longer needed as set on OPENCL.CL
+//#define ML_NEGINF   (-INFINITY)
+//#define ML_POSINF   (INFINITY)
+//#define ML_NAN      (NAN)
 
 // Shim for give_log logic (set externally)
 #define give_log    log_p

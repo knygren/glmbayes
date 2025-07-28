@@ -61,6 +61,10 @@ dpq_test_wrapper <- function() {
     .Call('_glmbayes_Inv_f3_gaussian', PACKAGE = 'glmbayes', cbars, y, x, mu, P, alpha, wt)
 }
 
+load_kernel_library <- function(subdir, package = "glmbayes") {
+    .Call('_glmbayes_load_kernel_library', PACKAGE = 'glmbayes', subdir, package)
+}
+
 nmath_test_wrapper <- function() {
     .Call('_glmbayes_nmath_test_wrapper', PACKAGE = 'glmbayes')
 }
@@ -85,6 +89,10 @@ nmath_test_wrapper <- function() {
     .Call('_glmbayes_rindep_norm_gamma_reg_std_v5_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar)
 }
 
+rmath_test_wrapper <- function() {
+    .Call('_glmbayes_rmath_test_wrapper', PACKAGE = 'glmbayes')
+}
+
 .glmb_Standardize_Model_cpp <- function(y, x, P, bstar, A1) {
     .Call('_glmbayes_glmb_Standardize_Model', PACKAGE = 'glmbayes', y, x, P, bstar, A1)
 }
@@ -107,5 +115,9 @@ test_all_args <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link,
 
 test_square_kernel <- function(inputR) {
     .Call('_glmbayes_test_square_kernel', PACKAGE = 'glmbayes', inputR)
+}
+
+stirlerr_test_wrapper <- function() {
+    .Call('_glmbayes_stirlerr_test_wrapper', PACKAGE = 'glmbayes')
 }
 

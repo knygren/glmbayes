@@ -1,13 +1,20 @@
 #include <Rcpp.h>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 #include <string>
 #include <filesystem>  // C++17
+#include <vector>
+#include <map>
+#include <set>
+#include <string>
+#include <stdexcept>
+#include <algorithm>
+
 
 namespace fs = std::filesystem;
 
 // Load a single file like "nmath/bd0.cl"
-
 
 
 
@@ -37,6 +44,11 @@ std::string load_kernel_source(const std::string& relative_path,
   return oss.str();
 }
 
+
+
+/////////////////////////////
+
+// [[Rcpp::export]]
 std::string load_kernel_library(const std::string& subdir, const std::string& package = "glmbayes") {
   std::string dir_path = Rcpp::as<std::string>(
     Rcpp::Function("system.file")("cl", subdir, Rcpp::Named("package") = package)
@@ -44,11 +56,14 @@ std::string load_kernel_library(const std::string& subdir, const std::string& pa
   
   std::map<std::string, std::set<std::string>> provides_map;
   std::map<std::string, std::set<std::string>> depends_map;
-  std::map<std::string, fs::path> file_map;
+  std::map<std::string, std::filesystem::path> file_map;
   
-  // Parse metadata
-  for (const auto& entry : fs::directory_iterator(dir_path)) {
+  std::cerr << "\n📂 Files found in '" << subdir << "':\n";
+  for (const auto& entry : std::filesystem::directory_iterator(dir_path)) {
     if (entry.path().extension() == ".cl") {
+      std::string file_id = entry.path().stem().string();
+      std::cerr << " - " << file_id << "\n";
+      
       std::ifstream infile(entry.path());
       std::string line;
       std::set<std::string> provides, depends;
@@ -61,64 +76,106 @@ std::string load_kernel_library(const std::string& subdir, const std::string& pa
         } else if (line.find("@depends") != std::string::npos) {
           std::stringstream ss(line.substr(line.find("@depends") + 9));
           std::string item;
-          while (ss >> item) depends.insert(item);
+          while (ss >> item) {
+            // Remove only ‘,’ characters
+            item.erase(std::remove(item.begin(), item.end(), ','),item.end()  );
+            //  item.erase(std::remove_if(item.begin(), item.end(), ::ispunct), item.end());
+            depends.insert(item);
+            
+            
+          }
         }
       }
       
-      std::string file_id = entry.path().filename().string();
       file_map[file_id] = entry.path();
       provides_map[file_id] = provides;
       depends_map[file_id] = depends;
     }
   }
   
-  // Track fulfilled provides during sort
-  std::set<std::string> fulfilled;
-  std::set<std::string> unsorted;
-  for (const auto& [file, _] : file_map) {
-    unsorted.insert(file);
-  }
-  
   std::vector<std::string> sorted;
-  bool progress = true;
+  std::set<std::string> sorted_set;
+  std::set<std::string> unsorted_set;
   
-  while (progress) {
-    progress = false;
-    
-    for (auto it = unsorted.begin(); it != unsorted.end(); ) {
-      const std::string& file = *it;
-      const std::set<std::string>& deps = depends_map[file];
-      
-      bool all_satisfied = std::all_of(deps.begin(), deps.end(), [&](const std::string& dep) {
-        return fulfilled.count(dep);
-      });
-      
-      if (all_satisfied) {
-        sorted.push_back(file);
-        fulfilled.insert(provides_map[file].begin(), provides_map[file].end());
-        it = unsorted.erase(it);
-        progress = true;
-      } else {
-        ++it;
-      }
+  std::cerr << "\n📤 Files with no dependencies:\n";
+  for (const auto& [file, _] : file_map) {
+    if (depends_map[file].empty()) {
+      sorted.push_back(file);
+      sorted_set.insert(file);
+      std::cerr << " + " << file << "\n";
+    } else {
+      unsorted_set.insert(file);
     }
   }
   
-  // Anything remaining is unresolved—append at end
-  for (const std::string& file : unsorted) {
-    sorted.push_back(file);
+  std::cerr << "\n🧪 Unsorted files:\n";
+  for (const auto& file : unsorted_set) {
+    std::cerr << " - " << file << "\n";
   }
   
-  // 📤 Debug: Final sort order
-  std::cerr << "\n🔗 Final kernel load order (resolved first, unresolved last):\n";
+  int pass_count = 0;
+  while (!unsorted_set.empty()) {
+    ++pass_count;
+    std::cerr << "\n🔁 While Loop Pass #" << pass_count << " — Remaining unsorted: " << unsorted_set.size() << "\n";
+    
+    std::vector<std::string> newly_sorted;
+    bool progress_made = false;
+    int file_counter = 0;
+    
+    for (const std::string& file : unsorted_set) {
+      ++file_counter;
+      std::cerr << "   🔍 File #" << file_counter << ": " << file << "\n";
+      
+      const auto& deps = depends_map[file];
+      int depends_counter = static_cast<int>(deps.size());
+      std::cerr << "      📦 Dependency Count: " << depends_counter << "\n";
+      
+      int found_counter = 0;
+      int dep_index = 0;
+      for (const std::string& dep : deps) {
+        ++dep_index;
+        std::cerr << "         🔎 Checking classified #" << dep_index << ": " << dep << "\n";
+        
+        auto it = sorted_set.find(dep);
+        if (it != sorted_set.end()) {
+          std::cerr << "            ➤ Found in sorted? ✅ Yes\n";
+          ++found_counter;
+        } else {
+          std::cerr << "            ➤ Found in sorted? ❌ No\n";
+        }
+      }
+      
+      std::cerr << "      🔍 Found count: " << found_counter << "\n";
+      if (found_counter == depends_counter) {
+        sorted.push_back(file);
+        sorted_set.insert(file);
+        newly_sorted.push_back(file);
+        progress_made = true;
+        std::cerr << " ✅ Promoted to Sorted: " << file << "\n";
+      }
+    }
+    
+    for (const std::string& file : newly_sorted) {
+      unsorted_set.erase(file);
+    }
+    
+    if (!progress_made) {
+      std::cerr << "\n❌ No files promoted on pass #" << pass_count << "; possible circular or missing dependencies:\n";
+      for (const std::string& file : unsorted_set) {
+        std::cerr << " - " << file << "\n";
+      }
+      throw std::runtime_error("Dependency sort failed: unresolved dependencies remain.");
+    }
+  }
+  
+  std::cerr << "\n🔗 Final Sorted Load Order:\n";
   for (const auto& file : sorted) {
     std::cerr << " - " << file << "\n";
   }
   
-  // Concatenate sources
   std::string combined_source;
   for (const auto& file : sorted) {
-    std::string rel_path = subdir + "/" + file;
+    std::string rel_path = subdir + "/" + file + ".cl";
     combined_source += load_kernel_source(rel_path, package) + "\n";
   }
   

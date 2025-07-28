@@ -117,10 +117,12 @@ attribute_hidden double stirlerr(double n)
 	if (n <= 5.25) {
 	    if(n >= 1.) { // "MM2"; slightly more accurate than direct form
 		double l_n = log(n);	      // ldexp(u, -1) == u/2
-		return lgamma(n) + n*(1 - l_n) + ldexp(l_n - M_LN_2PI, -1);
+  return   		lgamma(n) + n*(1 - l_n) + ldexp(l_n - M_LN_2PI, -1);
 	    }
 	    else // n < 1
-		return lgamma1p(n) - (n + 0.5)*log(n) + n - M_LN_SQRT_2PI;
+	
+		return lgamma1p(n) - (n + 0.5)*log(n) + n - M_LN_SQRT_2PI
+	    ;
 	}
 	// else  5.25 < n <= 23.5
 	nn = n*n;

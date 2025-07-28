@@ -1,4 +1,5 @@
-
+// @test: dpq
+// @provides: dpq_test_kernel
 
 __kernel void dpq_test_kernel(__global float* output) {
     
