@@ -4,32 +4,6 @@
 //@includes: nmath, dpq
 
 
-inline double pnorm5(double x, double mu, double sigma, int lower_tail, int log_p)
-{
-    double p, cp;
-
-    /* Note: The structure of these checks has been carefully thought through.
-     * For example, if x == mu and sigma == 0, we get the correct answer 1.
-     */
-#ifdef IEEE_754
-    if(ISNAN(x) || ISNAN(mu) || ISNAN(sigma))
-	return x + mu + sigma;
-#endif
-    if(!R_FINITE(x) && mu == x) return ML_NAN;/* x-mu is NaN */
-    if (sigma <= 0) {
-	if(sigma < 0) ML_WARN_return_NAN;
-	/* sigma = 0 : */
-	return (x < mu) ? R_DT_0 : R_DT_1;
-    }
-    p = (x - mu) / sigma;
-    if(!R_FINITE(p))
-	return (x < mu) ? R_DT_0 : R_DT_1;
-    x = p;
-
-    pnorm_both(x, &p, &cp, (lower_tail ? 0 : 1), log_p);
-
-    return(lower_tail ? p : cp);
-}
 
 
 inline void pnorm_both(double x, double *cum, double *ccum, int i_tail, int log_p)
@@ -229,3 +203,32 @@ inline void pnorm_both(double x, double *cum, double *ccum, int i_tail, int log_
 #endif
     return;
 }
+
+
+inline double pnorm5(double x, double mu, double sigma, int lower_tail, int log_p)
+{
+    double p, cp;
+
+    /* Note: The structure of these checks has been carefully thought through.
+     * For example, if x == mu and sigma == 0, we get the correct answer 1.
+     */
+#ifdef IEEE_754
+    if(ISNAN(x) || ISNAN(mu) || ISNAN(sigma))
+	return x + mu + sigma;
+#endif
+    if(!R_FINITE(x) && mu == x) return ML_NAN;/* x-mu is NaN */
+    if (sigma <= 0) {
+	if(sigma < 0) ML_WARN_return_NAN;
+	/* sigma = 0 : */
+	return (x < mu) ? R_DT_0 : R_DT_1;
+    }
+    p = (x - mu) / sigma;
+    if(!R_FINITE(p))
+	return (x < mu) ? R_DT_0 : R_DT_1;
+    x = p;
+
+    pnorm_both(x, &p, &cp, (lower_tail ? 0 : 1), log_p);
+
+    return(lower_tail ? p : cp);
+}
+
