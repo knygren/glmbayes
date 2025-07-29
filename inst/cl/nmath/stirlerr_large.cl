@@ -1,4 +1,4 @@
-// stirlerr.cl - OpenCL Adaptation of stirlerr.c
+// stirlerr_large.cl - OpenCL Adaptation of stirlerr.c (large values only)
 //@provides: stirlerr_large
 //@depends: nmath
 //@includes: nmath
