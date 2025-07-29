@@ -7,6 +7,22 @@
   #define MATHLIB_WARNING(fmt, ...)   /* no-op or printf(fmt, __VA_ARGS__) */
 #endif
 
+#ifndef MATHLIB_WARNING2
+#define MATHLIB_WARNING2(fmt,x,x2)	printf(fmt,x,x2)
+#endif
+
+#ifndef MATHLIB_WARNING3
+#define MATHLIB_WARNING3(fmt,x,x2,x3)	printf(fmt,x,x2,x3)
+#endif
+
+#ifndef MATHLIB_WARNING4
+#define MATHLIB_WARNING4(fmt,x,x2,x3,x4) printf(fmt,x,x2,x3,x4)
+#endif
+
+#ifndef MATHLIB_WARNING5
+#define MATHLIB_WARNING5(fmt,x,x2,x3,x4,x5) printf(fmt,x,x2,x3,x4,x5)
+#endif
+
 #ifdef DEBUG_MODE
   #undef MATHLIB_WARNING
   #define MATHLIB_WARNING(fmt, ...) printf("Rmath warning: " fmt, __VA_ARGS__)

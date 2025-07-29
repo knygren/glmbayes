@@ -8,12 +8,12 @@
 ##
 ## And with R 3.4.0, and RcppArmadillo 0.7.960.*, we turn C++11 on as OpenMP
 ## support within Armadillo prefers / requires it
-CXX=g++
+##CXX=g++
 ##CXX_STD = CXX11 # Edited out - Not needed in newer versions of R
 
-PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) 
+# src/Makevars — for Linux/macOS builds
 
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -I/usr/include
 
-
-PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)  -lRcppParallel
+PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) -L/usr/lib -lOpenCL -lRcppParallel $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
