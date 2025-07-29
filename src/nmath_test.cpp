@@ -140,11 +140,11 @@ Rcpp::NumericVector nmath_test_wrapper() {
   + "\n" + lgamma_source
   + "\n" + lgamma1p_source
   + "\n" + stirlerr_small_source
-//  + "\n" + dgamma_source
   + "\n" + stirlerr_source
-//  + "\n" + bd0_source
+  + "\n" + bd0_source
 //  + "\n" + dbinom_source
 //  + "\n" + dpois_source
+//  + "\n" + dgamma_source
 //  + "\n" + pgamma_source
   + "\n" + test_kernel_code;
   std::cout << kernel_code << std::endl;
