@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <Rcpp.h>
+#include "configure_OpenCL.h"
 
 // 🚀 Runner for nmath test kernel
 void nmath_test_runner(const std::string& source,
@@ -22,14 +23,34 @@ void nmath_test_runner(const std::string& source,
   
   // 🌐 Context & Queue
   cl_context context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &status);
-  cl_queue_properties props[] = {0};
+
+  
+  
+    cl_queue_properties props[] = {0};
   cl_command_queue queue = clCreateCommandQueueWithProperties(context, device, props, &status);
   
   // 📦 Program & Kernel
   const char* src_ptr = source.c_str();
   size_t src_len = source.size();
-  cl_program program = clCreateProgramWithSource(context, 1, &src_ptr, &src_len, &status);
-  status |= clBuildProgram(program, 0, nullptr, nullptr, nullptr, nullptr);
+
+  // Get Configuration (Based on context and device)
+  OpenCLConfig cfg = configureOpenCL(context, device);
+  const char *opts = cfg.buildOptions.empty()
+    ? nullptr
+    : cfg.buildOptions.c_str();
+  
+  
+  
+  
+    cl_program program = clCreateProgramWithSource(context, 1, &src_ptr, &src_len, &status);
+  status |= clBuildProgram(program, 
+                           0,    // build for all devices
+                           nullptr, //device list
+                           opts, // Configuration options
+//                           nullptr, // Configuration options
+                           nullptr,
+                           nullptr);
+  
   
   // 📣 Retrieve build log
   size_t log_size;
@@ -114,7 +135,7 @@ Rcpp::NumericVector nmath_test_wrapper() {
   + "\n" + log1p_source
   + "\n" + pnorm_source
   + "\n" + stirlerr_large_source
-//  + "\n" + expm1_source
+  + "\n" + expm1_source
 //  + "\n" + gamma_source
 //  + "\n" + lgamma_source
 //  + "\n" + lgamma1p_source
