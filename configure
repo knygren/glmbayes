@@ -1,47 +1,43 @@
 #!/bin/bash
 
-echo "Generating Makevars..."
+echo "🔧 Generating src/Makevars..."
 
-# Remove any existing Makevars
+# Clean old Makevars
 rm -f src/Makevars
 
+
 # ----------------------------
-# 🔍 Detect OpenCL
+# 🔍 Detect OpenCL header
 CL_HEADER=$(find /usr /usr/local /opt -type f -name cl.h 2>/dev/null | grep "/CL/cl.h" | head -n 1)
 
 if [ -n "$CL_HEADER" ]; then
-  CL_BASE=$(dirname "$CL_HEADER")
-  CL_LIB_DIR="$CL_BASE/../lib64"
-  echo "Found OpenCL header at $CL_BASE"
-  USE_OPENCL="1"
+  CL_INC_DIR=$(dirname "$CL_HEADER")
+  # Try to locate the OpenCL library using the header path
+  CL_LIB_DIR=$(find /usr /usr/local /opt -type f -name libOpenCL.so 2>/dev/null | xargs -n1 dirname | head -n 1)
+  echo "✅ OpenCL found: header at $CL_INC_DIR, library at $CL_LIB_DIR"
+  USE_OPENCL=1
 else
-  echo "OpenCL header not found. Building without OpenCL..."
-  USE_OPENCL="0"
+  echo "⚠️ OpenCL not found. Will compile without it."
+  USE_OPENCL=0
 fi
 
 # ----------------------------
-# 🧵 Detect TBB using pkg-config
-if pkg-config --exists tbb; then
-  TBB_CFLAGS=$(pkg-config --cflags tbb)
-  TBB_LIBS=$(pkg-config --libs tbb)
-  echo "Found TBB via pkg-config"
-else
-  TBB_CFLAGS=""
-  TBB_LIBS="-ltbb"
-  echo "TBB not found via pkg-config. Falling back to -ltbb"
+TBB_CFLAGS=$(Rscript -e "RcppParallel::CxxFlags()")
+TBB_LIBS=$(Rscript -e "RcppParallel::LdFlags()")
+
 fi
 
 # ----------------------------
-# 🛠 Generate Makevars content
+# 🛠 Write Makevars
 {
   echo "PKG_CXXFLAGS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_CFLAGS"
-
+  
   if [ "$USE_OPENCL" = "1" ]; then
-    echo "PKG_CXXFLAGS += -DUSE_OPENCL -I$CL_BASE"
+    echo "PKG_CXXFLAGS += -DUSE_OPENCL -I$CL_INC_DIR"
     echo "PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) -L$CL_LIB_DIR -lOpenCL $TBB_LIBS \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)"
   else
     echo "PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_LIBS \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)"
   fi
 } > src/Makevars
 
-echo "Makevars generated successfully."
+echo "✅ src/Makevars generated."
