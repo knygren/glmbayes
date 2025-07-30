@@ -30,12 +30,12 @@ TBB_LIBS=$(Rscript -e "RcppParallel::LdFlags()")
 {
   echo "PKG_CXXFLAGS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_CFLAGS"
   
-  if [ "$USE_OPENCL" = "1" ]; then
-    echo "PKG_CXXFLAGS += -DUSE_OPENCL -I$CL_INC_DIR"
-    echo "PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) -L$CL_LIB_DIR -lOpenCL $TBB_LIBS \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)"
-  else
-    echo "PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_LIBS \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)"
-  fi
+if [ "$USE_OPENCL" = "1" ]; then
+  echo "PKG_CXXFLAGS += -DUSE_OPENCL -I$CL_INC_DIR"
+  echo "PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) -L$CL_LIB_DIR -lOpenCL $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)"
+else
+  echo "PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)"
+fi
 } > src/Makevars
 
 echo "✅ src/Makevars generated."
