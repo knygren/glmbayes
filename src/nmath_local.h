@@ -40,7 +40,7 @@
 #include <math.h>
 #include <float.h> /* DBL_MIN etc */
 
-#include <Rconfig.h>
+//#include <Rconfig.h>
 #include <Rmath.h>
 
 /* Used internally only */
