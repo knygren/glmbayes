@@ -21,7 +21,7 @@ namespace fs = std::filesystem;
 
 
 
-
+#ifdef USE_OPENCL
 std::string load_kernel_source(const std::string& relative_path,
                                const std::string& package = "glmbayes") {
   // Retrieve full path via system.file()
@@ -46,12 +46,12 @@ std::string load_kernel_source(const std::string& relative_path,
   oss << file.rdbuf();
   return oss.str();
 }
-
+#endif
 
 
 /////////////////////////////
 
-// [[Rcpp::export]]
+#ifdef USE_OPENCL
 std::string load_kernel_library(const std::string& subdir, const std::string& package = "glmbayes") {
   std::string dir_path = Rcpp::as<std::string>(
     Rcpp::Function("system.file")("cl", subdir, Rcpp::Named("package") = package)
@@ -184,5 +184,6 @@ std::string load_kernel_library(const std::string& subdir, const std::string& pa
   
   return combined_source;
 }
+#endif
 
 #endif
