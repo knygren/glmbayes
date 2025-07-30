@@ -1,3 +1,4 @@
+#ifdef USE_OPENCL
 #include "kernel_loader.h"
 #include <CL/cl.h>
 #include <iostream>
@@ -6,12 +7,13 @@
 
 
 
+
+
 //std::string nmath_source = load_kernel_library("nmath");
 //std::string arithmetic_source = load_kernel_library("arithmetic");
 //std::string test_kernel = load_kernel_source("test/arithmetic_test.cl");
 
 //std::string test_program_source = arithmetic_source + test_kernel;
-
 
 void arithmetic_test_kernel_runner(const std::string& test_program_source,
                                    std::vector<float>& output) {
@@ -592,3 +594,4 @@ Rcpp::NumericVector basic_kernel_wrapper_v2() {
   // 📤 Return result to R
   return Rcpp::NumericVector(output.begin(), output.end());
 }
+#endif
