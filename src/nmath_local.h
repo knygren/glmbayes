@@ -47,10 +47,11 @@
 double  Rf_d1mach(int);
 double	Rf_gamma_cody(double);
 
-#include <R_ext/RS.h>
+/// Try without this
+#include "RS_local.h"
 
 /* possibly needed for debugging */
-#include <R_ext/Print.h>
+//#include <R_ext/Print.h>
 
 /* moved from dpq.h */
 #ifdef HAVE_NEARBYINT
