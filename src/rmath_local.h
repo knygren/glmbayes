@@ -227,7 +227,7 @@ extern "C" {
 
 # endif
 #else
-# include <R_ext/Boolean.h>
+# include "boolean_local.h"
 #endif
 
 
