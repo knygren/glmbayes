@@ -1,3 +1,6 @@
+#ifdef USE_OPENCL
+
+
 #include <Rcpp.h>
 #include <fstream>
 #include <sstream>
@@ -181,3 +184,5 @@ std::string load_kernel_library(const std::string& subdir, const std::string& pa
   
   return combined_source;
 }
+
+#endif

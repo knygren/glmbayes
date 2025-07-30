@@ -1,4 +1,5 @@
 // rmath_test.cpp
+#ifdef USE_OPENCL
 
 #include "kernel_loader.h"
 #include <CL/cl.h>
@@ -101,3 +102,4 @@ Rcpp::NumericVector rmath_test_wrapper() {
   // Return results back to R
   return Rcpp::NumericVector(output.begin(), output.end());
 }
+#endif

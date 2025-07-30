@@ -1,3 +1,4 @@
+#ifdef USE_OPENCL
 #include <Rcpp.h>
 #include <CL/cl.h>
 #include <fstream>
@@ -71,3 +72,4 @@ Rcpp::NumericVector test_square_kernel(Rcpp::NumericVector inputR) {
 
   return Rcpp::NumericVector(output.begin(), output.end());
 }
+#endif
