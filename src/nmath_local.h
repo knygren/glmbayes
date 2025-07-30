@@ -248,7 +248,8 @@ attribute_hidden void bratio(double a, double b, double x, double y,
 extern "C" {
 #endif
   
-attribute_hidden  double dgamma_local(double x, double shape, double scale, int give_log);
+//attribute_hidden 
+double dgamma_local(double x, double shape, double scale, int give_log);
 
   
 #ifdef __cplusplus
@@ -259,7 +260,8 @@ attribute_hidden  double dgamma_local(double x, double shape, double scale, int 
 extern "C" {
 #endif
   
-  attribute_hidden  double pnorm5_local(double x, double mu, double sigma, int lower_tail, int log_p);  
+//  attribute_hidden  
+  double pnorm5_local(double x, double mu, double sigma, int lower_tail, int log_p);  
 #ifdef __cplusplus
 }
 #endif

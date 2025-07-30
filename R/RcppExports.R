@@ -61,10 +61,6 @@ dpq_test_wrapper <- function() {
     .Call('_glmbayes_Inv_f3_gaussian', PACKAGE = 'glmbayes', cbars, y, x, mu, P, alpha, wt)
 }
 
-load_kernel_library <- function(subdir, package = "glmbayes") {
-    .Call('_glmbayes_load_kernel_library', PACKAGE = 'glmbayes', subdir, package)
-}
-
 nmath_test_wrapper <- function() {
     .Call('_glmbayes_nmath_test_wrapper', PACKAGE = 'glmbayes')
 }

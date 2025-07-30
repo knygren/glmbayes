@@ -220,18 +220,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// load_kernel_library
-std::string load_kernel_library(const std::string& subdir, const std::string& package);
-RcppExport SEXP _glmbayes_load_kernel_library(SEXP subdirSEXP, SEXP packageSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const std::string& >::type subdir(subdirSEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type package(packageSEXP);
-    rcpp_result_gen = Rcpp::wrap(load_kernel_library(subdir, package));
-    return rcpp_result_gen;
-END_RCPP
-}
 // nmath_test_wrapper
 Rcpp::NumericVector nmath_test_wrapper();
 RcppExport SEXP _glmbayes_nmath_test_wrapper() {
@@ -515,7 +503,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_RSS", (DL_FUNC) &_glmbayes_RSS, 5},
     {"_glmbayes_f2_gaussian", (DL_FUNC) &_glmbayes_f2_gaussian, 7},
     {"_glmbayes_Inv_f3_gaussian", (DL_FUNC) &_glmbayes_Inv_f3_gaussian, 7},
-    {"_glmbayes_load_kernel_library", (DL_FUNC) &_glmbayes_load_kernel_library, 2},
     {"_glmbayes_nmath_test_wrapper", (DL_FUNC) &_glmbayes_nmath_test_wrapper, 0},
     {"_glmbayes_rindep_norm_gamma_reg_std_cpp", (DL_FUNC) &_glmbayes_rindep_norm_gamma_reg_std_cpp, 12},
     {"_glmbayes_rindep_norm_gamma_reg_std_v2_cpp", (DL_FUNC) &_glmbayes_rindep_norm_gamma_reg_std_v2_cpp, 14},

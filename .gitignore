@@ -3,8 +3,12 @@
 .RData
 .Ruserdata
 src/*.o
+# Ignore all object files recursively
+**/*.o
 src/*.so
 src/*.dll
 inst/doc
 /doc/
 /Meta/
+
+
