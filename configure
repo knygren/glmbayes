@@ -28,7 +28,9 @@ TBB_LIBS=$(Rscript -e "RcppParallel::LdFlags()")
 
 # ----------------------------
 # 🗂️ Detect source files, exclude OpenCL ones if needed
-ALL_CPP=$(ls src/*.cpp | sed 's|src/||')
+##ALL_CPP=$(ls src/*.cpp | sed 's|src/||')
+ALL_CPP=$(ls src/*.c src/*.cpp 2>/dev/null | sed 's|src/||')
+
 EXCLUDED_CPP="load_kernel_source.cpp load_kernel_library.cpp"
 
 if [ "$USE_OPENCL" = "1" ]; then
