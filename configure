@@ -25,10 +25,29 @@ fi
 TBB_CFLAGS=$(Rscript -e "RcppParallel::CxxFlags()")
 TBB_LIBS=$(Rscript -e "RcppParallel::LdFlags()")
 
+
+# ----------------------------
+# 🗂️ Detect source files, exclude OpenCL ones if needed
+ALL_CPP=$(ls src/*.cpp | sed 's|src/||')
+EXCLUDED_CPP="load_kernel_source.cpp load_kernel_library.cpp"
+
+if [ "$USE_OPENCL" = "1" ]; then
+  FINAL_CPP="$ALL_CPP"
+else
+  # Filter out excluded files
+  FINAL_CPP=$(comm -23 <(echo "$ALL_CPP" | sort) <(echo "$EXCLUDED_CPP" | sort))
+fi
+
+# Convert to .o format
+FINAL_OBJS=$(echo "$FINAL_CPP" | sed 's/\.cpp/.o/' | paste -sd " " -)
+
 # 🛠 Write Makevars
 {
   echo "CXX_STD = CXX17"
   echo "PKG_CXXFLAGS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_CFLAGS"
+  echo "OBJECTS = $FINAL_OBJS"
+  echo "PKG_OBJECTS = \$(OBJECTS)"
+
 
   if [ "$USE_OPENCL" = "1" ]; then
     echo "PKG_CXXFLAGS += -DUSE_OPENCL -I$CL_INC_DIR"
