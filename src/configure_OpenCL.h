@@ -1,5 +1,5 @@
 // configure_OpenCL.h
-
+#ifdef USE_OPENCL
 #ifndef CONFIGURE_OPENCL_H
 #define CONFIGURE_OPENCL_H
 
@@ -17,4 +17,4 @@ struct OpenCLConfig {
 OpenCLConfig configureOpenCL(cl_context context, cl_device_id device);
 
 #endif // CONFIGURE_OPENCL_H
-
+#endif // USE_OPENCL

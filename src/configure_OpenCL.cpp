@@ -1,5 +1,5 @@
 // configure_OpenCL.cpp
-
+#ifdef USE_OPENCL
 #include "configure_OpenCL.h"
 #include <iostream>
 #include <sstream>
@@ -118,3 +118,4 @@ OpenCLConfig configureOpenCL(cl_context   context,
 
     return cfg;
 }
+#endif // USE_OPENCL
