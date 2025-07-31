@@ -87,12 +87,12 @@ echo "✅ R include directory detected at $R_INCLUDE_DIR"
   echo "OBJECTS = $FINAL_OBJS"
   echo "PKG_OBJECTS = \$(OBJECTS)"
 
-  if [ \"$USE_OPENCL\" = \"1\" ]; then
-    echo \"PKG_CPPFLAGS += -DUSE_OPENCL -I$CL_INC_DIR\"
-    echo \"PKG_CFLAGS += -DUSE_OPENCL -I$CL_INC_DIR\"
-    echo \"PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) -L$CL_LIB_DIR -lOpenCL $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)\"
+  if [ "$USE_OPENCL\" = \"1\" ]; then
+    echo "PKG_CPPFLAGS += -DUSE_OPENCL -I$CL_INC_DIR\"
+    echo "PKG_CFLAGS += -DUSE_OPENCL -I$CL_INC_DIR\"
+    echo "PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) -L$CL_LIB_DIR -lOpenCL $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)\"
   else
-    echo \"PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)\"
+    echo "PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)\"
   fi
 } > src/Makevars
 
