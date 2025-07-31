@@ -5,6 +5,12 @@ echo "🔧 Generating src/Makevars..."
 # Clean old Makevars
 rm -f src/Makevars
 
+# Detect the script's own directory
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Echo the resolved path to the screen
+echo "DEBUG: configure is running from: $SCRIPT_DIR"
+
 
 # ----------------------------
 # 🔍 Detect OpenCL header
@@ -46,7 +52,7 @@ echo "$EXCLUDED_CPP" | sort > /tmp/excluded_cpp_sorted.$$
 
 FINAL_CPP=$(comm -23 /tmp/all_cpp_sorted.$$ /tmp/excluded_cpp_sorted.$$)
 
-echo "DEBUG: FINAL_CPP is: $EXCLUDED_CPP"
+echo "DEBUG: FINAL_CPP is: $FINAL_CPP"
 
 # Clean up
 rm -f /tmp/all_cpp_sorted.$$ /tmp/excluded_cpp_sorted.$$
