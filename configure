@@ -34,7 +34,10 @@ TBB_CFLAGS=$(Rscript -e "RcppParallel::CxxFlags()")
 
 # 🔧 Compile-time TBB flags
 TBB_LIBS1=$(Rscript -e "cat(RcppParallel::LdFlags())")
+<<<<<<< HEAD
 echo "🔧 TBB_LIBS1 (compile/link): $TBB_LIBS1"
+=======
+>>>>>>> df8d2511cd4233f0f1ee892e8d5df90393388bdf
 
 # 🔍 Runtime rpath flags derived from -L paths
 TBB_LIBS2=$(Rscript -e "
@@ -43,12 +46,20 @@ paths <- strsplit(flags, ' ')[[1]]
 rpaths <- paste(gsub('^-L', '-Wl,-rpath=', paths[grepl('^-L', paths)]), collapse=' ')
 cat(rpaths)
 ")
+<<<<<<< HEAD
 echo "🔍 TBB_LIBS2 (rpath):         $TBB_LIBS2"
+=======
+>>>>>>> df8d2511cd4233f0f1ee892e8d5df90393388bdf
 
 # 🧩 Combined linker and rpath flags
 TBB_LIBS="$TBB_LIBS1 $TBB_LIBS2"
 
 # 📣 Echo details for inspection
+<<<<<<< HEAD
+=======
+echo "🔧 TBB_LIBS1 (compile/link): $TBB_LIBS1"
+echo "🔍 TBB_LIBS2 (rpath):         $TBB_LIBS2"
+>>>>>>> df8d2511cd4233f0f1ee892e8d5df90393388bdf
 echo "📦 Combined TBB_LIBS:         $TBB_LIBS"
 
 
