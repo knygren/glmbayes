@@ -153,10 +153,9 @@ sed -e "s|@FINAL_OBJS@|$FINAL_OBJS|g" \
     -e "s|@RCPP_PARALLEL_INCLUDE@|$RCPP_PARALLEL_INCLUDE|g" \
     -e "s|@OPENCL_CPPFLAGS@|$OPENCL_CPPFLAGS|g" \
     -e "s|@OPENCL_CXXFLAGS@|$OPENCL_CXXFLAGS|g" \
-    if [ -n "$OPENCL_LIBS" ]; then
-  sed -e "s|@OPENCL_LIBS@|$OPENCL_LIBS|g" Makevars.in > Makevars
-else sed -e "s|@OPENCL_LIBS@||g" 
-  Makevars.in > Makevars
+if [ "$USE_OPENCL" = "1" ] && [ -n "$CL_HEADER" ]; then
+sed -e "s|@OPENCL_LIBS@|$OPENCL_LIBS|g" Makevars.in > Makevars
+else sed -e "s|@OPENCL_LIBS@||g"   Makevars.in > Makevars
 fi   
 
 echo "✅ src/Makevars has been dynamically generated:"
