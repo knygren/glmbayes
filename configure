@@ -49,7 +49,12 @@ rm -f /tmp/all_cpp_sorted.$$ /tmp/excluded_cpp_sorted.$$
 fi
 
 # Convert to .o format
-FINAL_OBJS=$(echo "$FINAL_CPP" | sed 's/\.cpp/.o/' | paste -sd " " -)
+
+FINAL_OBJS=$(echo "$FINAL_CPP" | sed 's/\.cpp$/.o/' | paste -sd " " -)
+echo "DEBUG: FINAL_OBJS resolved to: $FINAL_OBJS"
+
+echo "✅ R include directory detected at $R_INCLUDE_DIR"
+
 
 # ----------------------------
 # 📦 Detect R include directory
