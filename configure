@@ -17,6 +17,17 @@ echo "DEBUG: configure is running from: $SCRIPT_DIR"
 # 🔍 Detect OpenCL header
 CL_HEADER=$(find /usr /usr/local /opt -type f -name cl.h 2>/dev/null | grep "/CL/cl.h" | head -n 1)
 
+# 🔍 Detect OpenCL header
+CL_HEADER=$(find /usr /usr/local /opt -type f -name cl.h 2>/dev/null | grep "/CL/cl.h" | head -n 1)
+
+if [ -n "$CL_HEADER" ]; then
+  echo "✅ CL_HEADER is set: $CL_HEADER"
+else
+  echo "⚠️ CL_HEADER is empty: OpenCL header not found"
+fi
+
+
+
 if [ -n "$CL_HEADER" ]; then
   CL_INC_DIR=$(dirname "$CL_HEADER")
   # Try to locate the OpenCL library using the header path
