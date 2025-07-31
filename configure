@@ -75,30 +75,26 @@ echo "✅ R include directory detected at $R_INCLUDE_DIR"
 
 
 
-
 # 🛠 Write Makevars
 {
   echo "CXX_STD = CXX17"
+
+  # This ensures both C and C++ pick up the same includes
   echo "PKG_CPPFLAGS = -I$R_INCLUDE_DIR $TBB_CFLAGS"
+  echo "PKG_CFLAGS = -I$R_INCLUDE_DIR $TBB_CFLAGS"
+
   echo "PKG_CXXFLAGS = \$(SHLIB_OPENMP_CXXFLAGS)"
   echo "OBJECTS = $FINAL_OBJS"
   echo "PKG_OBJECTS = \$(OBJECTS)"
 
-  if [ "$USE_OPENCL" = "1" ]; then
-    echo "PKG_CPPFLAGS += -DUSE_OPENCL -I$CL_INC_DIR"
-    echo "PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) -L$CL_LIB_DIR -lOpenCL $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)"
+  if [ \"$USE_OPENCL\" = \"1\" ]; then
+    echo \"PKG_CPPFLAGS += -DUSE_OPENCL -I$CL_INC_DIR\"
+    echo \"PKG_CFLAGS += -DUSE_OPENCL -I$CL_INC_DIR\"
+    echo \"PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) -L$CL_LIB_DIR -lOpenCL $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)\"
   else
-    echo "PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)"
+    echo \"PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)\"
   fi
 } > src/Makevars
-
-# 🔍 Confirm final Makevars contents
-echo ""
-echo "📄 Contents of src/Makevars:"
-echo "---------------------------"
-cat src/Makevars
-echo "---------------------------"
-
 
 
 DEBUG_PATH="inst/debug/Makevars_debug"
