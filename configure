@@ -48,7 +48,7 @@ echo "📦 Combined TBB_LIBS:         $TBB_LIBS"
 ##ALL_CPP=$(ls src/*.cpp | sed 's|src/||')
 ALL_CPP=$(ls src/*.c src/*.cpp 2>/dev/null | sed 's|src/||')
 
-EXCLUDED_CPP="load_kernel_source.cpp load_kernel_library.cpp"
+EXCLUDED_CPP="load_kernel_source.cpp load_kernel_library.cpp dpq_test.cpp nmath_test.cpp rmath_test.cpp arithmetic_test.cpp square_test.cpp stirlerr_test.cpp"
 
 echo "DEBUG: ALL_CPP is: $ALL_CPP"
 echo "DEBUG: EXCLUDED_CPP is: $EXCLUDED_CPP"
