@@ -43,13 +43,19 @@ fi
 # Convert to .o format
 FINAL_OBJS=$(echo "$FINAL_CPP" | sed 's/\.cpp/.o/' | paste -sd " " -)
 
+# ----------------------------
+# 📦 Detect R include directory
+R_INCLUDE_DIR=$(R CMD config --cppflags | sed 's/-I//')
+echo "✅ R include directory detected at $R_INCLUDE_DIR"
+
+
 # 🛠 Write Makevars
 {
   echo "CXX_STD = CXX17"
   echo "PKG_CXXFLAGS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_CFLAGS"
-  echo "OBJECTS = $FINAL_OBJS"
+  echo "OBJECTS = $FINAL_OBJS" 
   echo "PKG_OBJECTS = \$(OBJECTS)"
-
+  echo "PKG_CXXFLAGS += -I$R_INCLUDE_DIR" 
 
   if [ "$USE_OPENCL" = "1" ]; then
     echo "PKG_CXXFLAGS += -DUSE_OPENCL -I$CL_INC_DIR"
