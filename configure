@@ -86,6 +86,9 @@ echo "✅ R include directory detected at $R_INCLUDE_DIR"
   echo "OBJECTS = $FINAL_OBJS"
   echo "PKG_OBJECTS = \$(OBJECTS)"
 
+  echo "glmbayes.so: \$(OBJECTS)"
+  echo "	\$(CXX) -std=gnu++17 -shared -o glmbayes.so \$(OBJECTS) \$(PKG_LIBS)"
+
   if [ "$USE_OPENCL" = "1" ]; then
     echo "PKG_CPPFLAGS += -DUSE_OPENCL -I$CL_INC_DIR"
     echo "PKG_CFLAGS += -DUSE_OPENCL -I$CL_INC_DIR"
