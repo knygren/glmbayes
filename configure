@@ -91,6 +91,13 @@ echo "✅ R include directory detected at $R_INCLUDE_DIR"
   fi
 } > src/Makevars
 
+# 🔍 Confirm final Makevars contents
+echo ""
+echo "📄 Contents of src/Makevars:"
+echo "---------------------------"
+cat src/Makevars
+echo "---------------------------"
+
 
 DEBUG_PATH="inst/debug/Makevars_debug"
 mkdir -p "$(dirname "$DEBUG_PATH")"
