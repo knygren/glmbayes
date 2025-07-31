@@ -164,6 +164,9 @@ else
   OPENCL_LIBS=""
 fi
 
+RCPP_PARALLEL_INCLUDE="${TBB_LIB_DIR/\/lib\//\/include\/tbb}"
+##echo "📁 RCPP_PARALLEL_INCLUDE (derived): $RCPP_PARALLEL_INCLUDE"
+
 # Echo derived placeholder values for verification
 echo ">> Derived values for Makevars.in:"
 echo "OPENCL_CPPFLAGS=$OPENCL_CPPFLAGS"
