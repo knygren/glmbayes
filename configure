@@ -164,7 +164,7 @@ else
   OPENCL_LIBS=""
 fi
 
-RCPP_PARALLEL_INCLUDE="${TBB_LIB_DIR/\/lib\//\/include\/tbb}"
+RCPP_PARALLEL_INCLUDE="/usr/include/tbb"
 ##echo "📁 RCPP_PARALLEL_INCLUDE (derived): $RCPP_PARALLEL_INCLUDE"
 
 # Echo derived placeholder values for verification
