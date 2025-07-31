@@ -52,10 +52,9 @@ echo "✅ R include directory detected at $R_INCLUDE_DIR"
 # 🛠 Write Makevars
 {
   echo "CXX_STD = CXX17"
-  echo "PKG_CXXFLAGS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_CFLAGS"
+  echo "PKG_CXXFLAGS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_CFLAGS -I$(R_INCLUDE_DIR)"
   echo "OBJECTS = $FINAL_OBJS" 
   echo "PKG_OBJECTS = \$(OBJECTS)"
-  echo "PKG_CXXFLAGS += -I$R_INCLUDE_DIR" 
 
   if [ "$USE_OPENCL" = "1" ]; then
     echo "PKG_CXXFLAGS += -DUSE_OPENCL -I$CL_INC_DIR"
