@@ -40,9 +40,9 @@
 #include <math.h>
 #include <float.h> /* DBL_MIN etc */
 
-#include <Rconfig.h>
+//#include <Rconfig.h>
 //#include "rmath_local.h"
-#include <Rmath.h>
+#include "Rmath.h"
 
 /* Used internally only */
 double  Rf_d1mach(int);
