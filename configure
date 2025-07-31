@@ -33,7 +33,7 @@ TBB_CFLAGS=$(Rscript -e "RcppParallel::CxxFlags()")
 
 
 # 🔧 Compile-time TBB flags
-TBB_LIBS1=$(Rscript -e "cat(RcppParallel::LdFlags())")
+TBB_LIBS1=$(Rscript -e "RcppParallel::LdFlags()")
 
 echo "🔧 TBB_LIBS1 (compile/link): $TBB_LIBS1"
 
