@@ -148,18 +148,20 @@ echo "OPENCL_LIBS=$OPENCL_LIBS"
 echo "RCPP_PARALLEL_INCLUDE=$RCPP_PARALLEL_INCLUDE"
 echo "FINAL_OBJS=$FINAL_OBJS"
 
-SED_EXPR="-e s|@FINAL_OBJS@|$FINAL_OBJS|g \
-          -e s|@RCPP_PARALLEL_INCLUDE@|$RCPP_PARALLEL_INCLUDE|g \
-          -e s|@OPENCL_CPPFLAGS@|$OPENCL_CPPFLAGS|g \
-          -e s|@OPENCL_CXXFLAGS@|$OPENCL_CXXFLAGS|g"
+SED_EXPR=(
+  -e "s|@FINAL_OBJS@|$FINAL_OBJS|g"
+  -e "s|@RCPP_PARALLEL_INCLUDE@|$RCPP_PARALLEL_INCLUDE|g"
+  -e "s|@OPENCL_CPPFLAGS@|$OPENCL_CPPFLAGS|g"
+  -e "s|@OPENCL_CXXFLAGS@|$OPENCL_CXXFLAGS|g"
+)
 
 if [ "$USE_OPENCL" = "1" ] && [ -n "$CL_HEADER" ]; then
-  SED_EXPR="$SED_EXPR -e s|@OPENCL_LIBS@|$OPENCL_LIBS|g"
+  SED_EXPR+=(-e "s|@OPENCL_LIBS@|$OPENCL_LIBS|g")
 else
-  SED_EXPR="$SED_EXPR -e s|@OPENCL_LIBS@||g"
+  SED_EXPR+=(-e "s|@OPENCL_LIBS@||g")
 fi
 
-eval sed $SED_EXPR Makevars.in > src/Makevars
+sed "${SED_EXPR[@]}" src/Makevars.in > src/Makevars
 
 echo "✅ src/Makevars has been dynamically generated:"
 echo "---BEGIN Makevars---"
