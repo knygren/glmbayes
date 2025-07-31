@@ -149,3 +149,25 @@ echo "✅ src/Makevars generated with CXX17 support."
 echo "📝 Debug Makevars written to $DEBUG_PATH"
 
 echo "✅ src/Makevars generated with CXX17 support."
+
+# Derive OpenCL paths if USE_OPENCL is active
+if [ "$USE_OPENCL" = "1" ] && [ -n "$CL_HEADER" ]; then
+  CL_BASE=$(dirname "$CL_HEADER")
+  OPEN_CL_HOME=$(echo "$CL_BASE" | sed 's:/include/CL$::')
+
+  OPENCL_CPPFLAGS="-DUSE_OPENCL -I$OPEN_CL_HOME/include"
+  OPENCL_CXXFLAGS=""
+  OPENCL_LIBS="-L$OPEN_CL_HOME/lib -lOpenCL"
+else
+  OPENCL_CPPFLAGS=""
+  OPENCL_CXXFLAGS=""
+  OPENCL_LIBS=""
+fi
+
+# Echo derived placeholder values for verification
+echo ">> Derived values for Makevars.in:"
+echo "OPENCL_CPPFLAGS=$OPENCL_CPPFLAGS"
+echo "OPENCL_CXXFLAGS=$OPENCL_CXXFLAGS"
+echo "OPENCL_LIBS=$OPENCL_LIBS"
+echo "RCPP_PARALLEL_INCLUDE=$RCPP_PARALLEL_INCLUDE"
+echo "FINAL_OBJS=$FINAL_OBJS"
