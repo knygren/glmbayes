@@ -7,6 +7,7 @@
 
 
 
+#ifdef USE_OPENCL
 void dpq_test_runner(const std::string& source,
                             const char* kernel_name,
                             std::vector<float>& output) {
@@ -54,7 +55,9 @@ void dpq_test_runner(const std::string& source,
   clReleaseCommandQueue(queue);
   clReleaseContext(context);
 }
+#endif
 
+#ifdef USE_OPENCL
 
 // [[Rcpp::export]]
 Rcpp::NumericVector dpq_test_wrapper() {
@@ -78,4 +81,5 @@ Rcpp::NumericVector dpq_test_wrapper() {
   // 📤 Return result to R
   return Rcpp::NumericVector(output.begin(), output.end());
 }
+#endif
 #endif
