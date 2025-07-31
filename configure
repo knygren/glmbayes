@@ -17,8 +17,7 @@ echo "DEBUG: configure is running from: $SCRIPT_DIR"
 # 🔍 Detect OpenCL header
 CL_HEADER=$(find /usr /usr/local /opt -type f -name cl.h 2>/dev/null | grep "/CL/cl.h" | head -n 1)
 
-# 🔍 Detect OpenCL header
-CL_HEADER=$(find /usr /usr/local /opt -type f -name cl.h 2>/dev/null | grep "/CL/cl.h" | head -n 1)
+
 
 if [ -n "$CL_HEADER" ]; then
   echo "✅ CL_HEADER is set: $CL_HEADER"
@@ -158,6 +157,18 @@ echo "OPENCL_CXXFLAGS=$OPENCL_CXXFLAGS"
 echo "OPENCL_LIBS=$OPENCL_LIBS"
 echo "RCPP_PARALLEL_INCLUDE=$RCPP_PARALLEL_INCLUDE"
 echo "FINAL_OBJS=$FINAL_OBJS"
+
+
+## Quality Check for Makevars.in
+if [ -f src/Makevars.in ]; then
+  echo "==== Contents of src/Makevars.in ===="
+  cat src/Makevars.in
+  echo "==== End of src/Makevars.in ===="
+else
+  echo "Error: src/Makevars.in not found. Aborting."
+  exit 1
+fi
+
 
 SED_EXPR=(
   -e "s|@FINAL_OBJS@|$FINAL_OBJS|g"
