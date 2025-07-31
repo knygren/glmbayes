@@ -33,6 +33,9 @@ ALL_CPP=$(ls src/*.c src/*.cpp 2>/dev/null | sed 's|src/||')
 
 EXCLUDED_CPP="load_kernel_source.cpp load_kernel_library.cpp"
 
+echo "DEBUG: ALL_CPP is: $ALL_CPP"
+echo "DEBUG: EXCLUDED_CPP is: $EXCLUDED_CPP"
+
 if [ "$USE_OPENCL" = "1" ]; then
   FINAL_CPP="$ALL_CPP"
 else
@@ -42,6 +45,8 @@ echo "$ALL_CPP" | sort > /tmp/all_cpp_sorted.$$
 echo "$EXCLUDED_CPP" | sort > /tmp/excluded_cpp_sorted.$$
 
 FINAL_CPP=$(comm -23 /tmp/all_cpp_sorted.$$ /tmp/excluded_cpp_sorted.$$)
+
+echo "DEBUG: FINAL_CPP is: $EXCLUDED_CPP"
 
 # Clean up
 rm -f /tmp/all_cpp_sorted.$$ /tmp/excluded_cpp_sorted.$$
