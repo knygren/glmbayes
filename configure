@@ -30,11 +30,28 @@ fi
 
 # ----------------------------
 TBB_CFLAGS=$(Rscript -e "RcppParallel::CxxFlags()")
-##TBB_LIBS=$(Rscript -e "RcppParallel::LdFlags()")
-##TBB_LIBS=$(Rscript -e "cat(RcppParallel::LdFlags(), ' ', gsub('^-L', '-Wl,-rpath=', strsplit(RcppParallel::LdFlags(), ' ')[[1]]))")
-##TBB_LIBS=$(Rscript -e "cat(RcppParallel::LdFlags(), ' ', gsub('^-L', '-Wl,-rpath=', strsplit(RcppParallel::LdFlags(), ' ')[[1]]))")
-TBB_LIBS=$(Rscript -e "cat(as.character(RcppParallel::LdFlags()), ' ', gsub('^-L', '-Wl,-rpath=', strsplit(as.character(RcppParallel::LdFlags()), ' ')[[1]]))")
-echo "TBB_LIBS is set to: $TBB_LIBS"
+
+
+# 🔧 Compile-time TBB flags
+TBB_LIBS1=$(Rscript -e "cat(RcppParallel::LdFlags())")
+echo "🔧 TBB_LIBS1 (compile/link): $TBB_LIBS1"
+
+# 🔍 Runtime rpath flags derived from -L paths
+TBB_LIBS2=$(Rscript -e "
+flags <- RcppParallel::LdFlags()
+paths <- strsplit(flags, ' ')[[1]]
+rpaths <- paste(gsub('^-L', '-Wl,-rpath=', paths[grepl('^-L', paths)]), collapse=' ')
+cat(rpaths)
+")
+echo "🔍 TBB_LIBS2 (rpath):         $TBB_LIBS2"
+
+# 🧩 Combined linker and rpath flags
+TBB_LIBS="$TBB_LIBS1 $TBB_LIBS2"
+
+# 📣 Echo details for inspection
+echo "📦 Combined TBB_LIBS:         $TBB_LIBS"
+
+
 
 # ----------------------------
 # 🗂️ Detect source files, exclude OpenCL ones if needed
