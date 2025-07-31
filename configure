@@ -96,22 +96,30 @@ DEBUG_PATH="inst/debug/Makevars_debug"
 mkdir -p "$(dirname "$DEBUG_PATH")"
 echo "🔍 Attempting to write to: $DEBUG_PATH"
 
-echo "DEBUG: FINAL_OBJS FED TO MAKEVAR_DEBUG: $FINAL_OBJS"
+echo "DEBUG: FINAL_OBJS FED TO MAKEVARS_DEBUG: '$FINAL_OBJS'"
 
+# Base Makevars block
+cat <<EOF > "$DEBUG_PATH"
+CXX_STD = CXX17
+PKG_CXXFLAGS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_CFLAGS -I$R_INCLUDE_DIR
+OBJECTS = $FINAL_OBJS
+PKG_OBJECTS = \$(OBJECTS)
+EOF
 
-{
-  echo "CXX_STD = CXX17"
-  echo "PKG_CXXFLAGS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_CFLAGS -I$R_INCLUDE_DIR"
-  echo "OBJECTS = $FINAL_OBJS"
-  echo "PKG_OBJECTS = \$(OBJECTS)"
+# Conditional OpenCL block
+if [ "$USE_OPENCL" = "1" ]; then
+  cat <<EOF >> "$DEBUG_PATH"
+PKG_CXXFLAGS += -DUSE_OPENCL -I$CL_INC_DIR
+PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) -L$CL_LIB_DIR -lOpenCL $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)
+EOF
+else
+  cat <<EOF >> "$DEBUG_PATH"
+PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)
+EOF
+fi
 
-  if [ "$USE_OPENCL" = "1" ]; then
-    echo "PKG_CXXFLAGS += -DUSE_OPENCL -I$CL_INC_DIR"
-    echo "PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) -L$CL_LIB_DIR -lOpenCL $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)"
-  else
-    echo "PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)"
-  fi
-} > "$DEBUG_PATH"
+echo "📝 Debug Makevars written to: $DEBUG_PATH"
+echo "✅ src/Makevars generated with CXX17 support."
 
 echo "📝 Debug Makevars written to $DEBUG_PATH"
 
