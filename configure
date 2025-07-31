@@ -168,6 +168,13 @@ pwd
 echo "📁 Contents of src/:"
 ls -lh src/
 
+echo "📄 Contents of Makevars:"
+cat "$(pwd)/src/Makevars"
+
+
+echo "📄 Contents of Makevars.in:"
+cat "$(pwd)/src/Makevars.in"
+
 ## Quality Check for Makevars.in
 if [ -f src/Makevars.in ]; then
   echo "==== Contents of src/Makevars.in ===="
