@@ -58,8 +58,6 @@ void dpq_test_runner(const std::string& source,
 #endif
 
 #ifdef USE_OPENCL
-
-// [[Rcpp::export]]
 Rcpp::NumericVector dpq_test_wrapper() {
   const size_t stride = 25;  // Number of values we expect back
   std::vector<float> output(stride);
