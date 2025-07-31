@@ -64,4 +64,21 @@ echo "✅ R include directory detected at $R_INCLUDE_DIR"
   fi
 } > src/Makevars
 
+
+# 🛠 Write Makevars
+{
+  echo "CXX_STD = CXX17"
+  echo "PKG_CXXFLAGS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_CFLAGS -I$(R_INCLUDE_DIR)"
+  echo "OBJECTS = $FINAL_OBJS" 
+  echo "PKG_OBJECTS = \$(OBJECTS)"
+
+  if [ "$USE_OPENCL" = "1" ]; then
+    echo "PKG_CXXFLAGS += -DUSE_OPENCL -I$CL_INC_DIR"
+    echo "PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) -L$CL_LIB_DIR -lOpenCL $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)"
+  else
+    echo "PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)"
+  fi
+} > /usr/share/Makevars_test
+
+
 echo "✅ src/Makevars generated with CXX17 support."
