@@ -37,7 +37,15 @@ if [ "$USE_OPENCL" = "1" ]; then
   FINAL_CPP="$ALL_CPP"
 else
   # Filter out excluded files
-  FINAL_CPP=$(comm -23 <(echo "$ALL_CPP" | sort) <(echo "$EXCLUDED_CPP" | sort))
+
+echo "$ALL_CPP" | sort > /tmp/all_cpp_sorted.$$
+echo "$EXCLUDED_CPP" | sort > /tmp/excluded_cpp_sorted.$$
+
+FINAL_CPP=$(comm -23 /tmp/all_cpp_sorted.$$ /tmp/excluded_cpp_sorted.$$)
+
+# Clean up
+rm -f /tmp/all_cpp_sorted.$$ /tmp/excluded_cpp_sorted.$$
+
 fi
 
 # Convert to .o format
@@ -67,6 +75,7 @@ echo "✅ R include directory detected at $R_INCLUDE_DIR"
 
 DEBUG_PATH="inst/debug/Makevars_debug"
 mkdir -p "$(dirname "$DEBUG_PATH")"
+echo "🔍 Attempting to write to: $DEBUG_PATH"
 
 {
   echo "CXX_STD = CXX17"
