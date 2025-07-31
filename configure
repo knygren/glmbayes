@@ -30,8 +30,8 @@ fi
 
 # ----------------------------
 TBB_CFLAGS=$(Rscript -e "RcppParallel::CxxFlags()")
-TBB_LIBS=$(Rscript -e "RcppParallel::LdFlags()")
-
+##TBB_LIBS=$(Rscript -e "RcppParallel::LdFlags()")
+TBB_LIBS=$(Rscript -e "cat(RcppParallel::LdFlags(), ' ', gsub('^-L', '-Wl,-rpath=', strsplit(RcppParallel::LdFlags(), ' ')[[1]]))")
 
 # ----------------------------
 # 🗂️ Detect source files, exclude OpenCL ones if needed
