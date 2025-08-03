@@ -1,0 +1,317 @@
+Yaml
+
+---
+title: "Chapter 1: Getting started with glmbayes"
+author: "Kjell Nygren"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Chapter 1: Getting started with glmbayes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup,echo = FALSE}
+library(glmbayes)
+```
+
+The **glmb** function and related *method functions* that handle the output are designed to be Bayesian versions of the **glm** function and many of its *method functions*. This vignette shows how the basic setup/calling of the functions compare and then walks through how the method functions for glmb can be called to generate similar outputs to those from the glm functions.
+
+**Dobson Randomized Control Data**
+
+To understand how the outputs of the glmb function mirrors those for the glm function, it is useful to take a look at the first portion of the example that is provided with the glm function. The data is based on Randomized Controlled Trial data from Dobson (1990). Here is a view of the data:
+
+```{r dobson}
+## Dobson (1990) Page 93: Randomized Controlled Trial :
+counts <- c(18,17,15,20,10,20,25,13,12)
+outcome <- gl(3,1,9)
+treatment <- gl(3,3)
+print(d.AD <- data.frame(treatment, outcome, counts))
+```
+
+**Calling the two functions**
+
+The example code for the glm function specifies a Poisson regression model for this data. The below code chunks shows how the glmb function can be used in much the same fashion but with some extra requirements. In particular, we need to provide a prior distribution (in this case a Multivariate Normal prior) and related constants (in this case, a prior Mean and and a prior Variance-Covariance matrix) for the coefficients of interest. Optionally, we can also tell the function how many draws to make from the posterior distribution (the default used here generates 1000 iid draws). 
+
+Here is the call to the classical *glm* function:
+
+```{r glm_call,results = "hide"}
+## Call to glm
+glm.D93 <- glm(counts ~ outcome + treatment, 
+              family = poisson())
+```
+
+To use the *glmb* function, we first use a call to a function *Prior_Setup" to initialize the prior and to get the variable names needed.
+
+```{r Prior_Setup,results = "hide"}
+## Using glmb
+## Step 1: Set up Prior
+ps=Prior_Setup(counts ~ outcome + treatment)
+mu=ps$mu
+V=ps$Sigma
+```
+
+We next check whether using the initilized values for the prior would yield a model where 
+the data is consistent with the prior.
+
+```{r Prior_Check1,results = "hide"}
+# Step2A: Check the Prior
+Prior_Check(counts ~ outcome + treatment,family = poisson(),
+pfamily=dNormal(mu=mu,Sigma=V))
+```
+
+We see that the maximum likelihood estimate for the intercept  (in particular) appears to be quite different from the initialized value of 0, so we update the prior mean for the intercept and
+see that the data now appears farily consistent with the prior.
+
+```{r Update_and_ReCheck,results = "hide"}
+# Step2B: Update and Re-Check the Prior
+mu[1,1]=log(mean(counts))
+Prior_Check(counts ~ outcome + treatment,family = poisson(),
+pfamily=dNormal(mu=mu,Sigma=V))
+```
+
+Using the revised prior, we now call the *glmb* function and include the prior
+distribution in addition to the two required arguments for the *glm* function.
+
+```{r Call_glmb,results = "hide"}
+# Step 3: Call the glmb function
+glmb.D93<-glmb(counts ~ outcome + treatment, family=poisson(), pfamily=dNormal(mu=mu,Sigma=V))
+```
+
+
+In the above, it is worth noting a couple of steps that we went through when specifying the prior. We first used a call to the function *Prior_Setup* to get the correct dimensions for the mean and variance-covariance matrices and to initialize the constants. The *Prior_Setup* function also provided information on the Variable names in the design matrix (which also corresponds to the names of the coefficients eventually estimated) so we can make informed changes to the prior if so desired.
+
+We then used a call to the function *Prior_Check* and saw that at least one of the maximum likelihood estimates appeared inconsistent with the prior (in particular, the maximum likelihood intercept appears to be inconsistent with a prior mean of zero). Based on the output from this function, we replaced the initialized prior mean with a mean equal to *log(mean(counts))* and used this in our model. 
+
+The next couple of vignette's will discuss the prior specification in more details. Here we instead focus on reviewing the output from the function and how it can be used.
+
+**Printing the output**
+
+Taking a look at the basic printed output, we can see that the two closely mirror each other with the glmb posterior means replacing the glm maximum likelihood estimates.
+
+
+```{r Printed_Views}
+## Printed view of the output from the glm function 
+print(glm.D93)
+## Printed view of the output from the glmb function 
+print(glmb.D93)
+```
+
+In addition to the posterior means, the *glmb* printed output also returned three pieces of information that are similar to (but not quite the same) as the classical output. The "Effective Number of Parameters" should in general be close to (but not exactly the same) as the number of parameters estimated while the Expected Residual Deviance in general will be higher than the corresponding maximum likelihood estimate for the Residual Deviance (since the latter is designed to minimize it). Finally, the DIC is essentially a Bayesian version of the AIC. These measures will be discussed in greater detail in one of our later vignettes.
+
+**Methods Available**
+
+In addition to the basic print function output, the glmb function returns an object with an assigned class "glmb" for which a number of generic functions (or methods) are available. The class "glmb" inherits from "glm" and "lm" and as such many functions for those classes work directly for "glmb". For some of the instances where the inherited methods fail and/or could produce incorrect results, we have implemented methods specifically for the *glmb* class. The methods for classes *lm*, *glm*, and *glmb* are listed below. We will use many of these later in this vignette.
+
+```{r lm_Methods}
+## Methods for class "lm"
+methods(class="lm")
+```
+
+```{r glm_Methods}
+## Methods for class "glm"
+methods(class="glm")
+```
+
+```{r glmb_Methods}
+## Methods for class "glmb"
+methods(class="glmb")
+```
+
+**The summary functions**
+
+Let's take a closer look at the outputs of the summary functions.
+
+*glm summary output*
+
+In turn, we see the Call, a list of Deviance residuals, and the estimated coefficients. The coefficients are then followed by some additional model related information. 
+
+```{r glm_summary}
+## summary output for the "glm" class
+summary(glm.D93)
+```
+
+*glmb summary output*
+
+The summary for the glmb function follow a similar structure but adds a table containing information related to the prior and the maximum likelihood above the table with the means for the estimated Bayesian coefficients. The output below the main table with coefficients is also modified to contain similar (but slightly different) pieces of information (the details of which are discussed elsewhere).
+
+```{r glmb_summary}
+## summary output for the "glm" class
+summary(glmb.D93)
+```
+
+**Model Fit, Predictions, Deviance Residuals, Covariance Matrices, and Confidence/Credible Intervals**
+
+Let's next take a look at the outputs from these additional methods to see how they compare. Note that the Bayesian version of these contain random draws tied to the underlying distributions so the column means are mostly used in these comparisons.
+
+*Fitted values*
+
+```{r glm fitted outputs}
+## fitted outputs for the glm function
+fitted(glm.D93)
+```
+
+
+```{r glmb fitted outputs}
+## mean of fitted outputs for the glm function
+## works without a "glmb" class specific generic function
+colMeans(fitted(glmb.D93))
+```
+
+*Predictions(linear predictors)*
+
+```{r glm predictions}
+## predictions for the glm function
+predict(glm.D93)
+```
+
+```{r glmb predictions}
+## predictions for the glmb function
+colMeans(glmb.D93$linear.predictors) # no current predict function
+colMeans(predict(glmb.D93)) 
+```
+
+*Residuals*
+
+```{r glm residuals}
+## residuals for the glm function
+residuals(glm.D93)
+```
+
+```{r glmb residuals}
+## residuals for the glmb function
+colMeans(residuals(glmb.D93))
+```
+
+*vcov*
+
+```{r glm vcov}
+## vcov for the glm function
+vcov(glm.D93)
+```
+
+```{r glmb vcov}
+## vcov for the glmb function
+vcov(glmb.D93)
+```
+
+*confint*
+
+Confidence intervals
+```{r glm confint}
+## confint for the glm function
+confint(glm.D93)
+```
+
+```{r glmb confint}
+## confint for the glmb function
+confint(glmb.D93)
+```
+
+
+**AIC/DIC, Deviance, and the Log-Likelihood**
+
+These model statistics are useful when comparing different model specifications. The Bayesian versions of these will be discussed in greater detail in a separate Vignette.
+
+*AIC/DIC*
+
+```{r glm AIC}
+## AIC for the glm function (equivalent degrees of freedom and the AIC)
+extractAIC(glm.D93)
+```
+
+```{r glmb DIC}
+## DIC for the glmb function (estimated effective number of parameters and the DIC)
+extractAIC(glmb.D93)
+```
+
+*Deviance*
+
+```{r glm Deviance}
+## Deviance for the glm function
+deviance(glm.D93)
+```
+
+```{r glmb Deviance}
+## Deviance for the glmb function
+## works without a "glmb" class specific generic function
+mean(deviance(glmb.D93))
+```
+
+*Log-Likelihoods*
+
+```{r glm logLik}
+## Deviance for the glm function
+logLik(glm.D93)
+```
+
+```{r glmb logLik}
+## Deviance for the glmb function
+mean(logLik(glmb.D93))
+```
+
+**Model Frame, formula, family, nobs, and show**
+
+These are mostly useful for understanding various aspects of the model.
+
+*Model Frames*
+
+```{r glm Model Frame}
+## Model Frame for the glm function
+model.frame(glm.D93)
+```
+
+```{r glmb Model Frame}
+## Model Frame for the glmb function
+model.frame(glmb.D93$glm)
+```
+
+*formula*
+
+```{r glm formula}
+## formula for the glm function
+formula(glm.D93)
+```
+
+```{r glmb formula}
+## formula for the glmb function
+formula(glmb.D93)
+```
+*family*
+
+```{r glm family}
+## family for the glm function
+family(glm.D93)
+```
+
+
+```{r glmb family}
+## family for the glmb function
+family(glmb.D93$glm)
+```
+*nobs*
+
+```{r glm nobs}
+## nobs for the glm function
+nobs(glm.D93)
+```
+
+```{r glmb nobs}
+## nobs for the glmb function
+nobs(glmb.D93)
+```
+
+
+
+
+
+*show*
+
+The show method returns the same output as the print function

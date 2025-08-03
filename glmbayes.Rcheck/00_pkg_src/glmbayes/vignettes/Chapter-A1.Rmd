@@ -1,0 +1,330 @@
+Yaml
+
+---
+title: "Chapter A1: Overview of Estimation Procedures"
+author: "Kjell Nygren"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Chapter A1: Overview of Estimation Procedures}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(glmbayes)
+```
+
+## General Discussion
+
+The estimation procedures implemented in this package can divided into the following four distinct categories:
+
+* Finding posterior modes
+* Simulating from models with with conjugate priors
+* Generating iid samples for log-concave models with non-conjugate Normal, Gamma, or Independent_Normal_Gamma priors 
+* Bounding Distances to posterior densities for two-block Gibbs samplers
+
+In this vingette, we provide a brief overview of how these procedures are implemented. It is worth noting that the 
+combination of these four approaches likely can be applied to wider range of models and future plans for this package include the implementation of additional models.
+
+## Finding Posterior Modes
+
+Finding posterior modes is an important first component for most of the implemented sampling procedures in this package.   The posterior modes are returned as part of the output itself from many of the core functions and are also used to center many of the sampling procedures implemented so they also help determine the accuracy and speed of underlying sampling procedures.  The process for fiding posterior modes work a bit differently depending on the *family* and *pfamily* in question. Our subsections here describe the currently implemented approaches
+
+### Posterior Modes for the *gaussian()* family combined with either the *dNormal()* or *dNormal_Gamma()* pfamilies
+
+In this case, the posterior modes have closed form solutions that also correspond to the posterior means for the posterior distributions. Moreover, using proper priors ensure that the modes always exists (unlike the classical case where unique maximum likelihood estimates might not exist).  The concern in this case is mainly with ensuring numerical accuracy, especially in cases where the model might have many variables or where the resulting model coefficients (despite the prior) might be poorly identified. 
+
+Our implemented process for finding posterior modes essentially involves the following steps
+
+* Perform a Cholesky decomposition for the prior precision (inverse variance-covariance) 
+* Use the Cholesky decomposition to add additional "prior" observations to the dataset
+* Use the *lm.fit* or *lm.wfit* functions for the modified dataset in order to return resulting posterior mode estimates
+
+The source codes *rnorm_reg_cpp.cpp* (for the *dNormal()* prior)  and *rNormal_reg.wfit.R* (for the *dNormal_Gamma()* Prior) shows the current version of these implementations. Note that the *rNormal_reg.wfit* function is called from within the *rNormal_Gamma_reg* function in order to find the posterior mode.
+
+In addition to having the benefit of the robust estimation procedures built into the *lm.fit* and *lm.wfit* functions, calling these functions also have the added benefit of returning the components needed to have access to the various influence related methods available for classes *lm* and *glm*.
+
+### Posterior Modes for *non-gaussian* families combined with the *dNormal()* pfamily.
+
+In this case, there is no closed form solution for the posterior mode. Our current implementation (see the source code *rnnorm_reg_cpp.cpp*) leverages a call to the *optim* function with the *method="BFGS"* and *hessian=TRUE* options in order to attempt to find the posterior mode. The *"BFGS"* method [Add reference] is a quasi-Newton method (also known as a variable metric algorithm) that uses function values and gradients to build up a picture of the surface optimized. The *hessian=TRUE* option returns an approximation for the hessian associated with  the negative of the log-posterior density which is leveraged during standardization of the model prior to the simuation phase (see the section "Generating iid Samples for Non-Conjugate Families" below for details) for these models.
+
+While the posterior mode is derived using the above method (and used as the estimate for the posterior mode), our *rNormal_reg* function also uses a call to the *glmb.wfit* function in order to get the output needed for the influence measures. This implements a similar procedure to that in the *glm.fit* function before doing a single call to the *lm.fit* function. Similar to the procedure in the *gaussian()* family case above, the data provided to the *lm.fit* function has additional added observations (based on a Cholesky decomposition). We refer the reader to the source codes for the *glm.fit* and *glmb.wfit* for the details on the similarities and differences between the two functions. Essentially, the latter assumes that the posterior mode has alredy been reached (using the calls to the optim function) so no iterations are therefore required.
+
+### Conditional Posterior Modes for the *gaussian* family combined with the *dIndependent_Normal_Gamma()* pfamily.
+
+The rIndependent_Normal_Gamma_reg procedure currently uses an initial iterative process where the coefficients and dispersion are conditionally optimized in order to arrive at a good centering of candidate densities for the simulation. The conditional optimization of the coefficients in this process relies on the same process as in the other *gaussian()* family case above. The shape and rate parameters for the candidate gamma distribution are in turn set based on the expected *RSS* based on simulation from the conditional densitiy associated with the conditionally optimized coefficients (see the current source code *rIndependent_Normal_Gamma_Reg.R* for details). 
+
+Plese note that the methods implemented for this prior should be regarded as still being in the developemental/experimental phase. The current implementation appears to yield valid *iid* samples at reasonable speeds for some of our smaller models, but it is unclear how well this will perform for larger models and methods may be adjusted in the future to improve performance.
+
+## Simulating from Models With Conjugate priors
+
+Three of the currently implemented combinations of *families* and *pfamilies* involves what is known in the literature as conjugate prior distributions where the posterior distributions take on the same well known probability distribution as the prior distributions [ADD REFERENCES]. These models are
+
+* The *gaussian()* family with a *dNormal()* pfamily prior for the regression coefficients
+* The *gaussian()* family with a *dGamma()* pfamily prior for the inverse dispersion (precision) parameter
+* The *gaussian()* family with a *dNormal_Gamma()* pfamily prior the regression coefficienst and inverse dispersion parameter.
+
+Simulation in these cases reduces to simulation from *multivariate normal* and/or *gamma* distributions and the main concern is ensuring numerical accuracy and speed for the resulting simulation. We refer the reader to the source codes 
+*rnorm_reg_cpp.cpp*, *rgamma_reg.R*, and *rNormal_Gamma_reg* for details on the current implementation of these simulation procedures in the current package.
+
+## Generating iid Samples for Non-Conjugate Families
+
+The most innovative components of the current package likely involves the procedures implemented in order to generate *iid* samples from models with various  non-gaussian families combined with *dNormal()* pfamily priors as well as for models combining the *gaussian()* family with *dIndependent_Normal_Gamma()* pfamily prior distributions. In addititon the package contains an *iid* sampling procedure for the *Gamma()* family with a *dGamma()* pfamily prior for the dispersion parameter. We discuss each of these at a high level here and provide references to additional details for those interested.
+
+### Non-gaussian families with Normal Priors
+
+ When the specified *family* is any log-concave non-gaussian family, then the estimation uses the Likelihood
+ subgradient density approach of Nygren and Nygren (2006).  This approaches uses tangencies to the 
+ log-likelihood function in order to construct an enveloping function from which candidate draws are 
+ generated and then either accepted/rejected using accept/reject methods. The core C function performing
+ this simulation essentially goes through the following steps: 
+  
+ 
+ 1) The model is standardized to have prior mean vector equal to 0 (i.e., offsets and any prior mean are combined
+ into a constant term).
+ 
+ 
+ 2) The posterior mode for this transformed model is found. Currently this uses the *optim* function. 
+ Later implementations may replace this with iteratively reweighted least squares (IWLS) to increase 
+ consistency with the *glm* function and to enhance numerical accuracy.
+ 
+ 
+ 3) The model is further standardized so that (a) the precision matrix at the posterior mode is diagonal and (b)
+ the prior variance-covariance matrix is the identity matrix (see the documentation *glmb_Standardize_Model* and the discussion below for details).
+ 
+ 
+ 4) An enveloping function is built for the the standardized model, containing constants needed during simulation (see
+ the documentation *EnvelopeBuild* and the discussion below for details).
+ 
+ 
+ 5) Samples for the standardized model are generated using accept-reject methods (see the documentation for *rnnorm_reg_std* and the discussion below for details).
+ 
+ 
+ 6) The output from the standardized model are transformed back to the original scale by reversing the two 
+ eigenvalue decompositions and by adding back the prior mean.  
+
+
+The below code chunks provide a more detailed illustration of the estimation process
+
+**Setup of Data and Prior** 
+```{r Setup data and prior}
+data(menarche2)
+
+Age2=menarche2$Age-13
+x<-matrix(as.numeric(1.0),nrow=length(Age2),ncol=2)
+x[,2]=Age2
+
+y=menarche2$Menarche/menarche2$Total
+wt=menarche2$Total
+
+mu<-matrix(as.numeric(0.0),nrow=2,ncol=1)
+mu[2,1]=(log(0.9/0.1)-log(0.5/0.5))/3
+V1<-1*diag(as.numeric(2.0))
+
+# 2 standard deviations for prior estimate at age 13 between 0.1 and 0.9
+## Specifies uncertainty around the point estimates
+
+V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
+V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 1 times as large as point estimate 
+
+dispersion2<-as.numeric(1.0)
+offset2=rep(as.numeric(0.0),length(y))
+P=solve(V1)
+n=1000
+
+
+```
+
+**Gathering of family functions Used in process** 
+
+```{r Setup_Family_Functions}
+
+famfunc<-glmbfamfunc(binomial(logit))
+
+f1<-famfunc$f1
+f2<-famfunc$f2  # Used in optim and glmbsim_cpp
+f3<-famfunc$f3  # Used in optim
+f5<-famfunc$f5
+f6<-famfunc$f6
+
+```
+
+**Finding the posterior mode** 
+
+```{r Find Posterior Mode}
+start <- mu
+
+###### Adjust weight for dispersion
+
+wt2=wt/dispersion2
+
+
+######################### Shift mean vector to offset so that adjusted model has 0 mean
+
+alpha=x%*%as.vector(mu)+offset2
+mu2=0*as.vector(mu)
+P2=P
+x2=x
+
+
+#####  Optimization step to find posterior mode and associated Precision
+
+parin=start-mu
+
+opt_out=optim(parin,f2,f3,y=as.vector(y),x=as.matrix(x),mu=as.vector(mu2),
+              P=as.matrix(P),alpha=as.vector(alpha),wt=as.vector(wt2),
+              method="BFGS",hessian=TRUE
+)
+
+bstar=opt_out$par  ## Posterior mode for adjusted model
+bstar # Mode from Optimization
+bstar+as.vector(mu)  # Mode for actual model
+A1=opt_out$hessian # Approximate Precision at mode
+A1
+
+```
+**Standardizing the Model** 
+
+ This functions starts with basic information about the model in the argument list and then
+uses the following steps to further standardize the model (the model is already assumed to have a 0 prior mean vector
+ when this step is applied).
+ 
+ 1) An eigenvalue composition is applied to the posterior precision matrix, and the model is (as an interim step)
+ standardized to have a posterior precision matrix equal to the identity matrix. Please note that this means
+ that the prior precision matrix after this step is *"smaller"* than the identity matrix.
+ 
+ 
+ 2) A diagonal matrix epsilon is pulled out from the standardized prior precision matrix so that the remaining
+ part of the prior precision matrix still is positive definite. That part is then treated as part of the posterior
+ for the rest of the standardization and simulation and only the part connected to epsilon is treated as part of the prior. 
+ Note that the exact epsilon chosen seems not to matter. Hence there are many possible ways of doing this 
+ standardization and future versions of this package may tweak the current approach 
+ if it helps improve numerical accuracy or acceptance rates.
+ 
+ 
+ 3) The model is next standardized (using a second eigenvalue decomposition) so that the prior (i.e., the portion connected to epsilon) is the identity  matrix. The standardized model then simutaneously has the feature that the prior precision matrix is the  identity matrix and that the data precision A (at the posterior mode) is a diagonal matrix. Hence the variables in the standardized model are approximately independent at the posterior mode.
+
+
+```{r Standardize Model}
+## Standardize Model
+
+Standard_Mod=glmb_Standardize_Model(y=as.vector(y), x=as.matrix(x),P=as.matrix(P),
+                                    bstar=as.matrix(bstar,ncol=1), A1=as.matrix(A1))
+
+bstar2=Standard_Mod$bstar2  
+A=Standard_Mod$A
+x2=Standard_Mod$x2
+mu2=Standard_Mod$mu2
+P2=Standard_Mod$P2
+L2Inv=Standard_Mod$L2Inv
+L3Inv=Standard_Mod$L3Inv
+
+```
+
+**Building the Envelope** 
+
+ To construct an enveloping function, we follow the approach in Nygren and Nygren (2006)
+ which involves the following steps when a maximally sized grid is constructed 
+ (if the prior for some dimensions is relatively strong, this may not be needed)
+ 
+
+ 1) For each dimension, a constant *omega_i* is found that depends on the 
+ corresponding diagonal element in the precision matrix.
+ 
+  
+ 2) Corresponding intervals *(thetastar_i-0.5 omega,thetastar_i-0.5 omega)*
+  are constructed around the posterior mode thetastar for each dimension
+  
+  
+ 3) The mode as well as the points *thetastar_i-omega_i* and *thetastar_i+omega_i*
+ are selected as the components of the points at which tangencies will be found for each of 
+ the dimensions.  
+ 
+ 
+ 4) A Grid is constructed with all possible combinations of points and 
+ negative log-likelihood and gradient for the negative log-likelihood are evaluated (see the
+ EnvelopeBuild_c.cpp function source code for details)
+ 
+ 
+ 5) The *Set_Grid* function is called in order to evaluate the log of the density associated
+ with each of the resulting restricted multivariate normals by evaluating the differences between the cummulative 
+ density for each dimension between its lower and upper bound.
+ 
+ 
+ 6)  The Set_LogP function is called in order to help set the probabilities with which each of the components
+ of the grid should be sampled (see remark 6 in Nygren and Nygren (2006)).
+ 
+ 
+ Any constants needed by the sampling are added to a list and returned by the function. 
+
+
+```{r Build Envelope}
+
+Env2=EnvelopeBuild(as.vector(bstar2), as.matrix(A),y, as.matrix(x2),
+                   as.matrix(mu2,ncol=1),as.matrix(P2),as.vector(alpha),as.vector(wt2),
+                   family="binomial",link="logit",Gridtype=as.integer(3), 
+                   n=as.integer(n),sortgrid=TRUE)
+
+
+Env2
+
+```
+
+**Simulating From the Standard Model** 
+
+   This function uses the information contained in the constructed envelope list in order to sample 
+ from a model in standard form. The simulation proceeds as follows in order to generate each draw in the required
+ number of samples.
+ 
+ 1)  A random number between 0 and 1 is generated and is used together with the information in the PLSD vector 
+ (from the envelope) in order to identify the part of the grid from which a candidate is to be generated.
+
+ 2) For the part of the grid selected, the dimensions are looped through and a candidate component for each dimension
+ is generated from a restricted normal using information from the Envelope (in particular, the values for logrt, loglt,  and cbars corresponding to that the part of the grid selected and the dimension sampled)
+ 
+ 3) The log-likelihood for the standardized model is evaluated for the generated candidate (note that the 
+ log-likelihood here includes the portion of the prior that was shifted to the log-likelihood as part of the standardization procedure)
+ 
+ 4) An additional random number is generated and the log of this random number is compared to a log-acceptance rate that is calculated based on the candidate and the LLconst component from the Envelope component selected in order to determine if the candidate should be accepted or rejected 
+ 
+ 5) If the candidate was not accepted, the process above is repeated from step 1 until a candidate is accepted
+
+
+```{r Standard_Simulation}
+
+sim=rnnorm_reg_std(n=as.integer(n),y=as.vector(y),x=as.matrix(x2),mu=as.matrix(mu2,ncol=1),
+                   P=as.matrix(P2),alpha=as.vector(alpha),wt=as.vector(wt2),
+                   f2=f2,Envelope=Env2,family="binomial",link="logit",as.integer(0))
+
+```
+
+**Undoing the standardization** 
+
+
+```{r Undo_Standardization}
+
+out=L2Inv%*%L3Inv%*%t(sim$out)
+
+for(i in 1:n){
+  out[,i]=out[,i]+mu
+}
+
+summary(t(out))
+mean(sim$draws)
+
+```
+
+### gaussian families with Independent_Normal_Gamma Prior
+
+
+
+
+## Bounding Distances to Target Densities for Two-Block Gibbs Samplers

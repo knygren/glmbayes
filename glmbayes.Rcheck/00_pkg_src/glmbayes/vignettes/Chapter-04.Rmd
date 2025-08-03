@@ -1,0 +1,864 @@
+Yaml
+
+---
+title: "Chapter 4: Reviewing Model Predictions, Deviance Residuals and Model Statistics"
+author: "Kjell Nygren"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Chapter 4: Reviewing Model Predictions, Deviance Residuals and Model Statistics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+---
+references:
+- id: nygren2006
+  title: Likelihood Subgradient Densities
+  author:
+  - family: Nygren
+    given: Kjell
+  - family: Nygren
+    given: Lan Ma
+  container-title: Journal of the American Statistical Association
+  volume: 101
+  URL: 'https://doi.org/10.1198/016214506000000357'
+  DOI: 10.1198/016214506000000357
+  issue: 475
+  publisher: Taylor and Francis, Ltd
+  page: 1144-1156
+  type: article-journal
+  issued:
+    year: 2006
+    month: 9
+
+- id: Venables2002
+  title: Modern Applied Statistics with S.
+  author:
+  - family: Venables
+    given: W. N.
+  - family: Ripley
+    given: B. D.
+  URL: 'https://www.springer.com/gp/book/9780387954578'
+  DOI: 10.1007/978-0-387-21706-2
+  publisher: Springer-Verlag New York
+  page: 1-498
+  type: book
+  issued:
+    year: 2002
+    
+- id: Hamilton2004
+  title: Lecture notes obstetrics and gynaecology
+  author:
+  - family: Hamilton-Fairley
+    given: Diana
+  URL: 'https://www.bookdepository.com/Lecture-Notes-Obstetrics-Gynaecology-Diana-Hamilton-Fairley/9781405120661'
+  publisher: Blackwell Pub.
+  type: book
+  issued:
+    year: 2004
+    month: 11
+
+- id: Evans2006
+  title: Checking for Prior-Data Conflict
+  author:
+  - family: Evans
+    given: Michael
+  - family: Moshonov
+    given: Hadas
+  container-title: Bayesian Analysis
+  volume: 1
+  URL: 'http://dx.doi.org/10.1214/06-BA129'
+  DOI: 10.1214/06-BA129
+  issue: 4
+  page: 893-914
+  type: article-journal
+  issued:
+    year: 2006
+    month: 
+
+- id: Spiegelhalter2002
+  title: Bayesian measures of model complexity and fit
+  author:
+  - family: Spiegelhalter
+    given: David J.
+  - family: Best
+    given: Nicola G.
+  - family: Carlin
+    given: Bradley P.
+  - family: Van Der Linde
+    given: Angelika
+  container-title: Journal of the Royal Statistical Society Series B (Statistical Methodology)
+  volume: 64
+  URL: 'https://doi.org/10.1111/1467-9868.00353'
+  DOI: 10.1111/1467-9868.00353
+  issue: 4
+  page: 583-639
+  type: article-journal
+  issued:
+    year: 2002
+    month: 9
+
+    
+---
+
+---
+nocite: | 
+  @nygren2006
+...
+
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup,results="hide",echo = FALSE}
+library(glmbayes)
+```
+
+
+```{r menarche data,results = "hide",echo = FALSE}
+## Load menarche data
+data(menarche2)
+head(menarche2, 5)
+
+```
+
+```{r Analysis Setup,echo = FALSE}
+## Number of variables in model
+Age=menarche2$Age
+nvars=2
+set.seed(333)
+
+## Reference Ages for setting of priors and Age_Difference
+ref_age1=13  # user can modify this
+ref_age2=15  ## user can modify this
+
+## Define variables used later in analysis
+Age2=Age-ref_age1
+Age_Diff=ref_age2-ref_age1
+
+```
+
+
+```{r Prior Info,echo = FALSE}
+
+## Point estimates at reference ages
+m1=0.5  
+m2=0.9
+
+## Lower bound of prior credible intervals for point estimates
+m1_lower=0.3
+m2_lower=0.7
+
+## Assumed correlation between the two (on link scale)
+m_corr=0.4
+```
+
+
+```{r Logit: set up link function info and initialize prior matrices,echo = FALSE}
+
+## Set up link function and initialize prior mean and Variance-Covariance matrices
+bi_logit <- binomial(link="logit")
+mu1<-matrix(0,nrow=nvars,ncol=1)
+rownames(mu1)=c("Intercept","Age2")
+colnames(mu1)=c("Prior Mean")
+V1<-1*diag(nvars)
+rownames(V1)=c("Intercept","Age2")
+colnames(V1)=c("Intercept","Age2")
+```
+
+
+```{r Logit:set prior means,results = "hide",echo = FALSE}
+## Prior mean for intercept is set to point estimate 
+## at reference age1 (on logit scale)
+mu1[1,1]=bi_logit$linkfun(m1)
+
+## Prior mean for slope is set to difference in point estimates
+## on logit scale divided by Age_Diff
+
+mu1[2,1]=(bi_logit$linkfun(m2) -bi_logit$linkfun(m1))/Age_Diff 
+print(mu1)
+
+```
+
+```{r Logit:set prior Variance Covariance matrix,results = "hide",echo = FALSE}
+## Implied standard deviations for point estimates on logit scale
+
+sd_m1= (bi_logit$linkfun(m1) -bi_logit$linkfun(m1_lower))/1.96
+sd_m2= (bi_logit$linkfun(m2) -bi_logit$linkfun(m2_lower))/1.96
+
+## Also compute implied estimate for upper bound of confidence intervals
+
+m1_upper=bi_logit$linkinv(bi_logit$linkfun(m1)+sd_m1*1.96)
+m2_upper=bi_logit$linkinv(bi_logit$linkfun(m2)+sd_m2*1.96)
+print("m1_upper is:")
+m1_upper
+print("m2_upper is:")
+m2_upper
+
+
+## Implied Standard deviation for slope (using variance formula for difference between two variables)
+a=(1/Age_Diff)
+sd_slope=sqrt((a*sd_m1)^2+(a*sd_m2)^2-2*a*a*(sd_m1*sd_m2*m_corr))
+
+#Cov(m1,slope)=cov(m1, a*(m2-m1)) =a*E[(m1-E[m1])((m2-m1)-E[m2-m1])]
+#   =a*E[(m1-E[m1])(m2-E[m2])]- a* E[(m1-E[m1])(m1-E[m1])]
+##   =a*Cov[m1,m2] - a*Var[m1]
+##  =a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+cov_V1=a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+
+# Set covariance matrix
+V1[1,1]=sd_m1^2
+V1[2,2]=sd_slope^2
+V1[1,2]=cov_V1
+V1[2,1]=V1[1,2]
+print("V1 is:")
+print(V1)
+```
+
+```{r Run Logit,results = "hide",echo = FALSE}
+Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,Menarche=menarche2$Menarche,Age2)
+prior1=list(mu=mu1,Sigma=V1)
+#glmb.out1<-glmb(n=1000,cbind(Menarche, Total-Menarche) ~ #Age2,family=binomial(logit),mu=mu1,Sigma=V1,data=Menarche_Model_Data)
+glmb.out1<-glmb(n=1000,cbind(Menarche, Total-Menarche) ~ Age2,family=binomial(logit),pfamily=dNormal(mu=mu1,Sigma=V1),data=Menarche_Model_Data)
+
+```
+
+
+# Introduction
+
+In this section, we will be continuing our discussion of the Bayesian model using the Menarche data that we covered in chapter 4.  Recall that our main model (with the carefully specified prior) had the summary output below. The focus of this chapter will be to dig deeper and to examine model predictions/fit, residuals, outliers, and the DIC statistic (for model comparisons).  
+
+```{r Summary Logit}
+summary(glmb.out1)
+```
+
+
+# Reviewing Model Predictions
+
+We start with a look a model predictions, both in and out of sample. The *predict* function can be used for both of these purposes as we illustrate below.  
+
+## Predictions for Actual Data
+
+Generating in-sample predictions requires just a simple call to the predict function in order to extract the required information of the *glmb* class object (in this case we choose to extract the predictions for the "response). Once extracted, the randomized draws for the predictions can be analyzed further. Here we choose to so for my just looking at the mean predictions (we look at other outputs for the out of sample prediction below) and we then plot those for comparison to the underlying data. 
+
+As we can see from this plot, the predictions in general seems visually to match the underlying data relatively well although there may be some extent to which it overstates the percentage of girls who have had their first period for the lower age range. It is also hard to judge from this plot whether some of the points are outliers or whether they fall within a range where we would expect the observations to fall. We explore both of those issues further later in this chapter.    
+
+
+```{r Model_Preds1,fig.height = 5, fig.width = 7}
+## Predicting for original data
+
+pred1=predict(glmb.out1,type="response")
+pred1_m=colMeans(pred1)
+
+plot(Menarche/Total ~ Age, data=menarche2,main="% of girls Who have had their first period")
+lines(menarche2$Age, pred1_m,lty=1)
+
+
+```
+
+
+## Predictions for "New" Data
+
+In order to understand the remaining uncertainty tied to our model and predictions for "new" observations, we use simulated value for the coefficients in order to simulate new data over a range of different ages so that we can provide "credible sets" around the model. We use the median sample size for the underlying observations in the the model.  Let's us briefly touch on each of the steps below. 
+
+In order to perform the simulation, we first set up a new dataset for the independent variables by creating a new age variable and setting the number of observations to simulate. We store the new independent variable in a a new data frame with the same variable names as in the original dataset.
+
+```{r Setup_NewData}
+## Pull Model Info
+mod_Object=glmb.out1
+n=nrow(mod_Object$coefficients)
+obs_size=median(menarche2$Total) ## Median of Total counts
+
+# Generate New Data for The Independent Variable
+Age_New <- seq(8, 20, 0.25)
+Age2_New=Age_New-13
+
+# olddata - Should contain all variables used in original model formula
+olddata=data.frame(Age=menarche2$Age,
+Menarche=menarche2$Menarche,Total=menarche2$Total,Age2=Age2)
+
+# Should contain all variables used on RHS of model formula
+newdata=data.frame(Age=Age_New,Age2=Age2_New)
+
+```
+
+In order to perform the simulation, we first pass the output from the *glmb*, the newdata, the olddata, and the type to the predict function.  We then set up a matrix into which we store the newly simulated values for the dependent variable and simulate from *rbinom* function using the predicted response values from the response function. 
+
+```{r Model_Sims}
+## Predict and Simulate for newdata
+
+pred_menarche=predict(mod_Object,newdata=newdata,olddata=olddata,type="response")
+pred_y=matrix(0,nrow=n,ncol=length(Age_New))
+for(i in 1:n){
+  pred_y[i,1:length(Age_New)]=rbinom(length(Age_New),size=obs_size,
+  prob=pred_menarche[i,1:length(Age_New)])
+}
+
+```
+
+
+The output is summarized by producing both means and *credible set* information for proportions based on the simulated coefficients and the simulated data (the intervals for the latter will be wider). The latter interval is more appropriate when examining if the actual data appears to correspond to outliers.
+
+```{r Mean_and_Quartile_Info}
+
+## Produce mean and quantile information
+
+pred_m=colMeans(pred_menarche)
+pred_y_m=colMeans(pred_y/obs_size)
+quant1_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.025))
+quant2_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.975))
+quant1_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.025))
+quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975))
+
+```
+
+We now plot most of these summarized measures and the original data together in order to get a visualization of the various predictions and data. This plot suggests that the individual observations in the original data generally tends to fall between the lower and upper bounds credible sets based on the simulated data although it is hard to tell at lower end of the age scale based on this chart. We will explore the latter issue a bit more later in this chapter.
+
+```{r Model_Plots,fig.height = 5, fig.width = 7}
+
+plot(Menarche/Total ~ Age, data=menarche2,main="Percentage of girls Who have had their first period")
+lines(Age_New, pred_m,lty=1)
+lines(Age_New, quant1_m,lty=2)
+lines(Age_New, quant2_m,lty=2)
+lines(Age_New, quant1_m_y,lty=2)
+lines(Age_New, quant2_m_y,lty=2)
+
+```
+
+We close this section with a comparison of our prior and posterior credible intervals. We store the related information for our posterior simulated credible intervals in a data frame and then look at these in comparison o the prior credible intervals. What we see is that the prior credible interval at age 13 is wider than the posterior credible interval and in fact contains the posterior interval.  At age 15, the two posterior credible set is still contained within the prior credible set but skews heavily towards the upper end of the prior credible set.
+
+
+```{r Store_Preds}
+
+outdata=data.frame(Age=Age_New,Age2=Age2_New,pred_m=pred_m, quant1_m, quant2_m,quant1_m_y,quant2_m_y)
+
+print("Prior credible set at age 13 was")
+cbind(m1_lower,m1_upper)
+
+print("Prior credible set at age 15 was")
+cbind(m2_lower,m2_upper)
+
+print("Posterior Predictions between ages 13 and 15 are")
+outdata[which(outdata$Age >= 13&outdata$Age <= 15 ),]
+
+```
+
+# Reviewing Model Residuals
+
+We now turn to a more careful examination of the deviance residuals.  We first extract the residuals from the *glmb* object and then produce the mean and credible intervals so we can plot them later in this section.
+
+```{r Residual_Analysis}
+
+## Get Residuals for model, their means, and credible bounds
+res_out=residuals(glmb.out1)
+res_mean=colMeans(res_out)
+sqrt(mean(res_mean^2))
+
+res_low1=apply(res_out,2,FUN=quantile,probs=c(0.025))
+res_high1=apply(res_out,2,FUN=quantile,probs=c(0.975))
+```
+To understand whether any of the above residuals might be unexpected outliers, we now use the simulated predictions in order to simulate new data for each observation in the original dataset to see what construct a credible set for the residuals.  
+
+```{r Simulate_New_Residuals}
+## Simulate new data and get residuals for simulated data
+
+ysim1=simulate(glmb.out1,nsim=1,seed=NULL,pred=pred1,family="binomial",
+                        prior.weights=weights(glmb.out1))
+res_ysim_out1=residuals(glmb.out1,ysim=ysim1)
+res_low=apply(res_ysim_out1,2,FUN=quantile,probs=c(0.025))
+res_high=apply(res_ysim_out1,2,FUN=quantile,probs=c(0.975))
+```
+
+Using the simulate credible sets, we now plot them together. This reveals that the expected value for the actual residuals all fall within the credible sets of the simulated residuals for the new data.  However, the credible sets for some of residuals at the lower age falls outside of those bounds. We will look at how alternate model specifications can avoid this later in this chapter.  
+
+```{r Residual_Plot,fig.height = 5, fig.width = 7}
+# Plot Credible Interval bounds for Deviance Residuals
+
+plot(res_mean~Age,ylim=c(-2.5,2.5),
+  main="Credible Interval Bounds for Logit Model Deviance Residuals",
+  xlab = "Age", ylab = "Dev. Residuals")
+lines(Age, 0*res_mean,lty=1)
+lines(Age, res_low,lty=1)
+lines(Age, res_high,lty=1)
+lines(Age, res_low1,lty=2)
+lines(Age, res_high1,lty=2)
+```
+
+
+# Using the DIC Statistic
+
+The DIC Statistic is mainly useful when comparing the predictions from several models with the same likelihood function but with different specifications (say different link-functions or different model variables). Here, we will explore alternative link functions for the Menarche data by using the Probit and Clog-Log Models and will then compare the models using the DIC Statistic and related outputs.
+
+## Running The Probit Model
+
+The Probit model uses an alternative link function based on the cumulative distribution function for the normal distribution instead of the cumulative distribution function for logistic distribution. Below, we use a similar approach to the prior specification as we did in the earlier chapter for the Logit model and then produce the corresponding output. We will not comment further on those results and will hold off on further discussion until our subsection comparing the DIC statistic from the various models.
+
+
+```{r Probit_Model}
+## ----Probit: set up link function info and initialize prior matrices-----------
+
+## Set up link function and initialize prior mean and Variance-Covariance matrices
+bi_probit <- binomial(link="probit")
+mu2<-matrix(0,nrow=nvars,ncol=1)
+rownames(mu2)=c("Intercept","Age2")
+colnames(mu2)=c("Prior Mean")
+V2<-1*diag(nvars)
+rownames(V2)=c("Intercept","Age2")
+colnames(V2)=c("Intercept","Age2")
+
+
+## ----Probit:set prior means----------------------------------------------------
+## Prior mean for intercept is set to point estimate 
+## at reference age1 (on probit scale)
+mu2[1,1]=bi_probit$linkfun(m1)
+
+## Prior mean for slope is set to difference in point estimates
+## on probit scale divided by Age_Diff
+
+mu2[2,1]=(bi_probit$linkfun(m2) -bi_probit$linkfun(m1))/Age_Diff 
+print(mu2)
+
+
+## ----Probit:set prior Variance Covariance matrix-------------------------------
+## Implied standard deviations for point estimates on probit scale
+
+sd_m1= (bi_probit$linkfun(m1) -bi_probit$linkfun(m1_lower))/1.96
+sd_m2= (bi_probit$linkfun(m2) -bi_probit$linkfun(m2_lower))/1.96
+
+## Implied Standard deviation for slope (using variance formula for difference between two variables)
+a=(1/Age_Diff)
+sd_slope=sqrt((a*sd_m1)^2+(a*sd_m2)^2-2*a*a*(sd_m1*sd_m2*m_corr))
+
+#Cov(m1,slope)=cov(m1, a*(m2-m1)) =a*E[(m1-E[m1])((m2-m1)-E[m2-m1])]
+#   =a*E[(m1-E[m1])(m2-E[m2])]- a* E[(m1-E[m1])(m1-E[m1])]
+##   =a*Cov[m1,m2] - a*Var[m1]
+##  =a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+cov_V2=a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+
+# Set covariance matrix
+V2[1,1]=sd_m1^2
+V2[2,2]=sd_slope^2
+V2[1,2]=cov_V2
+V2[2,1]=V2[1,2]
+print(V2)
+
+
+## ----Run Probit,results = "hide"-----------------------------------------------
+Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,
+                               Menarche=menarche2$Menarche,Age2)
+
+glmb.out2<-glmb(n=1000,cbind(Menarche, Total-Menarche) ~Age2,family=binomial(probit),
+                pfamily=dNormal(mu=mu2,Sigma=V2),data=Menarche_Model_Data)
+
+print(glmb.out2)
+summary(glmb.out2)
+```
+
+## Running The Clog-Log Model
+
+The Clog-Log models offers an additional alternative model for the binomial data. Here we set up a model using this link function. Unlike the Logit and Probit models, the Clog-Log link function is not symmetric so we run an alternative models below with the reverse sign. Again, we will hold off on interpretation until later in the chapter.
+
+
+
+```{r cloglog_Model}
+
+## ----cloglog: set up link function info and initialize prior matrices-----------
+
+## Set up link function and initialize prior mean and Variance-Covariance matrices
+bi_cloglog <- binomial(link="cloglog")
+mu3<-matrix(0,nrow=nvars,ncol=1)
+rownames(mu3)=c("Intercept","Age2")
+colnames(mu3)=c("Prior Mean")
+V3<-1*diag(nvars)
+rownames(V3)=c("Intercept","Age2")
+colnames(V3)=c("Intercept","Age2")
+
+
+## ----cloglog:set prior means----------------------------------------------------
+## Prior mean for intercept is set to point estimate 
+## at reference age1 (on cloglog scale)
+mu3[1,1]=bi_cloglog$linkfun(m1)
+
+## Prior mean for slope is set to difference in point estimates
+## on cloglog scale divided by Age_Diff
+
+mu3[2,1]=(bi_cloglog$linkfun(m2) -bi_cloglog$linkfun(m1))/Age_Diff 
+print(mu3)
+
+
+## ----Cloglog:set prior Variance Covariance matrix-------------------------------
+## Implied standard deviations for point estimates on clolog scale
+
+sd_m1= (bi_cloglog$linkfun(m1) -bi_cloglog$linkfun(m1_lower))/1.96
+sd_m2= (bi_cloglog$linkfun(m2) -bi_cloglog$linkfun(m2_lower))/1.96
+
+## Implied Standard deviation for slope (using variance formula for difference between two variables)
+a=(1/Age_Diff)
+sd_slope=sqrt((a*sd_m1)^2+(a*sd_m2)^2-2*a*a*(sd_m1*sd_m2*m_corr))
+
+#Cov(m1,slope)=cov(m1, a*(m2-m1)) =a*E[(m1-E[m1])((m2-m1)-E[m2-m1])]
+#   =a*E[(m1-E[m1])(m2-E[m2])]- a* E[(m1-E[m1])(m1-E[m1])]
+##   =a*Cov[m1,m2] - a*Var[m1]
+##  =a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+cov_V3=a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+
+# Set covariance matrix
+V3[1,1]=sd_m1^2
+V3[2,2]=sd_slope^2
+V3[1,2]=cov_V3
+V3[2,1]=V3[1,2]
+print(V3)
+
+
+## ----Run cloglog,results = "hide"-----------------------------------------------
+Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,
+                               Menarche=menarche2$Menarche,Age2)
+
+glmb.out3<-glmb(n=1000,cbind(Menarche, Total-Menarche) ~Age2,family=binomial(cloglog),
+                pfamily=dNormal(mu=mu3,Sigma=V3),data=Menarche_Model_Data)
+
+print(glmb.out3)
+summary(glmb.out3)
+
+
+```
+## Running The Reverse Clog-Log Model
+
+Here we set up and run the reverse clog-log model. It models the opposite probability and is not equivalent to the earlier models because of the asymmetry of the distribution.
+
+
+```{r cloglog_Model2}
+
+## ----cloglog: set up link function info and initialize prior matrices-----------
+
+## Set up link function and initialize prior mean and Variance-Covariance matrices
+bi_cloglog <- binomial(link="cloglog")
+mu4<-matrix(0,nrow=nvars,ncol=1)
+rownames(mu4)=c("Intercept","Age2")
+colnames(mu4)=c("Prior Mean")
+V4<-1*diag(nvars)
+rownames(V4)=c("Intercept","Age2")
+colnames(V4)=c("Intercept","Age2")
+
+
+## ----cloglog:set prior means----------------------------------------------------
+## Prior mean for intercept is set to point estimate 
+## at reference age1 (on logit scale)
+mu4[1,1]=bi_cloglog$linkfun((1-m1))
+
+## Prior mean for slope is set to difference in point estimates
+## on logit scale divided by Age_Diff
+
+mu4[2,1]=(bi_cloglog$linkfun((1-m2))-bi_cloglog$linkfun((1-m1)))/Age_Diff 
+print(mu4)
+
+
+## ----Probit:set prior Variance Covariance matrix-------------------------------
+## Implied standard deviations for point estimates on logit scale
+
+sd_m1= (bi_cloglog$linkfun((1-m1_lower))-bi_cloglog$linkfun((1-m1)))/1.96
+sd_m2= (bi_cloglog$linkfun((1-m2_lower))-bi_cloglog$linkfun((1-m2)))/1.96
+
+## Implied Standard deviation for slope (using variance formula for difference between two variables)
+a=(1/Age_Diff)
+sd_slope=sqrt((a*sd_m1)^2+(a*sd_m2)^2-2*a*a*(sd_m1*sd_m2*m_corr))
+
+#Cov(m1,slope)=cov(m1, a*(m2-m1)) =a*E[(m1-E[m1])((m2-m1)-E[m2-m1])]
+#   =a*E[(m1-E[m1])(m2-E[m2])]- a* E[(m1-E[m1])(m1-E[m1])]
+##   =a*Cov[m1,m2] - a*Var[m1]
+##  =a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+cov_V4=a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1
+
+# Set covariance matrix
+V4[1,1]=sd_m1^2
+V4[2,2]=sd_slope^2
+V4[1,2]=cov_V4
+V4[2,1]=V4[1,2]
+print(V4)
+
+
+## ----Run cloglog,results = "hide"-----------------------------------------------
+Menarche_Model_Data=data.frame(Age=menarche2$Age,Total=menarche2$Total,
+                               Menarche=menarche2$Menarche,Age2)
+
+glmb.out4<-glmb(n=1000,cbind(Total-Menarche,Menarche) ~Age2,family=binomial(cloglog),
+                pfamily=dNormal(mu=mu4,Sigma=V4),data=Menarche_Model_Data)
+
+print(glmb.out4)
+summary(glmb.out4)
+
+```
+
+## Comparing the DIC Statistics
+
+The Deviance Information Criterion (DIC) statistic is a Bayesian version of the AIC useful to compare different model specifications for the same likelihood function. Generally, smaller DIC statistic are preferred. Like other information criteria, the DIC favors models with a better but includes a penalty for model complexity. The DIC is computed from the Monte Carlo simulation output.  In addition to the DIC itself, the *extractAIC* function provides an "expected number of parameter" output (which tends to be more relevant for Hierarchical models).
+
+As we can see from the below output, the DIC for the two Clog-Log models are much worse than for the other two models suggesting they do a worse job of approximating the relationship between age and the percentage of girls who had experienced their first period. The difference in the DIC between the Logit and Probit models are smaller although the Probit model appears to have the lower DIC. Below the DIC table, the also provide the same kind of output from the Classical models and the associated AIC, which shows a similar pattern.
+
+```{r Compare_DIC}
+DIC_Out=rbind(
+  extractAIC(glmb.out1),
+  extractAIC(glmb.out2),
+  extractAIC(glmb.out3),
+  extractAIC(glmb.out4))
+
+rownames(DIC_Out)=c("Logit","Probit","Clog-Log","Reverse Clog-Log")
+DIC_Out
+```
+
+```{r Compare_AIC}
+
+glm.out1=glm(cbind(Menarche, Total-Menarche) ~Age2,family=binomial(logit),data=Menarche_Model_Data)
+glm.out2=glm(cbind(Menarche, Total-Menarche) ~Age2,family=binomial(probit),data=Menarche_Model_Data)
+glm.out3=glm(cbind(Menarche, Total-Menarche) ~Age2,family=binomial(cloglog),data=Menarche_Model_Data)
+glm.out4=glm(cbind(Total-Menarche,Menarche ) ~Age2,family=binomial(cloglog),data=Menarche_Model_Data)
+
+AIC_Out=rbind(extractAIC(glm.out1),
+extractAIC(glm.out2),
+extractAIC(glm.out3),
+extractAIC(glm.out4))
+
+rownames(AIC_Out)=c("Logit","Probit","Clog-Log","Reverse Clog-Log")
+colnames(AIC_Out)=c("edf","AIC")
+AIC_Out
+```
+
+## Plotting Predictions and Residuals For the Additional Models
+
+### Probit Model
+
+*Predictions*
+```{r Model_Sims2}
+## Predict and Simulate for newdata
+
+mod_Object=glmb.out2
+pred1=predict(glmb.out2,type="response")
+pred1_m=colMeans(pred1)
+n=nrow(mod_Object$coefficients)
+pred_menarche=predict(mod_Object,newdata=newdata,olddata=olddata,type="response")
+pred_y=matrix(0,nrow=n,ncol=length(Age_New))
+for(i in 1:n){
+  pred_y[i,1:length(Age_New)]=rbinom(length(Age_New),size=obs_size,
+  prob=pred_menarche[i,1:length(Age_New)])
+}
+
+```
+
+```{r Mean_and_Quartile_Info2}
+
+## Produce mean and quantile information
+
+pred_m=colMeans(pred_menarche)
+pred_y_m=colMeans(pred_y/obs_size)
+quant1_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.025))
+quant2_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.975))
+quant1_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.025))
+quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975))
+
+```
+
+
+```{r Model_Plots2,fig.height = 5, fig.width = 7}
+
+plot(Menarche/Total ~ Age, data=menarche2,main="Percentage of girls Who have had their first period")
+lines(Age_New, pred_m,lty=1)
+lines(Age_New, quant1_m,lty=2)
+lines(Age_New, quant2_m,lty=2)
+lines(Age_New, quant1_m_y,lty=2)
+lines(Age_New, quant2_m_y,lty=2)
+
+```
+*Residuals*
+```{r Residual_Analysis2}
+## Get Residuals for model, their means, and credible bounds
+res_out=residuals(glmb.out2)
+res_mean=colMeans(res_out)
+sqrt(mean(res_mean^2))
+res_low1=apply(res_out,2,FUN=quantile,probs=c(0.025))
+res_high1=apply(res_out,2,FUN=quantile,probs=c(0.975))
+```
+
+```{r Simulate_New_Residuals2}
+## Simulate new data and get residuals for simulated data
+
+ysim1=simulate(glmb.out2,nsim=1,seed=NULL,pred=pred1,family="binomial",
+                        prior.weights=weights(glmb.out2))
+res_ysim_out1=residuals(glmb.out2,ysim=ysim1)
+res_low=apply(res_ysim_out1,2,FUN=quantile,probs=c(0.025))
+res_high=apply(res_ysim_out1,2,FUN=quantile,probs=c(0.975))
+```
+
+
+```{r Residual_Plot2,fig.height = 5, fig.width = 7}
+# Plot Credible Interval bounds for Deviance Residuals
+
+plot(res_mean~Age,ylim=c(-2.5,2.5),
+  main="Credible Interval Bounds for Probit Model Deviance Residuals",
+  xlab = "Age", ylab = "Dev. Residuals")
+lines(Age, 0*res_mean,lty=1)
+lines(Age, res_low,lty=1)
+lines(Age, res_high,lty=1)
+lines(Age, res_low1,lty=2)
+lines(Age, res_high1,lty=2)
+```
+
+### clog-log Model
+
+*Predictions*
+```{r Model_Sims3}
+## Predict and Simulate for newdata
+mod_Object=glmb.out3
+pred1=predict(glmb.out3,type="response")
+pred1_m=colMeans(pred1)
+n=nrow(mod_Object$coefficients)
+pred_menarche=predict(mod_Object,newdata=newdata,olddata=olddata,type="response")
+pred_y=matrix(0,nrow=n,ncol=length(Age_New))
+for(i in 1:n){
+  pred_y[i,1:length(Age_New)]=rbinom(length(Age_New),size=obs_size,
+  prob=pred_menarche[i,1:length(Age_New)])
+}
+
+```
+
+```{r Mean_and_Quartile_Info3}
+
+## Produce mean and quantile information
+
+pred_m=colMeans(pred_menarche)
+pred_y_m=colMeans(pred_y/obs_size)
+quant1_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.025))
+quant2_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.975))
+quant1_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.025))
+quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975))
+
+```
+
+
+```{r Model_Plots3,fig.height = 5, fig.width = 7}
+
+plot(Menarche/Total ~ Age, data=menarche2,main="Percentage of girls Who have had their first period")
+lines(Age_New, pred_m,lty=1)
+lines(Age_New, quant1_m,lty=2)
+lines(Age_New, quant2_m,lty=2)
+lines(Age_New, quant1_m_y,lty=2)
+lines(Age_New, quant2_m_y,lty=2)
+
+```
+*Residuals*
+```{r Residual_Analysis3}
+## Get Residuals for model, their means, and credible bounds
+res_out=residuals(glmb.out3)
+res_mean=colMeans(res_out)
+sqrt(mean(res_mean^2))
+res_low1=apply(res_out,2,FUN=quantile,probs=c(0.025))
+res_high1=apply(res_out,2,FUN=quantile,probs=c(0.975))
+```
+
+```{r Simulate_New_Residuals3}
+## Simulate new data and get residuals for simulated data
+
+ysim1=simulate(glmb.out3,nsim=1,seed=NULL,pred=pred1,family="binomial",
+                        prior.weights=weights(glmb.out3))
+res_ysim_out1=residuals(glmb.out3,ysim=ysim1)
+res_low=apply(res_ysim_out1,2,FUN=quantile,probs=c(0.025))
+res_high=apply(res_ysim_out1,2,FUN=quantile,probs=c(0.975))
+```
+
+
+```{r Residual_Plot3,fig.height = 5, fig.width = 7}
+# Plot Credible Interval bounds for Deviance Residuals
+
+plot(res_mean~Age,ylim=c(-4.0,4.0),
+  main="Credible Interval Bounds for cloglog Model Deviance Residuals",
+  xlab = "Age", ylab = "Dev. Residuals")
+lines(Age, 0*res_mean,lty=1)
+lines(Age, res_low,lty=1)
+lines(Age, res_high,lty=1)
+lines(Age, res_low1,lty=2)
+lines(Age, res_high1,lty=2)
+```
+
+### Reverse clog-log Model
+
+*Predictions*
+```{r Model_Sims4}
+## Predict and Simulate for newdata
+mod_Object=glmb.out4
+pred1=predict(glmb.out4,type="response")
+pred1_m=colMeans(pred1)
+n=nrow(mod_Object$coefficients)
+pred_menarche=predict(mod_Object,newdata=newdata,olddata=olddata,type="response")
+pred_y=matrix(0,nrow=n,ncol=length(Age_New))
+for(i in 1:n){
+  pred_y[i,1:length(Age_New)]=rbinom(length(Age_New),size=obs_size,
+  prob=pred_menarche[i,1:length(Age_New)])
+}
+
+```
+
+```{r Mean_and_Quartile_Info4}
+
+## Produce mean and quantile information
+
+pred_m=colMeans(pred_menarche)
+pred_y_m=colMeans(pred_y/obs_size)
+quant1_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.025))
+quant2_m=apply(pred_menarche,2,FUN=quantile,probs=c(0.975))
+quant1_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.025))
+quant2_m_y=apply(pred_y/obs_size,2,FUN=quantile,probs=c(0.975))
+
+```
+
+
+```{r Model_Plots4,fig.height = 5, fig.width = 7}
+
+plot(Menarche/Total ~ Age, data=menarche2,main="Percentage of girls Who have had their first period")
+lines(Age_New, 1-pred_m,lty=1)
+lines(Age_New, 1-quant1_m,lty=2)
+lines(Age_New, 1-quant2_m,lty=2)
+lines(Age_New, 1-quant1_m_y,lty=2)
+lines(Age_New, 1-quant2_m_y,lty=2)
+
+```
+*Residuals*
+```{r Residual_Analysis4}
+## Get Residuals for model, their means, and credible bounds
+res_out=residuals(glmb.out4)
+res_mean=colMeans(res_out)
+sqrt(mean(res_mean^2))
+res_low1=apply(res_out,2,FUN=quantile,probs=c(0.025))
+res_high1=apply(res_out,2,FUN=quantile,probs=c(0.975))
+```
+
+```{r Simulate_New_Residuals4}
+## Simulate new data and get residuals for simulated data
+
+ysim1=simulate(glmb.out4,nsim=1,seed=NULL,pred=pred1,family="binomial",
+                        prior.weights=weights(glmb.out4))
+res_ysim_out1=residuals(glmb.out4,ysim=ysim1)
+res_low=apply(res_ysim_out1,2,FUN=quantile,probs=c(0.025))
+res_high=apply(res_ysim_out1,2,FUN=quantile,probs=c(0.975))
+```
+
+
+```{r Residual_Plot4,fig.height = 5, fig.width = 7}
+# Plot Credible Interval bounds for Deviance Residuals
+
+plot(-res_mean~Age,ylim=c(-3.0,3.0),
+  main="Credible Interval Bounds - Rev. clog-log Model Deviance Residuals",
+  xlab = "Age", ylab = "Dev. Residuals")
+lines(Age, 0*res_mean,lty=1)
+lines(Age, -res_low,lty=1)
+lines(Age, -res_high,lty=1)
+lines(Age, -res_low1,lty=2)
+lines(Age, -res_high1,lty=2)
+```
+
+
+# References

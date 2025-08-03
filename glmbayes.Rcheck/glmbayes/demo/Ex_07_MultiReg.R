@@ -1,0 +1,15 @@
+data(AMI)
+summary(AMI)
+mlm1 <- lm(cbind(TOT, AMI) ~ GEN + AMT + PR + DIAP + QRS, data = AMI)
+summary(mlm1)
+
+m1 <- lm(TOT ~ GEN + AMT + PR + DIAP + QRS, data =AMI)
+summary(m1)
+m2 <- lm(AMI ~ GEN + AMT + PR + DIAP + QRS, data = AMI)
+summary(m2)
+
+head(resid(mlm1))
+head(fitted(mlm1))
+coef(mlm1)
+sigma(mlm1)
+vcov(mlm1)

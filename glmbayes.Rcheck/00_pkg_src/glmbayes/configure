@@ -1,0 +1,75 @@
+#!/bin/sh
+
+# ---- Manual OpenCL toggle ----
+OPENCL_FOUND=no   # Change to 'no' to disable OpenCL manually
+
+#!/bin/sh
+# ── configure ──
+
+# 1. Hard‐coded RcppParallel install location
+RPP_INC_DIR="/home/knygren/R/x86_64-pc-linux-gnu-library/4.5/RcppParallel/include"
+RPP_LIB_DIR="/home/knygren/R/x86_64-pc-linux-gnu-library/4.5/RcppParallel/lib"
+
+# After defining RPP_INC_DIR and RPP_LIB_DIR
+echo ">> RPP_INC_DIR      = '$RPP_INC_DIR'"
+echo ">> RPP_LIB_DIR      = '$RPP_LIB_DIR'"
+
+
+
+# 2. Core flags
+OPENCL_FOUND=yes       # switch to "yes" to enable OpenCL
+OPENMP_CFLAGS="-fopenmp"
+LAPACK_LIBS="-llapack"
+BLAS_LIBS="-lblas"
+FLIBS="$(R CMD config FLIBS)"
+
+# 3. RcppParallel flags
+RPP_CPPFLAGS="-I$RPP_INC_DIR"
+RPP_LDFLAGS="-L$RPP_LIB_DIR -ltbb -ltbbmalloc -Wl,-rpath,${RPP_LIB_DIR}"
+
+# After building your RcppParallel flags
+echo ">> RPP_CPPFLAGS = '$RPP_CPPFLAGS'"
+echo ">> RPP_LDFLAGS = '$RPP_LDFLAGS'"
+
+
+RCPPPARALLEL_FLAGS="-L$RCPPPARALLEL_LIB -ltbb -I$RCPPPARALLEL_INC"
+
+# ---- Manual OpenCL configuration ----
+#OPENCL_INCLUDE="-I/usr/local/cuda/include"
+OPENCL_INCLUDE="-I/usr/include"
+OPENCL_LIB="-L/usr/lib -lOpenCL"
+
+# ---- Compose final flags ----
+FULL_CXXFLAGS="$OPENMP_CFLAGS"
+FULL_LIBS="$OPENMP_CFLAGS"
+
+
+if [ "$OPENCL_FOUND" = "yes" ]; then
+  echo "OpenCL manually enabled"
+  FULL_CXXFLAGS="$FULL_CXXFLAGS -DUSE_OPENCL $OPENCL_INCLUDE"
+  FULL_LIBS="$FULL_LIBS $OPENCL_LIB"
+else
+  echo "OpenCL manually disabled"
+fi
+
+FULL_LIBS="$FULL_LIBS $LAPACK_LIBS $BLAS_LIBS $FLIBS"
+
+
+# Before appending
+echo ">> FULL_CXXFLAGS    = '$FULL_CXXFLAGS'"
+echo ">> FULL_LIBS        = '$FULL_LIBS'"
+
+
+# ---- APPEND RCPPPARALLEL_FLAGS - MAY BE NEEDED IN LINUX
+FULL_LIBS="$FULL_LIBS $RPP_LDFLAGS"
+FULL_CXXFLAGS="$FULL_CXXFLAGS $RPP_CPPFLAGS"
+
+
+
+# After appending
+echo ">> FULL_CXXFLAGS    = '$FULL_CXXFLAGS'"
+echo ">> FULL_LIBS        = '$FULL_LIBS'"
+
+# ---- Write to Makevars ----
+echo "PKG_CXXFLAGS = $FULL_CXXFLAGS" > src/Makevars
+echo "PKG_LIBS = $FULL_LIBS" >> src/Makevars

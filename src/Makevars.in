@@ -1,19 +1,45 @@
+## 1. C++ standard
+CXX_STD = CXX17
 
-## With R 3.1.0 or later, you can uncomment the following line to tell R to 
-## enable compilation with C++11 (where available)
-##
-## Also, OpenMP support in Armadillo prefers C++11 support. However, for wider
-## availability of the package we do not yet enforce this here.  It is however
-## recommended for client packages to set it.
-##
-## And with R 3.4.0, and RcppArmadillo 0.7.960.*, we turn C++11 on as OpenMP
-## support within Armadillo prefers / requires it
-##CXX=g++
-##CXX_STD = CXX11 # Edited out - Not needed in newer versions of R
+## 2. Preprocessor flags
+PKG_CPPFLAGS = \
+    -DRCPP_PARALLEL_USE_TBB=1 \
+    -DTBB_INTERFACE_NEW \
+    -I"@RCPP_PARALLEL_INCLUDE@" \
+    "@OPENCL_CPPFLAGS@"
 
-# src/Makevars — for Linux/macOS builds
+## 3. C compiler flags mirror CPPFLAGS
+PKG_CFLAGS   = $(PKG_CPPFLAGS)
 
-PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -I/usr/include
+## 4. C++ compiler flags
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) \
+               $(PKG_CPPFLAGS) \
+               @OPENCL_CXXFLAGS@
 
-PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) -L/usr/lib -lOpenCL -lRcppParallel $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+## 5. Linker flags
+PKG_LIBS     = \
+    $(SHLIB_OPENMP_CXXFLAGS) \
+    @OPENCL_LIBS@ \
+    $(LAPACK_LIBS) \
+    $(BLAS_LIBS) \
+    $(FLIBS)
 
+## 6. Objects from configure
+OBJECTS     = @FINAL_OBJS@
+PKG_OBJECTS = $(OBJECTS)
+
+## 7. Pattern rule for object files
+%.o: %.cpp
+	$(CXX) $(PKG_CXXFLAGS) -c $< -o $@
+
+%.o: %.c
+	$(CC)  $(PKG_CFLAGS)   -c $< -o $@
+
+$(info SHLIB: $(SHLIB))
+$(info OBJECTS: $(OBJECTS))
+
+## 8. Build shared library
+all: $(SHLIB)
+
+$(SHLIB): $(OBJECTS)
+	$(SHLIB_CXXLD) $(SHLIB_LDFLAGS) -o $@ $^ $(PKG_LIBS)

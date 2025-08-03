@@ -1,207 +1,75 @@
-#!/bin/bash
+#!/bin/sh
 
-echo "🔧 Generating src/Makevars..."
+# ---- Manual OpenCL toggle ----
+OPENCL_FOUND=no   # Change to 'no' to disable OpenCL manually
 
-# Clean old Makevars
-rm -f src/Makevars
+#!/bin/sh
+# ── configure ──
 
-# Detect the script's own directory
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# 1. Hard‐coded RcppParallel install location
+RPP_INC_DIR="/home/knygren/R/x86_64-pc-linux-gnu-library/4.5/RcppParallel/include"
+RPP_LIB_DIR="/home/knygren/R/x86_64-pc-linux-gnu-library/4.5/RcppParallel/lib"
 
-# Echo the resolved path to the screen
-echo "DEBUG: configure is running from: $SCRIPT_DIR"
-
-
-
-# ----------------------------
-# 🔍 Detect OpenCL header
-CL_HEADER=$(find /usr /usr/local /opt -type f -name cl.h 2>/dev/null | grep "/CL/cl.h" | head -n 1)
+# After defining RPP_INC_DIR and RPP_LIB_DIR
+echo ">> RPP_INC_DIR      = '$RPP_INC_DIR'"
+echo ">> RPP_LIB_DIR      = '$RPP_LIB_DIR'"
 
 
 
-if [ -n "$CL_HEADER" ]; then
-  echo "✅ CL_HEADER is set: $CL_HEADER"
+# 2. Core flags
+OPENCL_FOUND=yes       # switch to "yes" to enable OpenCL
+OPENMP_CFLAGS="-fopenmp"
+LAPACK_LIBS="-llapack"
+BLAS_LIBS="-lblas"
+FLIBS="$(R CMD config FLIBS)"
+
+# 3. RcppParallel flags
+RPP_CPPFLAGS="-I$RPP_INC_DIR"
+RPP_LDFLAGS="-L$RPP_LIB_DIR -ltbb -ltbbmalloc -Wl,-rpath,${RPP_LIB_DIR}"
+
+# After building your RcppParallel flags
+echo ">> RPP_CPPFLAGS = '$RPP_CPPFLAGS'"
+echo ">> RPP_LDFLAGS = '$RPP_LDFLAGS'"
+
+
+RCPPPARALLEL_FLAGS="-L$RCPPPARALLEL_LIB -ltbb -I$RCPPPARALLEL_INC"
+
+# ---- Manual OpenCL configuration ----
+#OPENCL_INCLUDE="-I/usr/local/cuda/include"
+OPENCL_INCLUDE="-I/usr/include"
+OPENCL_LIB="-L/usr/lib -lOpenCL"
+
+# ---- Compose final flags ----
+FULL_CXXFLAGS="$OPENMP_CFLAGS"
+FULL_LIBS="$OPENMP_CFLAGS"
+
+
+if [ "$OPENCL_FOUND" = "yes" ]; then
+  echo "OpenCL manually enabled"
+  FULL_CXXFLAGS="$FULL_CXXFLAGS -DUSE_OPENCL $OPENCL_INCLUDE"
+  FULL_LIBS="$FULL_LIBS $OPENCL_LIB"
 else
-  echo "⚠️ CL_HEADER is empty: OpenCL header not found"
+  echo "OpenCL manually disabled"
 fi
 
+FULL_LIBS="$FULL_LIBS $LAPACK_LIBS $BLAS_LIBS $FLIBS"
 
 
-if [ -n "$CL_HEADER" ]; then
-  CL_INC_DIR=$(dirname "$CL_HEADER")
-  # Try to locate the OpenCL library using the header path
-  CL_LIB_DIR=$(find /usr /usr/local /opt -type f -name libOpenCL.so 2>/dev/null | xargs -n1 dirname | head -n 1)
-  echo "✅ OpenCL found: header at $CL_INC_DIR, library at $CL_LIB_DIR"
-  USE_OPENCL=1
-else
-  echo "⚠️ OpenCL not found. Will compile without it."
-  USE_OPENCL=0
-fi
-
-# ----------------------------
-TBB_CFLAGS=$(Rscript -e "RcppParallel::CxxFlags()")
-
-echo "🔧 TBB_CFLAGS: $TBB_CFLAGS"
-
-TBB_LIB_DIR="/usr/lib/x86_64-linux-gnu"
-TBB_LIBS1="-L$TBB_LIB_DIR -ltbb"
-TBB_LIBS2="-Wl,-rpath=$TBB_LIB_DIR"
-TBB_LIBS="$TBB_LIBS1 $TBB_LIBS2"
-
-echo "🔧 TBB_LIBS1 (compile/link): $TBB_LIBS1"
-echo "🔍 TBB_LIBS2 (rpath):         $TBB_LIBS2"
-echo "📦 Combined TBB_LIBS:         $TBB_LIBS"
+# Before appending
+echo ">> FULL_CXXFLAGS    = '$FULL_CXXFLAGS'"
+echo ">> FULL_LIBS        = '$FULL_LIBS'"
 
 
-# ----------------------------
-# 🗂️ Detect source files, exclude OpenCL ones if needed
-##ALL_CPP=$(ls src/*.cpp | sed 's|src/||')
-ALL_CPP=$(ls src/*.c src/*.cpp 2>/dev/null | sed 's|src/||')
-
-EXCLUDED_CPP="load_kernel_source.cpp load_kernel_library.cpp dpq_test.cpp nmath_test.cpp rmath_test.cpp arithmetic_test.cpp square_test.cpp stirlerr_test.cpp"
-
-echo "DEBUG: ALL_CPP is: $ALL_CPP"
-echo "DEBUG: EXCLUDED_CPP is: $EXCLUDED_CPP"
-
-if [ "$USE_OPENCL" = "1" ]; then
-  FINAL_CPP="$ALL_CPP"
-else
-  # Filter out excluded files
-
-echo "$ALL_CPP" | sort > /tmp/all_cpp_sorted.$$
-echo "$EXCLUDED_CPP" | sort > /tmp/excluded_cpp_sorted.$$
-
-FINAL_CPP=$(comm -23 /tmp/all_cpp_sorted.$$ /tmp/excluded_cpp_sorted.$$)
-
-echo "DEBUG: FINAL_CPP is: $FINAL_CPP"
-
-# Clean up
-rm -f /tmp/all_cpp_sorted.$$ /tmp/excluded_cpp_sorted.$$
-
-fi
-
-# Convert to .o format
-
-##FINAL_OBJS=$(echo "$FINAL_CPP" | sed 's/\.cpp$/.o/' | paste -sd " " -)
-FINAL_OBJS=$(echo "$FINAL_CPP" | sed -E 's/\.(cpp|c)$/.o/' | paste -sd " " -)
-
-echo "DEBUG: FINAL_OBJS resolved to: $FINAL_OBJS"
-
-echo "✅ R include directory detected at $R_INCLUDE_DIR"
-
-
-# ----------------------------
-# 📦 Detect R include directory
-R_INCLUDE_DIR=$(R CMD config --cppflags | sed 's/-I//')
-echo "✅ R include directory detected at $R_INCLUDE_DIR"
+# ---- APPEND RCPPPARALLEL_FLAGS - MAY BE NEEDED IN LINUX
+FULL_LIBS="$FULL_LIBS $RPP_LDFLAGS"
+FULL_CXXFLAGS="$FULL_CXXFLAGS $RPP_CPPFLAGS"
 
 
 
+# After appending
+echo ">> FULL_CXXFLAGS    = '$FULL_CXXFLAGS'"
+echo ">> FULL_LIBS        = '$FULL_LIBS'"
 
-
-
-DEBUG_PATH="inst/debug/Makevars_debug"
-mkdir -p "$(dirname "$DEBUG_PATH")"
-echo "🔍 Attempting to write to: $DEBUG_PATH"
-
-echo "DEBUG: FINAL_OBJS FED TO MAKEVARS_DEBUG: '$FINAL_OBJS'"
-
-# Base Makevars block
-cat <<EOF > "$DEBUG_PATH"
-CXX_STD = CXX17
-PKG_CXXFLAGS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_CFLAGS -I$R_INCLUDE_DIR
-OBJECTS = $FINAL_OBJS
-PKG_OBJECTS = \$(OBJECTS)
-EOF
-
-# Conditional OpenCL block
-if [ "$USE_OPENCL" = "1" ]; then
-  cat <<EOF >> "$DEBUG_PATH"
-PKG_CXXFLAGS += -DUSE_OPENCL -I$CL_INC_DIR
-PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) -L$CL_LIB_DIR -lOpenCL $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)
-EOF
-else
-  cat <<EOF >> "$DEBUG_PATH"
-PKG_LIBS = \$(SHLIB_OPENMP_CXXFLAGS) $TBB_LIBS -lstdc++ -lgcc \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)
-EOF
-fi
-
-echo "📝 Debug Makevars written to: $DEBUG_PATH"
-echo "✅ src/Makevars generated with CXX17 support."
-
-echo "📝 Debug Makevars written to $DEBUG_PATH"
-
-echo "✅ src/Makevars generated with CXX17 support."
-
-# Derive OpenCL paths if USE_OPENCL is active
-if [ "$USE_OPENCL" = "1" ] && [ -n "$CL_HEADER" ]; then
-  CL_BASE=$(dirname "$CL_HEADER")
-  OPEN_CL_HOME=$(echo "$CL_BASE" | sed 's:/include/CL$::')
-
-  OPENCL_CPPFLAGS="-DUSE_OPENCL -I$OPEN_CL_HOME/include"
-  OPENCL_CXXFLAGS=""
-  OPENCL_LIBS="-L$OPEN_CL_HOME/lib -lOpenCL"
-else
-  OPENCL_CPPFLAGS=""
-  OPENCL_CXXFLAGS=""
-  OPENCL_LIBS=""
-fi
-
-RCPP_PARALLEL_INCLUDE="/usr/include/tbb"
-##echo "📁 RCPP_PARALLEL_INCLUDE (derived): $RCPP_PARALLEL_INCLUDE"
-
-# Echo derived placeholder values for verification
-echo ">> Derived values for Makevars.in:"
-echo "OPENCL_CPPFLAGS=$OPENCL_CPPFLAGS"
-echo "OPENCL_CXXFLAGS=$OPENCL_CXXFLAGS"
-echo "OPENCL_LIBS=$OPENCL_LIBS"
-echo "RCPP_PARALLEL_INCLUDE=$RCPP_PARALLEL_INCLUDE"
-echo "FINAL_OBJS=$FINAL_OBJS"
-
-
-
-## 📌 Echo current working directory
-echo "🔍 Current working directory before Makevars access:"
-pwd
-
-## 📂 List contents of src/ directory
-echo "📁 Contents of src/:"
-ls -lh src/
-
-echo "📄 Contents of Makevars:"
-cat "$(pwd)/src/Makevars"
-
-
-echo "📄 Contents of Makevars.in:"
-cat "$(pwd)/src/Makevars.in"
-
-## Quality Check for Makevars.in
-if [ -f src/Makevars.in ]; then
-  echo "==== Contents of src/Makevars.in ===="
-  cat src/Makevars.in
-  echo "==== End of src/Makevars.in ===="
-else
-  echo "Error: src/Makevars.in not found. Aborting."
-  exit 1
-fi
-
-
-SED_EXPR=(
-  -e "s|@FINAL_OBJS@|$FINAL_OBJS|g"
-  -e "s|@RCPP_PARALLEL_INCLUDE@|$RCPP_PARALLEL_INCLUDE|g"
-  -e "s|@OPENCL_CPPFLAGS@|$OPENCL_CPPFLAGS|g"
-  -e "s|@OPENCL_CXXFLAGS@|$OPENCL_CXXFLAGS|g"
-)
-
-if [ "$USE_OPENCL" = "1" ] && [ -n "$CL_HEADER" ]; then
-  SED_EXPR+=(-e "s|@OPENCL_LIBS@|$OPENCL_LIBS|g")
-else
-  SED_EXPR+=(-e "s|@OPENCL_LIBS@||g")
-fi
-
-sed "${SED_EXPR[@]}" src/Makevars.in > src/Makevars
-
-echo "✅ src/Makevars has been dynamically generated:"
-echo "---BEGIN Makevars---"
-cat src/Makevars
-echo "---END Makevars---"
+# ---- Write to Makevars ----
+echo "PKG_CXXFLAGS = $FULL_CXXFLAGS" > src/Makevars
+echo "PKG_LIBS = $FULL_LIBS" >> src/Makevars

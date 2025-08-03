@@ -1,0 +1,27 @@
+Yaml
+
+---
+title: "Chapter 8: Working with the Gamma regression Model"
+output: rmarkdown::html_vignette
+bibliography: bibliography.json
+vignette: >
+  %\VignetteIndexEntry{Chapter 8: Working with the Gamma regression Model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This is a test. [@nygren2006; @item2]
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(glmbayes)
+```
+
+# References

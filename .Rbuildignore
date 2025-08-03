@@ -3,3 +3,16 @@
 ^doc$
 ^Meta$
 ^my_r_packages\\.Rdata$
+^autoconf-archive/\\.prev-version$
+^autoconf-archive/\\.travis\\.yml$
+^autoconf-archive/\\.github$
+^aclocal\\.m4$
+^autoconf-archive$
+^compile$
+^config\\.h$
+^config\\.h\\.in$
+^docs$
+^install-sh$
+^missing$
+^my_r_packages\\.Rdata$
+^stamp-h1$

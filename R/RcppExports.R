@@ -2,118 +2,114 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 .EnvelopeBuild_cpp <- function(bStar, A, y, x, mu, P, alpha, wt, family = "binomial", link = "logit", Gridtype = 2L, n = 1L, sortgrid = FALSE) {
-    .Call('_glmbayes_EnvelopeBuild_c', PACKAGE = 'glmbayes', bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid)
+    .Call(`_glmbayes_EnvelopeBuild_c`, bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid)
 }
 
 .EnvelopeBuild_Ind_Normal_Gamma <- function(bStar, A, y, x, mu, P, alpha, wt, family = "binomial", link = "logit", Gridtype = 2L, n = 1L, sortgrid = FALSE) {
-    .Call('_glmbayes_EnvelopeBuild_Ind_Normal_Gamma', PACKAGE = 'glmbayes', bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid)
+    .Call(`_glmbayes_EnvelopeBuild_Ind_Normal_Gamma`, bStar, A, y, x, mu, P, alpha, wt, family, link, Gridtype, n, sortgrid)
 }
 
 .Set_Grid_cpp <- function(GIndex, cbars, Lint) {
-    .Call('_glmbayes_Set_Grid', PACKAGE = 'glmbayes', GIndex, cbars, Lint)
+    .Call(`_glmbayes_Set_Grid`, GIndex, cbars, Lint)
 }
 
 .setlogP_cpp <- function(logP, NegLL, cbars, G3) {
-    .Call('_glmbayes_setlogP', PACKAGE = 'glmbayes', logP, NegLL, cbars, G3)
+    .Call(`_glmbayes_setlogP`, logP, NegLL, cbars, G3)
 }
 
 arithmetic_test_wrapper <- function() {
-    .Call('_glmbayes_arithmetic_test_wrapper', PACKAGE = 'glmbayes')
+    .Call(`_glmbayes_arithmetic_test_wrapper`)
 }
 
 arithmetic_test_v2_wrapper <- function(a, b) {
-    .Call('_glmbayes_arithmetic_test_v2_wrapper', PACKAGE = 'glmbayes', a, b)
+    .Call(`_glmbayes_arithmetic_test_v2_wrapper`, a, b)
 }
 
 arithmetic_test_parallel_wrapper <- function(a, b) {
-    .Call('_glmbayes_arithmetic_test_parallel_wrapper', PACKAGE = 'glmbayes', a, b)
+    .Call(`_glmbayes_arithmetic_test_parallel_wrapper`, a, b)
 }
 
 run_test_kernel <- function() {
-    .Call('_glmbayes_run_test_kernel', PACKAGE = 'glmbayes')
+    .Call(`_glmbayes_run_test_kernel`)
 }
 
 dpq_macro_usage_wrapper <- function(p, log_p, lower_tail) {
-    .Call('_glmbayes_dpq_macro_usage_wrapper', PACKAGE = 'glmbayes', p, log_p, lower_tail)
+    .Call(`_glmbayes_dpq_macro_usage_wrapper`, p, log_p, lower_tail)
 }
 
 basic_kernel_wrapper <- function() {
-    .Call('_glmbayes_basic_kernel_wrapper', PACKAGE = 'glmbayes')
+    .Call(`_glmbayes_basic_kernel_wrapper`)
 }
 
 basic_kernel_wrapper_v2 <- function() {
-    .Call('_glmbayes_basic_kernel_wrapper_v2', PACKAGE = 'glmbayes')
-}
-
-dpq_test_wrapper <- function() {
-    .Call('_glmbayes_dpq_test_wrapper', PACKAGE = 'glmbayes')
+    .Call(`_glmbayes_basic_kernel_wrapper_v2`)
 }
 
 .RSS <- function(y, x, b, alpha, wt) {
-    .Call('_glmbayes_RSS', PACKAGE = 'glmbayes', y, x, b, alpha, wt)
+    .Call(`_glmbayes_RSS`, y, x, b, alpha, wt)
 }
 
 .f2_gaussian_vector <- function(b, y, x, mu, P, alpha, wt) {
-    .Call('_glmbayes_f2_gaussian', PACKAGE = 'glmbayes', b, y, x, mu, P, alpha, wt)
+    .Call(`_glmbayes_f2_gaussian`, b, y, x, mu, P, alpha, wt)
 }
 
 .Inv_f3_gaussian <- function(cbars, y, x, mu, P, alpha, wt) {
-    .Call('_glmbayes_Inv_f3_gaussian', PACKAGE = 'glmbayes', cbars, y, x, mu, P, alpha, wt)
+    .Call(`_glmbayes_Inv_f3_gaussian`, cbars, y, x, mu, P, alpha, wt)
 }
 
 nmath_test_wrapper <- function() {
-    .Call('_glmbayes_nmath_test_wrapper', PACKAGE = 'glmbayes')
+    .Call(`_glmbayes_nmath_test_wrapper`)
 }
 
 .rindep_norm_gamma_reg_std_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar = 1L) {
-    .Call('_glmbayes_rindep_norm_gamma_reg_std_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
+    .Call(`_glmbayes_rindep_norm_gamma_reg_std_cpp`, n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
 }
 
 .rindep_norm_gamma_reg_std_V2_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar = 1L) {
-    .Call('_glmbayes_rindep_norm_gamma_reg_std_v2_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar)
+    .Call(`_glmbayes_rindep_norm_gamma_reg_std_v2_cpp`, n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar)
 }
 
 .rindep_norm_gamma_reg_std_V3_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar = 1L) {
-    .Call('_glmbayes_rindep_norm_gamma_reg_std_v3_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar)
+    .Call(`_glmbayes_rindep_norm_gamma_reg_std_v3_cpp`, n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar)
 }
 
 .rindep_norm_gamma_reg_std_V4_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar = 1L) {
-    .Call('_glmbayes_rindep_norm_gamma_reg_std_v4_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar)
+    .Call(`_glmbayes_rindep_norm_gamma_reg_std_v4_cpp`, n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar)
 }
 
 .rindep_norm_gamma_reg_std_V5_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar = 1L) {
-    .Call('_glmbayes_rindep_norm_gamma_reg_std_v5_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar)
+    .Call(`_glmbayes_rindep_norm_gamma_reg_std_v5_cpp`, n, y, x, mu, P, alpha, wt, f2, Envelope, gamma_list, UB_list, family, link, progbar)
 }
 
 rmath_test_wrapper <- function() {
-    .Call('_glmbayes_rmath_test_wrapper', PACKAGE = 'glmbayes')
+    .Call(`_glmbayes_rmath_test_wrapper`)
 }
 
 .glmb_Standardize_Model_cpp <- function(y, x, P, bstar, A1) {
-    .Call('_glmbayes_glmb_Standardize_Model', PACKAGE = 'glmbayes', y, x, P, bstar, A1)
+    .Call(`_glmbayes_glmb_Standardize_Model`, y, x, P, bstar, A1)
 }
 
 .rnnorm_reg_std_cpp <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar = 1L) {
-    .Call('_glmbayes_rnnorm_reg_std_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
+    .Call(`_glmbayes_rnnorm_reg_std_cpp`, n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
 }
 
 test_all_args <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar = 1L) {
-    .Call('_glmbayes_rnnorm_reg_std_cpp_parallel', PACKAGE = 'glmbayes', n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
+    .Call(`_glmbayes_rnnorm_reg_std_cpp_parallel`, n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
 }
 
 .rnnorm_reg_cpp <- function(n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L) {
-    .Call('_glmbayes_rnnorm_reg_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family, link, Gridtype)
+    .Call(`_glmbayes_rnnorm_reg_cpp`, n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family, link, Gridtype)
 }
 
 .rnorm_reg_cpp <- function(n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family = "gaussian", link = "identity", Gridtype = 2L) {
-    .Call('_glmbayes_rnorm_reg_cpp', PACKAGE = 'glmbayes', n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family, link, Gridtype)
+    .Call(`_glmbayes_rnorm_reg_cpp`, n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family, link, Gridtype)
 }
 
 test_square_kernel <- function(inputR) {
-    .Call('_glmbayes_test_square_kernel', PACKAGE = 'glmbayes', inputR)
+    .Call(`_glmbayes_test_square_kernel`, inputR)
 }
 
 stirlerr_test_wrapper <- function() {
-    .Call('_glmbayes_stirlerr_test_wrapper', PACKAGE = 'glmbayes')
+    .Call(`_glmbayes_stirlerr_test_wrapper`)
 }
 

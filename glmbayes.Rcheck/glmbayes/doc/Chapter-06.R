@@ -1,0 +1,172 @@
+## ----include = FALSE----------------------------------------------------------
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+## ----setup--------------------------------------------------------------------
+library(glmbayes)
+
+## ----Plant_Data---------------------------------------------------------------
+## Annette Dobson (1990) "An Introduction to Generalized Linear Models".
+## Page 9: Plant Weight Data.
+ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
+trt <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
+weight <- c(ctl, trt)
+
+## ----Plant_Prior--------------------------------------------------------------
+ps=Prior_Setup(weight ~ group)
+mu=ps$mu
+V=ps$Sigma
+mu[1,1]=mean(weight)
+
+Prior_Check(weight ~ group,family =gaussian(),
+            pfamily=dNormal(mu=mu,Sigma=V))
+
+## May move this step inside the Prior_Check function
+lm.D9 <- lm(weight ~ group,x=TRUE,y=TRUE)
+disp_ML=sigma(lm.D9)^2
+n_prior=2
+shape=n_prior/2
+rate= disp_ML*shape
+
+## ----Models-------------------------------------------------------------------
+lm.D9=lm(weight~group)
+lmb.D9=lmb(weight ~ group,dNormal_Gamma(mu,V/disp_ML,shape=shape,rate=rate))
+lmb.D9_v2=lmb(weight ~ group,dNormal(mu,V,dispersion=disp_ML))
+
+glm.D9=glm(weight ~ group,family=gaussian())
+glmb.D9=glmb(weight ~ group,family=gaussian(),dNormal_Gamma(mu,V/disp_ML,shape=shape,rate=rate))
+glmb.D9_v2=glmb(weight ~ group,family=gaussian(),dNormal(mu,V,dispersion=disp_ML))
+
+
+
+## ----lm_print-----------------------------------------------------------------
+print(lm.D9)
+print(lmb.D9)
+print(lmb.D9_v2)
+
+
+## ----lm_summary---------------------------------------------------------------
+summary(lm.D9)
+summary(lmb.D9)
+summary(lmb.D9_v2)
+
+
+## ----lm_residuals-------------------------------------------------------------
+residuals(lm.D9)
+colMeans(residuals(lmb.D9))
+colMeans(residuals(lmb.D9_v2))
+
+residuals(glm.D9)
+
+
+## ----lm_fitted----------------------------------------------------------------
+fitted(lm.D9)
+colMeans(fitted(lmb.D9))
+colMeans(fitted(lmb.D9_v2))
+
+
+## ----lm_predicted-------------------------------------------------------------
+## As this is linear scale, these wll match the above
+predict(lm.D9)
+colMeans(predict(lmb.D9))
+colMeans(predict(lmb.D9_v2))
+
+
+## ----methods_lm---------------------------------------------------------------
+## As this is linear scale, these wll match the above
+methods(class="lm")
+
+## ----lm_logLik----------------------------------------------------------------
+## Now produces correct results for both versions
+logLik(lm.D9)
+colMeans(logLik(lmb.D9))
+colMeans(logLik(lmb.D9_v2))
+
+
+## ----lm_confint---------------------------------------------------------------
+## Now produces correct results for both versions
+confint(lm.D9)
+confint(lmb.D9)
+confint(lmb.D9_v2)
+
+
+## ----lm_deviance--------------------------------------------------------------
+## Note: Bayesian Deviance Estimates quite a bit larger than the Classical
+## This is because Classical minimizez the deviance
+## while the Bayesian model simulates over a range of possible values
+
+deviance(lm.D9)
+mean(deviance(lmb.D9))
+mean(deviance(lmb.D9_v2))
+
+deviance(glm.D9)
+mean(deviance(glmb.D9))
+mean(deviance(glmb.D9_v2))
+
+
+## ----lm_vcov------------------------------------------------------------------
+## Note: Bayesian Deviance Estimates quite a bit larger than the Classical
+## This is because Classical minimizez the deviance
+## while the Bayesian model simulates over a range of possible values
+
+vcov(lm.D9)
+vcov(lmb.D9)
+vcov(lmb.D9_v2)
+
+vcov(glm.D9)
+vcov(glmb.D9)
+vcov(glmb.D9_v2)
+
+
+## ----extractAIC---------------------------------------------------------------
+## Produces simular results to the AIC function (for lm) and extractAIC (for glm)
+AIC(lm.D9)
+
+extractAIC(lm.D9)
+extractAIC(lmb.D9)
+extractAIC(lmb.D9_v2)
+
+extractAIC(glm.D9)
+extractAIC(glmb.D9)
+extractAIC(glmb.D9_v2)
+
+
+## ----dummy.coef---------------------------------------------------------------
+## Produces simular results to the AIC function (for lm) and extractAIC (for glm)
+
+dummy.coef(lm.D9)
+dummy.coef(lmb.D9)
+dummy.coef(lmb.D9_v2)
+
+dummy.coef(glm.D9)
+dummy.coef(glmb.D9)
+dummy.coef(glmb.D9_v2)
+
+
+## ----model.frame--------------------------------------------------------------
+## Produces simular results to the AIC function (for lm) and extractAIC (for glm)
+
+model.frame(lm.D9)
+model.frame(lmb.D9)
+model.frame(lmb.D9_v2)
+
+model.frame(glm.D9)
+model.frame(glmb.D9)
+model.frame(glmb.D9_v2)
+
+
+## ----model.matrix-------------------------------------------------------------
+## Produces simular results to the AIC function (for lm) and extractAIC (for glm)
+
+model.matrix(lm.D9)
+model.matrix(lmb.D9)
+model.matrix(lmb.D9_v2)
+
+model.matrix(glm.D9)
+model.matrix(glmb.D9)
+model.matrix(glmb.D9_v2)
+
+

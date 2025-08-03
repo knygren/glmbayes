@@ -1,0 +1,22 @@
+Package: glmbayes
+Type: Package
+Title: Bayesian Generalized Linear Models (iid Samples)
+Version: 0.1.0
+Date: 2025-07-24
+Author: Kjell Nygren
+Maintainer: Kjell Nygren <kjell.a.nygren@gmail.com>
+Description: Generates iid samples for Bayesian Generalized Linear Models.
+License: GPL-2
+Imports: stats, Rcpp (>= 1.0.4.6), RcppArmadillo, RcppParallel
+LinkingTo: Rcpp, RcppArmadillo, RcppParallel
+Depends: MASS, R (>= 3.5.0)
+Suggests: knitr, rmarkdown
+SystemRequirements: Optional OpenCL support. If available, GPU
+        acceleration will be used; otherwise, computation runs on CPU.
+Encoding: UTF-8
+RoxygenNote: 7.3.2
+VignetteBuilder: knitr
+NeedsCompilation: yes
+Packaged: 2025-08-03 22:48:51 UTC; kjell
+Built: R 4.5.1; x86_64-w64-mingw32; 2025-08-03 23:19:20 UTC; windows
+Archs: x64
