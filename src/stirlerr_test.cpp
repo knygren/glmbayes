@@ -1,9 +1,13 @@
 #ifdef USE_OPENCL
 #include "kernel_loader.h"
 #include <CL/cl.h>
+#endif
 #include <iostream>
 #include <vector>
 #include <Rcpp.h>
+
+
+#ifdef USE_OPENCL
 
 // 🚀 Runner for stirlerr test kernel
 void stirlerr_test_runner(const std::string& source,
@@ -67,11 +71,15 @@ void stirlerr_test_runner(const std::string& source,
   clReleaseContext(context);
 }
 
+#endif
+
 // [[Rcpp::export]]
 Rcpp::NumericVector stirlerr_test_wrapper() {
   const size_t stride = 21;
   std::vector<double> output(stride);
   
+#ifdef USE_OPENCL
+
   std::string dpq_source     = load_kernel_library("dpq");
   std::string rmath_source     = load_kernel_library("rmath");
   std::string nmath_source     = load_kernel_library("nmath");
@@ -81,7 +89,10 @@ Rcpp::NumericVector stirlerr_test_wrapper() {
   std::cout << kernel_code << std::endl;
   
   stirlerr_test_runner(kernel_code, "stirlerr_test_kernel", output);
-  
+
+#else  
+    Rcpp::Rcout << "[INFO] OpenCL not available — returning zero vector.\n";
+
+#endif  
   return Rcpp::NumericVector(output.begin(), output.end());
 }
-#endif

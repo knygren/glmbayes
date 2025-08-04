@@ -94,73 +94,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// arithmetic_test_v2_wrapper
-Rcpp::NumericVector arithmetic_test_v2_wrapper(float a, float b);
-RcppExport SEXP _glmbayes_arithmetic_test_v2_wrapper(SEXP aSEXP, SEXP bSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< float >::type a(aSEXP);
-    Rcpp::traits::input_parameter< float >::type b(bSEXP);
-    rcpp_result_gen = Rcpp::wrap(arithmetic_test_v2_wrapper(a, b));
-    return rcpp_result_gen;
-END_RCPP
-}
-// arithmetic_test_parallel_wrapper
-Rcpp::NumericMatrix arithmetic_test_parallel_wrapper(Rcpp::NumericVector a, Rcpp::NumericVector b);
-RcppExport SEXP _glmbayes_arithmetic_test_parallel_wrapper(SEXP aSEXP, SEXP bSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type a(aSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type b(bSEXP);
-    rcpp_result_gen = Rcpp::wrap(arithmetic_test_parallel_wrapper(a, b));
-    return rcpp_result_gen;
-END_RCPP
-}
-// run_test_kernel
-Rcpp::NumericVector run_test_kernel();
-RcppExport SEXP _glmbayes_run_test_kernel() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(run_test_kernel());
-    return rcpp_result_gen;
-END_RCPP
-}
-// dpq_macro_usage_wrapper
-Rcpp::NumericVector dpq_macro_usage_wrapper(double p, bool log_p, bool lower_tail);
-RcppExport SEXP _glmbayes_dpq_macro_usage_wrapper(SEXP pSEXP, SEXP log_pSEXP, SEXP lower_tailSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type p(pSEXP);
-    Rcpp::traits::input_parameter< bool >::type log_p(log_pSEXP);
-    Rcpp::traits::input_parameter< bool >::type lower_tail(lower_tailSEXP);
-    rcpp_result_gen = Rcpp::wrap(dpq_macro_usage_wrapper(p, log_p, lower_tail));
-    return rcpp_result_gen;
-END_RCPP
-}
-// basic_kernel_wrapper
-Rcpp::NumericVector basic_kernel_wrapper();
-RcppExport SEXP _glmbayes_basic_kernel_wrapper() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(basic_kernel_wrapper());
-    return rcpp_result_gen;
-END_RCPP
-}
-// basic_kernel_wrapper_v2
-Rcpp::NumericVector basic_kernel_wrapper_v2();
-RcppExport SEXP _glmbayes_basic_kernel_wrapper_v2() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(basic_kernel_wrapper_v2());
-    return rcpp_result_gen;
-END_RCPP
-}
 // RSS
 NumericVector RSS(NumericVector y, NumericMatrix x, NumericMatrix b, NumericVector alpha, NumericVector wt);
 RcppExport SEXP _glmbayes_RSS(SEXP ySEXP, SEXP xSEXP, SEXP bSEXP, SEXP alphaSEXP, SEXP wtSEXP) {
@@ -455,17 +388,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// test_square_kernel
-Rcpp::NumericVector test_square_kernel(Rcpp::NumericVector inputR);
-RcppExport SEXP _glmbayes_test_square_kernel(SEXP inputRSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type inputR(inputRSEXP);
-    rcpp_result_gen = Rcpp::wrap(test_square_kernel(inputR));
-    return rcpp_result_gen;
-END_RCPP
-}
 // stirlerr_test_wrapper
 Rcpp::NumericVector stirlerr_test_wrapper();
 RcppExport SEXP _glmbayes_stirlerr_test_wrapper() {
@@ -483,12 +405,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_Set_Grid", (DL_FUNC) &_glmbayes_Set_Grid, 3},
     {"_glmbayes_setlogP", (DL_FUNC) &_glmbayes_setlogP, 4},
     {"_glmbayes_arithmetic_test_wrapper", (DL_FUNC) &_glmbayes_arithmetic_test_wrapper, 0},
-    {"_glmbayes_arithmetic_test_v2_wrapper", (DL_FUNC) &_glmbayes_arithmetic_test_v2_wrapper, 2},
-    {"_glmbayes_arithmetic_test_parallel_wrapper", (DL_FUNC) &_glmbayes_arithmetic_test_parallel_wrapper, 2},
-    {"_glmbayes_run_test_kernel", (DL_FUNC) &_glmbayes_run_test_kernel, 0},
-    {"_glmbayes_dpq_macro_usage_wrapper", (DL_FUNC) &_glmbayes_dpq_macro_usage_wrapper, 3},
-    {"_glmbayes_basic_kernel_wrapper", (DL_FUNC) &_glmbayes_basic_kernel_wrapper, 0},
-    {"_glmbayes_basic_kernel_wrapper_v2", (DL_FUNC) &_glmbayes_basic_kernel_wrapper_v2, 0},
     {"_glmbayes_RSS", (DL_FUNC) &_glmbayes_RSS, 5},
     {"_glmbayes_f2_gaussian", (DL_FUNC) &_glmbayes_f2_gaussian, 7},
     {"_glmbayes_Inv_f3_gaussian", (DL_FUNC) &_glmbayes_Inv_f3_gaussian, 7},
@@ -504,7 +420,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_rnnorm_reg_std_cpp_parallel", (DL_FUNC) &_glmbayes_rnnorm_reg_std_cpp_parallel, 12},
     {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 14},
     {"_glmbayes_rnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnorm_reg_cpp, 14},
-    {"_glmbayes_test_square_kernel", (DL_FUNC) &_glmbayes_test_square_kernel, 1},
     {"_glmbayes_stirlerr_test_wrapper", (DL_FUNC) &_glmbayes_stirlerr_test_wrapper, 0},
     {NULL, NULL, 0}
 };

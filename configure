@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ---- Manual OpenCL toggle ----
-OPENCL_FOUND=no   # Change to 'no' to disable OpenCL manually
+#OPENCL_FOUND=no   # Change to 'no' to disable OpenCL manually
 
 #!/bin/sh
 # ── configure ──
@@ -17,7 +17,7 @@ echo ">> RPP_LIB_DIR      = '$RPP_LIB_DIR'"
 
 
 # 2. Core flags
-OPENCL_FOUND=yes       # switch to "yes" to enable OpenCL
+OPENCL_FOUND=no       # switch to "yes" to enable OpenCL
 OPENMP_CFLAGS="-fopenmp"
 LAPACK_LIBS="-llapack"
 BLAS_LIBS="-lblas"

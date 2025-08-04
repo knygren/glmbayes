@@ -21,30 +21,6 @@ arithmetic_test_wrapper <- function() {
     .Call(`_glmbayes_arithmetic_test_wrapper`)
 }
 
-arithmetic_test_v2_wrapper <- function(a, b) {
-    .Call(`_glmbayes_arithmetic_test_v2_wrapper`, a, b)
-}
-
-arithmetic_test_parallel_wrapper <- function(a, b) {
-    .Call(`_glmbayes_arithmetic_test_parallel_wrapper`, a, b)
-}
-
-run_test_kernel <- function() {
-    .Call(`_glmbayes_run_test_kernel`)
-}
-
-dpq_macro_usage_wrapper <- function(p, log_p, lower_tail) {
-    .Call(`_glmbayes_dpq_macro_usage_wrapper`, p, log_p, lower_tail)
-}
-
-basic_kernel_wrapper <- function() {
-    .Call(`_glmbayes_basic_kernel_wrapper`)
-}
-
-basic_kernel_wrapper_v2 <- function() {
-    .Call(`_glmbayes_basic_kernel_wrapper_v2`)
-}
-
 .RSS <- function(y, x, b, alpha, wt) {
     .Call(`_glmbayes_RSS`, y, x, b, alpha, wt)
 }
@@ -103,10 +79,6 @@ test_all_args <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link,
 
 .rnorm_reg_cpp <- function(n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family = "gaussian", link = "identity", Gridtype = 2L) {
     .Call(`_glmbayes_rnorm_reg_cpp`, n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family, link, Gridtype)
-}
-
-test_square_kernel <- function(inputR) {
-    .Call(`_glmbayes_test_square_kernel`, inputR)
 }
 
 stirlerr_test_wrapper <- function() {

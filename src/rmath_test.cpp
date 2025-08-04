@@ -3,9 +3,12 @@
 
 #include "kernel_loader.h"
 #include <CL/cl.h>
+#endif
 #include <iostream>
 #include <vector>
 #include <Rcpp.h>
+
+#ifdef USE_OPENCL
 
 // 🚀 Runner for rmath test kernel
 void rmath_test_runner(const std::string& source,
@@ -81,12 +84,16 @@ void rmath_test_runner(const std::string& source,
   clReleaseCommandQueue(queue);
   clReleaseContext(context);
 }
+#endif
+
 
 // [[Rcpp::export]]
 Rcpp::NumericVector rmath_test_wrapper() {
   const size_t stride = 30;  // Number of values expected from kernel
   std::vector<double> output(stride);
   
+#ifdef USE_OPENCL
+
   // Load rmath core and test kernel
   std::string OPENCL_source     = load_kernel_source("OPENCL.CL");
   std::string rmath_source      = load_kernel_library("rmath");
@@ -99,7 +106,12 @@ Rcpp::NumericVector rmath_test_wrapper() {
   // Dispatch minimal kernel
   rmath_test_runner(kernel_code, "rmath_test_kernel", output);
   
+#else  
+  Rcpp::Rcout << "[INFO] OpenCL not available — returning zero vector.\n";
+  
+#endif
+  
+  
   // Return results back to R
   return Rcpp::NumericVector(output.begin(), output.end());
 }
-#endif
