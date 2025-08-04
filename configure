@@ -41,10 +41,105 @@ echo ">> RPP_LDFLAGS = '$RPP_LDFLAGS'"
 
 RCPPPARALLEL_FLAGS="-L$RCPPPARALLEL_LIB -ltbb -I$RCPPPARALLEL_INC"
 
+
+#!/bin/bash
+
+
+
+
+
+
+echo "📚 Collecting system include directories from gcc..."
+SYSTEM_INCLUDE_DIRS=$(echo | gcc -E -x c++ - -v 2>&1 | grep "^ /" | sed 's/^ //')
+echo "$SYSTEM_INCLUDE_DIRS"
+
+OPENCL_HEADER="CL/cl.h"
+OPENCL_INCLUDE_FOUND=no
+OPENCL_LIB_HEADER="libOpenCL.so"
+OPENCL_LIB_FOUND=no
+OPENCL_FOUND=no
+OPENCL_INCLUDE=""
+OPENCL_LIB=""
+
+for dir in $SYSTEM_INCLUDE_DIRS; do
+    echo "🔎 Checking: $dir"
+    if [ -f "$dir/$OPENCL_HEADER" ]; then
+        OPENCL_INCLUDE="-I$dir"
+        OPENCL_INCLUDE_FOUND=yes
+        echo "✅ Found OpenCL header in: $dir"
+        break
+    fi
+done
+
+
+echo "📚 Collecting system lib directories from gcc..."
+RAW_LIB_DIRS=$(gcc -Xlinker --verbose 2>&1 | grep SEARCH_DIR | sed 's/SEARCH_DIR("=*\([^"]*\)").*/\1/')
+echo "$RAW_LIB_DIRS"
+
+ALT_LIB_DIRS=$(echo "$RAW_LIB_DIRS" | sed 's|/usr/local|/usr|g')
+echo "$ALT_LIB_DIRS"
+
+
+#ALT_LIB_DIRS=$(echo "$RAW_LIB_DIRS" | sed 's|/usr/local/lib/x86_64-linux-gnu|/usr/lib64|g')
+#echo "$ALT_LIB_DIRS"
+
+
+#COMMON_DIRS="/usr/lib /usr/lib64 /usr/local/lib /lib64"
+
+# Combine, then deduplicate
+SYSTEM_LIB_DIRS=$(echo "$RAW_LIB_DIRS $ALT_LIB_DIRS" | tr ' ' '\n' | sort -u)
+echo "$SYSTEM_LIB_DIRS"
+
+
+for dir in $SYSTEM_LIB_DIRS; do
+    echo "🔎 Checking: $dir"
+    if [ -f "$dir/$OPENCL_LIB_HEADER" ]; then
+##        OPENCL_INCLUDE="-I$dir"
+        OPENCL_LIB="-L$dir -lOpenCL"
+        OPENCL_LIB_FOUND=yes
+        echo "✅ Found OpenCLn Library  in  $dir"
+        break
+    fi
+done
+
+
+# Set OPENCL_FOUND only if both header and lib were found
+if [ "$OPENCL_INCLUDE_FOUND" = "yes" ] && [ "$OPENCL_LIB_FOUND" = "yes" ]; then
+    OPENCL_FOUND=yes
+else
+    OPENCL_FOUND=no
+fi
+
+echo "📦 Final OpenCL Detection:"
+echo "OPENCL_INCLUDE_FOUND = $OPENCL_INCLUDE_FOUND"
+echo "OPENCL_LIB_FOUND     = $OPENCL_LIB_FOUND"
+echo "OPENCL_FOUND         = $OPENCL_FOUND"
+
+
+
+# libOpenCL 
+
+# Define static search paths first
+#SEARCH_PATHS=("/usr/include" "/usr/local/include" "/opt")
+
+#echo "Static SEARCH_PATHS:"
+#for dir in "${SEARCH_PATHS[@]}"; do
+#  echo "  $dir"
+#done
+
+# Append system PATH directories
+#SEARCH_PATHS+=("${SYSTEM_PATHS[@]}")
+
+#echo "Final combined SEARCH_PATHS:"
+#for dir in "${SEARCH_PATHS[@]}"; do
+#  echo "  $dir"
+#done
+
 # ---- Manual OpenCL configuration ----
 #OPENCL_INCLUDE="-I/usr/local/cuda/include"
-OPENCL_INCLUDE="-I/usr/include"
-OPENCL_LIB="-L/usr/lib -lOpenCL"
+#OPENCL_INCLUDE="-I/usr/include"
+#OPENCL_LIB="-L/usr/lib/x86_64-linux-gnu -lOpenCL"
+
 
 # ---- Compose final flags ----
 FULL_CXXFLAGS="$OPENMP_CFLAGS"
@@ -52,7 +147,7 @@ FULL_LIBS="$OPENMP_CFLAGS"
 
 
 if [ "$OPENCL_FOUND" = "yes" ]; then
-  echo "OpenCL manually enabled"
+  echo "OpenCL enabled"
   FULL_CXXFLAGS="$FULL_CXXFLAGS -DUSE_OPENCL $OPENCL_INCLUDE"
   FULL_LIBS="$FULL_LIBS $OPENCL_LIB"
 else
