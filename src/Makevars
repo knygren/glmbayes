@@ -1,2 +1,2 @@
-PKG_CXXFLAGS = -fopenmp -DUSE_OPENCL -I/usr/include -I/home/knygren/R/x86_64-pc-linux-gnu-library/4.5/RcppParallel/include
-PKG_LIBS = -fopenmp -L/usr/lib -lOpenCL -llapack -lblas -lgfortran -lm -lquadmath -L/home/knygren/R/x86_64-pc-linux-gnu-library/4.5/RcppParallel/lib -ltbb -ltbbmalloc -Wl,-rpath,/home/knygren/R/x86_64-pc-linux-gnu-library/4.5/RcppParallel/lib
+PKG_CXXFLAGS = -fopenmp -I/home/knygren/R/x86_64-pc-linux-gnu-library/4.5/RcppParallel/include
+PKG_LIBS = -fopenmp -llapack -lblas -lgfortran -lm -lquadmath -L/home/knygren/R/x86_64-pc-linux-gnu-library/4.5/RcppParallel/lib -ltbb -ltbbmalloc -Wl,-rpath,/home/knygren/R/x86_64-pc-linux-gnu-library/4.5/RcppParallel/lib

@@ -13,3 +13,4 @@ inst/doc
 **/autom4te.cache/
 **/autoconf-archive/
 *.Rcheck/
+glmbayes.Rcheck/
