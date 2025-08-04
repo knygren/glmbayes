@@ -23,6 +23,20 @@ echo ">> RPP_LIB_DIR      = '$RPP_LIB_DIR'"
 
 
 
+# ── Emscripten C++ Compiler Detection ──
+if [ "$(basename "$CXX")" = "em++" ]; then
+  echo "🚀 Emscripten detected: disabling OpenMP flags"
+  OPENMP_CFLAGS=""
+  OPENMP_LDFLAGS=""
+  EMSCRIPTEN_BUILD=YES
+else
+  EMSCRIPTEN_BUILD=NO
+  OPENMP_CFLAGS="-fopenmp"
+  OPENMP_LDFLAGS="-fopenmp"
+fi
+
+
+
 # 2. Core flags
 OPENCL_FOUND=no       # switch to "yes" to enable OpenCL
 OPENMP_CFLAGS="-fopenmp"
@@ -142,8 +156,13 @@ echo "OPENCL_FOUND         = $OPENCL_FOUND"
 
 
 # ---- Compose final flags ----
+#FULL_CXXFLAGS="$OPENMP_CFLAGS"
+#FULL_LIBS="$OPENMP_CFLAGS"
+
+# ---- Compose final flags ----
 FULL_CXXFLAGS="$OPENMP_CFLAGS"
-FULL_LIBS="$OPENMP_CFLAGS"
+FULL_LIBS="$OPENMP_LDFLAGS"
+
 
 
 if [ "$OPENCL_FOUND" = "yes" ]; then
