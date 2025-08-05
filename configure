@@ -22,9 +22,12 @@ echo ">> RPP_INC_DIR      = '$RPP_INC_DIR'"
 echo ">> RPP_LIB_DIR      = '$RPP_LIB_DIR'"
 
 
+OS=$(uname -s)
 
+echo ">> OS      = '$OS'"
+ 
 # ── Emscripten C++ Compiler Detection ──
-if [ "$(basename "$CXX")" = "em++" ]; then
+if [ "$(basename "$CXX")" = "em++" ] || [ "$OS" = "Darwin" ]; then
   echo "🚀 Emscripten detected: disabling OpenMP flags"
   OPENMP_CFLAGS=""
   OPENMP_LDFLAGS=""
