@@ -34,6 +34,9 @@
 
 #include "nmath_local.h"
 #include "dpq_local.h"
+#include <stdbool.h>    /* for C99 ‘bool’ type on all platforms */
+
+
 
 #define M_SQRT_2PI	2.50662827463100050241576528481104525301  /* sqrt(2*pi) */
 // sqrt(2 * Rmpfr::Const("pi", 128))
