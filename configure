@@ -39,7 +39,7 @@ fi
 
 # 2. Core flags
 OPENCL_FOUND=no       # switch to "yes" to enable OpenCL
-OPENMP_CFLAGS="-fopenmp"
+#OPENMP_CFLAGS="-fopenmp"
 LAPACK_LIBS="-llapack"
 BLAS_LIBS="-lblas"
 FLIBS="$(R CMD config FLIBS)"
