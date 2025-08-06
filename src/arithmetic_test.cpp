@@ -1,6 +1,14 @@
 #ifdef USE_OPENCL
 #include "kernel_loader.h"
+
+#ifdef USE_DIRECT_CLH
+// we passed “-I…/include/CL -DUSE_DIRECT_CLH”
+#include <cl.h>
+#else
+// normal case on Linux/macOS/Windows
 #include <CL/cl.h>
+#endif
+
 #endif
 #include <iostream>
 #include <vector>
