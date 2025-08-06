@@ -3,7 +3,7 @@
 
 #ifdef USE_DIRECT_CLH
 // we passed “-I…/include/CL -DUSE_DIRECT_CLH”
-#include <cl.h>
+#include <CL/cl.h>
 #else
 // normal case on Linux/macOS/Windows
 #include <CL/cl.h>
