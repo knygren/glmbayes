@@ -18,7 +18,7 @@
 #define __OPENCL_CL_H
 
 #include <cl_version.h>
-#include <cl_platform.h>
+#include <CL/cl_platform.h>
 
 #ifdef __cplusplus
 extern "C" {
