@@ -8,6 +8,9 @@
 #' @param weights a weighting variable
 #' @param max_disp_perc parameter currently used to control upper bound in accept-reject procedure 
 #' @inheritParams glmb
+#' @param use_parallel Logical. Whether to use parallel processing during simulation.
+#' @param use_opencl Logical. Whether to use OpenCL acceleration during Envelope construction.
+#' @param verbose Logical. Whether to print progress messages.
 #' @return \code{rindependent_norm_gamma_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
@@ -57,6 +60,7 @@
 
 
 rindependent_norm_gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
+                                      use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE,
                                       max_disp_perc=0.99){
   
   call<-match.call()

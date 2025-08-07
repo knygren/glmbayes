@@ -496,7 +496,11 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
                             Function f2,Function f3,NumericVector start,
                             std::string family="binomial",
                             std::string link="logit",
-                            int Gridtype=2      
+                            int Gridtype=2,
+                            bool use_parallel = true,       // Enables parallel simulation
+                            bool use_opencl = false,        // Enables OpenCL acceleration during envelope construction
+                            bool verbose = false            // Enables diagnostic output
+                            
 ) {
 
   //                          Rcpp::List  famfunc,
@@ -663,16 +667,9 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
     sim = rnnorm_reg_std_cpp(n, y, x2_temp, mu2_temp, P2_temp, alpha, wt2,
                              f2, Envelope, family, link, progbar);
   } else {
-//    sim = rnnorm_reg_std_parallel(n, y, x2_temp, mu2_temp, P2_temp, alpha, wt2,
-//                                  f2, Envelope, family, link, progbar);
 
-   // sim = test_parallel(n, y, x2_temp, mu2_temp, P2_temp, alpha, wt2,
-  //                                f2, Envelope, family, link, progbar);
-    
     
     sim = rnnorm_reg_std_cpp_parallel(n, y, x2_temp, mu2_temp, P2_temp, alpha, wt2, f2, Envelope, family, link, progbar);
-  //  test_all_args
-    //sim=test_parallel( n, l1);
       }
   
   

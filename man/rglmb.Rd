@@ -5,7 +5,18 @@
 \alias{print.rglmb}
 \title{The Bayesian Generalized Linear Model Distribution}
 \usage{
-rglmb(n = 1, y, x, family = gaussian(), pfamily, offset = NULL, weights = 1)
+rglmb(
+  n = 1,
+  y,
+  x,
+  family = gaussian(),
+  pfamily,
+  offset = NULL,
+  weights = 1,
+  use_parallel = TRUE,
+  use_opencl = FALSE,
+  verbose = FALSE
+)
 
 \method{print}{rglmb}(x, digits = max(3, getOption("digits") - 3), ...)
 }
@@ -34,6 +45,12 @@ if more than one is specified their sum is used.  See documentation for \code{mo
 
 \item{weights}{an optional vector of \sQuote{prior weights} to be used
     in the fitting process.  Should be \code{NULL} or a numeric vector.}
+
+\item{use_parallel}{Logical. Whether to use parallel processing during simulation.}
+
+\item{use_opencl}{Logical. Whether to use OpenCL acceleration during Envelope construction.}
+
+\item{verbose}{Logical. Whether to print progress messages.}
 
 \item{digits}{the number of significant digits to use when printing.}
 

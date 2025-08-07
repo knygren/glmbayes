@@ -13,7 +13,10 @@ rGamma_reg(
   prior_list,
   offset = NULL,
   weights = 1,
-  family = gaussian()
+  family = gaussian(),
+  use_parallel = TRUE,
+  use_opencl = FALSE,
+  verbose = FALSE
 )
 
 \method{print}{rGamma_reg}(x, digits = max(3, getOption("digits") - 3), ...)
@@ -35,6 +38,12 @@ prior distribution and a vector with the assumed value (beta) for the regression
 \item{weights}{an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.}
 
 \item{family}{a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)}
+
+\item{use_parallel}{Logical. Whether to use parallel processing during simulation.}
+
+\item{use_opencl}{Logical. Whether to use OpenCL acceleration during Envelope construction.}
+
+\item{verbose}{Logical. Whether to print progress messages.}
 
 \item{digits}{Number of significant digits to use for printed outpute}
 

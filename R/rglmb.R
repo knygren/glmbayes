@@ -7,6 +7,9 @@
 #' @param y a vector of observations of length \code{m}.
 #' @param x for \code{rglmb} a design matrix of dimension \code{m * p} and for \code{print.rglmb} the object to be printed. 
 #' @inheritParams glmb
+#' @param use_parallel Logical. Whether to use parallel processing during simulation.
+#' @param use_opencl Logical. Whether to use OpenCL acceleration during Envelope construction.
+#' @param verbose Logical. Whether to print progress messages.
 #' @return \code{rglmb} returns a object of class \code{"rglmb"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
@@ -76,7 +79,8 @@
 
 
 
-rglmb<-function(n=1,y,x,family=gaussian(),pfamily,offset=NULL,weights=1){
+rglmb<-function(n=1,y,x,family=gaussian(),pfamily,offset=NULL,weights=1,
+                use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE){
   
   ## Pull in information from the pfamily  
   pf=pfamily$pfamily
@@ -115,8 +119,9 @@ rglmb<-function(n=1,y,x,family=gaussian(),pfamily,offset=NULL,weights=1){
   
   ## Call relevant simulation function (for now without control2 list)
   
-  outlist=simfun(n=n,y=y,x=x,prior_list=prior_list,offset=offset,weights=weights,family=family)
+#  outlist=simfun(n=n,y=y,x=x,prior_list=prior_list,offset=offset,weights=weights,family=family)
 
+  outlist = simfun(n = n, y = y, x = x, prior_list = prior_list,offset = offset, weights = weights, family = family, use_parallel = use_parallel, use_opencl = use_opencl, verbose = verbose)
   
   outlist$pfamily=pfamily
   

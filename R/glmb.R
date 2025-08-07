@@ -22,6 +22,9 @@
 #' @param Gridtype an optional argument specifying the method used to determine the number of tangent points used to construct the enveloping function.
 #' @param digits the number of significant digits to use when printing.
 #' @inheritParams   stats::glm 
+#' @param use_parallel Logical. Whether to use parallel processing during simulation.
+#' @param use_opencl Logical. Whether to use OpenCL acceleration during Envelope construction.
+#' @param verbose Logical. Whether to print progress messages.
 #' @return \code{glmb} returns an object of class \code{"glmb"}. The function \code{summary} (i.e., 
 #' \code{\link{summary.glmb}}) can be used to obtain or print a summary of the results.  The generic accessor functions 
 #' \code{\link{coefficients}}, \code{\link{fitted.values}}, \code{\link{residuals}}, and \code{\link{extractAIC}} can be used 
@@ -143,7 +146,9 @@
 #' @export glmb
 # #' @exportClass glmb # temporarily disabled - no current exportclass
 
-glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1),n=1000,data, weights, subset,
+glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1),n=1000,data, weights,
+                use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE,
+                subset,
                 offset,na.action, Gridtype=1,start = NULL, etastart, 
                 mustart,  control = list(...), model = TRUE, 
                 method = "glm.fit", x = FALSE, y = TRUE, contrasts = NULL, 
@@ -252,7 +257,7 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
   
   
   
-  sim<-rglmb(n=n,y=y,x=x,family=family,pfamily=pfamily,offset=offset,weights=wtin)
+  sim<-rglmb(n=n,y=y,x=x,family=family,pfamily=pfamily,offset=offset,weights=wtin, use_parallel = use_parallel, use_opencl = use_opencl, verbose = verbose)
   
   
   #dispersion2<-dispersion

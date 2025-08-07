@@ -11,7 +11,10 @@ rNormal_Gamma_reg(
   prior_list,
   offset = NULL,
   weights = 1,
-  family = gaussian()
+  family = gaussian(),
+  use_parallel = TRUE,
+  use_opencl = FALSE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -34,6 +37,12 @@ prior distribution.}
     result of a call to a family function.  For \code{glm.fit} only the
     third option is supported.  (See \code{\link[stats]{family}} for details of
     family functions.)}
+
+\item{use_parallel}{Logical. Whether to use parallel processing during simulation.}
+
+\item{use_opencl}{Logical. Whether to use OpenCL acceleration during Envelope construction.}
+
+\item{verbose}{Logical. Whether to print progress messages.}
 }
 \value{
 \code{rNormal_Gamma_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 

@@ -341,8 +341,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // rnnorm_reg_cpp
-Rcpp::List rnnorm_reg_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P, NumericVector offset, NumericVector wt, double dispersion, Function f2, Function f3, NumericVector start, std::string family, std::string link, int Gridtype);
-RcppExport SEXP _glmbayes_rnnorm_reg_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP offsetSEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP) {
+Rcpp::List rnnorm_reg_cpp(int n, NumericVector y, NumericMatrix x, NumericVector mu, NumericMatrix P, NumericVector offset, NumericVector wt, double dispersion, Function f2, Function f3, NumericVector start, std::string family, std::string link, int Gridtype, bool use_parallel, bool use_opencl, bool verbose);
+RcppExport SEXP _glmbayes_rnnorm_reg_cpp(SEXP nSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP offsetSEXP, SEXP wtSEXP, SEXP dispersionSEXP, SEXP f2SEXP, SEXP f3SEXP, SEXP startSEXP, SEXP familySEXP, SEXP linkSEXP, SEXP GridtypeSEXP, SEXP use_parallelSEXP, SEXP use_openclSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -360,7 +360,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
     Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
     Rcpp::traits::input_parameter< int >::type Gridtype(GridtypeSEXP);
-    rcpp_result_gen = Rcpp::wrap(rnnorm_reg_cpp(n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family, link, Gridtype));
+    Rcpp::traits::input_parameter< bool >::type use_parallel(use_parallelSEXP);
+    Rcpp::traits::input_parameter< bool >::type use_opencl(use_openclSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(rnnorm_reg_cpp(n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family, link, Gridtype, use_parallel, use_opencl, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -418,7 +421,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_glmb_Standardize_Model", (DL_FUNC) &_glmbayes_glmb_Standardize_Model, 5},
     {"_glmbayes_rnnorm_reg_std_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_std_cpp, 12},
     {"_glmbayes_rnnorm_reg_std_cpp_parallel", (DL_FUNC) &_glmbayes_rnnorm_reg_std_cpp_parallel, 12},
-    {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 14},
+    {"_glmbayes_rnnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnnorm_reg_cpp, 17},
     {"_glmbayes_rnorm_reg_cpp", (DL_FUNC) &_glmbayes_rnorm_reg_cpp, 14},
     {"_glmbayes_stirlerr_test_wrapper", (DL_FUNC) &_glmbayes_stirlerr_test_wrapper, 0},
     {NULL, NULL, 0}

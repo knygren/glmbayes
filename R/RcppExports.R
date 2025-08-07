@@ -73,8 +73,8 @@ test_all_args <- function(n, y, x, mu, P, alpha, wt, f2, Envelope, family, link,
     .Call(`_glmbayes_rnnorm_reg_std_cpp_parallel`, n, y, x, mu, P, alpha, wt, f2, Envelope, family, link, progbar)
 }
 
-.rnnorm_reg_cpp <- function(n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L) {
-    .Call(`_glmbayes_rnnorm_reg_cpp`, n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family, link, Gridtype)
+.rnnorm_reg_cpp <- function(n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family = "binomial", link = "logit", Gridtype = 2L, use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE) {
+    .Call(`_glmbayes_rnnorm_reg_cpp`, n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family, link, Gridtype, use_parallel, use_opencl, verbose)
 }
 
 .rnorm_reg_cpp <- function(n, y, x, mu, P, offset, wt, dispersion, f2, f3, start, family = "gaussian", link = "identity", Gridtype = 2L) {

@@ -12,6 +12,9 @@
 #' @param offset this can be used to specify an \emph{a priori} known component to be included in the linear predictor during fitting. This should be \code{NULL} or a numeric vector of length equal to the number of cases. One or more offset terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See \code{\link{model.offset}}.
 #' @param weights an optional vector of \sQuote{prior weights} to be used in the fitting process. Should be NULL or a numeric vector.
 #' @inheritParams glmb
+#' @param use_parallel Logical. Whether to use parallel processing during simulation.
+#' @param use_opencl Logical. Whether to use OpenCL acceleration during Envelope construction.
+#' @param verbose Logical. Whether to print progress messages.
 #' @return \code{rNormal_Gamma_reg} returns a object of class \code{"rglmb"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
 #' The generic accessor functions \code{\link{coefficients}}, \code{\link{fitted.values}},
@@ -71,7 +74,9 @@
 #' @export
 
 
-rNormal_Gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
+rNormal_Gamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
+                            use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE
+                            ){
 
 ## Added for consistency with earlier verion of function
   

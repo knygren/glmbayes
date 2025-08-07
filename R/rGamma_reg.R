@@ -15,6 +15,9 @@
 #' @param family a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function or the result of a call to a family function. (See \code{\link{family}} for details of family functions.)
 #' @param digits Number of significant digits to use for printed outpute
 #' @param object an object of class \code{"glmb_dispersion"} that is to be summarized
+#' @param use_parallel Logical. Whether to use parallel processing during simulation.
+#' @param use_opencl Logical. Whether to use OpenCL acceleration during Envelope construction.
+#' @param verbose Logical. Whether to print progress messages.
 #' @param \ldots further arguments passed to or from other methods
 #' @return \code{rGamma_reg} returns a object of class \code{"rglmbdisp"}.  The function \code{summary} 
 #' (i.e., \code{\link{summary.rglmb}}) can be used to obtain or print a summary of the results.
@@ -47,7 +50,9 @@
 ## Offset in this model may need to be handled better
 
 
-rGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian()){
+rGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=gaussian(),
+                     use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE
+                     ){
     
   call <- match.call()
 

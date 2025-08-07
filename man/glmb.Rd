@@ -12,6 +12,9 @@ glmb(
   n = 1000,
   data,
   weights,
+  use_parallel = TRUE,
+  use_opencl = FALSE,
+  verbose = FALSE,
   subset,
   offset,
   na.action,
@@ -56,6 +59,12 @@ should be a pfamily function (see \code{\link{pfamily}} for details of pfamily f
 
 \item{weights}{an optional vector of \sQuote{prior weights} to be used
     in the fitting process.  Should be \code{NULL} or a numeric vector.}
+
+\item{use_parallel}{Logical. Whether to use parallel processing during simulation.}
+
+\item{use_opencl}{Logical. Whether to use OpenCL acceleration during Envelope construction.}
+
+\item{verbose}{Logical. Whether to print progress messages.}
 
 \item{subset}{an optional vector specifying a subset of observations to be used in the fitting process.}
 
