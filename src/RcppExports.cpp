@@ -199,6 +199,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// f2_binomial_logit_prep_grad_opencl
+List f2_binomial_logit_prep_grad_opencl(const NumericMatrix& b, const NumericVector& y, const NumericMatrix& x, const NumericMatrix& mu, const NumericMatrix& P, const NumericVector& alpha, const NumericVector& wt, int progbar);
+RcppExport SEXP _glmbayes_f2_binomial_logit_prep_grad_opencl(SEXP bSEXP, SEXP ySEXP, SEXP xSEXP, SEXP muSEXP, SEXP PSEXP, SEXP alphaSEXP, SEXP wtSEXP, SEXP progbarSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type P(PSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type wt(wtSEXP);
+    Rcpp::traits::input_parameter< int >::type progbar(progbarSEXP);
+    rcpp_result_gen = Rcpp::wrap(f2_binomial_logit_prep_grad_opencl(b, y, x, mu, P, alpha, wt, progbar));
+    return rcpp_result_gen;
+END_RCPP
+}
 // nmath_test_wrapper
 Rcpp::NumericVector nmath_test_wrapper();
 RcppExport SEXP _glmbayes_nmath_test_wrapper() {
@@ -470,6 +488,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_f2_gaussian", (DL_FUNC) &_glmbayes_f2_gaussian, 7},
     {"_glmbayes_Inv_f3_gaussian", (DL_FUNC) &_glmbayes_Inv_f3_gaussian, 7},
     {"_glmbayes_f2_binomial_logit_prep_opencl", (DL_FUNC) &_glmbayes_f2_binomial_logit_prep_opencl, 8},
+    {"_glmbayes_f2_binomial_logit_prep_grad_opencl", (DL_FUNC) &_glmbayes_f2_binomial_logit_prep_grad_opencl, 8},
     {"_glmbayes_nmath_test_wrapper", (DL_FUNC) &_glmbayes_nmath_test_wrapper, 0},
     {"_glmbayes_rindep_norm_gamma_reg_std_cpp", (DL_FUNC) &_glmbayes_rindep_norm_gamma_reg_std_cpp, 12},
     {"_glmbayes_rindep_norm_gamma_reg_std_v2_cpp", (DL_FUNC) &_glmbayes_rindep_norm_gamma_reg_std_v2_cpp, 14},

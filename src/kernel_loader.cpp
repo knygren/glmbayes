@@ -1,7 +1,9 @@
 #ifdef USE_OPENCL
 
 
-#include <Rcpp.h>
+//#include <Rcpp.h>
+#include <RcppArmadillo.h>
+
 #include <fstream>
 #include <sstream>
 #include <iostream>

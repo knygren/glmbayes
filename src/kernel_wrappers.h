@@ -30,3 +30,34 @@ Rcpp::List f2_binomial_logit_prep_opencl(
     Rcpp::NumericVector wt,
     int                  progbar = 0
 );
+
+// Rcpp‐exported wrapper that loads your .cl, flattens inputs, calls the
+// f2_binomial_logit_prep_grad_kernel_runner, and reconstructs xb/qf/grad
+// for downstream C++.
+//
+// b      : NumericMatrix, size l2 × m1 grid of β values
+// y      : NumericVector, length l1 responses
+// x      : NumericMatrix, size l1 × l2 design matrix
+// mu     : NumericMatrix, size l2 × 1 prior mean
+// P      : NumericMatrix, size l2 × l2 prior precision
+// alpha  : NumericVector, length l1 offsets
+// wt     : NumericVector, length l1 observation weights
+// progbar: int, 0 = no text bar, 1 = show progress
+//
+// Returns an Rcpp::List with components:
+//   xb   : NumericMatrix (l1 × m1) logistic preps
+//   qf   : NumericVector  (length = m1) prior quadratic forms
+//   grad : NumericMatrix  (m1 × l2) gradient w.r.t. β matching f3 output
+//
+// Implementation lives in f2_binomial_logit_prep_grad_wrapper.cpp
+// and calls f2_binomial_logit_prep_grad_kernel_runner().
+Rcpp::List f2_binomial_logit_prep_grad_opencl(
+    Rcpp::NumericMatrix b,
+    Rcpp::NumericVector y,
+    Rcpp::NumericMatrix x,
+    Rcpp::NumericMatrix mu,
+    Rcpp::NumericMatrix P,
+    Rcpp::NumericVector alpha,
+    Rcpp::NumericVector wt,
+    int                  progbar = 0
+);

@@ -1,6 +1,8 @@
 #pragma once
 
-#include <Rcpp.h>
+//#include <Rcpp.h>
+#include "RcppArmadillo.h"
+
 #include <vector>
 
 namespace OpenCLHelper {

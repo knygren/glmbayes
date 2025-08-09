@@ -8,8 +8,8 @@
 // normal case on Linux/macOS/Windows
 #include <CL/cl.h>
 #endif
-
 #endif
+
 #include <iostream>
 #include <vector>
 #include <Rcpp.h>

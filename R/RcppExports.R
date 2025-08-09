@@ -45,6 +45,10 @@ f2_binomial_logit_prep_opencl <- function(b, y, x, mu, P, alpha, wt, progbar) {
     .Call(`_glmbayes_f2_binomial_logit_prep_opencl`, b, y, x, mu, P, alpha, wt, progbar)
 }
 
+f2_binomial_logit_prep_grad_opencl <- function(b, y, x, mu, P, alpha, wt, progbar) {
+    .Call(`_glmbayes_f2_binomial_logit_prep_grad_opencl`, b, y, x, mu, P, alpha, wt, progbar)
+}
+
 nmath_test_wrapper <- function() {
     .Call(`_glmbayes_nmath_test_wrapper`)
 }
