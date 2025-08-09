@@ -639,7 +639,7 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   if(n==1){
     Envelope=EnvelopeBuild_c(bstar2_temp, A_temp,y, x2_temp,mu2_temp,
-                             P2_temp,alpha,wt2,family,link,Gridtype, n,false);
+                             P2_temp,alpha,wt2,family,link,Gridtype, n,false,use_opencl=use_opencl,verbose=verbose);
 
 
     
@@ -647,10 +647,16 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   if(n>1){
     Envelope=EnvelopeBuild_c(bstar2_temp, A_temp,y, x2_temp,mu2_temp,
-                             P2_temp,alpha,wt2,family,link,Gridtype, n,true);
+                             P2_temp,alpha,wt2,family,link,Gridtype, n,true,use_opencl=use_opencl,verbose=verbose);
   }
   
   //  Rcpp::Rcout << "Finished Envelope Creation:" << std::endl;
+  
+  Rcpp::Rcout << "Finished EnvelopeBuild: "
+              << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+              << "\n";
+  
+  
   
   // Step 5: Run the simulation 
 
@@ -663,15 +669,40 @@ Rcpp::List rnnorm_reg_cpp(int n,NumericVector y,NumericMatrix x,
   
   Rcpp::List sim;
   
-  if (n == 1) {
-    sim = rnnorm_reg_std_cpp(n, y, x2_temp, mu2_temp, P2_temp, alpha, wt2,
-                             f2, Envelope, family, link, progbar);
-  } else {
+//  if (n == 1) {
+//    sim = rnnorm_reg_std_cpp(n, y, x2_temp, mu2_temp, P2_temp, alpha, wt2,
+//                             f2, Envelope, family, link, progbar);
+//  } else {
 
     
-    sim = rnnorm_reg_std_cpp_parallel(n, y, x2_temp, mu2_temp, P2_temp, alpha, wt2, f2, Envelope, family, link, progbar);
-      }
+//    sim = rnnorm_reg_std_cpp_parallel(n, y, x2_temp, mu2_temp, P2_temp, alpha, wt2, f2, Envelope, family, link, progbar);
+//      }
   
+// Step 5: Run the simulation  
+
+
+  // Choose serial vs. parallel sampler  
+  if (!use_parallel || n == 1) {  
+    if (verbose) Rcpp::Rcout << ">>> Running serial sampler (use_parallel=FALSE or n=1): "
+                             << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+      << "\n";    
+    
+    sim = rnnorm_reg_std_cpp( n, y, x2_temp, mu2_temp, P2_temp, alpha, wt2,  f2, Envelope, family, link, progbar);  
+  }
+  else {  
+    if (verbose) Rcpp::Rcout << ">>> Running parallel sampler (use_parallel=TRUE and n>1):"
+                             << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                             << "\n";          
+      
+    sim = rnnorm_reg_std_cpp_parallel(n, y, x2_temp, mu2_temp, P2_temp, alpha, wt2,  f2, Envelope, family, link, progbar);  
+  }  
+  
+
+  if (verbose) Rcpp::Rcout << ">>> Finished Simulation: "
+                           << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                           << "\n";    
+  
+    
   
 
   // Rcout << "Finished Simulation"  << std::endl;

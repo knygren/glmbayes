@@ -1,5 +1,5 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
-
+#pragma once
 // we only include RcppArmadillo.h which pulls Rcpp.h in for us
 #include <cmath>
 #include "RcppArmadillo.h"
@@ -14,6 +14,12 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 
+#include "OpenCL_helper.h"
+using namespace OpenCLHelper;
+
+
+#include "OpenCL_proxy_kernels.h"
+using namespace OpenCLProxy;
 
 
 
@@ -1387,3 +1393,319 @@ arma::mat  f3_binomial_cloglog(NumericMatrix b,NumericVector y, NumericMatrix x,
 }
 
 
+////////////////////////////// Functions preparing for OpenCL implementation
+
+
+
+// [[Rcpp::export]]
+List f2_binomial_logit_prep(
+    NumericMatrix b,
+    NumericVector y,
+    NumericMatrix x,
+    NumericMatrix mu,
+    NumericMatrix P,
+    NumericVector alpha,
+    NumericVector wt,
+    int progbar
+) {
+  int l1  = x.nrow();
+  int l2  = x.ncol();
+  int m1  = b.ncol();
+  
+  // Armadillo “views” on the R objects
+  arma::mat    X   (x.begin(),     l1, l2, false);
+  arma::colvec Y   (y.begin(),     l1,   false);
+  arma::colvec A   (alpha.begin(), l1,   false);
+  arma::colvec Wt  (wt.begin(),    l1,   false);
+  arma::colvec Mu  (mu.begin(),    l2,   false);
+  arma::mat    P2  (P.begin(),      l2, l2, false);
+  
+  // Outputs
+  NumericMatrix xb_mat(l1, m1);
+  NumericVector  qf    (m1);
+  
+  // Temps
+  arma::colvec b2   (l2);
+  arma::colvec bmu2 (l2);
+  arma::colvec xb2  (l1);
+  
+  for (int i = 0; i < m1; ++i) {
+    Rcpp::checkUserInterrupt();
+    if (progbar > 0) {
+      progress_bar2(i, m1 - 1);
+      if (i == m1 - 1) Rcpp::Rcout << std::endl;
+    }
+    
+    // slice b[, i]
+    std::copy(
+      b.begin() + i * l2,
+      b.begin() + (i + 1) * l2,
+      b2.begin()
+    );
+    
+    // 1) prior quadratic form
+    bmu2  = b2 - Mu;
+    qf[i] = 0.5 * arma::as_scalar(bmu2.t() * P2 * bmu2);
+    
+    // 2) logistic prep: π = 1/(1 + exp(−(α + X·b2)))
+    xb2 = arma::exp(- A - (X * b2));
+    for (int j = 0; j < l1; ++j) {
+      xb_mat(j, i) = 1.0 / (1.0 + xb2(j));
+    }
+  }
+  
+  return List::create(
+    Rcpp::Named("xb") = xb_mat,
+    Rcpp::Named("qf") = qf
+  );
+}
+
+
+List f2_binomial_logit_prep_v2(
+    NumericMatrix b,        // (l2 × m1) grid of β
+    NumericVector y,        // (l1) responses (unused in prep)
+    NumericMatrix x,        // (l1 × l2) design matrix
+    NumericMatrix mu,       // (l2 × 1) prior means
+    NumericMatrix P,        // (l2 × l2) precision matrix
+    NumericVector alpha,    // (l1) offsets
+    NumericVector wt,       // (l1) weights (unused)
+    int progbar = 0
+) {
+  //--------------------------------------------------------------------------
+  // 1) INPUT MARSHALLING: Rcpp types → flat arrays (host buffers)
+  //--------------------------------------------------------------------------
+  int l1 = x.nrow();     // number of observations
+  int l2 = x.ncol();     // number of coefficients
+  int m1 = b.ncol();     // number of β grid points
+  
+  // flatten into column-major contiguous vectors
+  std::vector<double> X_flat     = flattenMatrix(x);      // length = l1*l2
+  std::vector<double> B_flat     = flattenMatrix(b);      // length = l2*m1
+  std::vector<double> mu_flat    = flattenMatrix(mu);     // length = l2
+  std::vector<double> P_flat     = flattenMatrix(P);      // length = l2*l2
+  std::vector<double> alpha_flat = copyVector(alpha);     // length = l1
+  std::vector<double> wt_flat    = copyVector(wt);        // length = l1
+  
+  // Kernel inputs are now:
+  //   X_flat, B_flat, mu_flat, P_flat, alpha_flat, wt_flat
+  //   plus scalars l1, l2, m1
+  
+  //--------------------------------------------------------------------------
+  // 2) KERNEL STUB: CPU fallback, identical math to eventual OpenCL kernel
+  //--------------------------------------------------------------------------
+  // Allocate flat outputs
+  std::vector<double> qf_flat(m1, 0.0);           // length = m1
+  std::vector<double> xb_flat((size_t)l1*m1, 0.0); // length = l1*m1
+  
+  // Temporaries
+  std::vector<double> bmu(l2);
+  std::vector<double> tmp(l2);
+  
+  for (int j = 0; j < m1; ++j) {
+    Rcpp::checkUserInterrupt();
+    if (progbar > 0) {
+      progress_bar2(j, m1 - 1);
+      if (j == m1 - 1) Rcpp::Rcout << std::endl;
+    }
+    
+    // pointers into flattened buffers
+    const double* bj   = B_flat.data()   + (size_t)j * l2;
+    const double* muj  = mu_flat.data();
+    
+    // -- a) Quadratic form: 0.5 * (b_j – mu)' P (b_j – mu)
+    for (int k = 0; k < l2; ++k) {
+      bmu[k] = bj[k] - muj[k];
+    }
+    // tmp = P * bmu
+    for (int r = 0; r < l2; ++r) {
+      double acc = 0.0;
+      size_t prow = (size_t)r * l2;
+      for (int c = 0; c < l2; ++c) {
+        acc += P_flat[prow + c] * bmu[c];
+      }
+      tmp[r] = acc;
+    }
+    // dot(bmu, tmp)
+    double qval = 0.0;
+    for (int k = 0; k < l2; ++k) {
+      qval += bmu[k] * tmp[k];
+    }
+    qf_flat[j] = 0.5 * qval;
+    
+    // -- b) Logistic prep: π_{i,j} = 1 / (1 + exp(α[i] + X[i,·]·b_j))
+    for (int i = 0; i < l1; ++i) {
+      // compute linear predictor: α_i + sum_k X[i,k]*b_j[k]
+      double linpred = alpha_flat[i];
+      size_t xoff = (size_t)i;
+      for (int k = 0; k < l2; ++k) {
+        // X is column-major: element (i,k) at X_flat[k*l1 + i]
+        linpred += X_flat[(size_t)k * l1 + xoff] * bj[k];
+      }
+      // logistic
+      xb_flat[(size_t)j * l1 + i] = 1.0 / (1.0 + std::exp(-linpred));
+    }
+  }
+  
+  // Kernel outputs are:
+  //   qf_flat  (length = m1)
+  //   xb_flat  (length = l1 * m1)
+  
+  //--------------------------------------------------------------------------
+  // 3) OUTPUT MARSHALLING: flat arrays → Rcpp types
+  //--------------------------------------------------------------------------
+  NumericVector qf(m1);
+  for (int j = 0; j < m1; ++j) {
+    qf[j] = qf_flat[j];
+  }
+  
+  NumericMatrix xb(l1, m1);
+  for (int j = 0; j < m1; ++j) {
+    for (int i = 0; i < l1; ++i) {
+      xb(i, j) = xb_flat[(size_t)j * l1 + i];
+    }
+  }
+  
+  return List::create(
+    Named("xb") = xb,   // l1 × m1 logistic probabilities
+    Named("qf") = qf    // m1 prior quadratic forms
+  );
+}
+
+
+
+
+
+// [[Rcpp::export]]
+List f2_binomial_logit_prep_v3(
+    NumericMatrix b,        // (l2 × m1) grid of β
+    NumericVector y,        // (l1) responses (unused in prep)
+    NumericMatrix x,        // (l1 × l2) design matrix
+    NumericMatrix mu,       // (l2 × 1) prior means
+    NumericMatrix P,        // (l2 × l2) precision matrix
+    NumericVector alpha,    // (l1) offsets
+    NumericVector wt,       // (l1) weights (unused)
+    int progbar = 0
+) {
+  // 1) INPUT MARSHALLING
+  int l1 = x.nrow();
+  int l2 = x.ncol();
+  int m1 = b.ncol();
+  
+  std::vector<double> X_flat     = flattenMatrix(x);   // length = l1*l2
+  std::vector<double> B_flat     = flattenMatrix(b);   // length = l2*m1
+  std::vector<double> mu_flat    = flattenMatrix(mu);  // length = l2
+  std::vector<double> P_flat     = flattenMatrix(P);   // length = l2*l2
+  std::vector<double> alpha_flat = copyVector(alpha);  // length = l1
+  
+  // 2) INVOKE PROXY KERNEL
+  std::vector<double> qf_flat(m1);
+  std::vector<double> xb_flat((size_t)l1 * m1);
+  
+  
+  // —— DEBUG INPUTS ——  
+  Rcpp::Rcout << "[DEBUG] l1=" << l1 
+              << "  l2=" << l2 
+              << "  m1=" << m1 << "\n";
+  
+  // show first 3 entries of each flat buffer  
+  int K = std::min(3, m1);  
+  Rcpp::Rcout << "X_flat[0..2]: ";  
+  for (int i = 0; i < std::min(3, (int)X_flat.size()); ++i)  
+    Rcpp::Rcout << X_flat[i] << " ";  
+  Rcpp::Rcout << "\nB_flat[0..2]: ";  
+  for (int i = 0; i < std::min(3, (int)B_flat.size()); ++i)  
+    Rcpp::Rcout << B_flat[i] << " ";  
+  Rcpp::Rcout << "\nmu_flat[0..2]: ";  
+  for (int i = 0; i < std::min(3, (int)mu_flat.size()); ++i)  
+    Rcpp::Rcout << mu_flat[i] << " ";  
+  Rcpp::Rcout << "\nalpha_flat[0..2]: ";  
+  for (int i = 0; i < std::min(3, (int)alpha_flat.size()); ++i)  
+    Rcpp::Rcout << alpha_flat[i] << " ";  
+  Rcpp::Rcout << "\n\n";  
+  R_FlushConsole();
+  // —— end DEBUG ——  
+  
+  
+  f2_binomial_logit_prep_kernel_proxy(
+    X_flat, B_flat, mu_flat, P_flat, alpha_flat,
+    l1, l2, m1,
+    qf_flat, xb_flat,
+    progbar
+  );
+  
+  
+
+  
+  
+  // —— DEBUG OUTPUTS ——  
+  Rcpp::Rcout << "[DEBUG] first " << K << " qf_flat: ";  
+  for (int j = 0; j < K; ++j)  
+    Rcpp::Rcout << qf_flat[j] << " ";  
+  
+  Rcpp::Rcout << "\n[DEBUG] first xb_flat(·,0): ";  
+  for (int j = 0; j < K; ++j)  
+    Rcpp::Rcout << xb_flat[(size_t)j * l1 + 0] << " ";  
+  
+  Rcpp::Rcout << "\n\n";  
+  R_FlushConsole();  
+  // —— end DEBUG ——  
+  
+  
+  // 3) OUTPUT MARSHALLING
+  NumericVector qf(m1);
+  for (int j = 0; j < m1; ++j) {
+    qf[j] = qf_flat[j];
+  }
+  
+  NumericMatrix xb(l1, m1);
+  for (int j = 0; j < m1; ++j) {
+    for (int i = 0; i < l1; ++i) {
+      xb(i, j) = xb_flat[(size_t)j * l1 + i];
+    }
+  }
+  
+  return List::create(
+    Named("xb") = xb,
+    Named("qf") = qf
+  );
+}
+
+
+NumericVector f2_binomial_logit_accum(
+    NumericMatrix xb,        // n × m matrix of π = P(y=1)
+    NumericVector qf,        // length m: 0.5*(b-μ)'P(b-μ)
+    NumericVector y,         // length n observed {0,1}
+    NumericVector wt,        // length n weights
+    int progbar          // 0 = no bar, 1 = show bar
+) {
+  int n = xb.nrow();
+  int m = xb.ncol();
+  NumericVector res(m);
+  
+  
+  
+  
+  for (int i = 0; i < m; ++i) {
+    Rcpp::checkUserInterrupt();
+    //if (progbar == 1) {
+    //  progress_bar2(i, m - 1);
+    //  if (i == m - 1) Rcpp::Rcout << std::endl;
+    //}
+    
+    // extract column i of xb
+    NumericVector xbi = xb(_, i);
+    
+    // per-observation log-likelihoods
+    NumericVector ll = dbinom_glmb(y, wt, xbi, true);
+    
+    // sum of log-likelihoods
+    double sumll = std::accumulate(ll.begin(), ll.end(), 0.0);
+    
+    // total negative log-lik = quadratic form + (− sum log-lik)
+    res[i] = qf[i] - sumll;
+  }
+  
+  
+  
+  return res;
+}

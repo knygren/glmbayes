@@ -17,7 +17,9 @@ EnvelopeBuild(
   link = "logit",
   Gridtype = 2L,
   n = 1L,
-  sortgrid = FALSE
+  sortgrid = FALSE,
+  use_opencl = FALSE,
+  verbose = FALSE
 )
 }
 \arguments{

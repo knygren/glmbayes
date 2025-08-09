@@ -10,6 +10,8 @@
 
 #include "famfuncs.h"
 #include "Set_Grid.h"
+#include "Envelopefuncs.h"
+#include "kernel_wrappers.h"
 
 using namespace Rcpp;
 
@@ -22,17 +24,25 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
                     NumericMatrix P,
                     NumericVector alpha,
                     NumericVector wt,
-                    std::string family="binomial",
-                    std::string link="logit",
-                    int Gridtype=2, 
-                    int n=1,
-                    bool sortgrid=false
+                    std::string family,
+                    std::string link,
+                    int Gridtype, 
+                    int n,
+                    bool sortgrid,
+                    bool use_opencl ,        // Enables OpenCL acceleration during envelope construction
+                    bool verbose             // Enables diagnostic output
+                       
 ){
   
 
-  Rcpp::Rcout << "Entering EnvelopeBuild_c: "
-              << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
-              << "\n";
+  if (verbose) {
+    Rcpp::Rcout << ">>> EnvelopeBuild_c called with:\n"
+                << "    Gridtype   = " << Gridtype << "\n"
+                << "    n          = " << n << "\n"
+                << "    use_opencl = " << use_opencl << "\n"
+                << "    sortgrid   = " << sortgrid << "\n";
+  }
+  
   
   int progbar=0;
   
@@ -83,13 +93,51 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
   double Temp2;
 
   
-  Rcpp::Rcout << "Entering Envelope Loop: "
+  if (verbose) {
+    
+  Rcpp::Rcout << "Entering Grid Loop: "
               << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
               << "\n";
-  
+  }
       
   // Should write a small note with logic behind types 1 and 2
   
+  /*
+   GRIDTYPE LOGIC (Nygren & Nygren 2006)
+   
+   Let a_i = posterior precision diagonal for dimension i (i.e. A2(i,i)).
+   Let ω_i = width parameter computed below.
+   
+   1) Gridtype 1: static threshold test
+   • If (1 + a_i) ≤ 2/√π  ≈ 1.128379 ⇒
+   the theoretical upper bound on expected candidates per draw
+   for a full normal envelope is ≤ 1, so building more points
+   doesn’t reduce rejections.
+   ⇒ use a single-point envelope at the mode:
+   G2[i] = {θ⋆_i},  GIndex1[i] = {4}
+   
+   • Else
+   ⇒ build a three-point envelope at
+   {θ⋆_i − ω_i, θ⋆_i, θ⋆_i + ω_i}, GIndex1[i] = {1,2,3}
+   
+   2) Gridtype 2: dynamic envelope via `EnvelopeOpt(a, n)`
+   • Rather than a fixed-bound test, we solve (per dimension) the
+   cost-tradeoff between:
+   – T_build(g_i) ∝ g_i  (linear grid-construction cost)
+   – T_sample(n, acc_i(g_i)) ∝ n / acc_i(g_i)
+   where acc_i(g_i) ≈ acceptance rate given g_i grid points
+   • `EnvelopeOpt` returns gridindex[i] ∈ {1, 3} by minimizing
+   T_build + T_sample under approximations from subgradient theory.
+   • This lets us invest in more envelope points up-front when
+   n is large, because reduced rejections during sampling
+   more than pay for the extra build cost.
+   
+   3) Gridtype 3: always three-point grid (regardless of a_i or n)
+   4) Gridtype 4: always single-point grid (mode only)
+   */
+
+  
+    
   for(i=0;i<l1;i++){
   
     if(Gridtype==1){
@@ -164,13 +212,20 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
   
   NumericMatrix LLconst(l2,1);
   NumericVector NegLL(l2);    
+  
+  NumericVector NegLL_Alt(l2);    /// Temporary
+  
+  
   arma::mat cbars2(cbars.begin(), l2, l1, false); 
   arma::mat cbars3(cbars.begin(), l2, l1, false); 
   
   // Note: NegLL_2 only added to allow for QC printing of results 
   
   arma::colvec NegLL_2(NegLL.begin(), NegLL.size(), false);
+
   
+  
+    
   //    G4b.print("tangent points");
   
 //  Rcpp::Rcout << "Gridtype is :"  << Gridtype << std::endl;
@@ -179,80 +234,298 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
   
   if( family=="binomial" && link=="logit"){
     
-    Rcpp::Rcout << "Initiating NegLL Calculations: "
-                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
-                << "\n";
-    
-        
-    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    if (verbose) {
+      
+      Rcpp::Rcout << "Initiating NegLL Calculations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
+  
+  if(use_opencl==0 ){
     NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,progbar);  
-    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
-    //Rcout << "Initiating Gradient Calculations: " << Rcpp::as<std::string>(Rcpp::Function("Sys.time")()) << "\n";
+    
+  }
+    // --- New prep step immediately afterwards
+    //   This returns:
+    //     xb_mat  : n_obs × n_grid matrix of p_i = 1/(1+exp(−α − x·b))
+    //     qf_vec  : length n_grid vector of 0.5*(b−μ)'P(b−μ)
+//     if (verbose) {
+//       
+//     Rcpp::Rcout << "Initiating f2_binomial_logit_prep: "
+//                 << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+//                 << "\n";
+//   }
+//   
+// // 1. Run your OpenCL prep
+//   
+// // prep$xb : n × m matrix
+// // prep$qf : length-m vector
+//   
+//     Rcpp::List prep = f2_binomial_logit_prep(
+//       G4,       // NumericMatrix b
+//       y,        // NumericVector y
+//       x,        // NumericMatrix x
+//       mu,       // NumericMatrix mu
+//       P,        // NumericMatrix P
+//       alpha,    // NumericVector alpha
+//       wt,       // NumericVector wt
+//       progbar   // int progbar
+//     );
+//     
+//     if (verbose) {
+//       
+//       Rcpp::Rcout << "Initiating f2_binomial_logit_prep_v2: "
+//                   << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+//                   << "\n";
+//     }
+//     
+//     
+//     Rcpp::List prep_v2 = f2_binomial_logit_prep_v2(
+//       G4,       // NumericMatrix b
+//       y,        // NumericVector y
+//       x,        // NumericMatrix x
+//       mu,       // NumericMatrix mu
+//       P,        // NumericMatrix P
+//       alpha,    // NumericVector alpha
+//       wt,       // NumericVector wt
+//       progbar   // int progbar
+//     );
 
-    Rcpp::Rcout << "Initiating Gradient Calculations: "
-                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
-                << "\n";
+        
+    // if (verbose) {
+    //   
+    //   Rcpp::Rcout << "Initiating f2_binomial_logit_prep_v3: "
+    //               << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+    //               << "\n";
+    // }
+    // 
+    // 
+    // Rcpp::List prep_v3 = f2_binomial_logit_prep_v3(
+    //   G4,       // NumericMatrix b
+    //   y,        // NumericVector y
+    //   x,        // NumericMatrix x
+    //   mu,       // NumericMatrix mu
+    //   P,        // NumericMatrix P
+    //   alpha,    // NumericVector alpha
+    //   wt,       // NumericVector wt
+    //   progbar   // int progbar
+    // );
+
+    else{
+    if (verbose) {
+      
+      Rcpp::Rcout << "Initiating f2_binomial_logit_prep_opencl: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
+    
+    
+    Rcpp::List prep_v4 = f2_binomial_logit_prep_opencl(
+      G4,       // NumericMatrix b
+      y,        // NumericVector y
+      x,        // NumericMatrix x
+      mu,       // NumericMatrix mu
+      P,        // NumericMatrix P
+      alpha,    // NumericVector alpha
+      wt,       // NumericVector wt
+      progbar   // int progbar
+    );
+    
+    
+    
+    
+  //  NumericMatrix xb = prep["xb"];
+  //  NumericVector qf = prep["qf"];
+    
+    NumericMatrix xb = prep_v4["xb"];
+    NumericVector qf = prep_v4["qf"];
+    
+
+//    NumericMatrix xb2 = prep["xb"];
+//    NumericVector qf2 = prep["qf"];
     
         
+        if(verbose){
+    Rcpp::Rcout << "Initiating f2_binomial_logit_accumulator: "
+                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                << "\n";
+      }
+  
+    
+    // 2. Call the accumulator with identical signature style
+    NegLL = f2_binomial_logit_accum(
+        xb      ,
+        qf      ,
+        y       = y,
+        wt      = wt,
+        progbar = 0
+    );
+    
+    }
+
+  
+  // After computing NegLL and NegLL_Alt, for example inside your envelope build:
+  
+//   Rcpp::Rcout << "i   NegLL       NegLL_Alt    diff\n";
+// //  for (int i = 0; i < l2; ++i) {
+//     for (int i = 0; i < 100; ++i) {
+//     double a = NegLL[i];
+//     double b = NegLL_Alt[i];
+//     Rcpp::Rcout 
+//     << std::setw(12) << i << " " 
+//     << std::setw(12) << a << " " 
+//     << std::setw(12) << b << " " 
+//     << std::setw(12) << (a - b) << "\n";
+//   }
+//   
+    
+    
+    if (verbose) {
+      Rcpp::Rcout << "Initiating Gradient Evaluations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
+    
         cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,progbar);
   }
   if(family=="binomial"  && link=="probit"){
-  //  Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    if (verbose) {
+      
+      Rcpp::Rcout << "Initiating NegLL Calculations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt,progbar);  
-  //  Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    if (verbose) {
+      Rcpp::Rcout << "Initiating Gradient Evaluations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt,progbar);
   }
   if(family=="binomial"   && link=="cloglog"){
-  //  Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    if (verbose) {
+      
+      Rcpp::Rcout << "Initiating NegLL Calculations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt,progbar);  
-  //  Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    if (verbose) {
+      Rcpp::Rcout << "Initiating Gradient Evaluations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt,progbar);
   }
   
   if(family=="quasibinomial"  && link=="logit"){
-    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    if (verbose) {
+      
+      Rcpp::Rcout << "Initiating NegLL Calculations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     NegLL=f2_binomial_logit(G4,y, x, mu, P, alpha, wt,progbar);  
-    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    if (verbose) {
+      Rcpp::Rcout << "Initiating Gradient Evaluations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     cbars2=f3_binomial_logit(G4,y, x,mu,P,alpha,wt,progbar);
   }
   if(family=="quasibinomial" && link=="probit"){
-    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    if (verbose) {
+      
+      Rcpp::Rcout << "Initiating NegLL Calculations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     NegLL=f2_binomial_probit(G4,y, x, mu, P, alpha, wt,progbar);  
-    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    if (verbose) {
+      Rcpp::Rcout << "Initiating Gradient Evaluations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     cbars2=f3_binomial_probit(G4,y, x,mu,P,alpha,wt,progbar);
   }
   if(family=="quasibinomial" && link=="cloglog"){
-    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    if (verbose) {
+      
+      Rcpp::Rcout << "Initiating NegLL Calculations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     NegLL=f2_binomial_cloglog(G4,y, x, mu, P, alpha, wt,progbar);  
-    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    if (verbose) {
+      Rcpp::Rcout << "Initiating Gradient Evaluations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     cbars2=f3_binomial_cloglog(G4,y, x,mu,P,alpha,wt,progbar);
   }
   
   if(family=="poisson" ){
-    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    if (verbose) {
+      
+      Rcpp::Rcout << "Initiating NegLL Calculations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt,progbar);  
-    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    if (verbose) {
+      Rcpp::Rcout << "Initiating Gradient Evaluations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt,progbar);
   }
   
   if(family=="quasipoisson" ){
-    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    if (verbose) {
+      
+      Rcpp::Rcout << "Initiating NegLL Calculations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     NegLL=f2_poisson(G4,y, x, mu, P, alpha, wt,progbar);  
-    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    if (verbose) {
+      Rcpp::Rcout << "Initiating Gradient Evaluations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     cbars2=f3_poisson(G4,y, x,mu,P,alpha,wt,progbar);
   }
   
   if(family=="Gamma" ){
-    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    if (verbose) {
+      
+      Rcpp::Rcout << "Initiating NegLL Calculations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     NegLL=f2_gamma(G4,y, x, mu, P, alpha, wt,progbar);  
-    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    if (verbose) {
+      Rcpp::Rcout << "Initiating Gradient Evaluations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     cbars2=f3_gamma(G4,y, x,mu,P,alpha,wt,progbar);
   }
   
   if(family=="gaussian" ){
-    //Rcpp::Rcout << "Finding Values of Log-posteriors:" << std::endl;
+    if (verbose) {
+      
+      Rcpp::Rcout << "Initiating NegLL Calculations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     NegLL=f2_gaussian(G4,y, x, mu, P, alpha, wt);  
-    //Rcpp::Rcout << "Finding Value of Gradients at Log-posteriors:" << std::endl;
+    if (verbose) {
+      Rcpp::Rcout << "Initiating Gradient Evaluations: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
     cbars2=f3_gaussian(G4,y, x,mu,P,alpha,wt);
   }
   
@@ -278,7 +551,15 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
 //              << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
 //              << "\n";
   
+  if (verbose) {
+    
+    Rcpp::Rcout << "Setting Grid: "
+                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                << "\n";
+  }
   
+  
+
 //  Set_Grid_C2(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
   Set_Grid_C2_pointwise(GIndex, cbars, Lint1,Down,Up,loglt,logrt,logct,logU,logP);
   
@@ -288,6 +569,14 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
 //                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
 //                << "\n";
     
+  
+  if (verbose) {
+    
+    Rcpp::Rcout << "Setting logP: "
+                << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                << "\n";
+  }
+  
         
       setlogP_C2(logP,NegLL,cbars,G3,LLconst);
 
@@ -313,6 +602,14 @@ List EnvelopeBuild_c(NumericVector bStar,NumericMatrix A,
   
     
   if(sortgrid==true){
+    
+    if (verbose) {
+      
+      Rcpp::Rcout << "Sorting Grid: "
+                  << Rcpp::as<std::string>(Rcpp::Function("format")(Rcpp::Function("Sys.time")())) 
+                  << "\n";
+    }
+    
     
     Rcpp::List outlist=EnvSort(l1,l2,GIndex,G3,cbars,logU,logrt,loglt,logP,LLconst,PLSD,a_1);
     

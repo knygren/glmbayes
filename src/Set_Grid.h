@@ -8,7 +8,7 @@
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 
-#include "famfuncs.h"
+//#include "famfuncs.h"
 
 using namespace Rcpp;
 

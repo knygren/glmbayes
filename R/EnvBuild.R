@@ -73,7 +73,10 @@
 
 
 EnvelopeBuild<-function(bStar, A, y, x, mu, P, alpha, wt, family = "binomial",
-                         link = "logit", Gridtype = 2L, n = 1L, sortgrid = FALSE){
+                         link = "logit", Gridtype = 2L, n = 1L, sortgrid = FALSE,
+                        use_opencl = FALSE,        
+                        verbose = FALSE 
+                        ){
   
   if(family=="gaussian"){
     return(.EnvelopeBuild_Ind_Normal_Gamma(bStar, A, y, x, mu, P, alpha, wt, family = family,
@@ -81,6 +84,6 @@ EnvelopeBuild<-function(bStar, A, y, x, mu, P, alpha, wt, family = "binomial",
   
   else{
   return(.EnvelopeBuild_cpp(bStar, A, y, x, mu, P, alpha, wt, family = family,
-                            link = link, Gridtype = Gridtype, n = n, sortgrid))}
+                            link = link, Gridtype = Gridtype, n = n, sortgrid,use_opencl=use_opencl,verbose=verbose ))}
 }
   
