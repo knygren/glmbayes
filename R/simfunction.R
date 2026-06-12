@@ -1209,6 +1209,27 @@ rindepNormalGamma_reg<-function(n,y,x,prior_list,offset=NULL,weights=1,family=ga
   stopifnot(nrow(x) == length(y))
   stopifnot(length(mu) == ncol(x))
   
+  ## Prior-vs-data balance guard. The dispersion envelope caps the log-tilt
+  ## at n_w/2 (the data contribution to shape2; see Remark 4.1.3 of the ING
+  ## vignette), which presumes a likelihood-dominated regime. Under the
+  ## Prior_Setup ING calibration shape = (n_prior + 1 + p)/2, so the implied
+  ## effective prior sample size must not exceed the weighted observation
+  ## count n_w = sum(wt) (equivalently pwt <= 0.5).
+  if (!is.null(shape)) {
+    n_w <- sum(wt)
+    n_prior_implied <- 2 * shape - 1 - ncol(x)
+    if (n_prior_implied > n_w) {
+      stop(
+        "dIndependent_Normal_Gamma prior implies n_prior = ",
+        signif(n_prior_implied, 4), " effective prior observations, but the ",
+        "data supply only n_w = sum(weights) = ", signif(n_w, 4), ". The ",
+        "dispersion envelope requires n_prior <= n_w (prior weight pwt <= 0.5); ",
+        "weaken the prior (smaller shape) or supply more data.",
+        call. = FALSE
+      )
+    }
+  }
+  
   # Reconstruct P from Sigma and enforce SPD
   R    <- chol(Sigma)
   Pinv <- chol2inv(R)

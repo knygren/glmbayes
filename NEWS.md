@@ -52,6 +52,23 @@
 
 ## Other changes
 
+* **Prior-vs-data guard for `dIndependent_Normal_Gamma` sampling:**
+  **`rindepNormalGamma_reg()`** now rejects calls where the Gamma (precision)
+  part of the prior carries more effective prior observations than the data
+  supply: inverting the `Prior_Setup()` calibration
+  `shape = (n_prior + 1 + p)/2`, sampling requires
+  `n_prior <= n_w = sum(weights)` (equivalently a prior weight
+  `pwt <= 0.5`). Rationale: the dispersion envelope caps its log-tilt at
+  `n_w/2` - the *data* contribution to the posterior Gamma shape (Remark
+  4.1.3 of the ING vignette) - a strengthening of the validity condition
+  `lm_log2 < shape2` that presumes a likelihood-dominated regime.
+  Prior-dominated calls could previously bind that cap on every envelope
+  build (console `UB3A mean slope` warnings) and silently degrade the
+  envelope. Note that `n_prior` here is the effective sample size of the
+  Gamma component specifically; under the `Prior_Setup()` calibration the
+  Gamma and coefficient parts share a common `n_prior`, so the two are not
+  fully independent.
+
 * Expanded **testthat** coverage for **`dBeta()`** / binomial(identity) conjugate
   paths and related **`glmb()`** integration.
 
