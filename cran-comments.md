@@ -42,12 +42,13 @@ in vignettes/examples and remain in `Suggests`.
 
 ## Test environments
 
-* local Windows 10 (build 26200), R 4.5.x, `R CMD check --as-cran`:
-  _[fill in: 0 errors | 0 warnings | 0 notes]_
+* local Windows 10, `R CMD check --as-cran`: 0 errors | 0 warnings | 0 notes
 
-* [Optional — add if used:]
-  * R-hub / win-builder / macOS-builder results
-  * `devtools::check_rhub()` or GitHub Actions matrix
+* win-builder (CRAN): 0 errors | 0 warnings | 0 notes on **r-devel**, **r-release**,
+  and **r-oldrel**
+
+* R-universe (https://knygren.r-universe.dev/glmbayes): checks passed cleanly across
+  the build matrix
 
 ## Check notes addressed in this release
 
