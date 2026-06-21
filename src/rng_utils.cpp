@@ -1,11 +1,8 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 
-// Include <random> before R headers when a private nmath header redefines calloc/free.
 #include <random>
 
-#include <Rmath.h>   // libR Mathlib: Rf_pgamma, Rf_qgamma (replaces src/pgamma.c, qgamma.c)
-//#include "nmath_local.h"
-//#include "dpq_local.h"
+#include <Rmath.h>   // libR Mathlib: Rf_pgamma, Rf_qgamma
 #include "rng_utils.h"
 
 // Thread-local RNG and distribution
@@ -23,8 +20,6 @@ double log_p_inv_gamma_safe(double dispersion,
                             double rate) {
   double y = 1.0 / dispersion;
   
-  // Replaced pgamma_local (src/pgamma.c) with libR Rf_pgamma (<Rmath.h>).
-  //return pgamma_local(y, shape, 1.0 / rate, /*lower_tail=*/0, /*log_p=*/1);
   return ::Rf_pgamma(y,
                       shape,
                       1.0 / rate,
@@ -41,30 +36,10 @@ double p_inv_gamma_safe(double dispersion,
   // So P(X <= d) = P(Y >= 1/d) = 1 - F_Y(1/d)
   double y = 1.0 / dispersion;
   
-  // Replaced pgamma_local with libR Rf_pgamma (<Rmath.h>).
-  //double Fy = pgamma_local(y, shape, 1.0 / rate, /*lower_tail=*/1, /*log_p=*/0);
   double Fy = ::Rf_pgamma(y, shape, 1.0 / rate, /*lower_tail=*/1, /*log_p=*/0);
   
   return 1.0 - Fy;
 }
-
-
-// double q_inv_gamma_safe(double p,
-//                         double shape,
-//                         double rate,
-//                         double disp_upper,
-//                         double disp_lower) {
-//   // Compute probabilities at the bounds using safe pgamma
-//   double p_upp = p_inv_gamma_safe(disp_upper, shape, rate);
-//   double p_low = p_inv_gamma_safe(disp_lower, shape, rate);
-//   
-//   // Map uniform p into [p_low, p_upp]
-//   double p1 = p_low + p * (p_upp - p_low);
-//   double p2 = 1.0 - p1;
-//   
-//   // Invert via Rf_qgamma (libR Mathlib)
-//   return 1.0 / ::Rf_qgamma(p2, shape, 1.0 / rate, /*lower_tail=*/1, /*log_p=*/0);
-// }
 
 
 double q_inv_gamma_safe(double u,
@@ -102,8 +77,6 @@ double q_inv_gamma_safe(double u,
   // log p2 = log(1 - exp(lg_p1))
   double lg_p2 = std::log1p(-std::exp(lg_p1));
   
-  // Replaced qgamma_local (src/qgamma.c) with libR Rf_qgamma (<Rmath.h>).
-  //double y = qgamma_local(lg_p2, shape, 1.0 / rate, /*lower_tail=*/1, /*log_p=*/1);
   double y = ::Rf_qgamma(lg_p2,
                          shape,
                          1.0 / rate,
@@ -131,12 +104,6 @@ double runif_safe() {
 }
 
 
-// 
-// // Declaration (e.g. in a header if needed)
-// // double rinvgamma_safe(double shape, double rate,
-// //                        double disp_upper, double disp_lower);
-// 
-// // Definition (in your .cpp file)
 double rinvgamma_ct_safe(double shape,
                        double rate,
                        double disp_upper,

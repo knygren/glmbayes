@@ -15,10 +15,7 @@
 
 #include <cmath>         // for std::log or std::exp if used
 #include <math.h>
-#include "rng_utils.h"  // for safe_runif()
-
-//#include "nmath_local.h"   // archived under legacy_c_code/; C++ uses libR / rng_utils
-//#include "dpq_local.h"
+#include "rng_utils.h"  // libR via rng_utils (Rf_pgamma, Rf_qgamma)
 
 // Required headers
 #include <RcppArmadillo.h>

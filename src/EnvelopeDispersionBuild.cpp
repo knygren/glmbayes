@@ -8,7 +8,6 @@
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 
-#include <Rmath.h>
 #include "famfuncs.h"
 #include "Envelopefuncs.h"
 #include <RcppParallel.h>

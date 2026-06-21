@@ -5,9 +5,6 @@
 #include <limits>
 #include <RcppParallel.h>
 #include <Rmath.h>   // libR Mathlib: Rf_dbinom_raw, Rf_pnorm5, Rf_dnorm4, Rf_dbinom
-//#define MATHLIB_STANDALONE
-//#include "nmath_local.h"
-//#include "dpq_local.h"
 #include "openclPort.h"
 #include "famfuncs.h"
 #include "progress_utils.h"
@@ -24,14 +21,6 @@ using namespace glmbayes::progress;
 
 /////////////////////////////////////////////////////////////
 
-
-// Replaced dbinom_raw_local (src/dbinom.c) with libR Rf_dbinom_raw (<Rmath.h>).
-//inline double dbinom_raw_local(double x, double n, double p, double q, int give_log) {
-//  return dbinom_raw(x, n, p, q, give_log);
-//}
-
-
-///////////////////////////////////////////////////////////
 
 namespace glmbayes{
 
@@ -54,8 +43,6 @@ void neg_dbinom_glmb_rmat(const RVector<double>& x,          // success proporti
     double p       = p_vec[i];
     double q       = q_vec[i];
     
-    // libR Mathlib (parallel path); precomputed p and q for stability
-    //res[i] = -dbinom_raw_local(success, trials, p, q, lg);
     res[i] = -::Rf_dbinom_raw(success, trials, p, q, lg);
     
     // Optional diagnostics
@@ -86,8 +73,6 @@ NumericVector dbinom_glmb(NumericVector x, NumericVector N, NumericVector means,
     // Clamp probabilities to avoid extreme values
     double p = std::min(1.0, std::max(0.0, means[i]));
     
-    // Replaced R::dbinom with libR Mathlib Rf_dbinom (<Rmath.h>).
-    //res[i] = R::dbinom(success, trials, p, lg);
     res[i] = ::Rf_dbinom(success, trials, p, lg);
 
     
@@ -641,9 +626,6 @@ arma::vec f2_binomial_probit_rmat(
     // Compute p and q stably via probit link
     for (std::size_t j = 0; j < l1; j++) {
       double z = eta(j);
-      // Replaced pnorm5_local (src/pnorm.c) with libR Rf_pnorm5 (<Rmath.h>).
-      //double p = pnorm5_local(z, 0.0, 1.0, /*lower_tail=*/1, /*log_p=*/0);
-      //double q = pnorm5_local(z, 0.0, 1.0, /*lower_tail=*/0, /*log_p=*/0);
       double p = ::Rf_pnorm5(z, 0.0, 1.0, /*lower_tail=*/1, /*log_p=*/0);
       double q = ::Rf_pnorm5(z, 0.0, 1.0, /*lower_tail=*/0, /*log_p=*/0);
       p_vec[j] = p;
@@ -923,10 +905,6 @@ Rcpp::List f2_f3_binomial_probit(
     // =========================
     for (int j = 0; j < l1; j++) {
       double eta_j = eta[j];
-      // Replaced R::pnorm / R::dnorm with libR Rf_pnorm5 / Rf_dnorm4 (<Rmath.h>).
-      //double p     = R::pnorm(eta_j, 0.0, 1.0, 1, 0);
-      //double q     = R::pnorm(-eta_j, 0.0, 1.0, 1, 0);
-      //double d     = R::dnorm(eta_j, 0.0, 1.0, 0);
       double p     = ::Rf_pnorm5(eta_j, 0.0, 1.0, 1, 0);   // Φ(eta)
       double q     = ::Rf_pnorm5(-eta_j, 0.0, 1.0, 1, 0);  // Φ(-eta)
       double d     = ::Rf_dnorm4(eta_j, 0.0, 1.0, 0);      // φ(eta)

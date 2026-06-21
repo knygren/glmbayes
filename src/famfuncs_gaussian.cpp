@@ -2,9 +2,7 @@
 #include <RcppParallel.h>
 
 #include <Rcpp.h>
-#include <Rmath.h>   // libR Mathlib: Rf_dnorm4 (replaces vendored src/dnorm.c for this file)
-//#include "nmath_local.h"
-//#include "dpq_local.h"
+#include <Rmath.h>   // libR Mathlib: Rf_dnorm4
 #include "famfuncs.h"
 #include "progress_utils.h"
 
@@ -31,8 +29,6 @@ void neg_dnorm_glmb_rmat(const RcppParallel::RVector<double>& x,         // obse
   for (std::size_t i = 0; i < n; ++i) {
     double mu    = means[i];   // mean parameter
     double sigma = sds[i];     // standard deviation
-    // Replaced dnorm4_local (src/dnorm.c) with libR Mathlib Rf_dnorm4 (<Rmath.h>).
-    //res[i] = -dnorm4_local(x[i], mu, sigma, lg);
     res[i] = -::Rf_dnorm4(x[i], mu, sigma, lg);
     
   }

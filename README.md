@@ -22,6 +22,31 @@ This repository is **0.9.6.9000** in development. The current **CRAN release is 
 The [GitHub](https://github.com/knygren/glmbayes) repository holds the source; [R-Universe](https://knygren.r-universe.dev/glmbayes) builds binaries from it.
 See [NEWS.md](https://github.com/knygren/glmbayes/blob/main/NEWS.md) for changes.
 
+## Planned updates
+
+The next development cycle (after **0.9.6**) focuses on three infrastructure and
+workflow improvements. Much of the underlying work is already in place in
+[**glmbayesCore**](https://github.com/knygren/glmbayesCore); the goal here is to
+port the same patterns into **glmbayes**.
+
+1. ~~**Phase out local `nmath` sources and headers.**~~ **Done (0.9.6.9000).** CPU
+   statistical code uses R’s libR Mathlib via `<Rmath.h>` (`Rf_dnorm4`, `Rf_pgamma`,
+   etc.); the unused vendored CPU snapshot under `src/nmath/` and archived
+   `legacy_c_code/` have been removed from the package.
+
+2. **OpenCL via [`nmathopencl`](https://CRAN.R-project.org/package=nmathopencl).** GPU
+   statistical kernels are still bundled under `inst/cl/` in this release.
+   **glmbayesCore** already delegates OpenCL nmath to the **`nmathopencl`**
+   package (on CRAN); **glmbayes** will adopt the same dependency, replacing the
+   in-package OpenCL nmath tree with the shared upstream implementation.
+
+3. **`bayestestR` integration.** [Chapter 13](https://knygren.r-universe.dev/articles/glmbayes/Chapter-13.html)
+   already summarizes posterior coefficient draws with **`bayestestR`** utilities.
+   The next step is to make that workflow easier for **`glmb` / `lmb`** fits—whether
+   via S3 methods, small wrapper functions, or extended examples is still to be
+   decided; the aim is seamless use of **`describe_posterior()`**, **`hdi()`**,
+   **`rope()`**, and related indices on fitted objects.
+
 ## Installation
 
 **CRAN (release 0.9.6)**
@@ -379,24 +404,7 @@ details behind the samplers.
 
 ## Future Plans
 
-- **R Mathlib (`nmath`) usage from C:** Today the package vendors local copies of
-  selected R Mathlib routines and headers in `*.c` sources. The plan is to switch
-  to calling the **same `nmath` functions that ship with R**, via the supported
-  linking/API path, so maintenance tracks base R instead of duplicating sources.
-- **OpenCL / GPU code upstream:** Routines currently living under the
-  **openclport** and **nmathopencl** namespaces are slated to move into dedicated
-  upstream packages. **nmathopencl** is already available on
-  [R-Universe](https://knygren.r-universe.dev/nmathopencl); a **CRAN** release is targeted,
-  after which glmbayes can depend on that package for a substantial share of
-  OpenCL- and GPU-related functionality rather than carrying those implementations
-  here.
-- **Conjugate priors for intercept-only GLMs:** Add **pfamily** specifications
-  that supply conjugate priors for **intercept-only** `glm()`-style models (a
-  single mean structure / scalar linear predictor), complementing the existing
-  prior families for general designs.
-- **bayestestR integration:** Add methods or small wrappers so **bayestestR**
-  summaries and diagnostics can be used with **`glmb` / `lmb`** fits in the same
-  way as with other Bayesian modeling workflows.
+See **Planned updates** above for the main post-0.9.6 roadmap (**`nmathopencl`**, **`bayestestR`**).
 
 Further performance and algorithm work:
 

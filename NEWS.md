@@ -1,5 +1,13 @@
 # glmbayes 0.9.6.9000 (development)
 
+## CPU nmath phase-out
+
+* Removed unused vendored CPU R Mathlib sources (`src/nmath/` snapshot and
+  `legacy_c_code/` archive). CPU statistical routines in C++ now rely exclusively
+  on R’s libR via `<Rmath.h>` (`Rf_dnorm4`, `Rf_pgamma`, `Rf_qgamma`,
+  `Rf_dbinom_raw`, etc.), matching **glmbayesCore**. OpenCL nmath under
+  `inst/cl/nmath/` is unchanged (separate **`nmathopencl`** migration planned).
+
 # glmbayes 0.9.6
 
 ## Highlights
