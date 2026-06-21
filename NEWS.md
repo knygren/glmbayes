@@ -1,3 +1,5 @@
+# glmbayes 0.9.6.9000 (development)
+
 # glmbayes 0.9.6
 
 ## Highlights
