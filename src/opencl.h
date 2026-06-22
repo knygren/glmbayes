@@ -140,6 +140,13 @@ std::string load_likelihood_subgradient_program(
     const std::string& family,
     const std::string& link,
     const std::string& package = "glmbayes");
+
+// Prelude, shims, and nmath subset from nmathopencl; entry kernels from app_package.
+std::string load_likelihood_subgradient_program_v2(
+    const std::string& family,
+    const std::string& link,
+    const std::string& app_package = "glmbayes",
+    const std::string& nmath_package = "nmathopencl");
 #endif
 
 } // namespace opencl

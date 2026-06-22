@@ -80,6 +80,7 @@
 #' @importFrom MASS mvrnorm
 #' @importFrom Rdpack reprompt
 #' @importFrom RcppParallel RcppParallelLibs
+#' @import nmathopencl
 #' @import opencltools
 #' @useDynLib glmbayes, .registration = TRUE
 "_PACKAGE"
