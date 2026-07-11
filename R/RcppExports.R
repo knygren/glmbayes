@@ -81,14 +81,6 @@ glmb_Standardize_Model_cpp_export <- function(y, x, P, bstar, A1) {
     .Call(`_glmbayes_glmb_Standardize_Model_cpp_export`, y, x, P, bstar, A1)
 }
 
-load_kernel_source_wrapper_cpp_export <- function(relative_path, package = "glmbayes") {
-    .Call(`_glmbayes_load_kernel_source_wrapper_cpp_export`, relative_path, package)
-}
-
-load_kernel_library_wrapper_cpp_export <- function(subdir, package = "glmbayes", verbose = FALSE) {
-    .Call(`_glmbayes_load_kernel_library_wrapper_cpp_export`, subdir, package, verbose)
-}
-
 has_opencl_cpp_export <- function() {
     .Call(`_glmbayes_has_opencl_cpp_export`)
 }
@@ -99,5 +91,9 @@ get_opencl_core_count_cpp_export <- function() {
 
 gpu_names_cpp_export <- function() {
     .Call(`_glmbayes_gpu_names_cpp_export`)
+}
+
+debug_likelihood_program_cpp_export <- function(family, link) {
+    .Call(`_glmbayes_debug_likelihood_program_cpp_export`, family, link)
 }
 

@@ -1,0 +1,7 @@
+"kernel","family","link","nchar_v1","nchar_v2","nchar_delta","md5_v1","md5_v2","identical","first_diff_line","file_v1","file_v2"
+"poisson","poisson","logit",62916,62916,0,"5d07de8a9c7196c87ebd4f12e1db2ffd","5d07de8a9c7196c87ebd4f12e1db2ffd",TRUE,NA,"data-raw/compare_v1_v2_cpp_output/poisson_v1.cl","data-raw/compare_v1_v2_cpp_output/poisson_v2.cl"
+"gaussian","gaussian","logit",100095,100101,6,"66f55f375a45c29707ff61717a0b58cc","c5d49667945ced37f26ea4a13d27808d",FALSE,2033,"data-raw/compare_v1_v2_cpp_output/gaussian_v1.cl","data-raw/compare_v1_v2_cpp_output/gaussian_v2.cl"
+"gamma","Gamma","logit",170592,170597,5,"4cec7c44e395b2dda4a825c6a1ae29b1","302b639cf6b0b84bdd39de3dd4464f74",FALSE,2032,"data-raw/compare_v1_v2_cpp_output/gamma_v1.cl","data-raw/compare_v1_v2_cpp_output/gamma_v2.cl"
+"binomial_logit","binomial","logit",169069,169075,6,"c496f7aa05f0ca46523e78125c27a697","577d72828a69f1ab59a0956cf1fae58c",FALSE,2032,"data-raw/compare_v1_v2_cpp_output/binomial_logit_v1.cl","data-raw/compare_v1_v2_cpp_output/binomial_logit_v2.cl"
+"binomial_probit","binomial","probit",181386,181392,6,"c131b423c421c506ca6e5ca142a6893b","33b506591d9bc5688f42379d383c39ab",FALSE,2032,"data-raw/compare_v1_v2_cpp_output/binomial_probit_v1.cl","data-raw/compare_v1_v2_cpp_output/binomial_probit_v2.cl"
+"binomial_cloglog","binomial","cloglog",168440,168446,6,"939821826bd92fb7bda385d3310df737","6fc1436458eb1b72ef172cb21b6a59df",FALSE,2032,"data-raw/compare_v1_v2_cpp_output/binomial_cloglog_v1.cl","data-raw/compare_v1_v2_cpp_output/binomial_cloglog_v2.cl"

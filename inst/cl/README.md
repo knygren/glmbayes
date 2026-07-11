@@ -23,17 +23,14 @@ Legacy layouts (`rmath/`, `dpq/` as separate trees for old concatenation) are **
 
 ## Building one executable OpenCL program
 
-At runtime, **`glmbayes::opencl::load_likelihood_subgradient_program(family, link, package)`** (implemented in `src/kernel_loader.cpp`) returns a **single character string**: the concatenation of sources in this **fixed order**:
+At runtime, **`glmbayes::opencl::load_likelihood_subgradient_program(family, link, app_package, nmath_package)`** (implemented in `src/kernel_loader.cpp`) returns a **single character string**. Prelude, shims, and selective **`nmath/`** are read from **`nmathopencl`**; the entry kernel from **`glmbayes`** (`inst/cl/src/f2_f3_*.cl`).
 
-1. **`OPENCL.cl`**
-2. **`libR_shims`** (library load)
-3. **`R_ext_types`**
-4. **`R_shims`**
-5. **`R_ext_runtime`**
-6. **`R_ext_internals`**
-7. **`System`**
-8. **`nmath`** — **subset only**: stems declared on the chosen `src/f2_f3_*.cl` in the `@all_depends_nmath:` tag, merged in the order given by **`nmath/kernel_dependency_index.tsv`**
-9. **The entry kernel file** — e.g. `src/f2_f3_binomial_logit.cl`
+Assembly order:
+
+1. **`OPENCL.cl`** (from **nmathopencl**)
+2. **`libR_shims`**, **`R_ext_types`**, **`R_shims`**, **`R_ext_runtime`**, **`R_ext_internals`**, **`System`** (from **nmathopencl**)
+3. **`nmath`** subset — stems from `@all_depends_nmath` on the chosen entry kernel; files and TSV from **nmathopencl**
+4. **Entry kernel** — e.g. `src/f2_f3_binomial_logit.cl` (from **glmbayes**)
 
 Family/link strings match R’s GLM conventions (`"binomial"` / `"logit"`, `"poisson"`, `"Gamma"`, `"gaussian"`, …) and map internally to the correct `src/` path.
 
@@ -43,8 +40,8 @@ That string is passed to **`clCreateProgramWithSource`** (see `glmbayes::opencl:
 
 ## Relation to R helpers
 
-- **`load_kernel_source()`** / **`load_kernel_library()`** (R / `openclPort`) are **generic**: load one file or an entire subdirectory with `@provides` / `@depends` sorting. Useful for exploration and small examples.
-- **`load_likelihood_subgradient_program()`** is **application-specific**: it is the exact recipe the package uses for envelope GPU evaluation. It uses **`openclPort::load_kernel_*`** internally plus a **TSV-driven subset** of `nmath/` tied to each entry kernel.
+- **`opencltools::load_kernel_source()`** / **`opencltools::load_kernel_library()`** (with `package = "glmbayes"` for entry kernels, or `"nmathopencl"` for prelude/nmath) are **generic** exploration helpers.
+- **`load_likelihood_subgradient_program()`** is **application-specific**: the exact C++ recipe for envelope GPU evaluation (delegates loading to **opencltools** via C API). The pre-nmathopencl loader is archived under **`src/backup/`**.
 
 ---
 

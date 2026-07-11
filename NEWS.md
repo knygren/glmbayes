@@ -1,5 +1,11 @@
 # glmbayes 0.9.6.9000 (development)
 
+## Independent Normal-Gamma simulation
+
+* Updates to independent normal gamma simulation to better handle
+  non-isotropic priors with highly differentiated implied pweights across
+  dimensions.
+
 ## CPU nmath phase-out
 
 * Removed unused vendored CPU R Mathlib sources (`src/nmath/` snapshot and
@@ -7,6 +13,15 @@
   on R’s libR via `<Rmath.h>` (`Rf_dnorm4`, `Rf_pgamma`, `Rf_qgamma`,
   `Rf_dbinom_raw`, etc.), matching **glmbayesCore**. OpenCL nmath under
   `inst/cl/nmath/` is unchanged (separate **`nmathopencl`** migration planned).
+
+## OpenCL kernel loading
+
+* Production GPU assembly uses **`load_likelihood_subgradient_program`**
+  (prelude/nmath from **nmathopencl**, entry kernels from **glmbayes**), with
+  C++ loaders delegated to **opencltools** (`LinkingTo: opencltools`).
+* Removed exported **`load_kernel_source()`** and **`load_kernel_library()`**
+  from **glmbayes**; use **`opencltools::load_kernel_*`** (pass
+  `package = "glmbayes"` for `inst/cl/src/` kernels).
 
 # glmbayes 0.9.6
 

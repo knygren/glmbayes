@@ -134,15 +134,9 @@ Rcpp::List f2_f3_opencl(
 );
 
 #ifdef USE_OPENCL
-// Concatenated OpenCL C source: prelude, shims, selective nmath, and src/f2_f3_*.cl.
-// See inst/cl/README.md.
+// Concatenated OpenCL C source: prelude and shims from nmathopencl, selective
+// nmath subset from nmathopencl, entry kernels from app_package. See inst/cl/README.md.
 std::string load_likelihood_subgradient_program(
-    const std::string& family,
-    const std::string& link,
-    const std::string& package = "glmbayes");
-
-// Prelude, shims, and nmath subset from nmathopencl; entry kernels from app_package.
-std::string load_likelihood_subgradient_program_v2(
     const std::string& family,
     const std::string& link,
     const std::string& app_package = "glmbayes",

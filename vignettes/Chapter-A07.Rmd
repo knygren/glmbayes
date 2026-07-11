@@ -2312,6 +2312,25 @@ with
 and \(\sum_i \rho_i = 1\). \(\square\)
 
 
+> **Erratum (corrected below).** The original statement and proof of this
+> remark claimed \(t^{*} < \lambda_{\min}(K)\). That conclusion is **wrong**:
+> the proof's final step only licenses the weaker bound
+> \(t^{*} < \lambda_{\max}(K)\) (see the corrected proof below, and the
+> discussion after Claim 7). The stronger, incorrect bound was used in the
+> original proof of Claim 7 (part 3) to conclude that
+> \(\mathrm{UB2}_j(d)\) always attains its minimum over \([\mathrm{low},
+> \mathrm{upp}]\) at an endpoint. That conclusion is only valid when \(K\)
+> is (numerically) isotropic, i.e. the coefficient prior is a Zellner
+> g-prior for the design/weights in use; for anisotropic \(K\), a genuine
+> interior local minimum of \(\mathrm{UB2}_j(d)\) can occur. See the
+> corrected Claim 7 and the discussion following its proof for the
+> general root-finding procedure this implies. This has been confirmed
+> both by concrete counterexamples and by the compiled sampler in
+> `glmbayesCore` (`data-raw/ub2_root_finding_prototype.R`,
+> `data-raw/validate_ub2_rootfinding_fix.R`,
+> `data-raw/README_ub2_rootfinding_fix.md`), which implements the
+> corrected, exact minimization described below.
+
 **Remark 5.5.7 (Critical points of \(\tilde{\mathrm{UB2}}_j\)).**
 Suppose \(\Delta > 0\) and \(r^{*}_j \neq 0\). If \(t^{*} > 0\) is a critical
 point of \(\tilde{\mathrm{UB2}}_j(t)\), i.e.
@@ -2325,12 +2344,14 @@ point of \(\tilde{\mathrm{UB2}}_j(t)\), i.e.
     2\, v_j^{T}(K + t^{*}I)^{-3}v_j
   },
 \]
-and \(t^{*}\) lies strictly below the smallest eigenvalue of \(K\):
+and \(t^{*}\) lies strictly below the largest eigenvalue of \(K\):
 \[
-  t^{*} I \;\prec\; K,
-  \qquad
-  t^{*} < \lambda_{\min}(K).
+  t^{*} < \lambda_{\max}(K).
 \]
+(When \(K\) is isotropic, \(\lambda_{\max}(K) = \lambda_{\min}(K)\) and this
+recovers the stronger bound \(t^{*} I \prec K\); for anisotropic \(K\) only
+the weaker bound below the largest eigenvalue holds -- see the discussion
+after Claim 7 for why the analogous bound below \(\lambda_{\min}(K)\) fails.)
 
 *Proof.* From Remark 5.5.4 and Remark 5.5.5,
 \[
@@ -2506,6 +2527,15 @@ which proves the claimed lower bound. \(\square\)
 We now state the main result about the shape of \(\tilde{\mathrm{UB2}}_j(t)\)
 and the location of its minima.
 
+> **Erratum (corrected below).** Part 1 originally stated the (incorrect)
+> bound \(t^{*} < \lambda_{\min}(K)\) from the original Remark 5.5.7, and
+> part 3 used it to claim that \(\mathrm{UB2}_j(d)\) *always* attains its
+> minimum over \([\mathrm{low},\mathrm{upp}]\) at an endpoint. Both are
+> corrected below: part 1 now uses the valid bound
+> \(t^{*} < \lambda_{\max}(K)\), and part 3 is restated as an *isotropic*
+> special case, followed by the corrected general statement for anisotropic
+> \(K\) (Remark 5.5.9 / Corrected Claim 7\('\)).
+
 **Claim 7.**  
 Suppose \(\Delta > 0\) and \(r^{*}_j \neq 0\). Then:
 
@@ -2519,11 +2549,9 @@ Suppose \(\Delta > 0\) and \(r^{*}_j \neq 0\). Then:
        2\, v_j^{T}(K + t^{*}I)^{-3}v_j
      },
    \]
-   and lies strictly below the smallest eigenvalue of \(K\):
+   and lies strictly below the largest eigenvalue of \(K\):
    \[
-     t^{*} I \;\prec\; K,
-     \qquad
-     t^{*} < \lambda_{\min}(K).
+     t^{*} < \lambda_{\max}(K).
    \]
 
 2. Any inflection point \(t^{*} > 0\) (where \(\tilde{\mathrm{UB2}}_j''(t^{*}) = 0\))
@@ -2535,35 +2563,104 @@ Suppose \(\Delta > 0\) and \(r^{*}_j \neq 0\). Then:
    \]
    i.e. \(t^{*}\) is at least twice the smallest eigenvalue of \(K\).
 
-3. Consequently, any critical point lies strictly below any inflection
-   point, in the region where \(\tilde{\mathrm{UB2}}_j\) is concave, and
-   over any interval \(t \in [1/\mathrm{upp},\,1/\mathrm{low}]\) the
-   minimum of \(\tilde{\mathrm{UB2}}_j(t)\) must occur at one of the
+3. **(Isotropic case only.)** If \(K = \lambda I\) for a scalar
+   \(\lambda > 0\) (equivalently, the coefficient prior is a Zellner
+   g-prior for the design/weights in use), then \(\lambda_{\min}(K) =
+   \lambda_{\max}(K) = \lambda\), so part 1 gives \(t^{*} < \lambda\) and
+   part 2 gives \(t^{*} \ge 2\lambda\) for any critical/inflection point
+   respectively; any critical point therefore lies strictly below any
+   inflection point, in the region where \(\tilde{\mathrm{UB2}}_j\) is
+   concave, and over any interval \(t \in [1/\mathrm{upp},\,1/\mathrm{low}]\)
+   the minimum of \(\tilde{\mathrm{UB2}}_j(t)\) must occur at one of the
    endpoints. Equivalently, the minimum of \(\mathrm{UB2}_j(d)\) over
    \(d \in [\mathrm{low},\,\mathrm{upp}]\) occurs at \(d = \mathrm{low}\)
    or \(d = \mathrm{upp}\).
+   **For anisotropic \(K\)** (\(\lambda_{\max}(K) > \lambda_{\min}(K)\)),
+   this endpoint-only conclusion does **not** follow: part 1 only rules out
+   critical points with \(t^{*} \ge \lambda_{\max}(K)\), so a critical
+   point can occur anywhere in \((0, \lambda_{\max}(K))\), which overlaps
+   the convex region \(t \ge 2\lambda_{\min}(K)\) whenever
+   \(\lambda_{\max}(K) > 2\lambda_{\min}(K)\) (condition number of \(K\)
+   greater than 2). A critical point there is a genuine local minimum that
+   can lie strictly below both endpoint values -- see the discussion after
+   this proof for concrete examples and the corrected general procedure.
 
 *Proof of Claim 7.*  
 Part 1 follows directly from Remark 5.5.7: at any critical point
 \(t^{*}\) of \(\tilde{\mathrm{UB2}}_j(t)\) with \(\Delta > 0\) and
 \(r^{*}_j \neq 0\), we have the stated implicit equation and the strict
-inequality \(t^{*} < \lambda_{\min}(K)\).
+inequality \(t^{*} < \lambda_{\max}(K)\).
 
 Part 2 follows from Remark 5.5.8: at any inflection point \(t^{*}\),
 \(\tilde{\mathrm{UB2}}_j''(t^{*}) = 0\) implies
 \(t^{*} \ge 2\,\lambda_{\min}(K)\).
 
-For part 3, combine these bounds with the sign pattern of
-\(\tilde{\mathrm{UB2}}_j''(t)\) implied by Remark 5.5.5. The function is
-strictly concave for \(t < \lambda_{\min}(K)\) and convex for
-\(t \ge 2\,\lambda_{\min}(K)\), so any critical point must lie in the
-concave region strictly below any inflection point. Over any compact
-interval \([1/\mathrm{upp},\,1/\mathrm{low}]\), a function that is
-concave around any interior critical point and eventually convex must
-attain its minimum at an endpoint of the interval, and hence the minimum
-of \(\tilde{\mathrm{UB2}}_j(t)\) occurs at one of the endpoints. The
+For part 3 (isotropic case), combine these bounds with the sign pattern of
+\(\tilde{\mathrm{UB2}}_j''(t)\) implied by Remark 5.5.5. When
+\(\lambda_{\min}(K) = \lambda_{\max}(K) = \lambda\), the function is
+strictly concave for \(t < \lambda\) and convex for \(t \ge 2\lambda\), so
+any critical point (necessarily \(t^{*} < \lambda\), by part 1) must lie in
+the concave region strictly below any inflection point (necessarily
+\(t^{*} \ge 2\lambda\), by part 2). Over any compact interval
+\([1/\mathrm{upp},\,1/\mathrm{low}]\), a function that is concave around
+any interior critical point and eventually convex must attain its minimum
+at an endpoint of the interval, and hence the minimum of
+\(\tilde{\mathrm{UB2}}_j(t)\) occurs at one of the endpoints. The
 equivalent statement for \(\mathrm{UB2}_j(d)\) follows from the
 reparameterization \(t = 1/d\). \(\square\)
+
+### 5.5.5\('\) Corrected minimization for anisotropic \(K\)
+
+Claim 7's endpoint shortcut (part 3) is an *isotropic-only* result. When
+\(K\) is anisotropic, \(\mathrm{UB2}_j(d)\) can have a genuine interior
+local (and global) minimum over \([\mathrm{low},\mathrm{upp}]\) that lies
+strictly below both \(\mathrm{UB2}_j(\mathrm{low})\) and
+\(\mathrm{UB2}_j(\mathrm{upp})\). Concrete 2D and 3D examples with an
+interior minimum 50-58% below the endpoint-only estimate are given in
+`glmbayesCore`'s `data-raw/ub2_root_finding_prototype.R`; a
+condition-number sweep there shows the gap is exactly zero for
+\(\lambda_{\max}(K)/\lambda_{\min}(K) \le 100\) and grows for larger
+condition numbers. (In the accept-reject sampler this previously surfaced
+as spurious "Sign violation: UB2 < 0" errors whenever a proposed/accepted
+dispersion landed near the true, uncounted-for interior minimum.)
+
+**Remark 5.5.9 (Exact minimization via root-finding).**
+The only property of \(\mathrm{UB2}_{\mathrm{Min}, j}\) actually required
+elsewhere in this chapter (Claims 1-6, and the across-face/across-block
+machinery) is
+\[
+  \mathrm{UB2}_{\mathrm{Min}, j} \;\le\; \mathrm{UB2}_j(d)
+  \quad\text{for all } d \in [\mathrm{low}, \mathrm{upp}],
+\]
+i.e. any valid lower bound suffices; Claim 7's endpoint formula was never a
+separate requirement, only an (isotropic-only) shortcut for computing the
+exact minimum. Since \(t = 1/d\) is always a scalar regardless of the
+coefficient dimension \(p\), the exact minimum of \(\tilde{\mathrm{UB2}}_j\)
+over \(t \in [1/\mathrm{upp}, 1/\mathrm{low}]\) can be found directly and
+cheaply for any \(K\):
+
+1. By part 1 of Claim 7, any critical point \(t^{*}\) satisfies
+   \(t^{*} < \lambda_{\max}(K)\), so it suffices to search
+   \(t \in \bigl(0,\, \min(1/\mathrm{low},\, \lambda_{\max}(K))\bigr)\).
+2. Critical points satisfy
+   \(h_j'(t) := 2\,v_j^{T}(K+tI)^{-3}v_j \cdot t - \bigl(g_j(t) - \Delta\bigr)
+   = 0\) (equivalently, in the eigenbasis of \(K\), with \(w_i = (u_i^Tv_j)^2\)
+   for eigenvectors \(u_i\), \(h_j'(t) = \sum_i w_i(\lambda_i - t)/(\lambda_i
+   + t)^3 = \Delta\)); bracket sign changes of this equation on a grid
+   refined near each eigenvalue \(\lambda_i\) of \(K\), and polish each
+   bracket with a standard 1-D root finder.
+3. \(\mathrm{UB2}_{\mathrm{Min}, j} = \min\) of \(\tilde{\mathrm{UB2}}_j\)
+   evaluated at \(t = 1/\mathrm{upp}\), \(t = 1/\mathrm{low}\), and every
+   root found in step 2. This is exact (not merely a tighter heuristic),
+   and automatically reduces to Claim 7's endpoint formula when \(K\) is
+   isotropic (no interior critical point is possible there, by part 3).
+
+This procedure is implemented in `glmbayes`
+(`src/EnvelopeDispersionBuild.cpp::bound_ub2_over_dispersion`, via the
+`ub2_exact_detail` helper namespace), ported from the identical,
+independently validated implementation in `glmbayesCore` -- see
+`glmbayesCore`'s `data-raw/README_ub2_rootfinding_fix.md` for the exact
+patch and validation results.
 
 
 

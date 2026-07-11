@@ -57,30 +57,34 @@ EnvelopeEval (EnvelopeEval.cpp)
 
 OpenCL kernels are not stored as single monolithic files. Instead, the package builds the program by **concatenating** several source components in a fixed order. This mirrors a C/C++ build where headers and libraries are included before the main source.
 
-### 3.1 Assembly Order
+### 3.1 Assembly order (production)
 
-The full program string is:
+Runtime GPU assembly uses **`load_likelihood_subgradient_program`** in `src/kernel_loader.cpp` (see `inst/cl/README.md`). Prelude, shims, and selective **`nmath/`** are loaded from **`nmathopencl`**; entry kernels from **`glmbayes`** (`inst/cl/src/f2_f3_*.cl`).
+
+For interactive exploration, mirror that split with **opencltools**:
 
 ```
-all_src = OPENCL.cl
-        + rmath (load_kernel_library("rmath"))
-        + dpq   (load_kernel_library("dpq"))
-        + nmath (load_kernel_library("nmath"))
-        + kernel file (load_kernel_source, e.g. "src/f2_f3_binomial_logit.cl")
+all_src = opencltools::load_kernel_source("OPENCL.cl", package = "nmathopencl")
+        + opencltools::load_kernel_library("libR_shims", package = "nmathopencl")
+        + … (R_ext_types, R_shims, R_ext_runtime, R_ext_internals, System)
+        + opencltools::load_library_for_kernel(
+              system.file("cl/src/f2_f3_binomial_logit.cl", package = "glmbayes"),
+              system.file("cl/nmath", package = "nmathopencl"),
+              depends_tag = "all_depends_nmath")
+        + opencltools::load_kernel_source("src/f2_f3_binomial_logit.cl", package = "glmbayes")
 ```
 
-1. **OPENCL.cl** – Global configuration: extensions (`cl_khr_fp64`, `cl_khr_printf`), IEEE constants (`ML_NAN`, `ML_POSINF`), feature detection for `expm1`/`log1p`, and utility macros.
-2. **rmath** – Mathematical constants (M_E, M_PI, etc.) and distribution function declarations.
-3. **dpq** – R-style density/CDF macros (`R_D__0`, `R_DT_val`, etc.) used in give_log/lower_tail logic.
-4. **nmath** – Ported numerical routines (bd0, stirlerr, lgamma, dbinom, dpois, pnorm, etc.).
-5. **Kernel file** – The model-specific kernel (e.g., `f2_f3_binomial_logit.cl`) that computes f2 and f3 for each grid point.
+1. **OPENCL.cl** and shim layers — from **nmathopencl**.
+2. **nmath subset** — stems from `@all_depends_nmath` on the entry kernel; files from **nmathopencl** `inst/cl/nmath/`.
+3. **Kernel file** — model-specific kernel from **glmbayes** `inst/cl/src/`.
 
-### 3.2 load_kernel_source and load_kernel_library
+### 3.2 opencltools loaders
 
-- **`load_kernel_source(relative_path)`** – Loads a single `.cl` file from `inst/cl/` via `system.file("cl", relative_path, package = "glmbayes")`.
-- **`load_kernel_library(subdir)`** – Loads all `.cl` files in a subdirectory (e.g., `"nmath"`, `"rmath"`, `"dpq"`), parses `@provides` and `@depends` annotations, performs a **dependency-aware topological sort**, and concatenates the files so that dependents appear after their dependencies.
+- **`opencltools::load_kernel_source(relative_path, package = …)`** – Loads a single `.cl` file via `system.file("cl", …)`.
+- **`opencltools::load_kernel_library(subdir, package = …)`** – Loads all `.cl` files in a subdirectory with `@provides` / `@depends` topological sort.
+- **`opencltools::load_library_for_kernel()`** – Minimal nmath subset from `@all_depends_nmath` tags (see `?opencltools::load_library_for_kernel`).
 
-The `@provides` and `@depends` tags allow modular, maintainable kernel code: each file declares what it provides and what it needs. See `?load_kernel_library` for details.
+The `@provides` and `@depends` tags allow modular, maintainable kernel code. See **`?opencltools::load_kernel_library`** for details.
 
 
 ## 4. Ported Math Libraries (nmath / rmath / dpq)
@@ -214,5 +218,5 @@ Use `has_opencl()` to check availability and `diagnose_glmbayes()` for a full di
 - **Chapter A09** – Parallel sampling (pilot pattern, 5-minute safeguard)
 - **Chapter 16** – GPU acceleration: installation, `has_opencl`, `diagnose_glmbayes`
 - **`?EnvelopeBuild`**, **`?EnvelopeEval`** – use_opencl argument
-- **`?load_kernel_library`**, **`?load_kernel_source`** – Program assembly
+- **`?opencltools::load_kernel_library`**, **`?opencltools::load_kernel_source`** – Program assembly
 - **`?glmb`**, **`?rglmb`** – use_opencl argument

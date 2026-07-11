@@ -22,6 +22,10 @@
 #'   \item \code{\link[opencltools:gpu_diagnostics]{detect_compute_runtimes}()}
 #'   \item \code{\link[opencltools:gpu_diagnostics]{verify_opencl_runtime}()}
 #'   \item \code{\link[opencltools:gpu_diagnostics]{check_runtime_env}()}
+#'   \item \code{\link[opencltools:load_kernel_source]{load_kernel_source}()},
+#'     \code{\link[opencltools:load_kernel_source]{load_kernel_library}()}
+#'     (pass \code{package = "glmbayes"} for entry kernels under \code{inst/cl/src/};
+#'     prelude and \code{nmath/} come from \pkg{nmathopencl} in the production GPU path)
 #'   \item \code{\link[opencltools:add_to_path]{add_to_path_windows}()} and related PATH helpers
 #' }
 #'
@@ -41,6 +45,7 @@
 #'
 #' @references
 #' \insertAllCited{}
+#' @example inst/examples/Ex_load_kernel_source.R
 #' @importFrom Rdpack reprompt
 #' @keywords diagnostics gpu opencl environment
 #' @name gpu_diagnostics

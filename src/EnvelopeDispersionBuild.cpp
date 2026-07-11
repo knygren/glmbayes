@@ -14,6 +14,9 @@
 #include "openclPort.h"
 #include "progress_utils.h"
 #include "rng_utils.h"  // for safe_runif()
+#include <vector>
+#include <algorithm>
+#include <cmath>
 
 
 using namespace Rcpp;
@@ -702,10 +705,147 @@ Rcpp::List rss_face_quadratic_sum_internal(
 
 
 // ---------------------------------------------------------------------
+// Exact (root-finding) minimization of UB2_j(d) over d in [low, upp] for
+// anisotropic coefficient priors.
+//
+// Background (see vignettes/Chapter-A07.Rmd, Remark 5.5.4/5.5.7, and
+// glmbayesCore's data-raw/ub2_root_finding_prototype.R /
+// data-raw/README_ub2_rootfinding_fix.md): with t = 1/d,
+// K = Q^{-1/2} P Q^{-1/2}, v_j = Q^{-1/2}*(cbars_j - P*mu - P*beta_hat), and
+// w_i = (u_i^T v_j)^2 (u_i = eigenvectors of K, lambda_i its eigenvalues),
+//
+//   tilde{UB2}_j(t) = (t/2) * (g(t) - Delta),   g(t) = sum_i w_i/(lambda_i+t)^2.
+//
+// Claim 7 (Chapter A07) assumed the minimum over t always occurs at an
+// endpoint, but the underlying proof (Remark 5.5.7) only guarantees any
+// critical point t* satisfies t* < lambda_max(K), not t* < lambda_min(K).
+// For anisotropic K this allows genuine interior minima, which the
+// endpoint-only shortcut misses -- the mechanism behind observed
+// "Sign violation: UB2 < 0" errors downstream (the endpoint estimate is too
+// large, so an actually-evaluated dispersion near the true interior minimum
+// undercuts it). This block finds the true minimum exactly, at negligible
+// extra cost: t is always scalar regardless of the coefficient dimension p,
+// and K depends only on P/Q (not on the face j), so its eigendecomposition
+// is computed once per envelope build and reused across all faces.
+// ---------------------------------------------------------------------
+
+namespace ub2_exact_detail {
+
+inline double g_of_t(const arma::vec& lambda, const arma::vec& w, double t) {
+  double s = 0.0;
+  for (arma::uword i = 0; i < lambda.n_elem; ++i) {
+    double m = lambda(i) + t;
+    s += w(i) / (m * m);
+  }
+  return s;
+}
+
+inline double hprime_of_t(const arma::vec& lambda, const arma::vec& w, double t) {
+  double s = 0.0;
+  for (arma::uword i = 0; i < lambda.n_elem; ++i) {
+    double m = lambda(i) + t;
+    s += w(i) * (lambda(i) - t) / (m * m * m);
+  }
+  return s;
+}
+
+inline double ub2_reduced(const arma::vec& lambda, const arma::vec& w, double Delta, double t) {
+  return 0.5 * t * (g_of_t(lambda, w, t) - Delta);
+}
+
+// Robust bracketed bisection root finder for f(t) = 0 on [a, b], f(a) and
+// f(b) assumed to have opposite signs (or zero). Not the fastest possible
+// (Brent's method would converge faster) but simple and reliably correct;
+// this runs a handful of times per face, once per envelope build, so
+// performance is not a concern.
+template <typename F>
+inline double bisection_root(F f, double a, double b, double fa, double fb,
+                              int max_iter = 100, double tol = 1e-12) {
+  for (int it = 0; it < max_iter; ++it) {
+    double mid = 0.5 * (a + b);
+    double fm = f(mid);
+    if (std::abs(fm) < tol || (b - a) < tol * std::max(1.0, std::abs(mid))) return mid;
+    if ((fa > 0.0) == (fm > 0.0)) { a = mid; fa = fm; } else { b = mid; fb = fm; }
+  }
+  return 0.5 * (a + b);
+}
+
+struct ExactResult { double ub2_min; double t_star; };
+
+// Finds the exact minimum of tilde{UB2}_j(t) over t in [t_lo, t_hi] by
+// bracketing sign changes of h'(t) - Delta on a grid anchored at t_lo, t_hi,
+// and min(t_hi, lambda_max(K)) (any critical point must lie strictly below
+// lambda_max(K); see Remark 5.5.7), refined near each eigenvalue of K, then
+// polishing each bracket via bisection. Always includes t_lo and t_hi among
+// the evaluated candidates, so the result is never worse than the old
+// endpoint-only estimate.
+inline ExactResult ub2_min_exact_1d(const arma::vec& lambda, const arma::vec& w,
+                                     double Delta, double t_lo, double t_hi,
+                                     int grid_mult = 40) {
+  double lam_max = lambda.max();
+  double hi_search = std::min(t_hi, lam_max * (1.0 - 1e-9));
+
+  std::vector<double> cands;
+  cands.push_back(t_lo);
+  cands.push_back(t_hi);
+
+  if (hi_search > t_lo) {
+    std::vector<double> anchors;
+    anchors.push_back(t_lo);
+    anchors.push_back(hi_search);
+    for (arma::uword i = 0; i < lambda.n_elem; ++i) {
+      if (lambda(i) > t_lo && lambda(i) < hi_search) anchors.push_back(lambda(i));
+    }
+    std::sort(anchors.begin(), anchors.end());
+    anchors.erase(std::unique(anchors.begin(), anchors.end()), anchors.end());
+
+    std::vector<double> grid;
+    for (size_t i = 0; i + 1 < anchors.size(); ++i) {
+      double lo_i = anchors[i], hi_i = anchors[i + 1];
+      if (hi_i <= lo_i) continue;
+      for (int k = 0; k < grid_mult; ++k) {
+        grid.push_back(lo_i + (hi_i - lo_i) * static_cast<double>(k) / (grid_mult - 1));
+      }
+    }
+    if (grid.size() < 2) {
+      for (int k = 0; k < grid_mult; ++k) {
+        grid.push_back(t_lo + (hi_search - t_lo) * static_cast<double>(k) / (grid_mult - 1));
+      }
+    }
+    std::sort(grid.begin(), grid.end());
+    grid.erase(std::unique(grid.begin(), grid.end()), grid.end());
+
+    std::vector<double> fvals(grid.size());
+    for (size_t i = 0; i < grid.size(); ++i) fvals[i] = hprime_of_t(lambda, w, grid[i]) - Delta;
+
+    for (size_t i = 0; i + 1 < grid.size(); ++i) {
+      if ((fvals[i] > 0.0) != (fvals[i + 1] > 0.0)) {
+        double root = bisection_root(
+          [&](double t) { return hprime_of_t(lambda, w, t) - Delta; },
+          grid[i], grid[i + 1], fvals[i], fvals[i + 1]
+        );
+        if (root > t_lo && root < t_hi) cands.push_back(root);
+      }
+    }
+  }
+
+  double best_val = ub2_reduced(lambda, w, Delta, cands[0]);
+  double best_t = cands[0];
+  for (size_t i = 1; i < cands.size(); ++i) {
+    double v = ub2_reduced(lambda, w, Delta, cands[i]);
+    if (v < best_val) { best_val = v; best_t = cands[i]; }
+  }
+  return ExactResult{ best_val, best_t };
+}
+
+}  // namespace ub2_exact_detail
+
+// ---------------------------------------------------------------------
 // bound_ub2_over_dispersion
-// Evaluate UB2 at the dispersion endpoints [low, upp] for each face and
-// return the per-face minimum and the matching dispersion. No quadratic
-// algebra, no dependency on UB2 minimization.
+// Evaluate UB2 at the dispersion endpoints [low, upp] for each face, plus
+// (when the coefficient prior precision P/Q pair yields a well-defined K)
+// the exact interior minimum via ub2_exact_detail::ub2_min_exact_1d above;
+// return the per-face minimum and the matching dispersion.
 // ---------------------------------------------------------------------
 Rcpp::List bound_ub2_over_dispersion(
     int gs,
@@ -743,6 +883,31 @@ Rcpp::List bound_ub2_over_dispersion(
   mat M_min, M_max;
   double RSS_ML_local = 0.0;
 
+  // Exact (root-finding) minimization needs K = Q^{-1/2} P Q^{-1/2} and its
+  // eigendecomposition. K depends only on P and Q = base_A, not on the face
+  // j, so both are computed once here and reused for every face below.
+  bool have_K = false;
+  vec K_eigval;
+  mat K_eigvec;
+  mat Qinvhalf;   // Rq^{-1}, where base_A = Rq^T * Rq (arma::chol, upper-tri)
+  double Delta = 0.0;
+  double t_lo = 1.0 / upp;   // t = 1/d; d=upp -> t_lo (smallest t)
+  double t_hi = 1.0 / low;   // d=low -> t_hi (largest t)
+
+  // Near-isotropic fast path: Claim 7 part 3 (Chapter A07 vignette) proves
+  // the endpoint-only minimum is *exact* -- not merely a heuristic -- once
+  // kappa(K) = lambda_max(K)/lambda_min(K) <= 2 (any critical point lies in
+  // t* < lambda_max(K) by part 1, while any inflection point needs
+  // t* >= 2*lambda_min(K) by part 2; these two ranges cannot overlap when
+  // lambda_max(K) <= 2*lambda_min(K), so no genuine interior local minimum
+  // is possible). When this certificate holds we skip the per-face
+  // root-finding search entirely (it would just re-derive the endpoint
+  // values at extra cost) and fall straight through to the endpoint
+  // comparison below. This is a single, cheap, once-per-envelope-build
+  // check -- not a per-face search -- since kappa(K) does not depend on j.
+  bool K_is_near_isotropic = false;
+  double kappa_K = NA_REAL;
+
   if (UB_Min_Method == 2) {
     M_min = Rcpp::as<mat>(cache["M_min"]);
     M_max = Rcpp::as<mat>(cache["M_max"]);
@@ -754,6 +919,25 @@ Rcpp::List bound_ub2_over_dispersion(
     vec wv        = Rcpp::as<vec>(wt);
     vec resid_ml  = yv - X * beta_hat - alphav;
     RSS_ML_local  = as_scalar(resid_ml.t() * (wv % resid_ml));
+
+    Delta = rss_min_global - RSS_ML_local;
+    if (Delta < 0.0) Delta = 0.0;  // guard against tiny floating-point noise
+
+    mat Rq;
+    if (arma::chol(Rq, base_A)) {
+      Qinvhalf = arma::inv(arma::trimatu(Rq));
+      mat K = Qinvhalf.t() * Pmat * Qinvhalf;
+      K = 0.5 * (K + K.t());
+      if (arma::eig_sym(K_eigval, K_eigvec, K) && K_eigval.min() > 0.0) {
+        have_K = true;
+        kappa_K = K_eigval.max() / K_eigval.min();
+        // Small numerical cushion above the exact "2" cutoff from Claim 7
+        // part 3, since kappa_K is itself only known to eigendecomposition
+        // precision; using the exact cutoff risks needlessly falling back
+        // to the (harmless, still-correct) search for borderline cases.
+        K_is_near_isotropic = kappa_K <= 2.0 * (1.0 + 1e-8);
+      }
+    }
   }
 
   for (int j = 0; j < gs; ++j) {
@@ -762,9 +946,12 @@ Rcpp::List bound_ub2_over_dispersion(
 
     double ub2_low = NA_REAL;
     double ub2_upp = NA_REAL;
+    double best_ub2, best_disp;
+    bool used_exact = false;
 
     if (UB_Min_Method == 1) {
-      // Method 1: original UB2 helper
+      // Method 1: original UB2 helper (endpoint-only; retained for
+      // compatibility if UB_Min_Method is manually switched back to 1).
       ub2_low = UB2(low, cache, cbars_j, y, x, alpha, wt, rss_min_global);
       ub2_upp = UB2(upp, cache, cbars_j, y, x, alpha, wt, rss_min_global);
     } else {
@@ -778,20 +965,46 @@ Rcpp::List bound_ub2_over_dispersion(
 
       ub2_low = (0.5 / low) * (rss_low_approx - rss_min_global);
       ub2_upp = (0.5 / upp) * (rss_upp_approx - rss_min_global);
+
+      if (have_K && !K_is_near_isotropic) {
+        // Exact minimum over the whole [low, upp] interval, not just the
+        // endpoints -- fixes the Claim 7 gap for anisotropic K. Always
+        // evaluates at t_lo/t_hi too, so this is never worse than the
+        // endpoint-only estimate above, and reduces to it automatically
+        // when K is (numerically) isotropic.
+        vec v_j = Qinvhalf.t() * b_j;
+        vec w_coords = arma::square(K_eigvec.t() * v_j);
+        ub2_exact_detail::ExactResult ex =
+          ub2_exact_detail::ub2_min_exact_1d(K_eigval, w_coords, Delta, t_lo, t_hi);
+        best_ub2   = ex.ub2_min;
+        best_disp  = 1.0 / ex.t_star;
+        used_exact = true;
+      }
+      // else: K_is_near_isotropic (kappa(K) <= 2) certifies -- once, for the
+      // whole envelope build, per the note above bound_ub2_over_dispersion's
+      // K/kappa_K computation -- that the endpoint-only comparison below is
+      // already exact, so the per-face root-finding search is skipped.
     }
 
-    if (ub2_low <= ub2_upp) {
-      disp_min_ub2[j] = low;
-      ub2_min[j]      = ub2_low;
-    } else {
-      disp_min_ub2[j] = upp;
-      ub2_min[j]      = ub2_upp;
+    if (!used_exact) {
+      if (ub2_low <= ub2_upp) {
+        best_ub2  = ub2_low;
+        best_disp = low;
+      } else {
+        best_ub2  = ub2_upp;
+        best_disp = upp;
+      }
     }
+
+    disp_min_ub2[j] = best_disp;
+    ub2_min[j]      = best_ub2;
   }
 
   return Rcpp::List::create(
-    Rcpp::Named("disp_min_ub2") = disp_min_ub2,
-    Rcpp::Named("ub2_min")      = ub2_min
+    Rcpp::Named("disp_min_ub2")        = disp_min_ub2,
+    Rcpp::Named("ub2_min")             = ub2_min,
+    Rcpp::Named("kappa_K")             = kappa_K,
+    Rcpp::Named("K_is_near_isotropic") = K_is_near_isotropic
   );
 }
 
@@ -1537,6 +1750,14 @@ List EnvelopeDispersionBuild(
     Rcpp::Rcout << "[EnvelopeDispersionBuild:bound_ub2] Exiting: "
                   << glmbayes::progress::timestamp_cpp()
                   << "\n";
+    if (bound_res.containsElementNamed("kappa_K")) {
+      double kappa_K_report = Rcpp::as<double>(bound_res["kappa_K"]);
+      bool near_iso_report  = Rcpp::as<bool>(bound_res["K_is_near_isotropic"]);
+      Rcpp::Rcout << "[EnvelopeDispersionBuild:bound_ub2] kappa(K) = "
+                  << kappa_K_report
+                  << ", K_is_near_isotropic = " << (near_iso_report ? "TRUE" : "FALSE")
+                  << "\n";
+    }
   }
 
   NumericVector disp_min_ub2_bound = bound_res["disp_min_ub2"];
@@ -1644,6 +1865,13 @@ List EnvelopeDispersionBuild(
   List gamma_list  = mix["gamma_list"];
   List UB_list     = mix["UB_list"];
   List diagnostics = mix["diagnostics"];
+
+  double kappa_K_diag            = bound_res.containsElementNamed("kappa_K")
+    ? Rcpp::as<double>(bound_res["kappa_K"]) : NA_REAL;
+  bool   K_is_near_isotropic_diag = bound_res.containsElementNamed("K_is_near_isotropic")
+    ? Rcpp::as<bool>(bound_res["K_is_near_isotropic"]) : false;
+  diagnostics["kappa_K"]             = kappa_K_diag;
+  diagnostics["K_is_near_isotropic"] = K_is_near_isotropic_diag;
 
   return List::create(
     Named("Env_out")    = Env,

@@ -45,10 +45,40 @@ with OpenCL support.
 \item \code{\link[opencltools:gpu_diagnostics]{detect_compute_runtimes}()}
 \item \code{\link[opencltools:gpu_diagnostics]{verify_opencl_runtime}()}
 \item \code{\link[opencltools:gpu_diagnostics]{check_runtime_env}()}
+\item \code{\link[opencltools:load_kernel_source]{load_kernel_source}()},
+\code{\link[opencltools:load_kernel_source]{load_kernel_library}()}
+(pass \code{package = "glmbayes"} for entry kernels under \code{inst/cl/src/};
+prelude and \code{nmath/} come from \pkg{nmathopencl} in the production GPU path)
 \item \code{\link[opencltools:add_to_path]{add_to_path_windows}()} and related PATH helpers
 }
 }
 
+\examples{
+############################### Start of load_kernel_source example ####################
+
+if (has_opencl()) {
+  # Family entry kernels live in glmbayes; prelude/nmath in nmathopencl (production v2 path)
+  ksrc <- opencltools::load_kernel_source(
+    "src/f2_f3_binomial_logit.cl",
+    package = "glmbayes"
+  )
+  nmath_stem <- opencltools::load_kernel_source(
+    "nmath/bd0.cl",
+    package = "nmathopencl"
+  )
+  nmath_lib <- opencltools::load_kernel_library(
+    "nmath",
+    package = "nmathopencl"
+  )
+  cat("Entry kernel length:", nchar(ksrc), "\n")
+  cat("nmath stem length:", nchar(nmath_stem), "\n")
+  cat("nmath library length:", nchar(nmath_lib), "\n")
+} else {
+  message("OpenCL not available in this build; skipping kernel load example.")
+}
+
+## End of load_kernel_source example
+}
 \references{
 \insertAllCited{}
 }

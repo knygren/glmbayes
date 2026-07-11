@@ -1,6 +1,7 @@
 #include "RcppArmadillo.h"
 #include "Envelopefuncs.h"
 #include "openclPort.h"
+#include "opencl.h"
 #include "simfuncs.h"
 
 using namespace openclPort;
@@ -571,27 +572,10 @@ Rcpp::List glmb_Standardize_Model_cpp_export(
 
 // =============================================================================
 // Tier 5: OpenCL / GPU
-// Callers: load_kernel_source, load_kernel_library, has_opencl,
-//          get_opencl_core_count, gpu_names
-// User:    Advanced users - GPU diagnostics, kernel loading for use_opencl
+// Callers: has_opencl, get_opencl_core_count, gpu_names
+// User:    Advanced users - GPU diagnostics for use_opencl
+// Kernel loading: opencltools (see ?opencltools::load_kernel_source)
 // =============================================================================
-
-// [[Rcpp::export]]
-std::string load_kernel_source_wrapper_cpp_export(
-    const std::string& relative_path,
-    const std::string& package = "glmbayes"
-) {
-  return load_kernel_source_wrapper(relative_path, package);
-}
-
-// [[Rcpp::export]]
-std::string load_kernel_library_wrapper_cpp_export(
-    const std::string& subdir,
-    const std::string& package = "glmbayes",
-    bool verbose = false
-) {
-  return load_kernel_library_wrapper(subdir, package, verbose);
-}
 
 // [[Rcpp::export]]
 bool has_opencl_cpp_export() {
@@ -607,6 +591,23 @@ int get_opencl_core_count_cpp_export() {
 Rcpp::CharacterVector gpu_names_cpp_export() {
   return gpu_names();
 }
+
+#ifdef USE_OPENCL
+// [[Rcpp::export]]
+Rcpp::List debug_likelihood_program_cpp_export(
+    std::string family,
+    std::string link)
+{
+  using glmbayes::opencl::load_likelihood_subgradient_program;
+
+  const std::string program =
+      load_likelihood_subgradient_program(family, link, "glmbayes");
+
+  return Rcpp::List::create(
+      Rcpp::Named("program") = program,
+      Rcpp::Named("nchar") = static_cast<int>(program.size()));
+}
+#endif
 
 
 // =============================================================================
