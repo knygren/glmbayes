@@ -592,23 +592,6 @@ Rcpp::CharacterVector gpu_names_cpp_export() {
   return gpu_names();
 }
 
-#ifdef USE_OPENCL
-// [[Rcpp::export]]
-Rcpp::List debug_likelihood_program_cpp_export(
-    std::string family,
-    std::string link)
-{
-  using glmbayes::opencl::load_likelihood_subgradient_program;
-
-  const std::string program =
-      load_likelihood_subgradient_program(family, link, "glmbayes");
-
-  return Rcpp::List::create(
-      Rcpp::Named("program") = program,
-      Rcpp::Named("nchar") = static_cast<int>(program.size()));
-}
-#endif
-
 
 // =============================================================================
 // Phased Out (no R wrappers; C++ exports commented out)

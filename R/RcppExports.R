@@ -93,7 +93,3 @@ gpu_names_cpp_export <- function() {
     .Call(`_glmbayes_gpu_names_cpp_export`)
 }
 
-debug_likelihood_program_cpp_export <- function(family, link) {
-    .Call(`_glmbayes_debug_likelihood_program_cpp_export`, family, link)
-}
-

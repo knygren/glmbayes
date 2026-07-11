@@ -499,18 +499,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// debug_likelihood_program_cpp_export
-Rcpp::List debug_likelihood_program_cpp_export(std::string family, std::string link);
-RcppExport SEXP _glmbayes_debug_likelihood_program_cpp_export(SEXP familySEXP, SEXP linkSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
-    Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
-    rcpp_result_gen = Rcpp::wrap(debug_likelihood_program_cpp_export(family, link));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_rNormalGLM_cpp_export", (DL_FUNC) &_glmbayes_rNormalGLM_cpp_export, 18},
@@ -536,7 +524,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_glmbayes_has_opencl_cpp_export", (DL_FUNC) &_glmbayes_has_opencl_cpp_export, 0},
     {"_glmbayes_get_opencl_core_count_cpp_export", (DL_FUNC) &_glmbayes_get_opencl_core_count_cpp_export, 0},
     {"_glmbayes_gpu_names_cpp_export", (DL_FUNC) &_glmbayes_gpu_names_cpp_export, 0},
-    {"_glmbayes_debug_likelihood_program_cpp_export", (DL_FUNC) &_glmbayes_debug_likelihood_program_cpp_export, 2},
     {NULL, NULL, 0}
 };
 
