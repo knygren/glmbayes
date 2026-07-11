@@ -6,6 +6,9 @@ suppressPackageStartupMessages({
   if (!requireNamespace("nmathopencl", quietly = TRUE)) {
     stop("nmathopencl required")
   }
+  if (!requireNamespace("glmbayes", quietly = TRUE)) {
+    stop("glmbayes required")
+  }
 })
 
 app_pkg <- "glmbayes"
@@ -32,23 +35,7 @@ assemble_preload_v1 <- function(pkg = app_pkg) {
 }
 
 assemble_preload_v2 <- function(pkg = nmath_pkg) {
-  manifest_path <- system.file("cl", "program_preload_manifest.tsv", package = pkg)
-  if (!nzchar(manifest_path)) {
-    stop("program_preload_manifest.tsv not found in ", pkg)
-  }
-  manifest <- read.delim(manifest_path, stringsAsFactors = FALSE)
-  pieces <- vector("list", nrow(manifest))
-  for (i in seq_len(nrow(manifest))) {
-    row <- manifest[i, ]
-    pieces[[i]] <- if (row$kind == "file") {
-      opencltools::load_kernel_source(row$rel_path, pkg)
-    } else if (row$kind == "library") {
-      opencltools::load_kernel_library(row$rel_path, pkg)
-    } else {
-      stop("Unknown kind: ", row$kind)
-    }
-  }
-  paste(unlist(pieces), collapse = "\n")
+  opencltools::load_program_preload(source_package = pkg)
 }
 
 assemble_nmath_v1 <- function(kernel_rel, pkg = app_pkg) {
@@ -60,10 +47,12 @@ assemble_nmath_v1 <- function(kernel_rel, pkg = app_pkg) {
 }
 
 assemble_nmath_v2 <- function(kernel_rel, app = app_pkg, nmath = nmath_pkg) {
-  kernel_path <- system.file("cl", kernel_rel, package = app)
-  nmath_dir <- system.file("cl/nmath", package = nmath)
-  opencltools::load_library_for_kernel(
-    kernel_path, nmath_dir, depends_tag = "all_depends_nmath"
+  opencltools::load_library_for_kernel_cross_package(
+    kernel_relative_path = kernel_rel,
+    kernel_package = app,
+    library_subdir = "nmath",
+    library_package = nmath,
+    depends_tag = "all_depends_nmath"
   )
 }
 
@@ -99,7 +88,6 @@ first_diff_info <- function(a, b) {
   len_a <- nchar(a, type = "bytes")
   len_b <- nchar(b, type = "bytes")
   min_len <- min(len_a, len_b)
-  # compare by lines for readability
   la <- strsplit(a, "\n", fixed = TRUE)[[1]]
   lb <- strsplit(b, "\n", fixed = TRUE)[[1]]
   n <- min(length(la), length(lb))

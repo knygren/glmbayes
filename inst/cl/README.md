@@ -27,8 +27,8 @@ At runtime, **`glmbayes::opencl::load_likelihood_subgradient_program(family, lin
 
 Assembly order:
 
-1. **`OPENCL.cl`** (from **nmathopencl**)
-2. **`libR_shims`**, **`R_ext_types`**, **`R_shims`**, **`R_ext_runtime`**, **`R_ext_internals`**, **`System`** (from **nmathopencl**)
+1. **Prelude** — **`OPENCL.cl`** plus shim libraries listed in **nmathopencl** **`program_preload_manifest.tsv`**
+2. **`libR_shims`**, **`R_ext_types`**, **`R_shims`**, **`R_ext_runtime`**, **`R_ext_internals`**, **`System`** (from **nmathopencl**, via the manifest)
 3. **`nmath`** subset — stems from `@all_depends_nmath` on the chosen entry kernel; files and TSV from **nmathopencl**
 4. **Entry kernel** — e.g. `src/f2_f3_binomial_logit.cl` (from **glmbayes**)
 
@@ -41,6 +41,8 @@ That string is passed to **`clCreateProgramWithSource`** (see `glmbayes::opencl:
 ## Relation to R helpers
 
 - **`opencltools::load_kernel_source()`** / **`opencltools::load_kernel_library()`** (with `package = "glmbayes"` for entry kernels, or `"nmathopencl"` for prelude/nmath) are **generic** exploration helpers.
+- **`opencltools::load_program_preload(source_package = "nmathopencl")`** reads **`program_preload_manifest.tsv`** (or its RDS companion) and concatenates steps 1–2 above.
+- **`opencltools::load_library_for_kernel_cross_package()`** mirrors step 3 when the entry kernel lives in **glmbayes** and **`nmath/`** lives in **nmathopencl**.
 - **`load_likelihood_subgradient_program()`** is **application-specific**: the exact C++ recipe for envelope GPU evaluation (delegates loading to **opencltools** via C API). The pre-nmathopencl loader is archived under **`src/backup/`**.
 
 ---

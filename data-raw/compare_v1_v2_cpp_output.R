@@ -1,5 +1,4 @@
-# Dump production OpenCL program strings (R-level assembly via opencltools).
-# Mirrors load_likelihood_subgradient_program() without a package C++ export.
+# Dump production OpenCL program strings via opencltools R loaders.
 suppressPackageStartupMessages({
   if (!requireNamespace("opencltools", quietly = TRUE)) {
     stop("opencltools required")
@@ -7,39 +6,24 @@ suppressPackageStartupMessages({
   if (!requireNamespace("nmathopencl", quietly = TRUE)) {
     stop("nmathopencl required")
   }
+  if (!requireNamespace("glmbayes", quietly = TRUE)) {
+    stop("glmbayes required")
+  }
 })
 
 app_pkg <- "glmbayes"
 nmath_pkg <- "nmathopencl"
 
-assemble_preload <- function(pkg = nmath_pkg) {
-  manifest_path <- system.file("cl", "program_preload_manifest.tsv", package = pkg)
-  if (!nzchar(manifest_path)) {
-    stop("program_preload_manifest.tsv not found in ", pkg)
-  }
-  manifest <- read.delim(manifest_path, stringsAsFactors = FALSE)
-  pieces <- vector("list", nrow(manifest))
-  for (i in seq_len(nrow(manifest))) {
-    row <- manifest[i, ]
-    pieces[[i]] <- if (row$kind == "file") {
-      opencltools::load_kernel_source(row$rel_path, pkg)
-    } else if (row$kind == "library") {
-      opencltools::load_kernel_library(row$rel_path, pkg)
-    } else {
-      stop("Unknown kind: ", row$kind)
-    }
-  }
-  paste(unlist(pieces), collapse = "\n")
-}
-
-assemble_program <- function(kernel_rel, app = app_pkg, nmath = nmath_pkg) {
-  preload <- assemble_preload(nmath)
-  kernel_path <- system.file("cl", kernel_rel, package = app)
-  nmath_dir <- system.file("cl/nmath", package = nmath)
-  nmath_src <- opencltools::load_library_for_kernel(
-    kernel_path, nmath_dir, depends_tag = "all_depends_nmath"
+assemble_program <- function(kernel_rel) {
+  preload <- opencltools::load_program_preload(source_package = nmath_pkg)
+  nmath_src <- opencltools::load_library_for_kernel_cross_package(
+    kernel_relative_path = kernel_rel,
+    kernel_package = app_pkg,
+    library_subdir = "nmath",
+    library_package = nmath_pkg,
+    depends_tag = "all_depends_nmath"
   )
-  ksrc <- opencltools::load_kernel_source(kernel_rel, app)
+  ksrc <- opencltools::load_kernel_source(kernel_rel, app_pkg)
   paste(preload, nmath_src, ksrc, sep = "\n")
 }
 
