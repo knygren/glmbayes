@@ -1,5 +1,17 @@
 # glmbayes 0.9.6.9000 (development)
 
+## Bug fixes
+
+* **`print.lmb()`:** Single-response **`lmb()`** fits again show a concise
+  **`Call:`** line (formula, `n`, `data`, and related arguments) instead of
+  deparsing the full **`pfamily`** object, including embedded **`simfun`**
+  source. When multi-response **`lmb()`** / **`mlmb`** support was added in
+  0.9.6, **`.mlmb_lmb_display_call()`** omitted **`pfamily`** from the stored
+  call for each block fit only; univariate **`lmb()`** still used the internal
+  **`.uni_lmb()`** matched call via **`do.call()`**, which inlined the evaluated
+  **`pfamily`**. Univariate fits now use the same display-call helper as
+  **`mlmb`**.
+
 ## Independent Normal-Gamma simulation
 
 * Updates to independent normal gamma simulation to better handle

@@ -226,6 +226,7 @@ lmb <- function(
       .uni_lmb,
       c(list(formula = formula, pfamily = pfamily), lmb_args)
     )
+    fit$call <- .mlmb_lmb_display_call(mc, formula)
     return(fit)
   }
 
