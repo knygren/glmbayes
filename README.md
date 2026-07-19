@@ -22,26 +22,6 @@ The current **CRAN release is version 0.9.7**
 The [GitHub](https://github.com/knygren/glmbayes) repository holds the source; [R-Universe](https://knygren.r-universe.dev/glmbayes) builds binaries from it.
 See [NEWS.md](https://github.com/knygren/glmbayes/blob/main/NEWS.md) for changes.
 
-## Recent updates (0.9.7)
-
-Recent infrastructure work (through **0.9.7**) includes:
-
-1. ~~**Phase out local `nmath` sources and headers.**~~ **Done.** CPU
-   statistical code uses R’s libR Mathlib via `<Rmath.h>` (`Rf_dnorm4`, `Rf_pgamma`,
-   etc.); the unused vendored CPU snapshot under `src/nmath/` and archived
-   `legacy_c_code/` have been removed from the package.
-
-2. ~~**OpenCL via [`nmathopencl`](https://CRAN.R-project.org/package=nmathopencl).**~~
-   **Done (0.9.7).** GPU statistical kernels are loaded from **`nmathopencl`**
-   (hard dependency, including Windows CRAN binaries). **glmbayes**-specific
-   likelihood/envelope kernels remain under `inst/cl/`.
-
-3. ~~**`bayestestR` / `insight` integration for prior checking.**~~ **Done (0.9.7).**
-   S3 methods for **`simulate_prior()`**, **`check_prior()`**, and
-   **`describe_prior()`** on **`glmb`** fits, plus **`insight`** accessors for
-   model metadata and posterior draws. See **`?glmbayes_bayestestR_prior_methods`**
-   and **`?glmbayes_insight_methods`**.
-
 ## Installation
 
 **CRAN (release 0.9.7)**
@@ -399,8 +379,12 @@ details behind the samplers.
 
 ## Future Plans
 
-See **Planned updates** above for recently completed infrastructure work
-(**`nmathopencl`**, **`insight`**, **`bayestestR`** prior-checking methods).
+The main near-term goal is to migrate much of the sampling back end — the
+**`src/*.cpp`** code and related R-layer simulation/envelope functions — into
+[**glmbayesCore**](https://github.com/knygren/glmbayesCore), leaving **glmbayes**
+focused on the user-facing **`glmb()`** / **`lmb()`** interface, priors,
+diagnostics, and documentation. **glmbayesCore** already hosts shared CPU/OpenCL
+nmath and several core samplers; the migration will extend that split.
 
 Further performance and algorithm work:
 
