@@ -1,4 +1,32 @@
-# glmbayes 0.9.6.9000 (development)
+# glmbayes 0.9.7
+
+## Highlights
+
+* **CRAN dependency on `nmathopencl`:** OpenCL statistical kernels are now
+  supplied by the **`nmathopencl`** package (hard **`Imports`** dependency),
+  including Windows binaries on CRAN — unblocking GPU/OpenCL builds on Windows
+  without vendored nmath in **glmbayes**.
+* **Bug fixes** (see below): **`print.lmb()`** call display, truncated
+  **`dIndependent_Normal_Gamma`** dispersion prior simulation for
+  **`simulate_prior()`**, and related documentation/roxygen cleanup.
+
+## insight integration
+
+* Added S3 methods for **`insight`** accessors on **`glmb`** fits
+  (`model_info`, `get_parameters`, `find_parameters`, `find_algorithm`,
+  `get_data`, `get_priors`). **`insight`** moves from `Suggests` to
+  **`Imports`** and key generics are re-exported. **`get_priors()`** returns
+  **`pfamily(model)`** (full prior specification, including complete
+  **`Sigma`**) rather than a marginal-only table.
+
+## bayestestR prior-checking integration
+
+* Added **`simulate_prior()`**, **`check_prior()`**, and **`describe_prior()`**
+  methods for **`glmb`** fits; **`bayestestR`** moves from `Suggests` to
+  **`Imports`**. Each **`pfamily()`** stores a matching **`pfun`** (like
+  **`simfun`**); **`simulate_prior.glmb()`** calls it, including the truncated
+  inverse-gamma dispersion prior used by **`dIndependent_Normal_Gamma()`**
+  fits.
 
 ## Bug fixes
 
@@ -20,20 +48,13 @@
 
 ## CPU nmath phase-out
 
-* Removed unused vendored CPU R Mathlib sources (`src/nmath/` snapshot and
-  `legacy_c_code/` archive). CPU statistical routines in C++ now rely exclusively
-  on R’s libR via `<Rmath.h>` (`Rf_dnorm4`, `Rf_pgamma`, `Rf_qgamma`,
-  `Rf_dbinom_raw`, etc.), matching **glmbayesCore**. OpenCL nmath under
-  `inst/cl/nmath/` is unchanged (separate **`nmathopencl`** migration planned).
+* Removed vendored CPU R Mathlib sources; CPU routines in C++ now use R's
+  libR via `<Rmath.h>`.
 
 ## OpenCL kernel loading
 
-* Production GPU assembly uses **`load_likelihood_subgradient_program`**
-  (prelude/nmath from **nmathopencl**, entry kernels from **glmbayes**), with
-  C++ loaders delegated to **opencltools** (`LinkingTo: opencltools`).
-* Removed exported **`load_kernel_source()`** and **`load_kernel_library()`**
-  from **glmbayes**; use **`opencltools::load_kernel_*`** (pass
-  `package = "glmbayes"` for `inst/cl/src/` kernels).
+* OpenCL nmath comes from **`nmathopencl`**; **glmbayes** likelihood/envelope
+  kernels remain under `inst/cl/`, loaded via **opencltools**.
 
 # glmbayes 0.9.6
 

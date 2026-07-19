@@ -49,6 +49,7 @@ GPUs
 GRE
 Genereralized
 Gridtype
+HDI
 Hadamard
 Homebrew
 Hotelling
@@ -267,6 +268,7 @@ increade
 indexwise
 inforative
 infty
+inlined
 integrability
 integrable
 integrands
@@ -361,6 +363,7 @@ precisions
 precompiled
 pred
 prefactor
+prepending
 procedured
 progressbar
 propto
@@ -384,6 +387,7 @@ rceil
 readback
 recomputation
 recv
+reimplemented
 reindexing
 reparameterization
 reparameterize
@@ -442,6 +446,7 @@ ubuntu
 uncancelled
 uncentered
 underbrace
+untruncated
 unversioned
 upp
 usally

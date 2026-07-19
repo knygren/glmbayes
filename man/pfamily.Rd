@@ -140,6 +140,11 @@ and \code{lik_shape}.}
 \item{simfun}{Function used to generate posterior draws (e.g., \code{\link{rNormal_reg}},
 \code{\link{rGamma_reg}}, \code{\link{rGamma_Conjugate_reg}}, \code{\link{rNormalGamma_reg}}, \code{\link{rindepNormalGamma_reg}});
 for standard use these produce i.i.d.\ posterior samples for the implemented settings.}
+\item{pfun}{Prior-simulation function paired with this constructor (e.g.,
+\code{\link{rNormal_prior}}, \code{\link{rGamma_prior}},
+\code{\link{rNormal_Gamma_prior}}); called by
+\code{\link[bayestestR]{simulate_prior}} methods on fitted objects via
+\code{pfun(n, prior_list, params)}.}
 }
 \description{
 Prior family objects provide a convenient way to specify the details of the priors
@@ -241,7 +246,7 @@ the \code{shape} argument (see Details above).
 
 Each \code{pfamily} object includes:
 \itemize{
-\item \code{pfamily}, \code{prior_list}, \code{okfamilies}, \code{plinks}, and \code{simfun} (see Value).
+\item \code{pfamily}, \code{prior_list}, \code{okfamilies}, \code{plinks}, \code{simfun}, and \code{pfun} (see Value).
 }
 }
 

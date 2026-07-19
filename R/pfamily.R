@@ -147,7 +147,7 @@
 #'   the \code{shape} argument (see Details above).
 #'
 #' Each `pfamily` object includes:
-#' - `pfamily`, `prior_list`, `okfamilies`, `plinks`, and `simfun` (see Value).
+#' - `pfamily`, `prior_list`, `okfamilies`, `plinks`, `simfun`, and `pfun` (see Value).
 #'
 #' @return An object of class \code{"pfamily"} (with a concise \code{print} method). A list with elements:
 #' \item{pfamily}{Character string: the constructor name (\code{"dNormal"}, \code{"dGamma"},
@@ -178,6 +178,11 @@
 #' \item{simfun}{Function used to generate posterior draws (e.g., \code{\link{rNormal_reg}},
 #'   \code{\link{rGamma_reg}}, \code{\link{rGamma_Conjugate_reg}}, \code{\link{rNormalGamma_reg}}, \code{\link{rindepNormalGamma_reg}});
 #'   for standard use these produce i.i.d.\ posterior samples for the implemented settings.}
+#' \item{pfun}{Prior-simulation function paired with this constructor (e.g.,
+#'   \code{\link{rNormal_prior}}, \code{\link{rGamma_prior}},
+#'   \code{\link{rNormal_Gamma_prior}}); called by
+#'   \code{\link[bayestestR]{simulate_prior}} methods on fitted objects via
+#'   \code{pfun(n, prior_list, params)}.}
 #' 
 #' @author The design of the \code{pfamily} set of functions was developed by Kjell Nygren and was 
 #' inspired by the family used by the \code{\link{glmb}} function to specify the likelihood 
@@ -289,7 +294,8 @@ dNormal<-function(mu,Sigma,dispersion=NULL){
 
   outlist=list(pfamily="dNormal",prior_list=prior_list,okfamilies=okfamilies,
   plinks=plinks,             
-  simfun=rNormal_reg)
+  simfun=rNormal_reg,
+  pfun=rNormal_prior)
   attr(outlist,"Prior Type")="dNormal"             
   class(outlist)="pfamily"
   outlist$call<-match.call()
@@ -346,7 +352,8 @@ dGamma <- function(shape, rate, beta,
                     prior_list = prior_list,
                     okfamilies = okfamilies,
                     plinks     = plinks,
-                    simfun     = rGamma_reg)
+                    simfun     = rGamma_reg,
+                    pfun       = rGamma_prior)
     attr(outlist, "Prior Type") <- "dGamma"
 
   ## -------------------------------------------------------------------------
@@ -400,7 +407,8 @@ dGamma <- function(shape, rate, beta,
                     prior_list = prior_list,
                     okfamilies = okfamilies,
                     plinks     = plinks,
-                    simfun     = rGamma_Conjugate_reg)
+                    simfun     = rGamma_Conjugate_reg,
+                    pfun       = rGamma_Conjugate_prior)
     attr(outlist, "Prior Type") <- "dGamma"
   }
 
@@ -516,7 +524,8 @@ dBeta <- function(shape1, shape2, beta) {
     prior_list = prior_list,
     okfamilies = okfamilies,
     plinks     = plinks,
-    simfun     = rBeta_reg
+    simfun     = rBeta_reg,
+    pfun       = rBeta_prior
   )
   attr(outlist, "Prior Type") <- "dBeta"
   class(outlist) <- "pfamily"
@@ -577,7 +586,8 @@ dNormal_Gamma <- function(mu, Sigma_0, shape, rate) {
   prior_list=list(mu=mu,Sigma=Sigma,shape=shape,rate=rate)
   attr(prior_list,"Prior Type")="dNormal_Gamma"  
   outlist=list(pfamily="dNormal_Gamma",call=call,prior_list=prior_list,
-    okfamilies=okfamilies,plinks=plinks,simfun=rNormalGamma_reg)
+    okfamilies=okfamilies,plinks=plinks,simfun=rNormalGamma_reg,
+    pfun=rNormal_Gamma_prior)
   
   attr(outlist,"Prior Type")="dNormal_Gamma"             
   class(outlist)="pfamily"
@@ -644,7 +654,8 @@ dIndependent_Normal_Gamma <- function(mu, Sigma, shape, rate, max_disp_perc = 0.
                      disp_lower=disp_lower,disp_upper=disp_upper)
   attr(prior_list,"Prior Type")="dIndependent_Normal_Gamma"  
   outlist=list(pfamily="dIndependent_Normal_Gamma",prior_list=prior_list,
-               okfamilies=okfamilies,plinks=plinks,simfun=rindepNormalGamma_reg)
+               okfamilies=okfamilies,plinks=plinks,simfun=rindepNormalGamma_reg,
+               pfun=rIndependent_Normal_Gamma_prior)
   
   attr(outlist,"Prior Type")="dIndependent_Normal_Gamma"             
   class(outlist)="pfamily"

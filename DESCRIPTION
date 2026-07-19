@@ -1,8 +1,8 @@
 Package: glmbayes
 Type: Package
 Title: Bayesian Generalized Linear Models (IID Samples)
-Version: 0.9.6.9000
-Date: 2026-06-21
+Version: 0.9.7
+Date: 2026-07-19
 Authors@R: c(
     person("Kjell", "Nygren", role = c("aut", "cre"),
            email = "kjell.a.nygren@gmail.com"),
@@ -37,6 +37,8 @@ BugReports: https://github.com/knygren/glmbayes/issues
 Imports:
     stats,
     coda,
+    insight,
+    bayestestR,
     Rcpp (>= 1.1.1),
     RcppParallel,
     Rdpack (>= 0.11-0),
@@ -50,7 +52,6 @@ Suggests:
     rmarkdown,
     ggplot2,
     bayesrules,
-    bayestestR,
     LearnBayes,
     testthat (>= 3.0.0),
     spelling

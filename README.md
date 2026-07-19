@@ -17,39 +17,34 @@ The package includes a rich set of supporting tools for prior specification, mod
 that mirror those for lm() and glm(). Most functions are extensively documented, and a comprehensive set of vignettes
 are available to guide users through the package's capabilities.
 
-This repository is **0.9.6.9000** in development. The current **CRAN release is version 0.9.6**
+The current **CRAN release is version 0.9.7**
 ([CRAN](https://CRAN.R-project.org/package=glmbayes)).
 The [GitHub](https://github.com/knygren/glmbayes) repository holds the source; [R-Universe](https://knygren.r-universe.dev/glmbayes) builds binaries from it.
 See [NEWS.md](https://github.com/knygren/glmbayes/blob/main/NEWS.md) for changes.
 
-## Planned updates
+## Recent updates (0.9.7)
 
-The next development cycle (after **0.9.6**) focuses on three infrastructure and
-workflow improvements. Much of the underlying work is already in place in
-[**glmbayesCore**](https://github.com/knygren/glmbayesCore); the goal here is to
-port the same patterns into **glmbayes**.
+Recent infrastructure work (through **0.9.7**) includes:
 
-1. ~~**Phase out local `nmath` sources and headers.**~~ **Done (0.9.6.9000).** CPU
+1. ~~**Phase out local `nmath` sources and headers.**~~ **Done.** CPU
    statistical code uses R’s libR Mathlib via `<Rmath.h>` (`Rf_dnorm4`, `Rf_pgamma`,
    etc.); the unused vendored CPU snapshot under `src/nmath/` and archived
    `legacy_c_code/` have been removed from the package.
 
-2. **OpenCL via [`nmathopencl`](https://CRAN.R-project.org/package=nmathopencl).** GPU
-   statistical kernels are still bundled under `inst/cl/` in this release.
-   **glmbayesCore** already delegates OpenCL nmath to the **`nmathopencl`**
-   package (on CRAN); **glmbayes** will adopt the same dependency, replacing the
-   in-package OpenCL nmath tree with the shared upstream implementation.
+2. ~~**OpenCL via [`nmathopencl`](https://CRAN.R-project.org/package=nmathopencl).**~~
+   **Done (0.9.7).** GPU statistical kernels are loaded from **`nmathopencl`**
+   (hard dependency, including Windows CRAN binaries). **glmbayes**-specific
+   likelihood/envelope kernels remain under `inst/cl/`.
 
-3. **`bayestestR` integration.** [Chapter 13](https://knygren.r-universe.dev/articles/glmbayes/Chapter-13.html)
-   already summarizes posterior coefficient draws with **`bayestestR`** utilities.
-   The next step is to make that workflow easier for **`glmb` / `lmb`** fits—whether
-   via S3 methods, small wrapper functions, or extended examples is still to be
-   decided; the aim is seamless use of **`describe_posterior()`**, **`hdi()`**,
-   **`rope()`**, and related indices on fitted objects.
+3. ~~**`bayestestR` / `insight` integration for prior checking.**~~ **Done (0.9.7).**
+   S3 methods for **`simulate_prior()`**, **`check_prior()`**, and
+   **`describe_prior()`** on **`glmb`** fits, plus **`insight`** accessors for
+   model metadata and posterior draws. See **`?glmbayes_bayestestR_prior_methods`**
+   and **`?glmbayes_insight_methods`**.
 
 ## Installation
 
-**CRAN (release 0.9.6)**
+**CRAN (release 0.9.7)**
 
 ```r
 install.packages("glmbayes")
@@ -63,7 +58,7 @@ install.packages("glmbayes",
                            "https://knygren.r-universe.dev"))
 ```
 
-Prebuilt binaries from CRAN (0.9.6) and R-Universe are built **without OpenCL GPU
+Prebuilt binaries from CRAN (0.9.7) and R-Universe are built **without OpenCL GPU
 support**. For the CRAN release, OpenCL requires installing **from source** on a
 system with OpenCL development files available. To set up GPU acceleration, follow
 
@@ -404,7 +399,8 @@ details behind the samplers.
 
 ## Future Plans
 
-See **Planned updates** above for the main post-0.9.6 roadmap (**`nmathopencl`**, **`bayestestR`**).
+See **Planned updates** above for recently completed infrastructure work
+(**`nmathopencl`**, **`insight`**, **`bayestestR`** prior-checking methods).
 
 Further performance and algorithm work:
 
