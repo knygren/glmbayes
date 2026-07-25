@@ -30,6 +30,7 @@
 ^\.github$
 ^\.positai$
 ^\.claude$
+^\.cursor$
 ^CRAN-SUBMISSION$
 ^rds_check\.txt$
 ^Rplots\.pdf$

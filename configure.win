@@ -226,14 +226,15 @@ if [ -n "$CL_HEADER" ]; then
   echo "⚙️  LIB_FLAG     = $LIB_FLAG"
 
   # CRAN-safe, OpenMP-free, quoting-stable; -DGLMBAYES_RCPP_FH_SIM= mirrors Rcpp Function.h (see tools/rcpp_include.R)
+  # RcppParallel: Windows needs explicit TBB opt-in + link flags (see RcppParallel docs).
   MAKEVARS_CONTENT="PKG_CPPFLAGS = $RCPP_CPPFLAGS
-PKG_CXXFLAGS = -DGLMBAYES_BUILD -DUSE_OPENCL -DGLMBAYES_RCPP_FH_SIM=${RCPP_FHBR} -include glmbayes_getRegisteredNamespace.h $INCLUDE_FLAG
-PKG_LIBS = $LIB_FLAG -lOpenCL \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)"
+PKG_CXXFLAGS = -DGLMBAYES_BUILD -DUSE_OPENCL -DGLMBAYES_RCPP_FH_SIM=${RCPP_FHBR} -DRCPP_PARALLEL_USE_TBB=1 -include glmbayes_getRegisteredNamespace.h $INCLUDE_FLAG
+PKG_LIBS = $LIB_FLAG -lOpenCL \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS) \$(shell \"\${R_HOME}/bin\${R_ARCH_BIN}/Rscript.exe\" -e \"RcppParallel::RcppParallelLibs()\")"
 else
   # CPU-only fallback, also CRAN-safe
   MAKEVARS_CONTENT="PKG_CPPFLAGS = $RCPP_CPPFLAGS
-PKG_CXXFLAGS = -DGLMBAYES_BUILD -DGLMBAYES_RCPP_FH_SIM=${RCPP_FHBR} -include glmbayes_getRegisteredNamespace.h
-PKG_LIBS = \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)"
+PKG_CXXFLAGS = -DGLMBAYES_BUILD -DGLMBAYES_RCPP_FH_SIM=${RCPP_FHBR} -DRCPP_PARALLEL_USE_TBB=1 -include glmbayes_getRegisteredNamespace.h
+PKG_LIBS = \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS) \$(shell \"\${R_HOME}/bin\${R_ARCH_BIN}/Rscript.exe\" -e \"RcppParallel::RcppParallelLibs()\")"
 fi
 
 echo "📦 MAKEVARS_CONTENT:"

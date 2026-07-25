@@ -1,3 +1,11 @@
+# glmbayes 0.9.71
+
+## Bug fixes
+
+* **`configure.win`:** Windows builds now set `-DRCPP_PARALLEL_USE_TBB=1` and
+  append `RcppParallel::RcppParallelLibs()` to **`PKG_LIBS`**, matching updated
+  CRAN/R-Universe **`RcppParallel`** TBB linking requirements.
+
 # glmbayes 0.9.7
 
 ## Highlights
