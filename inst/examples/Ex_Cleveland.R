@@ -5,9 +5,8 @@ head(Cleveland)
 summary(Cleveland)
 
 # OpenCL-accelerated Bayesian logistic regression example
-# This only runs if OpenCL is available
-\donttest{
-if (has_opencl()) {
+# This only runs off CRAN when OpenCL is available
+if (identical(Sys.getenv("NOT_CRAN"), "true") && has_opencl()) {
   ps <- Prior_Setup(
     hd ~ age + sex + cp + trestbps + chol +
       fbs + restecg + thalach + exang + oldpeak + slope + ca + thal,
@@ -28,7 +27,8 @@ if (has_opencl()) {
     verbose      = FALSE
   )
   summary(fit)
-}
+} else {
+  message("Skipping OpenCL example (CRAN check or OpenCL not built).")
 }
 ###############################################################################
 ## End of Cleveland dataset example

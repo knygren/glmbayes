@@ -1,8 +1,8 @@
 Package: glmbayes
 Type: Package
 Title: Bayesian Generalized Linear Models (IID Samples)
-Version: 0.9.73
-Date: 2026-07-31
+Version: 0.9.74
+Date: 2026-08-02
 Authors@R: c(
     person("Kjell", "Nygren", role = c("aut", "cre"),
            email = "kjell.a.nygren@gmail.com"),

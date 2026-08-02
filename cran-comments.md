@@ -1,18 +1,22 @@
-# CRAN submission comments — glmbayes 0.9.73
+# CRAN submission comments — glmbayes 0.9.74
 
 ## Summary
 
-**Resubmission** after archival. **glmbayes 0.9.73** follows **0.9.72**, archived on
-**2026-07-31** for a configure policy violation (see correspondence below).
+**Resubmission** after archival. **glmbayes 0.9.74** follows **0.9.73** (auto-rejected
+**2026-08-02**) and **0.9.72**, archived on **2026-07-31** for a configure policy
+violation (see correspondence below).
 
-**This submission removes the flagged behaviour entirely.** There are no GitHub
-install recommendations and no custom Rcpp version checks.
+**Configure policy (0.9.73):** No GitHub install recommendations and no custom Rcpp
+version checks. **`configure` / `configure.win`** rely on standard **`LinkingTo:
+Rcpp`** and CRAN **Rcpp** only (Windows still passes `-DRCPP_PARALLEL_USE_TBB=1`
+and `RcppParallel::RcppParallelLibs()` for TBB linking).
 
-* **`configure` / `configure.win`:** Removed custom Rcpp header probing
-  (`tools/rcpp_include.R`, Function.h patches, `glmbayes_getRegisteredNamespace`
-  shim). Builds rely on standard **`LinkingTo: Rcpp`** and CRAN **Rcpp** only.
-  Windows still passes `-DRCPP_PARALLEL_USE_TBB=1` and
-  `RcppParallel::RcppParallelLibs()` for TBB linking.
+**OpenCL examples (0.9.74):** Cleveland, Boston_centered, and `gpu_diagnostics`
+kernel-load examples run OpenCL only when `NOT_CRAN="true"` and `has_opencl()`.
+During CRAN **`R CMD check`** they skip with a message (aligned with OpenCL
+**testthat** `skip_on_cran()`). This targets the incoming **debian-gcc** NOTE on
+`~/.cache/pocl/uncached/tempfile_*` reported for **0.9.73**, which we believe
+came from example checking invoking **opencltools** on a PoCL-only builder.
 
 No other functional or API changes.
 
@@ -52,6 +56,15 @@ submission. Apologies for the policy violation.
 emitted those warnings is removed; **`configure` / `configure.win`** no longer
 mention GitHub, `install_github`, Remote* fields, or custom Rcpp version checks.
 
+### Auto-rejection (2026-08-02, **0.9.73**)
+
+Incoming pretest reported **2 NOTEs** on Windows and **debian-gcc** (in addition to
+incoming feasibility): Windows *checking compiled code* (`'cc' not on the path` /
+`ccE`); debian-gcc *for new files in some other directories*
+(`~/.cache/pocl/uncached/tempfile_*`). **0.9.74** addresses the PoCL/example path
+as described in Summary; the Windows `ccE` NOTE appears environmental (same on
+**nmathopencl** / **opencltools** r-devel win-builder).
+
 ### CRAN incoming feasibility NOTE
 
 Local **`R CMD check --as-cran`** reports:
@@ -71,11 +84,11 @@ checking CRAN incoming feasibility ... NOTE
 ```
 
 This NOTE is expected for a resubmission after archival. The archival reason is
-addressed in **0.9.73** as described above.
+addressed in **0.9.73** / **0.9.74** as described above.
 
 ### Win-builder (2026-08-02)
 
-**glmbayes 0.9.73** (this submission tarball) checked on win-builder:
+**glmbayes 0.9.73** checked on win-builder (reference for **0.9.74** resubmission):
 
 - **R 4.6.1 (release, ucrt):** `Status: 1 NOTE` (install ~295s, check ~247s).
   The NOTE is *checking CRAN incoming feasibility* only: new submission, package
@@ -111,7 +124,7 @@ Error in ccE(...): 'cc' is not on the path
 * **local Windows 10, `R CMD check --as-cran`:** 1 NOTE (incoming feasibility /
   resubmission after archival only).
 
-* **R-universe (2026-08-02, glmbayes 0.9.73):** passes cleanly (0 errors,
+* **R-universe (2026-08-02, glmbayes 0.9.73 / prior):** passes cleanly (0 errors,
   warnings, or NOTEs) on all built platforms except **wasm** (not supported;
   package requires native compiled C++/OpenCL stack).
 

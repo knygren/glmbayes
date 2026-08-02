@@ -1,3 +1,13 @@
+# glmbayes 0.9.74
+
+## Bug fixes
+
+* **OpenCL examples:** Cleveland, Boston_centered, and `gpu_diagnostics` kernel-load
+  examples run OpenCL code only when `NOT_CRAN="true"` and `has_opencl()` (same
+  policy as OpenCL **testthat** skips on CRAN). During CRAN checks they print a
+  skip message instead of calling **opencltools** / GPU paths (avoids PoCL cache
+  NOTEs on incoming Linux builders when OpenCL is compiled in).
+
 # glmbayes 0.9.73
 
 ## Bug fixes and Removal of any external recommendation for Github install
