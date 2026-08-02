@@ -111,6 +111,10 @@ Error in ccE(...): 'cc' is not on the path
 * **local Windows 10, `R CMD check --as-cran`:** 1 NOTE (incoming feasibility /
   resubmission after archival only).
 
+* **R-universe (2026-08-02, glmbayes 0.9.73):** passes cleanly (0 errors,
+  warnings, or NOTEs) on all built platforms except **wasm** (not supported;
+  package requires native compiled C++/OpenCL stack).
+
 ---
 _This file is listed in `.Rbuildignore` and is not included in the built source
 tarball. When submitting, paste the content above into the “Optional comments”
