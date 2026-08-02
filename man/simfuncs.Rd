@@ -208,6 +208,9 @@ subgradients \insertCite{Chen1979,glmbayesGammaVignette}{glmbayes}.
 }
 \examples{
 ############################### Start of rNormal_reg examples ####################
+## During CRAN checks, run examples sequentially.
+use_parallel <- identical(Sys.getenv("NOT_CRAN"), "true")
+
 set.seed(333)
 
 ## Dobson (1990) Page 93: Randomized Controlled Trial :
@@ -225,7 +228,8 @@ out_pois <- rNormal_reg(
   x = ps$x,
   prior_list = list(mu = ps$mu, Sigma = ps$Sigma),
   family = poisson(link = "log"),
-  weights = rep(1, nrow(ps$x))
+  weights = rep(1, nrow(ps$x)),
+  use_parallel = use_parallel
 )
 summary(out_pois)
 
@@ -248,7 +252,8 @@ out_logit <- rNormal_reg(
   x = ps1$x,
   prior_list = list(mu = ps1$mu, Sigma = ps1$Sigma),
   family = binomial(logit),
-  weights = menarche$Total
+  weights = menarche$Total,
+  use_parallel = use_parallel
 )
 summary(out_logit)
 
@@ -266,7 +271,8 @@ out_probit <- rNormal_reg(
   x = ps2$x,
   prior_list = list(mu = ps2$mu, Sigma = ps2$Sigma),
   family = binomial(probit),
-  weights = menarche$Total
+  weights = menarche$Total,
+  use_parallel = use_parallel
 )
 summary(out_probit)
 
@@ -284,7 +290,8 @@ out_cloglog <- rNormal_reg(
   x = ps3$x,
   prior_list = list(mu = ps3$mu, Sigma = ps3$Sigma),
   family = binomial(cloglog),
-  weights = menarche$Total
+  weights = menarche$Total,
+  use_parallel = use_parallel
 )
 summary(out_cloglog)
 
@@ -308,11 +315,15 @@ out_gamma <- rNormal_reg(
   x = psg$x,
   prior_list = list(mu = psg$mu, Sigma = psg$Sigma, dispersion = psg$dispersion),
   family = Gamma(link = "log"),
-  weights = carinsca$Claims
+  weights = carinsca$Claims,
+  use_parallel = use_parallel
 )
 summary(out_gamma)
 options(oldopt)
 ############################### Start of rNormalGamma_reg examples ####################
+## During CRAN checks, run examples sequentially.
+use_parallel <- identical(Sys.getenv("NOT_CRAN"), "true")
+
 ## Annette Dobson (1990) "An Introduction to Generalized Linear Models".
 ## Page 9: Plant Weight Data.
 ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
@@ -329,10 +340,13 @@ y <- ps$y
 x <- as.matrix(ps$x)
 prior_list <- list(mu = mu, Sigma = ps$Sigma_0, shape = shape, rate = rate)
 ngamma.D9 <- rNormalGamma_reg(n = 1000, y = y, x = x,
-  prior_list = prior_list)
+  prior_list = prior_list, use_parallel = use_parallel)
 
 summary(ngamma.D9)
 ############################### Start of rindepNormalGamma_reg examples ####################
+## During CRAN checks, run examples sequentially.
+use_parallel <- identical(Sys.getenv("NOT_CRAN"), "true")
+
 ## Annette Dobson (1990) "An Introduction to Generalized Linear Models".
 ## Page 9: Plant Weight Data.
 ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
@@ -362,7 +376,8 @@ prior_list <- list(
 
 set.seed(360)
 
-sim2 <- rindepNormalGamma_reg(n = 1000, y, x, prior_list = prior_list)
+sim2 <- rindepNormalGamma_reg(n = 1000, y, x, prior_list = prior_list,
+  use_parallel = use_parallel)
 summary(sim2)
  
  
@@ -370,6 +385,9 @@ summary(sim2)
  
  
 ############################### Start of rGamma_reg examples ####################
+## During CRAN checks, run examples sequentially.
+use_parallel <- identical(Sys.getenv("NOT_CRAN"), "true")
+
 ## Annette Dobson (1990) "An Introduction to Generalized Linear Models".
 ## Page 9: Plant Weight Data.
 ctl <- c(4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14)
@@ -386,7 +404,8 @@ x <- as.matrix(ps$x)
 ## Use coefficients from Prior_Setup (full-model GLM MLE by default).
 prior_list <- list(beta = ps$coefficients, shape = ps$shape, rate = ps$rate)
 
-out <- rGamma_reg(n = 1000, y = y, x = x, prior_list = prior_list, family = gaussian())
+out <- rGamma_reg(n = 1000, y = y, x = x, prior_list = prior_list,
+  family = gaussian(), use_parallel = use_parallel)
 summary(out)
 }
 \references{

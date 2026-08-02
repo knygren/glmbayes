@@ -1,4 +1,7 @@
 ############################### Start of rindepNormalGamma_reg examples ####################
+## During CRAN checks, run examples sequentially.
+use_parallel <- identical(Sys.getenv("NOT_CRAN"), "true")
+
 ## Annette Dobson (1990) "An Introduction to Generalized Linear Models".
 ## Page 9: Plant Weight Data.
 ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
@@ -28,7 +31,8 @@ prior_list <- list(
 
 set.seed(360)
 
-sim2 <- rindepNormalGamma_reg(n = 1000, y, x, prior_list = prior_list)
+sim2 <- rindepNormalGamma_reg(n = 1000, y, x, prior_list = prior_list,
+  use_parallel = use_parallel)
 summary(sim2)
  
  

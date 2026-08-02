@@ -1,4 +1,7 @@
 ############################### Start of rNormal_reg examples ####################
+## During CRAN checks, run examples sequentially.
+use_parallel <- identical(Sys.getenv("NOT_CRAN"), "true")
+
 set.seed(333)
 
 ## Dobson (1990) Page 93: Randomized Controlled Trial :
@@ -16,7 +19,8 @@ out_pois <- rNormal_reg(
   x = ps$x,
   prior_list = list(mu = ps$mu, Sigma = ps$Sigma),
   family = poisson(link = "log"),
-  weights = rep(1, nrow(ps$x))
+  weights = rep(1, nrow(ps$x)),
+  use_parallel = use_parallel
 )
 summary(out_pois)
 
@@ -39,7 +43,8 @@ out_logit <- rNormal_reg(
   x = ps1$x,
   prior_list = list(mu = ps1$mu, Sigma = ps1$Sigma),
   family = binomial(logit),
-  weights = menarche$Total
+  weights = menarche$Total,
+  use_parallel = use_parallel
 )
 summary(out_logit)
 
@@ -57,7 +62,8 @@ out_probit <- rNormal_reg(
   x = ps2$x,
   prior_list = list(mu = ps2$mu, Sigma = ps2$Sigma),
   family = binomial(probit),
-  weights = menarche$Total
+  weights = menarche$Total,
+  use_parallel = use_parallel
 )
 summary(out_probit)
 
@@ -75,7 +81,8 @@ out_cloglog <- rNormal_reg(
   x = ps3$x,
   prior_list = list(mu = ps3$mu, Sigma = ps3$Sigma),
   family = binomial(cloglog),
-  weights = menarche$Total
+  weights = menarche$Total,
+  use_parallel = use_parallel
 )
 summary(out_cloglog)
 
@@ -99,7 +106,8 @@ out_gamma <- rNormal_reg(
   x = psg$x,
   prior_list = list(mu = psg$mu, Sigma = psg$Sigma, dispersion = psg$dispersion),
   family = Gamma(link = "log"),
-  weights = carinsca$Claims
+  weights = carinsca$Claims,
+  use_parallel = use_parallel
 )
 summary(out_gamma)
 options(oldopt)

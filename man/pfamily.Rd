@@ -255,6 +255,9 @@ the surrogate variance is the Beta variance
 \code{shape1*shape2/((shape1+shape2)^2*(shape1+shape2+1))}.
 }
 \examples{
+## During CRAN checks, run examples sequentially.
+use_parallel <- identical(Sys.getenv("NOT_CRAN"), "true")
+
 ## Dobson (1990) Page 93: Randomized Controlled Trial :
 counts    <- c(18, 17, 15, 20, 10, 20, 25, 13, 12)
 outcome   <- gl(3, 1, 9)
@@ -269,7 +272,8 @@ ps
 glmb.D93 <- glmb(
   counts ~ outcome + treatment,
   family  = poisson(),
-  pfamily = dNormal(mu = ps$mu, Sigma = ps$Sigma)
+  pfamily = dNormal(mu = ps$mu, Sigma = ps$Sigma),
+  use_parallel = use_parallel
 )
 
 ## Extract pfamily and pfamily settings for call to glmb
@@ -289,7 +293,8 @@ ps2
 ## Conjugate Normal Prior (fixed dispersion)
 lmb.D9 <- lmb(
   weight ~ group,
-  pfamily = dNormal(mu = ps2$mu, ps2$Sigma, dispersion = ps2$dispersion)
+  pfamily = dNormal(mu = ps2$mu, ps2$Sigma, dispersion = ps2$dispersion),
+  use_parallel = use_parallel
 )
 pfamily(lmb.D9)
 
@@ -301,7 +306,8 @@ lmb.D9_v2 <- lmb(
     Sigma_0 = ps2$Sigma_0,
     shape = ps2$shape,
     rate  = ps2$rate
-  )
+  ),
+  use_parallel = use_parallel
 )
 pfamily(lmb.D9_v2)
 
@@ -313,7 +319,8 @@ lmb.D9_v3 <- lmb(
     ps2$Sigma,
     shape = ps2$shape_ING,
     rate  = ps2$rate
-  )
+  ),
+  use_parallel = use_parallel
 )
 pfamily(lmb.D9_v3)
 }

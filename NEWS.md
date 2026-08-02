@@ -1,3 +1,22 @@
+# glmbayes 0.9.73
+
+## Bug fixes
+
+* **`configure.win`:** Windows builds now set `-DRCPP_PARALLEL_USE_TBB=1` and
+  append `RcppParallel::RcppParallelLibs()` to **`PKG_LIBS`**, matching updated
+  CRAN/R-Universe **`RcppParallel`** TBB linking requirements. Removed
+  **`tools/rcpp_include.R`** probing (Rcpp via standard **`LinkingTo`**).
+
+* **`tools/rcpp_include.R`:** Removed configure warnings that recommended
+  installing **Rcpp** from GitHub (CRAN policy).
+
+# glmbayes 0.9.72
+
+## Bug fixes
+
+* **Examples:** `Prior_Setup`, `pfamily`, and `simfuncs` examples use
+  `use_parallel = FALSE` during CRAN checks.
+
 # glmbayes 0.9.71
 
 ## Bug fixes
