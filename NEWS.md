@@ -1,14 +1,10 @@
 # glmbayes 0.9.73
 
-## Bug fixes
+## Bug fixes and Removal of any external recommendation for Github install
 
-* **`configure.win`:** Windows builds now set `-DRCPP_PARALLEL_USE_TBB=1` and
-  append `RcppParallel::RcppParallelLibs()` to **`PKG_LIBS`**, matching updated
-  CRAN/R-Universe **`RcppParallel`** TBB linking requirements. Removed
-  **`tools/rcpp_include.R`** probing (Rcpp via standard **`LinkingTo`**).
-
-* **`tools/rcpp_include.R`:** Removed configure warnings that recommended
-  installing **Rcpp** from GitHub (CRAN policy).
+* **Configure:** Removed **`tools/rcpp_include.R`** Rcpp header probing, Function.h
+  branch flags, and **`glmbayes_getRegisteredNamespace`** shim on Unix and Windows
+  (rely on **`LinkingTo: Rcpp`** and CRAN **Rcpp** instead).
 
 # glmbayes 0.9.72
 
