@@ -1,7 +1,7 @@
 #!/bin/sh
 # ── configure ──
 # This script runs on Linux/macOS (never on Windows).
-# It detects RcppParallel, OpenCL headers/libs, performs a runtime probe,
+# It detects RcppParallel, OpenCL headers/libs, performs a non-PoCL GPU runtime probe,
 # detects CUDA (optional), and generates src/Makevars dynamically.
 
 # Use R_HOME/bin/Rscript (Writing R Extensions). Never invoke bare "R" or "Rscript"
@@ -154,30 +154,71 @@ else
   echo "⚠️  OpenCL not found: falling back to CPU-only"
 fi
 
-# ---- 11. Runtime OpenCL probe ----
+# ---- 11. Runtime OpenCL probe (non-PoCL GPU required for USE_OPENCL) ----
+# PoCL-only ICDs on CRAN Linux builders expose a platform but compile kernels into
+# ~/.cache/pocl during check (clBuildProgram), causing incoming NOTEs. Enable
+# USE_OPENCL only when a non-PoCL platform exposes at least one GPU device.
 OPENCL_RUNTIME_FOUND=no
 if [ "$OPENCL_FOUND" = "yes" ] && [ "$EMSCRIPTEN_BUILD" != "YES" ]; then
-  echo "Checking for an actual OpenCL runtime platform..."
-  cat > conftest_opencl.c <<EOF
+  echo "Checking for a non-PoCL OpenCL GPU runtime..."
+  cat > conftest_opencl_gpu.c <<'EOF'
 #include <CL/cl.h>
-int main() {
-    cl_uint n = 0;
-    cl_int status = clGetPlatformIDs(0, NULL, &n);
-    return (status == CL_SUCCESS && n > 0) ? 0 : 1;
+#include <stdlib.h>
+#include <string.h>
+
+static int platform_is_pocl(cl_platform_id platform) {
+  char name[512];
+  char vendor[512];
+  if (clGetPlatformInfo(platform, CL_PLATFORM_NAME, sizeof(name), name, NULL) != CL_SUCCESS)
+    return 0;
+  if (clGetPlatformInfo(platform, CL_PLATFORM_VENDOR, sizeof(vendor), vendor, NULL) != CL_SUCCESS)
+    vendor[0] = '\0';
+  if (strstr(name, "PoCL") || strstr(name, "Portable Computing Language"))
+    return 1;
+  if (strstr(vendor, "PoCL") || strstr(vendor, "Portable Computing Language"))
+    return 1;
+  return 0;
+}
+
+int main(void) {
+  cl_uint np = 0;
+  if (clGetPlatformIDs(0, NULL, &np) != CL_SUCCESS || np == 0)
+    return 1;
+
+  cl_platform_id *platforms = (cl_platform_id *)malloc(np * sizeof(cl_platform_id));
+  if (!platforms)
+    return 1;
+  if (clGetPlatformIDs(np, platforms, NULL) != CL_SUCCESS) {
+    free(platforms);
+    return 1;
+  }
+
+  int found_gpu = 0;
+  for (cl_uint i = 0; i < np; i++) {
+    if (platform_is_pocl(platforms[i]))
+      continue;
+    cl_uint nd = 0;
+    if (clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 0, NULL, &nd) == CL_SUCCESS && nd > 0) {
+      found_gpu = 1;
+      break;
+    }
+  }
+  free(platforms);
+  return found_gpu ? 0 : 1;
 }
 EOF
 
-  ${CC} conftest_opencl.c $OPENCL_LIB -o conftest_opencl >/dev/null 2>&1
+  ${CC} conftest_opencl_gpu.c $OPENCL_LIB -o conftest_opencl_gpu >/dev/null 2>&1
 
-  if env LD_LIBRARY_PATH=$OPENCL_LIBDIR:$LD_LIBRARY_PATH ./conftest_opencl >/dev/null 2>&1; then
-    echo "OpenCL runtime detected."
+  if env LD_LIBRARY_PATH=$OPENCL_LIBDIR:$LD_LIBRARY_PATH ./conftest_opencl_gpu >/dev/null 2>&1; then
+    echo "Non-PoCL OpenCL GPU runtime detected."
     OPENCL_RUNTIME_FOUND=yes
   else
-    echo "No OpenCL runtime detected."
+    echo "No non-PoCL OpenCL GPU runtime detected (PoCL-only or no GPU platform)."
     OPENCL_RUNTIME_FOUND=no
   fi
 
-  rm -f conftest_opencl conftest_opencl.c
+  rm -f conftest_opencl_gpu conftest_opencl_gpu.c
 fi
 
 echo "Final OpenCL Detection:"
@@ -197,10 +238,10 @@ if [ "$OPENCL_FOUND" = "yes" ]; then
   FULL_LIBS="$FULL_LIBS $OPENCL_LIB"
 
   if [ "$OPENCL_RUNTIME_FOUND" = "yes" ]; then
-    echo "OpenCL runtime probe succeeded"
+    echo "OpenCL GPU runtime probe succeeded"
     FULL_CXXFLAGS="$FULL_CXXFLAGS -DUSE_OPENCL"
   else
-    echo "OpenCL runtime probe failed, not defining USE_OPENCL"
+    echo "OpenCL GPU runtime probe failed, not defining USE_OPENCL"
   fi
 
   if [ "$EMSCRIPTEN_BUILD" = "YES" ]; then

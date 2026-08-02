@@ -97,7 +97,7 @@ the maintained home for per-OS installation instructions and keeps them current.
 
 For a host-level diagnostic that does not depend on the `glmbayes` build state:
 
-```r
+```{r, eval=FALSE}
 opencltools::diagnose_glmbayes()
 ```
 
@@ -168,7 +168,7 @@ has_opencl()
 Once `has_opencl()` returns `TRUE`, run a full diagnostic to confirm the
 complete stack:
 
-```r
+```{r, eval=FALSE}
 diagnose_glmbayes()
 ```
 
@@ -212,7 +212,7 @@ your shell profile; advanced users may use the helpers in `opencltools` directly
 
 Once set up, pass `use_opencl = TRUE` to `glmb()` or `rglmb()`:
 
-```r
+```{r, eval=FALSE}
 example(Cleveland)
 ```
 

@@ -1,26 +1,31 @@
-# CRAN submission comments — glmbayes 0.9.74
+# CRAN submission comments — glmbayes 0.9.75
 
 ## Summary
 
-**Resubmission** after archival. **glmbayes 0.9.74** follows **0.9.73** (auto-rejected
-**2026-08-02**) and **0.9.72**, archived on **2026-07-31** for a configure policy
-violation (see correspondence below).
+**Resubmission** after archival. **glmbayes 0.9.75** follows **0.9.74** (PoCL NOTE
+still on **debian-gcc** incoming), **0.9.73** (auto-rejected **2026-08-02**), and
+**0.9.72**, archived on **2026-07-31** for a configure policy violation (see
+correspondence below).
 
 **Configure policy (0.9.73):** No GitHub install recommendations and no custom Rcpp
 version checks. **`configure` / `configure.win`** rely on standard **`LinkingTo:
 Rcpp`** and CRAN **Rcpp** only (Windows still passes `-DRCPP_PARALLEL_USE_TBB=1`
 and `RcppParallel::RcppParallelLibs()` for TBB linking).
 
-**OpenCL examples (0.9.74):** Cleveland, Boston_centered, and `gpu_diagnostics`
-kernel-load examples run OpenCL only when `NOT_CRAN="true"` and `has_opencl()`.
-During CRAN **`R CMD check`** they skip with a message (aligned with OpenCL
-**testthat** `skip_on_cran()`). This targets the incoming **debian-gcc** NOTE on
-`~/.cache/pocl/uncached/tempfile_*` reported for **0.9.73**, which we believe
-came from example checking invoking **opencltools** on a PoCL-only builder.
+**PoCL-aware OpenCL (0.9.75, Linux/macOS `configure`):** `-DUSE_OPENCL` is defined
+only when a **non-PoCL** platform exposes at least one **GPU** device. PoCL-only
+stacks on CRAN **debian-gcc** no longer compile OpenCL into **glmbayes**, so
+`has_opencl()` is `FALSE` during check and this package should not invoke
+`clBuildProgram` / PoCL cache files under `~/.cache/pocl/uncached/tempfile_*`.
+**0.9.74** example `NOT_CRAN` gating alone did not clear that NOTE (compile-time
+OpenCL was still enabled). Windows **`configure.win`** unchanged.
+
+**Vignette (0.9.75):** Chapter 16 diagnostic / `example(Cleveland)` chunks are
+`eval=FALSE` during rebuild (defense in depth).
 
 No other functional or API changes.
 
-OpenCL support remains **optional**. 
+OpenCL support remains **optional**.
 
 ### Correspondence with CRAN (2026-07-31)
 
@@ -33,36 +38,20 @@ configure: Rcpp Repository: CRAN
 configure: Rcpp Function.h: line with R_getVarEx + R_UnboundValue present = FALSE
 configure: WARNING: Rcpp looks like a CRAN install (no GitHub Remote* fields).
 configure: WARNING: On R-devel / R >= 4.5, stale CRAN headers can be incompatible
-configure: WARNING: with R (e.g. R_NamespaceRegistry). Consider
-configure: WARNING: remotes::install_github("RcppCore/Rcpp") or ensure
-configure: WARNING: install_github actually replaced the library.
+...
 ```
-
-CRAN noted that recommending installation from GitHub violates CRAN policy (CRAN
-versions of packages must work with current CRAN/Bioconductor dependencies and
-must not recommend development versions from other repositories). Repository note:
-
-> X-CRAN-Comment: Archived on 2026-07-31 for policy violation. Recommends packages from GitHub.
-
-Maintainer reply (2026-07-31): the GitHub suggestion was **not** intended as
-ongoing user guidance. It was temporary build-time logic for an R 4.6.0
-pre-release / Rcpp compatibility window (R 4.6.0, SVN < 89746; see
-[RcppCore/Rcpp#1473](https://github.com/RcppCore/Rcpp/issues/1473)). By the
-final **R 4.6** release and current CRAN **Rcpp**, GitHub installs were no
-longer required; the configure messages should have been removed before
-submission. Apologies for the policy violation.
 
 **0.9.73** implements the fix offered in that reply: all configure logic that
 emitted those warnings is removed; **`configure` / `configure.win`** no longer
 mention GitHub, `install_github`, Remote* fields, or custom Rcpp version checks.
 
-### Auto-rejection (2026-08-02, **0.9.73**)
+### Auto-rejection (2026-08-02, **0.9.73** / **0.9.74**)
 
 Incoming pretest reported **2 NOTEs** on Windows and **debian-gcc** (in addition to
 incoming feasibility): Windows *checking compiled code* (`'cc' not on the path` /
 `ccE`); debian-gcc *for new files in some other directories*
-(`~/.cache/pocl/uncached/tempfile_*`). **0.9.74** addresses the PoCL/example path
-as described in Summary; the Windows `ccE` NOTE appears environmental (same on
+(`~/.cache/pocl/uncached/tempfile_*`). **0.9.75** addresses the PoCL path via
+configure (above); the Windows `ccE` NOTE appears environmental (same on
 **nmathopencl** / **opencltools** r-devel win-builder).
 
 ### CRAN incoming feasibility NOTE
@@ -84,11 +73,11 @@ checking CRAN incoming feasibility ... NOTE
 ```
 
 This NOTE is expected for a resubmission after archival. The archival reason is
-addressed in **0.9.73** / **0.9.74** as described above.
+addressed in **0.9.73** / **0.9.75** as described above.
 
 ### Win-builder (2026-08-02)
 
-**glmbayes 0.9.73** checked on win-builder (reference for **0.9.74** resubmission):
+**glmbayes 0.9.73** checked on win-builder (reference for **0.9.75** resubmission):
 
 - **R 4.6.1 (release, ucrt):** `Status: 1 NOTE` (install ~295s, check ~247s).
   The NOTE is *checking CRAN incoming feasibility* only: new submission, package
