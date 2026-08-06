@@ -21,7 +21,7 @@ stacks on CRAN **debian-gcc** no longer compile OpenCL into **glmbayes**, so
 OpenCL was still enabled). Windows **`configure.win`** unchanged.
 
 **Vignette (0.9.75):** Chapter 16 diagnostic / `example(Cleveland)` chunks are
-`eval=FALSE` during rebuild (defense in depth).
+`eval=FALSE` during rebuild.
 
 No other functional or API changes.
 
