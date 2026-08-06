@@ -1,3 +1,10 @@
+# glmbayes 0.9.76
+
+## Under development
+
+* Stage 0 migration prep: file-vs-file inventory vs **glmbayesCore** in
+  `data-raw/CORE_MIGRATION_DIFF.md`; Stage 1 will Import **glmbayesCore** (>= 0.5.4).
+
 # glmbayes 0.9.75
 
 ## Bug fixes
