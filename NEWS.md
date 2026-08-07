@@ -32,6 +32,15 @@
   suppressed with `suppressMessages()`/`suppressWarnings()`. Same checks, same
   wording. Matches **glmbayesCore**'s fix for the same CRAN reviewer feedback.
 
+* **Internal:** Hardened the C++ console progress bar
+  (`glmbayes::progress::progress_bar()` in `src/progress_utils.cpp`) against
+  `N <= 0` and non-finite `x`/`N`/fraction (no-op instead of printing `nan`/`inf`
+  or dividing by zero), clamped the dot count to `[0, 40]`, and added an
+  optional `prefix` label parameter (default `""`, so existing two-argument
+  call sites are unaffected). Added `progress_bar_finish(newline = TRUE)` to
+  cleanly terminate a bar with a trailing newline. Matches **glmbayesCore**'s
+  `src/progress_utils.cpp`.
+
 # glmbayes 0.9.75
 
 ## Bug fixes

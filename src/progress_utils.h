@@ -123,7 +123,10 @@ inline std::string format_int_with_commas(long long value) {
   return oss.str();
 }
 
-void progress_bar(double x, double N);
+void progress_bar(double x, double N, const std::string& prefix = "");
+
+// Finalize an in-progress bar; when \a newline is false, leave the line for \r overwrite.
+void progress_bar_finish(bool newline = true);
 
 } // namespace progress
 } // namespace glmbayes

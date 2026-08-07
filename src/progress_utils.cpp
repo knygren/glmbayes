@@ -1,5 +1,7 @@
 #include "progress_utils.h"
 
+#include <cmath>
+#include <iomanip>
 
 using namespace Rcpp;
 using namespace glmbayes::progress;
@@ -8,35 +10,41 @@ namespace glmbayes {
 
 namespace progress {
 
-void progress_bar(double x, double N)
+void progress_bar(double x, double N, const std::string& prefix)
 {
-  // how wide you want the progress meter to be
-  int totaldotz=40;
+  if (N <= 0.0 || !std::isfinite(N) || !std::isfinite(x)) {
+    return;
+  }
+  int totaldotz = 40;
   double fraction = x / N;
-  // part of the progressmeter that's already "full"
-  int dotz = round(fraction * totaldotz);
-  
+  if (!std::isfinite(fraction)) {
+    return;
+  }
+  int dotz = static_cast<int>(std::round(fraction * totaldotz));
+  if (dotz < 0) dotz = 0;
+  if (dotz > totaldotz) dotz = totaldotz;
+
   Rcpp::Rcout.precision(3);
-  Rcout << "\r                                                                 " << std::flush ;
-  Rcout << "\r" << std::flush ;
-  Rcout << std::fixed << fraction*100 << std::flush ;
-  Rcout << "% [" << std::flush ;
-  int ii=0;
-  for ( ; ii < dotz;ii++) {
-    Rcout << "=" << std::flush ;
+  Rcout << "\r" << std::string(100, ' ') << "\r" << std::flush;
+  if (!prefix.empty()) {
+    Rcout << prefix << std::flush;
   }
-  // remaining part (spaces)
-  for ( ; ii < totaldotz;ii++) {
-    Rcout << " " << std::flush ;
+  Rcout << std::fixed << std::setprecision(0) << fraction * 100.0 << std::flush;
+  Rcout << "% [" << std::flush;
+  for (int ii = 0; ii < dotz; ++ii) {
+    Rcout << "=" << std::flush;
   }
-  // and back to line begin 
-  
-  Rcout << "]" << std::flush ;
-  
-  // and back to line begin 
-  
-  Rcout << "\r" << std::flush ;
-  
+  for (int ii = dotz; ii < totaldotz; ++ii) {
+    Rcout << " " << std::flush;
+  }
+  Rcout << "]" << std::flush;
+}
+
+void progress_bar_finish(bool newline)
+{
+  if (newline) {
+    Rcpp::Rcout << std::endl;
+  }
 }
 
 }
