@@ -2,13 +2,34 @@
 % Please edit documentation in R/gpu_diagnostics.R
 \name{diagnose_glmbayes}
 \alias{diagnose_glmbayes}
+\alias{print.diagnose_glmbayes}
 \alias{has_opencl}
 \alias{gpu_diagnostics}
 \title{GPU and OpenCL diagnostics for \pkg{glmbayes}}
 \usage{
 diagnose_glmbayes()
 
+\method{print}{diagnose_glmbayes}(x, ...)
+
 has_opencl()
+}
+\arguments{
+\item{x}{An object of class \code{"diagnose_glmbayes"}.}
+
+\item{...}{Unused; for S3 method compatibility.}
+}
+\value{
+\code{diagnose_glmbayes()} returns an object of class
+\code{"diagnose_glmbayes"} (also inheriting from \code{"list"}) with components
+\code{environment_info}, \code{driver_status}, \code{runtime_status},
+\code{env_diag}, \code{opencl_runtime_probe} (logical or \code{NA}), and
+\code{opencl_enabled} (logical). A human-readable report is produced by
+\code{\link{print.diagnose_glmbayes}} when the result is printed (for example
+at the top level in an interactive session). Assigned results stay quiet until
+\code{print()} is called.
+
+\code{has_opencl()} returns a length-1 logical: \code{TRUE}
+if this build was compiled with OpenCL support.
 }
 \description{
 Compile-time OpenCL probing for \pkg{glmbayes}, plus \code{diagnose_glmbayes()}

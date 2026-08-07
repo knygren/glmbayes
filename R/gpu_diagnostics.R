@@ -39,6 +39,19 @@
 #' notes: \code{vignette("Chapter-16", package = "glmbayes")}
 #' (\insertCite{glmbayesChapter12}{glmbayes}).
 #'
+#' @return
+#' \code{diagnose_glmbayes()} returns an object of class
+#' \code{"diagnose_glmbayes"} (also inheriting from \code{"list"}) with components
+#' \code{environment_info}, \code{driver_status}, \code{runtime_status},
+#' \code{env_diag}, \code{opencl_runtime_probe} (logical or \code{NA}), and
+#' \code{opencl_enabled} (logical). A human-readable report is produced by
+#' \code{\link{print.diagnose_glmbayes}} when the result is printed (for example
+#' at the top level in an interactive session). Assigned results stay quiet until
+#' \code{print()} is called.
+#'
+#' \code{has_opencl()} returns a length-1 logical: \code{TRUE}
+#' if this build was compiled with OpenCL support.
+#'
 #' @seealso
 #' \code{\link{diagnose_glmbayes}}, \code{\link{has_opencl}}, \pkg{opencltools},
 #' \code{\link{glmb}}, \code{\link{rglmb}}.
@@ -56,14 +69,10 @@ NULL
 #' @rdname gpu_diagnostics
 #' @order 1
 diagnose_glmbayes <- function() {
-  cat("=== glmbayes OpenCL Diagnostic Report ===\n")
-
   info     <- opencltools::detect_environment_and_gpus()
   drivers  <- opencltools::detect_or_install_gpu_drivers(info)
   runtimes <- opencltools::detect_compute_runtimes(info)
   env_diag <- opencltools::check_runtime_env(runtimes)
-
-  cat("Environment:", info$environment, "\n\n")
 
   gpu_vendor <- if (info$nvidia$present) "nvidia"
   else if (info$amd$present) "amd"
@@ -74,22 +83,102 @@ diagnose_glmbayes <- function() {
   runtime_ok <- NA
 
   if (!is.null(gpu_vendor)) {
+    drv  <- drivers$drivers[[gpu_vendor]]
+    rt   <- runtimes$runtimes[[gpu_vendor]]
+    diag <- env_diag$diagnostics[[gpu_vendor]]
+
+    paths_ok <- (length(diag$opencl$missing_path_dirs) == 0 &&
+                   length(diag$opencl$missing_lib_dirs) == 0)
+
+    if (paths_ok && tolower(info$environment) %in% c("linux", "wsl")) {
+      runtime_ok <- opencltools::verify_opencl_runtime(rt$opencl$lib_dirs)
+    }
+  }
+
+  opencl_enabled <- has_opencl()
+
+  missing_items <- !is.null(diag) &&
+    (length(diag$opencl$missing_path_dirs) > 0 ||
+       length(diag$opencl$missing_lib_dirs) > 0)
+
+  if (missing_items && !isTRUE(opencl_enabled) && interactive()) {
+    message("Missing PATH/lib entries detected and OpenCL is not enabled.")
+
+    if (length(diag$opencl$missing_path_dirs) > 0) {
+      message("Missing PATH entries:")
+      message(paste(" -", diag$opencl$missing_path_dirs, collapse = "\n"))
+      ans <- readline("Would you like to permanently add missing PATH dirs? [y/N]: ")
+      if (tolower(ans) == "y") {
+        if (tolower(info$environment) == "windows") {
+          opencltools::add_to_path_windows(diag$opencl$missing_path_dirs)
+        } else {
+          opencltools::add_to_path_linux(diag$opencl$missing_path_dirs)
+        }
+      }
+    }
+
+    if (length(diag$opencl$missing_lib_dirs) > 0 &&
+        tolower(info$environment) %in% c("linux", "wsl")) {
+      message("Missing library dirs:")
+      message(paste(" -", diag$opencl$missing_lib_dirs, collapse = "\n"))
+      ans_lib <- readline("Would you like to permanently add missing library dirs to LD_LIBRARY_PATH? [y/N]: ")
+      if (tolower(ans_lib) == "y") {
+        opencltools::add_to_libpath_linux(diag$opencl$missing_lib_dirs)
+      }
+    }
+  }
+
+  out <- list(
+    environment_info      = info,
+    driver_status         = drivers,
+    runtime_status        = runtimes,
+    env_diag              = env_diag,
+    opencl_runtime_probe  = runtime_ok,
+    opencl_enabled        = opencl_enabled
+  )
+  class(out) <- c("diagnose_glmbayes", "list")
+  out
+}
+
+
+#' @export
+#' @rdname gpu_diagnostics
+#' @order 2
+#' @param x An object of class \code{"diagnose_glmbayes"}.
+#' @param ... Unused; for S3 method compatibility.
+print.diagnose_glmbayes <- function(x, ...) {
+  info <- x$environment_info
+  drivers <- x$driver_status
+  runtimes <- x$runtime_status
+  env_diag <- x$env_diag
+  runtime_ok <- x$opencl_runtime_probe
+  opencl_enabled <- x$opencl_enabled
+
+  cat("=== glmbayes OpenCL Diagnostic Report ===\n")
+  cat("Environment:", info$environment, "\n\n")
+
+  gpu_vendor <- if (isTRUE(info$nvidia$present)) "nvidia"
+  else if (isTRUE(info$amd$present)) "amd"
+  else if (isTRUE(info$intel$present)) "intel"
+  else NULL
+
+  if (!is.null(gpu_vendor)) {
     cat("GPU:", toupper(gpu_vendor), "\n")
     drv  <- drivers$drivers[[gpu_vendor]]
     rt   <- runtimes$runtimes[[gpu_vendor]]
     diag <- env_diag$diagnostics[[gpu_vendor]]
 
-    if (drv$installed) {
+    if (isTRUE(drv$installed)) {
       cat("  [OK] Driver installed\n")
     } else {
       cat("  [FAIL] Driver not installed\n")
       if (length(drv$issues) > 0)
-        cat("    Issues:", paste(drv$issues, collapse=", "), "\n")
+        cat("    Issues:", paste(drv$issues, collapse = ", "), "\n")
     }
 
-    hdr <- rt$opencl$headers_present
-    rtm <- rt$opencl$runtime_present
-    inst <- rt$opencl$installed
+    hdr <- isTRUE(rt$opencl$headers_present)
+    rtm <- isTRUE(rt$opencl$runtime_present)
+    inst <- isTRUE(rt$opencl$installed)
 
     if (hdr) {
       cat("  [OK] OpenCL headers found (CL/cl.h)\n")
@@ -117,18 +206,19 @@ diagnose_glmbayes <- function() {
     } else {
       if (length(diag$opencl$missing_path_dirs) > 0)
         cat("  [WARN] Missing PATH entries:",
-            paste(diag$opencl$missing_path_dirs, collapse=", "), "\n")
+            paste(diag$opencl$missing_path_dirs, collapse = ", "), "\n")
       if (length(diag$opencl$missing_lib_dirs) > 0)
         cat("  [WARN] Missing library dirs:",
-            paste(diag$opencl$missing_lib_dirs, collapse=", "), "\n")
+            paste(diag$opencl$missing_lib_dirs, collapse = ", "), "\n")
     }
 
     if (paths_ok && tolower(info$environment) %in% c("linux", "wsl")) {
-      runtime_ok <- opencltools::verify_opencl_runtime(rt$opencl$lib_dirs)
-      if (runtime_ok) {
+      if (isTRUE(runtime_ok)) {
         cat("  [OK] OpenCL runtime probe succeeded (platform available)\n")
-      } else {
+      } else if (isFALSE(runtime_ok)) {
         cat("  [FAIL] OpenCL runtime probe failed (no usable platform)\n")
+      } else {
+        cat("  [SKIP] Runtime probe result unavailable\n")
       }
     } else if (!paths_ok) {
       cat("  [SKIP] Runtime probe skipped (missing PATH/lib dirs)\n")
@@ -140,60 +230,20 @@ diagnose_glmbayes <- function() {
     cat("[FAIL] No supported GPU detected. glmbayes will run in CPU-only mode.\n")
   }
 
-  opencl_enabled <- has_opencl()
-  if (opencl_enabled) {
+  if (isTRUE(opencl_enabled)) {
     cat("\n[OK] glmbayes was compiled with OpenCL support.\n")
   } else {
     cat("\n[FAIL] glmbayes was compiled without OpenCL support.\n")
   }
 
-  missing_items <- !is.null(diag) &&
-    (length(diag$opencl$missing_path_dirs) > 0 ||
-       length(diag$opencl$missing_lib_dirs) > 0)
-
-  if (missing_items && !isTRUE(opencl_enabled)) {
-    cat("\n[INFO] Missing PATH/lib entries detected and OpenCL is not enabled.\n")
-
-    if (length(diag$opencl$missing_path_dirs) > 0) {
-      cat("  Missing PATH entries:\n")
-      cat("   -", paste(diag$opencl$missing_path_dirs, collapse="\n   - "), "\n")
-      ans <- readline("Would you like to permanently add missing PATH dirs? [y/N]: ")
-      if (tolower(ans) == "y") {
-        if (tolower(info$environment) == "windows") {
-          opencltools::add_to_path_windows(diag$opencl$missing_path_dirs)
-        } else {
-          opencltools::add_to_path_linux(diag$opencl$missing_path_dirs)
-        }
-      }
-    }
-
-    if (length(diag$opencl$missing_lib_dirs) > 0 &&
-        tolower(info$environment) %in% c("linux", "wsl")) {
-      cat("  Missing library dirs:\n")
-      cat("   -", paste(diag$opencl$missing_lib_dirs, collapse="\n   - "), "\n")
-      ans_lib <- readline("Would you like to permanently add missing library dirs to LD_LIBRARY_PATH? [y/N]: ")
-      if (tolower(ans_lib) == "y") {
-        opencltools::add_to_libpath_linux(diag$opencl$missing_lib_dirs)
-      }
-    }
-  }
-
   cat("\n=== End of Diagnostic Report ===\n")
-
-  invisible(list(
-    environment_info      = info,
-    driver_status         = drivers,
-    runtime_status        = runtimes,
-    env_diag              = env_diag,
-    opencl_runtime_probe  = runtime_ok,
-    opencl_enabled        = opencl_enabled
-  ))
+  invisible(x)
 }
 
 
 #' @export
 #' @rdname gpu_diagnostics
-#' @order 2
+#' @order 3
 has_opencl <- function() {
   .has_opencl_cpp()
 }

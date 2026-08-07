@@ -18,6 +18,20 @@
   file `R/ing_prior_guard.R`, matching **glmbayesCore**'s
   `R/ing_prior_guard.R`. Pure refactor: same check, same error message.
 
+* **CRAN policy:** `diagnose_glmbayes()` no longer prints directly. It now
+  returns a classed `"diagnose_glmbayes"` object (documented `@return`), with
+  the readable report moved into a new `print.diagnose_glmbayes()` S3 method
+  (shown automatically when the result auto-prints at the top level, e.g. in
+  an interactive session). The interactive PATH/library-path prompts are now
+  also gated on `interactive()`. Matches **glmbayesCore**'s fix for CRAN
+  reviewer feedback on ungated `cat()`/`print()` output.
+
+* **CRAN policy:** `Prior_Check()` no longer uses raw `print()` for status
+  text; it now uses `message()` for informational notes and `warning()` when
+  the likelihood estimates look inconsistent with the prior, so output can be
+  suppressed with `suppressMessages()`/`suppressWarnings()`. Same checks, same
+  wording. Matches **glmbayesCore**'s fix for the same CRAN reviewer feedback.
+
 # glmbayes 0.9.75
 
 ## Bug fixes

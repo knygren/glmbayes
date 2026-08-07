@@ -1316,8 +1316,8 @@ Prior_Check<-function(formula,family,pfamily,level=0.95,data=NULL, weights, subs
   Like_std=summary(object)$coefficients[,2]
   
   if(is.null(mu)){
-    print("No Prior mean vector provided. Variables with needed Priors are:")
-    print(names(Like_est))
+    message("No Prior mean vector provided. Variables with needed Priors are:")
+    message(paste(names(Like_est), collapse = ", "))
     names(Like_est)    
     
   }
@@ -1328,8 +1328,7 @@ Prior_Check<-function(formula,family,pfamily,level=0.95,data=NULL, weights, subs
   Sigma=as.matrix(Sigma)
   Prior_std=sqrt(diag(Sigma))
   
-  print("Variables in the Model Are:")
-  print(names(Like_est))
+  message("Variables in the Model Are: ", paste(names(Like_est), collapse = ", "))
   std_dev_sum=qnorm(level)*(Prior_std+Like_std)
   
   abs_ratio=matrix(rep(0,length(Like_est),nrow=length(Like_est),ncol=1))
@@ -1341,11 +1340,11 @@ Prior_Check<-function(formula,family,pfamily,level=0.95,data=NULL, weights, subs
   max_abs_ratio=max(abs_ratio)
   
   if(max_abs_ratio>1) {
-    print("At least one of the maximum likelihood estimates appears to be inconsistent with the prior")
+    warning("At least one of the maximum likelihood estimates appears to be inconsistent with the prior")
   }
   
   else{
-    print("The maximum likelihood estimates for all coefficients appear to be roughly consistent with the prior.")
+    message("The maximum likelihood estimates for all coefficients appear to be roughly consistent with the prior.")
   }
   return(abs_ratio)
   
