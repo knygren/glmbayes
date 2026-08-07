@@ -3,6 +3,8 @@
 \name{residuals.glmb}
 \alias{residuals.glmb}
 \alias{residuals.rglmb}
+\alias{residuals.rlmb}
+\alias{residuals.summary.rglmb}
 \alias{residuals.lmb}
 \title{Accessing Bayesian Generalized Linear Model Fits}
 \usage{
@@ -10,12 +12,25 @@
 
 \method{residuals}{rglmb}(object, ysim = NULL, ...)
 
+\method{residuals}{rlmb}(object, ysim = NULL, ...)
+
+\method{residuals}{summary.rglmb}(object, ysim = NULL, ...)
+
 \method{residuals}{lmb}(object, ysim = NULL, ...)
 }
 \arguments{
-\item{object}{an object of class \code{glmb}, typically the result of a call to \link{glmb}}
+\item{object}{an object of class \code{glmb}, \code{rglmb}, \code{rlmb}, or
+\code{summary.rglmb}, typically the result of a call to \link{glmb},
+\link{rglmb}, \link{rlmb}, or \code{\link{summary.rglmb}}.}
 
-\item{ysim}{Optional simulated data for the data y.}
+\item{ysim}{Optional matrix of simulated responses (one row per draw), as
+produced by a posterior-predictive simulation (e.g. \code{\link{simulate.glmb}}).
+When supplied, \code{ysim} substitutes for the observed response \code{y}
+while the fitted value for each draw is held fixed at that draw's own
+fit; this builds a reference ("what would a typical residual look like
+under the model") distribution for posterior-predictive residual checks,
+comparable to the residuals obtained from the actual data
+(\code{ysim = NULL}).}
 
 \item{\ldots}{further arguments to or from other methods}
 }
@@ -32,7 +47,8 @@ use the family's deviance residuals function as in \code{\link[stats]{residuals.
 \insertCite{McCullagh1989}{glmbayes}.
 }
 \details{
-These functions are all \link{methods} for class \code{glmb}, \code{lmb}, or \code{summary.glmb} objects.
+These functions are all \link{methods} for class \code{glmb}, \code{rglmb},
+\code{rlmb}, \code{summary.rglmb}, or \code{lmb} objects.
 }
 \examples{
 data(menarche,package="MASS")

@@ -1,11 +1,13 @@
 #' Summarizing Bayesian Generalized Linear Model Distribution Functions
 #'
-#' These functions are all \code{\link{methods}} for class \code{rglmb} or \code{summary.rglmb} objects.
+#' These functions are all \code{\link{methods}} for class \code{rglmb},
+#' \code{rlmb}, or \code{summary.rglmb} objects.
 #' 
 #' @aliases 
 #' summary.rglmb
+#' summary.rlmb
 #' print.summary.rglmb
-#' @param object an object of class \code{"rglmb"} for which a 
+#' @param object an object of class \code{"rglmb"} or \code{"rlmb"} for which a 
 #' summary is desired.
 #' @param x an object of class \code{"summary.rglmb"} for which a printed output is desired.
 #' @param digits the number of significant digits to use when printing.
@@ -19,7 +21,9 @@
 #' value for the coefficient as extreme as the prior mean)}
 #' \item{Percentiles}{Matrix with estimated percentiles associated with the posterior density}
 #' @details The \code{summary.rglmb} function summarizes the output from the 
-#' \code{\link{rglmb}} function. It takes an object of class \code{rglmb} as an input. 
+#' \code{\link{rglmb}} or \code{\link{rlmb}} function. It takes an object of class \code{rglmb}
+#' or \code{rlmb} as an input. For \code{dGamma} rate-prior fits, it delegates to
+#' \code{summary} on the dispersion draws directly.
 #' The output to a large extent mirrors the output from the \code{\link{summary.glm}} 
 #' function. This is particularly true for the print output from the function 
 #' (i.e. the output of the function \code{\link{print.summary.rglmb}}).
@@ -39,14 +43,14 @@ summary.rglmb<-function(object,...){
   prior_type <- attr(object$pfamily, "Prior Type")
   
   
-  if (prior_type=="dGamma") {
+  if (!is.null(prior_type) && prior_type=="dGamma") {
     return(summary(object$dispersion))
   }
   
   ### Pull in information needed to compute linear.predictors, 
   ## fitted.values, and DICInfo  
 
-  offset=object$offset2
+  offset=.rglmb_get_offset(object)
   dispersion2=object$dispersion
   famfunc=object$famfunc
   y=object$y
@@ -99,11 +103,10 @@ summary.rglmb<-function(object,...){
   mc<-se/sqrt(n)
   
 
-  R <- chol(object$Prior$Precision)
+  Prec <- .rglmb_prior_precision(object$Prior)
+  R <- chol(Prec)
   Prec_inv <- chol2inv(R)
   Prec_inv <- 0.5 * (Prec_inv + t(Prec_inv))   # enforce symmetry
-  
-  Priorwt <- (se / sqrt(diag(Prec_inv)))^2
 
     priorrank<-matrix(0,nrow=l1,ncol=1)
   pval1<-matrix(0,nrow=l1,ncol=1)
@@ -125,11 +128,6 @@ summary.rglmb<-function(object,...){
   ml<-coef(glm_mle) 
   se1<-sqrt(diag(vcov(glm_mle)))
     
-
-  R <- chol(object$Prior$Precision)
-  Prec_inv <- chol2inv(R)
-  Prec_inv <- 0.5 * (Prec_inv + t(Prec_inv))   # enforce symmetry
-  
   Tab1 <- cbind(
     "Prior Mean" = as.numeric(object$Prior$mean),
     "Prior.sd"   = as.numeric(sqrt(diag(Prec_inv))),
@@ -173,7 +171,7 @@ summary.rglmb<-function(object,...){
   res<-list(
     coefficients=object$coefficients,
     coef.means=colMeans(object$coefficients),
-    coef.mode=object$mode,
+    coef.mode=object$coef.mode,
     dispersion=mean(object$dispersion),
     Prior=object$Prior,
     fitted.values=fitted.values,
@@ -204,6 +202,15 @@ summary.rglmb<-function(object,...){
   
   res
   
+}
+
+
+#' @rdname summary.rglmb
+#' @export
+#' @method summary rlmb
+
+summary.rlmb <- function(object, ...) {
+  summary.rglmb(object, ...)
 }
 
 
@@ -241,3 +248,37 @@ print.summary.rglmb<-function(x,digits = max(3, getOption("digits") - 3),...){
 }
 
 
+## Offset recovery for summary.rglmb(): most rglmb()/rlmb() outputs carry
+## offset2 (a copy of the input offset, or a zero vector -- see
+## R/simfunction.R); simfun_args$offset is a defensive fallback for any other
+## simfun-produced object that stores it there instead. Matches
+## glmbayesCore's `.rglmb_get_offset()`.
+.rglmb_get_offset <- function(object) {
+  if (!is.null(object$offset2)) {
+    return(object$offset2)
+  }
+  if (!is.null(object$simfun_args$offset)) {
+    return(object$simfun_args$offset)
+  }
+  rep(0, NROW(object$y))
+}
+
+## Prior-precision recovery for summary.rglmb(): most priors carry
+## object$Prior$Precision directly; this falls back to inverting Sigma/
+## Variance for priors that only store the covariance. Matches
+## glmbayesCore's `.rglmb_prior_precision()`.
+.rglmb_prior_precision <- function(prior) {
+  if (!is.null(prior$Precision)) {
+    P <- prior$Precision
+    return(0.5 * (P + t(P)))
+  }
+  if (!is.null(prior$Sigma)) {
+    V <- prior$Sigma
+  } else if (!is.null(prior$Variance)) {
+    V <- prior$Variance
+  } else {
+    stop("Could not recover prior precision from object$Prior.", call. = FALSE)
+  }
+  P <- chol2inv(chol(V))
+  0.5 * (P + t(P))
+}

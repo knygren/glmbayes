@@ -41,6 +41,43 @@
   cleanly terminate a bar with a trailing newline. Matches **glmbayesCore**'s
   `src/progress_utils.cpp`.
 
+* **Internal:** Moved `DIC_Info()` out of `R/glmb.R` into its own file,
+  `R/dic_info.R` (pure move, no behavior change), matching **glmbayesCore**'s
+  file layout so the function can migrate there later without also having to
+  split it out of `glmb.R` at that time.
+
+* **Bug fix:** `residuals.rglmb()` (and the newly-added `residuals.rlmb()` /
+  `residuals.summary.rglmb()` methods) now use the same `ysim` convention as
+  `residuals.glmb()`: when supplied, `ysim` substitutes for the **observed
+  response** `y`, with the fitted value held fixed at each draw's own fit --
+  not the reverse. Previously `residuals.rglmb()` substituted `ysim` for the
+  fitted value while holding `y` fixed, which does not correspond to a
+  standard posterior-predictive residual check. `residuals.glmb()`'s own
+  (already-correct) behavior is unchanged. `residuals.glmb()`,
+  `residuals.rglmb()`, `residuals.rlmb()`, and `residuals.summary.rglmb()` now
+  share a single internal helper, `.residuals_rglmb_draws()`, matching
+  **glmbayesCore**'s (recently corrected) `.residuals_rglmb_draws()`.
+
+* **New:** Added an explicit `summary.rlmb()` S3 method (a thin passthrough to
+  `summary.rglmb()`; behavior is unchanged since `rlmb` objects already
+  inherited `summary.rglmb()` via their class vector). Matches
+  **glmbayesCore**'s explicit `summary.rlmb()`.
+
+* **Internal:** `summary.rglmb()` now recovers the offset and prior precision
+  via two small defensive helpers, `.rglmb_get_offset()` and
+  `.rglmb_prior_precision()`, instead of reading `object$offset2` /
+  `object$Prior$Precision` directly inline (with a fallback to
+  `object$simfun_args$offset`, or to inverting `Prior$Sigma`/`Prior$Variance`
+  when `Prior$Precision` isn't present). Matches **glmbayesCore**'s
+  `.rglmb_get_offset()` / `.rglmb_prior_precision()`. No behavior change for
+  existing `rglmb()`/`rlmb()` output.
+
+* **Bug fix:** `summary.rglmb()`'s returned object now correctly carries the
+  posterior mode in its `coef.mode` component (`object$coef.mode`); it
+  previously read a nonexistent `object$mode` field and so was always `NULL`.
+  This component was not otherwise read internally, so this only affects code
+  that inspects `summary(rglmb_object)$coef.mode` directly.
+
 # glmbayes 0.9.75
 
 ## Bug fixes

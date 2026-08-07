@@ -2,15 +2,18 @@
 % Please edit documentation in R/summary.rglmb.R
 \name{summary.rglmb}
 \alias{summary.rglmb}
+\alias{summary.rlmb}
 \alias{print.summary.rglmb}
 \title{Summarizing Bayesian Generalized Linear Model Distribution Functions}
 \usage{
 \method{summary}{rglmb}(object, ...)
 
+\method{summary}{rlmb}(object, ...)
+
 \method{print}{summary.rglmb}(x, digits = max(3, getOption("digits") - 3), ...)
 }
 \arguments{
-\item{object}{an object of class \code{"rglmb"} for which a
+\item{object}{an object of class \code{"rglmb"} or \code{"rlmb"} for which a
 summary is desired.}
 
 \item{x}{an object of class \code{"summary.rglmb"} for which a printed output is desired.}
@@ -30,11 +33,14 @@ value for the coefficient as extreme as the prior mean)}
 \item{Percentiles}{Matrix with estimated percentiles associated with the posterior density}
 }
 \description{
-These functions are all \code{\link{methods}} for class \code{rglmb} or \code{summary.rglmb} objects.
+These functions are all \code{\link{methods}} for class \code{rglmb},
+\code{rlmb}, or \code{summary.rglmb} objects.
 }
 \details{
 The \code{summary.rglmb} function summarizes the output from the
-\code{\link{rglmb}} function. It takes an object of class \code{rglmb} as an input.
+\code{\link{rglmb}} or \code{\link{rlmb}} function. It takes an object of class \code{rglmb}
+or \code{rlmb} as an input. For \code{dGamma} rate-prior fits, it delegates to
+\code{summary} on the dispersion draws directly.
 The output to a large extent mirrors the output from the \code{\link{summary.glm}}
 function. This is particularly true for the print output from the function
 (i.e. the output of the function \code{\link{print.summary.rglmb}}).
