@@ -12,6 +12,12 @@
   `opencl_core_count_for_scaling()`. No change to the public return value
   (still the total OpenCL compute units across GPU devices, minimum 1).
 
+* **Internal:** Extracted the `rindepNormalGamma_reg()` prior-vs-data balance
+  guard (dispersion envelope requires `n_prior <= n_w`) into reusable helpers
+  `.ing_n_prior_from_shape()` / `.ing_stop_if_prior_exceeds_data()` in the new
+  file `R/ing_prior_guard.R`, matching **glmbayesCore**'s
+  `R/ing_prior_guard.R`. Pure refactor: same check, same error message.
+
 # glmbayes 0.9.75
 
 ## Bug fixes
