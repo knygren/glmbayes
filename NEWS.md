@@ -1,3 +1,17 @@
+# glmbayes 0.9.76
+
+## Under development
+
+* Version bump for post-CRAN **0.9.75** work. Package code matches the CRAN
+  **0.9.75** release until further changes land here.
+
+* **Internal:** `get_opencl_core_count()` now delegates to
+  `opencltools::get_opencl_core_count()` (single implementation for
+  compute-unit counting) instead of maintaining a second, independent OpenCL
+  device query in `src/opencl_detect.cpp`. Same policy as **glmbayesCore**'s
+  `opencl_core_count_for_scaling()`. No change to the public return value
+  (still the total OpenCL compute units across GPU devices, minimum 1).
+
 # glmbayes 0.9.75
 
 ## Bug fixes

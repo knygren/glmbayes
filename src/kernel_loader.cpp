@@ -2,6 +2,7 @@
 #include "openclPort.h"
 #include "opencl.h"
 
+#include <algorithm>
 #include <string>
 #include <stdexcept>
 
@@ -136,12 +137,17 @@ std::string load_likelihood_subgradient_program(
 
 namespace openclPort {
 
+// Delegate to opencltools (single implementation for compute-unit counting);
+// avoids maintaining a second, independent OpenCL device query here.
 int get_opencl_core_count() {
-#ifdef USE_OPENCL
-  return std::max(1, detect_num_gpus_internal());
-#else
-  return 1;
-#endif
+  try {
+    Rcpp::Environment pkg = Rcpp::Environment::namespace_env("opencltools");
+    Rcpp::Function f = pkg["get_opencl_core_count"];
+    int n = Rcpp::as<int>(f());
+    return std::max(1, n);
+  } catch (...) {
+    return 1;
+  }
 }
 
 } // namespace openclPort
