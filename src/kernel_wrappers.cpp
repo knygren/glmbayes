@@ -102,6 +102,7 @@ Rcpp::List f2_f3_opencl(
     Rcpp::stop("Unsupported family: " + family);
   }
 
+  // Entry kernels from glmbayes inst/cl only (not glmbayesCore).
   all_src = load_likelihood_subgradient_program(family, link, "glmbayes");
 
   // Legacy inline program assembly (pre-nmathopencl) archived in src/backup/

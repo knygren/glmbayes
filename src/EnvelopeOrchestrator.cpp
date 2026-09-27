@@ -10,6 +10,8 @@
 
 #include "Envelopefuncs.h"
 #include "progress_utils.h"
+#include "package_ns.h"
+#include "R_interface.h"
 
 using namespace glmbayes::env;
 
@@ -45,6 +47,8 @@ Rcpp::List EnvelopeOrchestrator(
     bool use_opencl,
     bool verbose
 ) {
+  check_disp_bounds_or_stop(disp_lower, disp_upper, "EnvelopeOrchestrator (entry)");
+
   // Unknown dispersion always uses full envelope size (3^p grid); smaller grids not supported.
   Gridtype = 3;
 
@@ -164,9 +168,8 @@ int l2 = cbars.nrow();
 Rcpp::NumericVector logP_vec = Env3_raw["logP"];
 Rcpp::NumericMatrix logP_mat(logP_vec.size(), 1, logP_vec.begin());
 
-// Look up EnvelopeSort in the glmbayes namespace
-Rcpp::Environment pkg = Rcpp::Environment::namespace_env("glmbayes");
-Rcpp::Function EnvelopeSort = pkg["EnvelopeSort"];
+// Look up EnvelopeSort in the glmbayesCore namespace
+Rcpp::Function EnvelopeSort = glmbayes_R::r_envelope_sort();
 
 
 

@@ -1,4 +1,5 @@
 #include "RcppArmadillo.h"
+#include "R_interface.h"
 using namespace Rcpp;
 
 
@@ -21,7 +22,7 @@ Rcpp::List rGammaGaussian(
   // --------------------------------------------------------------
   // R helper for truncated gamma
   // --------------------------------------------------------------
-  Rcpp::Function rgamma_ct("rgamma_ct");
+  Rcpp::Function rgamma_ct = glmbayes_R::r_rgamma_ct();
   
   int n_obs = y.size();
   int p     = x.ncol();

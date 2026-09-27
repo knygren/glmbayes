@@ -39,6 +39,7 @@ Imports:
     coda,
     insight,
     bayestestR,
+    glmbayesCore (>= 0.5.4),
     Rcpp (>= 1.1.1),
     RcppParallel,
     Rdpack (>= 0.11-0),

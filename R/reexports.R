@@ -44,3 +44,9 @@ bayestestR::check_prior
 #' @importFrom bayestestR describe_prior
 #' @export
 bayestestR::describe_prior
+
+## Type (2): canonical implementation in glmbayesCore (see R/prior.R for documentation).
+#' @rdname Prior_Setup
+#' @importFrom glmbayesCore Prior_Setup
+#' @export
+glmbayesCore::Prior_Setup

@@ -150,4 +150,8 @@ int get_opencl_core_count() {
   }
 }
 
+int opencl_core_count_for_scaling() {
+  return get_opencl_core_count();
+}
+
 } // namespace openclPort

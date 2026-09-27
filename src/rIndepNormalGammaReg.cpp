@@ -12,10 +12,12 @@
 #include "Envelopefuncs.h"
 #include "simfuncs.h"
 #include "progress_utils.h"
+#include "package_ns.h"
+#include "R_interface.h"
 
 #include <cmath>         // for std::log or std::exp if used
 #include <math.h>
-#include "rng_utils.h"  // libR via rng_utils (Rf_pgamma, Rf_qgamma)
+#include "rng_utils.h"  // for safe_runif()
 
 // Required headers
 #include <RcppArmadillo.h>
@@ -365,7 +367,10 @@ void rIndepNormalGammaReg_worker::operator()(std::size_t begin, std::size_t end)
         bool bad = false;
         std::ostringstream msg;
         
-        if (test1 > 0.0) {
+        // Tolerate round-off ties: at the mode face LL_Test == UB1 exactly in
+        // exact arithmetic, so test1 can land a few ulps above 0.
+        double tol1 = 1e-9 * std::max(1.0, std::abs(UB1));
+        if (test1 > tol1) {
           bad = true;
           msg << "Sign violation: test1 = " << test1 << " > 0\n";
         }
@@ -544,7 +549,7 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
 
     Rcpp::checkUserInterrupt();
     
-   if(progbar==1){
+   if(progbar==1 && n > 1){
      // progress_bar3(i, n-1);
      progress_bar(i, n-1);
      
@@ -661,7 +666,10 @@ Rcpp::List  rIndepNormalGammaReg_std(int n,NumericVector y,NumericMatrix x,
       bool bad = false;
       std::ostringstream msg;
       
-      if (test1 > 0.0) {
+      // Tolerate round-off ties: at the mode face LL_Test == UB1 exactly in
+      // exact arithmetic, so test1 can land a few ulps above 0.
+      double tol1 = 1e-9 * std::max(1.0, std::abs(UB1));
+      if (test1 > tol1) {
         bad = true;
         msg << "Sign violation: test1 = " << test1 << " > 0\n";
       }
@@ -1049,13 +1057,25 @@ Rcpp::List rIndepNormalGammaReg(
     bool verbose,
     bool progbar
 ){
-  
-  
-  // int disp_grid_type=2;
-  // 
-  // if(use_parallel) disp_grid_type=2;
-  
-  
+  glmbayes::env::check_disp_bounds_or_stop(
+    disp_lower, disp_upper, "rIndepNormalGammaReg (entry)"
+  );
+  const int p = x.ncol();
+  double n_w = 0.0;
+  for (int i = 0; i < wt.size(); ++i) {
+    n_w += wt[i];
+  }
+  const double n_prior_implied = 2.0 * shape - 1.0 - static_cast<double>(p);
+  if (n_prior_implied > n_w) {
+    Rcpp::stop(
+      "dIndependent_Normal_Gamma prior implies n_prior = %g effective prior "
+      "observations, but the data supply only n_w = sum(weights) = %g. The "
+      "dispersion envelope requires n_prior <= n_w (prior weight pwt <= 0.5); "
+      "weaken the prior (smaller shape) or supply more data.",
+      n_prior_implied, n_w
+    );
+  }
+
   // --- EnvelopeCentering: returns dispersion and RSS_post for downstream ---
   Rcpp::List centering_out = glmbayes::env::EnvelopeCentering(
     y, x, mu, P, offset, wt,
@@ -1113,8 +1133,7 @@ Rcpp::List rIndepNormalGammaReg(
   // Base R functions (needed for mode optimization below)
   Rcpp::Function optim("optim");
   Rcpp::Function gaussian("gaussian");
-  Rcpp::Environment glmbayes_ns = Rcpp::Environment::namespace_env("glmbayes");
-  Rcpp::Function glmbfamfunc = glmbayes_ns["glmbfamfunc"];
+  Rcpp::Function glmbfamfunc = glmbayes_R::r_glmbfamfunc();
   Rcpp::List famfunc = glmbfamfunc( gaussian() );
   Rcpp::Function f2 = famfunc["f2"];
   Rcpp::Function f3 = famfunc["f3"];
@@ -1259,6 +1278,34 @@ Rcpp::List rIndepNormalGammaReg(
   // Pass wt-Compute wt2 internally  
     
   // Call C++ envelope orchestrator
+  //
+  // NOTE on disp_lower/disp_upper/n_envopt PROTECT: EnvelopeOrchestrator() takes
+  // Nullable<double>/Nullable<int>, but our incoming disp_lower/disp_upper are
+  // Nullable<NumericVector> and n_envopt is a plain int, so we must materialize
+  // fresh scalar SEXPs via Rcpp::wrap() to pass along. A bare Rcpp::wrap(...)
+  // temporary sitting directly in a call's argument list is NOT protected from
+  // R's garbage collector by C++ temporary-lifetime rules alone -- GC only
+  // respects the PROTECT stack (or genuinely GC-reachable containers), and
+  // R's conservative C-stack scanner is not guaranteed to find such short-lived
+  // temporaries, especially under -O2 where they may live only in registers.
+  // EnvelopeOrchestrator() -> EnvelopeBuild() does a lot of R-level allocation,
+  // which is exactly the kind of GC-triggering work that can reclaim an
+  // unprotected temporary mid-call. We saw this manifest as disp_lower/disp_upper
+  // silently becoming corrupted (observed as exactly 1, 1) between
+  // EnvelopeOrchestrator's entry and its internal call into
+  // EnvelopeDispersionBuild(). Explicit PROTECT/UNPROTECT around the freshly
+  // wrapped SEXPs for the duration of the call removes any dependence on
+  // conservative stack scanning. We use Rcpp::Shield (RAII PROTECT/UNPROTECT)
+  // rather than raw PROTECT/UNPROTECT so the protect stack stays balanced even
+  // if EnvelopeOrchestrator() throws (e.g. via Rcpp::stop() diagnostics).
+  bool has_disp_bounds = !disp_lower.isNull() && !disp_upper.isNull();
+  double disp_lower_val = has_disp_bounds ? Rcpp::as<Rcpp::NumericVector>(disp_lower)[0] : NA_REAL;
+  double disp_upper_val = has_disp_bounds ? Rcpp::as<Rcpp::NumericVector>(disp_upper)[0] : NA_REAL;
+
+  Rcpp::Shield<SEXP> n_envopt_sexp(n_envopt < 0 ? R_NilValue : Rcpp::wrap(n_envopt));
+  Rcpp::Shield<SEXP> disp_lower_sexp(has_disp_bounds ? Rcpp::wrap(disp_lower_val) : R_NilValue);
+  Rcpp::Shield<SEXP> disp_upper_sexp(has_disp_bounds ? Rcpp::wrap(disp_upper_val) : R_NilValue);
+
   Rcpp::List env_out = EnvelopeOrchestrator(
     bstar2,
     A,
@@ -1271,29 +1318,17 @@ Rcpp::List rIndepNormalGammaReg(
     // wt2,
     n,
     Gridtype,
-    
-    // n_envopt: treat negative as NULL
-    (n_envopt < 0 ? R_NilValue : Rcpp::wrap(n_envopt)),
-                
-                shape,
-                rate,
-                RSS_Post2,
-                RSS_ML,
-                max_disp_perc,
-                
-                // disp_lower: Nullable<NumericVector> -> Nullable<double>
-                (disp_lower.isNull()
-                   ? R_NilValue
-                   : Rcpp::wrap(Rcpp::as<Rcpp::NumericVector>(disp_lower)[0])),
-                     
-                     // disp_upper: same logic
-                     (disp_upper.isNull()
-                        ? R_NilValue
-                        : Rcpp::wrap(Rcpp::as<Rcpp::NumericVector>(disp_upper)[0])),
-                          
-                          use_parallel,
-                          use_opencl,
-                          verbose
+    Rcpp::Nullable<int>(SEXP(n_envopt_sexp)),
+    shape,
+    rate,
+    RSS_Post2,
+    RSS_ML,
+    max_disp_perc,
+    Rcpp::Nullable<double>(SEXP(disp_lower_sexp)),
+    Rcpp::Nullable<double>(SEXP(disp_upper_sexp)),
+    use_parallel,
+    use_opencl,
+    verbose
   );
   
   

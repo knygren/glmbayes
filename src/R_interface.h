@@ -53,6 +53,7 @@
 #define R_INTERFACE_H
 
 #include <Rcpp.h>
+#include "package_ns.h"
 
 // -----------------------------------------------------------------------------
 //  R_interface.h
@@ -67,6 +68,14 @@
 // -----------------------------------------------------------------------------
 
 namespace glmbayes_R {
+
+// Registered-namespace environment for package-local R callbacks (EnvelopeOpt,
+// EnvelopeSort, glmbfamfunc, rNormal_reg.wfit, rgamma_ct).  Base-R utilities
+// below still resolve from the search path.
+inline Rcpp::Environment pkg_env() {
+  static Rcpp::Environment env = Rcpp::Environment::namespace_env(GLMBAYES_R_NS);
+  return env;
+}
 
 // -----------------------------------------------------------------------------
 //  Time / formatting utilities
@@ -117,12 +126,17 @@ inline Rcpp::Function r_expand_grid() {
 }
 
 inline Rcpp::Function r_envelope_opt() {
-  static Rcpp::Function fn("EnvelopeOpt");
+  static Rcpp::Function fn = pkg_env()["EnvelopeOpt"];
   return fn;
 }
 
 inline Rcpp::Function r_envelope_sort() {
-  static Rcpp::Function fn("EnvelopeSort");
+  static Rcpp::Function fn = pkg_env()["EnvelopeSort"];
+  return fn;
+}
+
+inline Rcpp::Function r_glmbfamfunc() {
+  static Rcpp::Function fn = pkg_env()["glmbfamfunc"];
   return fn;
 }
 
@@ -152,7 +166,7 @@ inline Rcpp::Function r_qgamma() {
 }
 
 inline Rcpp::Function r_rgamma_ct() {
-  static Rcpp::Function fn("rgamma_ct");
+  static Rcpp::Function fn = pkg_env()["rgamma_ct"];
   return fn;
 }
 
@@ -192,7 +206,7 @@ inline Rcpp::Function r_gaussian() {
 }
 
 inline Rcpp::Function r_rNormal_reg_wfit() {
-  static Rcpp::Function fn("rNormal_reg.wfit");
+  static Rcpp::Function fn = pkg_env()["rNormal_reg.wfit"];
   return fn;
 }
 

@@ -13,6 +13,7 @@
 #include <RcppParallel.h>
 #include "openclPort.h"
 #include "progress_utils.h"
+#include "R_interface.h"
 
 using namespace Rcpp;
 using namespace openclPort;
@@ -68,10 +69,10 @@ List EnvelopeBuild_Ind_Normal_Gamma(NumericVector bStar,NumericMatrix A,
   arma::colvec yy_2b(yy_2.begin(), yy_2.size(), false);
   List G2(a_1.size());
   List GIndex1(a_1.size());
-  Rcpp::Function EnvelopeOpt("EnvelopeOpt");
+  Rcpp::Function EnvelopeOpt = glmbayes_R::r_envelope_opt();
   Rcpp::Function expGrid("expand.grid");
   Rcpp::Function asMat("as.matrix");
-  Rcpp::Function EnvSort("EnvelopeSort");
+  Rcpp::Function EnvSort = glmbayes_R::r_envelope_sort();
   
   int i;  
   

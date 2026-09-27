@@ -1,0 +1,9 @@
+R/glmbayesCore-package.R
+R/multi_prior_setup.R
+R/multi_rlmb.R
+R/multi_rNormal_reg.R
+R/residuals.rglmb.R
+R/summary.mrglmb.R
+src/backup/kernel_loader_fat_pre_opencltools.cpp
+src/glmbayesCore.dll
+src/package_ns.h

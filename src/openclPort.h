@@ -98,6 +98,7 @@ bool has_opencl();
 
 // OpenCL compute units via opencltools::get_opencl_core_count() (envelope scaling)
 int get_opencl_core_count();
+int opencl_core_count_for_scaling();
 
 
 // -------------------------------------------------------------------------

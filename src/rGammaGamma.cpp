@@ -1,4 +1,5 @@
 #include <RcppArmadillo.h>
+#include "R_interface.h"
 using namespace Rcpp;
 
 namespace glmbayes {
@@ -23,7 +24,7 @@ Rcpp::List rGammaGamma(
   // Stage 1: R functions we will use (for now)
   // --------------------------------------------------------------
   Rcpp::Function qgamma("qgamma");
-  Rcpp::Function rgamma_ct("rgamma_ct");
+  Rcpp::Function rgamma_ct = glmbayes_R::r_rgamma_ct();
   Rcpp::Function runif("runif");
   
   // Preserve whether user supplied bounds

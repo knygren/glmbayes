@@ -1,4 +1,5 @@
 #include "RcppArmadillo.h"
+#include "R_interface.h"
 using namespace Rcpp;
 
 
@@ -24,8 +25,8 @@ Rcpp::List rNormalGammaReg(
   // --------------------------------------------------------------
   // R helpers
   // --------------------------------------------------------------
-  Rcpp::Function rNormal_reg_wfit("rNormal_reg.wfit");
-  Rcpp::Function glmbfamfunc("glmbfamfunc");
+  Rcpp::Function rNormal_reg_wfit = glmbayes_R::r_rNormal_reg_wfit();
+  Rcpp::Function glmbfamfunc = glmbayes_R::r_glmbfamfunc();
   Rcpp::Function gaussian("gaussian");
   
   // famfunc = glmbfamfunc(gaussian())

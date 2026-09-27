@@ -1,4 +1,4 @@
-#' Setup Prior Objects
+﻿#' Setup Prior Objects
 #'
 #' Helper function to facilitate the Setup of Prior Distributions for glm models.
 #' @name Prior_Setup
@@ -280,815 +280,817 @@
 #' \insertAllCited{}
 #'
 #' @example inst/examples/Ex_Prior_Setup.R
-#' @export
 
-## Note arguments outside of first two are currently not used
+NULL
 
-Prior_Setup <- function(
-    formula,
-    family      = gaussian(),
-    data=NULL,
-    weights=NULL,
-    subset=NULL,
-    na.action   = na.fail,
-    offset=NULL,
-    contrasts   = NULL,
-    pwt         = NULL,
-    pwt_default_low = 0.01,      # new: low-d default
-    pwt_default_high = 0.05,     # new: high-d default
-    n_prior     = NULL,
-    sd          = NULL,
-    dispersion  = NULL,
-    intercept_source = c("null_model", "full_model"),
-    effects_source   = c("null_effects",  "full_model"),
-    mu          = NULL,
-    k           = 1,
-    ...
-  ) 
-  
-  {
-
-  ## ---------------------------------------------------------------------------
-  ## Step 1: Parse and normalize top-level arguments.
-  ## ---------------------------------------------------------------------------
-  call <- match.call()  
-  intercept_source <- match.arg(intercept_source)
-  effects_source <- match.arg(effects_source)
-  if (!is.null(dispersion)) {
-    if (!is.numeric(dispersion) || length(dispersion) != 1L ||
-        !is.finite(dispersion) || dispersion <= 0) {
-      stop("dispersion must be NULL or a single positive finite numeric value.")
-    }
-  }
-  dispersion_input <- dispersion
-  
-  
-  
-  #mf<-model.frame(formula,data,subset=subset,na.action=na.action,
-  #                drop.unused.levels=drop.unused.levels,xlev=xlev)
-  
-  
-  if (is.character(family)) 
-    family <- get(family, mode = "function", envir = parent.frame())
-  if (is.function(family)) 
-    family <- family()
-  if (is.null(family$family)) {
-    print(family)
-    stop("'family' not recognized")
-  }
-  
-  if (missing(data))   data <- environment(formula)
-  
-  ## ---------------------------------------------------------------------------
-  ## Step 2: Build model frame / response / design matrix.
-  ## ---------------------------------------------------------------------------
-  mf <- match.call(expand.dots = FALSE)
-  m <- match(c("formula", "data", "subset", "weights", "na.action", 
-               "etastart", "mustart", "offset"), names(mf), 0L)
-  mf <- mf[c(1L, m)]
-  mf$drop.unused.levels <- TRUE
-  mf[[1L]] <- quote(stats::model.frame)
-  mf <- eval(mf, parent.frame())
-  
+## glmbayes implementation commented out; exported from glmbayesCore (R/reexports.R).
+# ## Note arguments outside of first two are currently not used
+#
+# Prior_Setup <- function(
+#     formula,
+#     family      = gaussian(),
+#     data=NULL,
+#     weights=NULL,
+#     subset=NULL,
+#     na.action   = na.fail,
+#     offset=NULL,
+#     contrasts   = NULL,
+#     pwt         = NULL,
+#     pwt_default_low = 0.01,      # new: low-d default
+#     pwt_default_high = 0.05,     # new: high-d default
+#     n_prior     = NULL,
+#     sd          = NULL,
+#     dispersion  = NULL,
+#     intercept_source = c("null_model", "full_model"),
+#     effects_source   = c("null_effects",  "full_model"),
+#     mu          = NULL,
+#     k           = 1,
+#     ...
+#   ) 
+#   
+#   {
+# 
+#   ## ---------------------------------------------------------------------------
+#   ## Step 1: Parse and normalize top-level arguments.
+#   ## ---------------------------------------------------------------------------
+#   call <- match.call()  
+#   intercept_source <- match.arg(intercept_source)
+#   effects_source <- match.arg(effects_source)
+#   if (!is.null(dispersion)) {
+#     if (!is.numeric(dispersion) || length(dispersion) != 1L ||
+#         !is.finite(dispersion) || dispersion <= 0) {
+#       stop("dispersion must be NULL or a single positive finite numeric value.")
+#     }
+#   }
+#   dispersion_input <- dispersion
+#   
+#   
+#   
+#   #mf<-model.frame(formula,data,subset=subset,na.action=na.action,
+#   #                drop.unused.levels=drop.unused.levels,xlev=xlev)
+#   
+#   
+#   if (is.character(family)) 
+#     family <- get(family, mode = "function", envir = parent.frame())
+#   if (is.function(family)) 
+#     family <- family()
+#   if (is.null(family$family)) {
+#     print(family)
+#     stop("'family' not recognized")
+#   }
+#   
+#   if (missing(data))   data <- environment(formula)
+#   
+#   ## ---------------------------------------------------------------------------
+#   ## Step 2: Build model frame / response / design matrix.
+#   ## ---------------------------------------------------------------------------
+#   mf <- match.call(expand.dots = FALSE)
+#   m <- match(c("formula", "data", "subset", "weights", "na.action", 
+#                "etastart", "mustart", "offset"), names(mf), 0L)
+#   mf <- mf[c(1L, m)]
+#   mf$drop.unused.levels <- TRUE
+#   mf[[1L]] <- quote(stats::model.frame)
+#   mf <- eval(mf, parent.frame())
+#   
 ##  mf<-model.frame(formula,data)
-  
-  mt <- attr(mf, "terms")
-  Y <- model.response(mf, "any")
-  
-  if (family$family == "binomial"
-      && is.numeric(Y) && is.vector(Y)
-      && all(Y >= 0 & Y <= 1)    # use <= instead of <=
-      && is.null(weights)) {
-    warning(
-      "You supplied a proportion response (0 <= y <= 1) to a binomial family\n",
-      "without `weights`. Each case will be treated as a single trial (n=1).\n",
-      "If you meant to model counts, either use `cbind(success, failure)`\n",
-      "or supply `weights =` the number of trials."
-    )
-  }
-  
-  
+#   
+#   mt <- attr(mf, "terms")
+#   Y <- model.response(mf, "any")
+#   
+#   if (family$family == "binomial"
+#       && is.numeric(Y) && is.vector(Y)
+#       && all(Y >= 0 & Y <= 1)    # use <= instead of <=
+#       && is.null(weights)) {
+#     warning(
+#       "You supplied a proportion response (0 <= y <= 1) to a binomial family\n",
+#       "without `weights`. Each case will be treated as a single trial (n=1).\n",
+#       "If you meant to model counts, either use `cbind(success, failure)`\n",
+#       "or supply `weights =` the number of trials."
+#     )
+#   }
+#   
+#   
 ##  X <- if (!is.empty.model(mt)) model.matrix(mt, mf, contrasts) else matrix(, NROW(Y), 0L)
-  X <- if (!is.empty.model(mt)) model.matrix(mt, mf, ...) else matrix(, NROW(Y), 0L)
-  
-  ## ---------------------------------------------------------------------------
-  ## Step 3: Resolve weights and effective sample size.
-  ## ---------------------------------------------------------------------------
-  ## --- WEIGHT HANDLING -------------------------------------------------------
-  
-  # Extract raw weights from the model frame (may be NULL)
-  raw_wt <- model.weights(mf)
-  
-  # Number of observations (always correct)
-  n_obs <- nrow(X)
-  
-  # Case 1: User supplied scalar weight (e.g., weights = 4)
-  # model.frame() cannot accept scalar weights, so we expand them *after* mf is built
-  if (!is.null(raw_wt) && length(raw_wt) == 1L) {
-    weights <- rep(raw_wt, n_obs)
-  }
-  
-  # Case 2: User supplied a full-length weight vector
-  else if (!is.null(raw_wt)) {
-    
-    if (!is.numeric(raw_wt))
-      stop("'weights' must be numeric")
-    
-    if (any(raw_wt < 0))
-      stop("negative weights not allowed")
-    
-    if (length(raw_wt) != n_obs)
-      stop("weights must be either a scalar or have length equal to number of observations")
-    
-    weights <- raw_wt
-  }
-  
-  # Case 3: No weights supplied -> default depends on family
-  else {
-    
-    if (family$family %in% c("gaussian", "Gamma")) {
-      # Gaussian/Gamma treat weights as replication weights -> default = 1
-      weights <- rep(1, n_obs)
-    } else {
-      # Binomial/Poisson: GLM semantics require weights = NULL
-      weights <- NULL
-    }
-  }
-  
-  # Compute effective sample size
-  if (is.null(weights)) {
-    n_effective <- n_obs
-  } else {
-    n_effective <- sum(weights)
-  }
-  
-  
-  #######################################33
-  
-  
-  
-  
-  
-  
-  offset <- as.vector(model.offset(mf))
-  if (!is.null(offset)) {
-    if (length(offset) != NROW(Y)) 
-      stop(gettextf("number of offsets is %d should equal %d (number of observations)", 
-                    length(offset), NROW(Y)), domain = NA)
-  }
-  
-  mustart <- model.extract(mf, "mustart")
-  etastart <- model.extract(mf, "etastart")
-  
-  
-  x<-X  
+#   X <- if (!is.empty.model(mt)) model.matrix(mt, mf, ...) else matrix(, NROW(Y), 0L)
+#   
+#   ## ---------------------------------------------------------------------------
+#   ## Step 3: Resolve weights and effective sample size.
+#   ## ---------------------------------------------------------------------------
+#   ## --- WEIGHT HANDLING -------------------------------------------------------
+#   
+#   # Extract raw weights from the model frame (may be NULL)
+#   raw_wt <- model.weights(mf)
+#   
+#   # Number of observations (always correct)
+#   n_obs <- nrow(X)
+#   
+#   # Case 1: User supplied scalar weight (e.g., weights = 4)
+#   # model.frame() cannot accept scalar weights, so we expand them *after* mf is built
+#   if (!is.null(raw_wt) && length(raw_wt) == 1L) {
+#     weights <- rep(raw_wt, n_obs)
+#   }
+#   
+#   # Case 2: User supplied a full-length weight vector
+#   else if (!is.null(raw_wt)) {
+#     
+#     if (!is.numeric(raw_wt))
+#       stop("'weights' must be numeric")
+#     
+#     if (any(raw_wt < 0))
+#       stop("negative weights not allowed")
+#     
+#     if (length(raw_wt) != n_obs)
+#       stop("weights must be either a scalar or have length equal to number of observations")
+#     
+#     weights <- raw_wt
+#   }
+#   
+#   # Case 3: No weights supplied -> default depends on family
+#   else {
+#     
+#     if (family$family %in% c("gaussian", "Gamma")) {
+#       # Gaussian/Gamma treat weights as replication weights -> default = 1
+#       weights <- rep(1, n_obs)
+#     } else {
+#       # Binomial/Poisson: GLM semantics require weights = NULL
+#       weights <- NULL
+#     }
+#   }
+#   
+#   # Compute effective sample size
+#   if (is.null(weights)) {
+#     n_effective <- n_obs
+#   } else {
+#     n_effective <- sum(weights)
+#   }
+#   
+#   
+#   #######################################33
+#   
+#   
+#   
+#   
+#   
+#   
+#   offset <- as.vector(model.offset(mf))
+#   if (!is.null(offset)) {
+#     if (length(offset) != NROW(Y)) 
+#       stop(gettextf("number of offsets is %d should equal %d (number of observations)", 
+#                     length(offset), NROW(Y)), domain = NA)
+#   }
+#   
+#   mustart <- model.extract(mf, "mustart")
+#   etastart <- model.extract(mf, "etastart")
+#   
+#   
+#   x<-X  
 ##  x<-model.matrix(formula,mf)
-  
-  nvar=ncol(x)
-  if (!is.numeric(k) || length(k) != 1L || !is.finite(k) || k < 0) {
-    stop("k must be a single non-negative finite numeric value.", call. = FALSE)
-  }
-  if (k + nvar < 2) {
-    stop(
-      "Prior_Setup: require k + p >= 2, where p is the number of coefficients (ncol of model matrix). ",
-      "Got k = ", k, ", p = ", nvar, ".",
-      call. = FALSE
-    )
-  }
-  
-  ## ---------------------------------------------------------------------------
-  ## Step 4: Resolve prior-weight inputs (pwt, sd, n_prior).
-  ## Shared by Gaussian and non-Gaussian families.
-  ## ---------------------------------------------------------------------------
-  if (is.null(pwt)) {
-    pwt <- if (nvar < 14) pwt_default_low else pwt_default_high
-    ## n_prior (later) recomputes pwt; avoid implying the default applies.
-    if (is.null(n_prior)) {
-      message("Using default pwt = ", pwt,
-              " (", if (nvar < 14) "low-d" else "high-d", " default).")
-    }
-  }
-  
-  ## Make sure the *columns* of x are named correctly:
-  
-  
-  ## validate pwt  
-  if (!is.numeric(pwt) || any(is.na(pwt))) {  
-    stop("pwt must be numeric and non NA, either length 1 or length ", nvar)  
-  }  
-  if (! (length(pwt) %in% c(1, nvar)) ) {  
-    stop("pwt must have length 1 or length(coef) = ", nvar,  
-         "; you supplied length ", length(pwt))  
-  }  
-  if (any(pwt <= 0 | pwt >= 1)) {  
-    stop("All elements of pwt must lie strictly between 0 and 1; you supplied:",  
-         paste0(round(pwt, 3), collapse = ", "))  
-  }  
-  
-  
-  
-  var_names <- colnames(x)
-  colnames(x) <- var_names
-
-  mu_internal <- matrix(0, nrow = nvar, ncol = 1, dimnames = list(var_names, "mu"))
- 
-  
-  ## ---------------------------------------------------------------------------
-  ## Step 5: Fit full GLM and extract baseline covariance (V0).
-  ## ---------------------------------------------------------------------------
-  
-
-  glm_full <- glm.fit(
-    x       = X,
-    y       = Y,
-    weights = weights,
-    offset  = offset,
-    family  = family
-    ,control = glm.control(...)
-  )
-  
-
-  glm_full$call      <- call
-  glm_full$formula   <- formula
-  glm_full$terms     <- mt
-  glm_full$data      <- mf
-  glm_full$offset    <- offset
-  glm_full$contrasts <- attr(X, "contrasts")
-  glm_full$xlevels   <- .getXlevels(mt, mf)
-  class(glm_full)    <- c("glm", "lm")
-  
-
-  V0 <- vcov(glm_full)
-  ## Saturated Gaussian blocks (n = p, RSS = 0): vcov(glm) is NA; use dispersion * (X'WX)^{-1}.
-  if (anyNA(V0) && family$family %in% c("gaussian", "poisson")) {
-    d_v0 <- if (!is.null(dispersion_input)) {
-      dispersion_input
-    } else if (identical(family$family, "poisson")) {
-      1
-    } else {
-      NULL
-    }
-    if (!is.null(d_v0)) {
-    w_fit <- if (is.null(weights)) rep(1, n_obs) else as.numeric(weights)
-    XtW <- sweep(x, 1, w_fit, `*`)
-    Gm <- crossprod(XtW, x)
-    Ginv <- tryCatch(
-      solve(Gm),
-      error = function(e) {
-        stop(
-          "vcov(glm_full) is NA and (X'WX) is singular; the design is rank-deficient.",
-          call. = FALSE
-        )
-      }
-    )
-    V0 <- d_v0 * Ginv
-    dimnames(V0) <- list(var_names, var_names)
-    }
-  }
-
-  glm_summary=summary(glm_full)
-  
-  ##n_likelihood <- glm_summary$df.residual + glm_summary$df[1]  # residual df + model rank
-  n_likelihood <- n_effective
-  
-  # If sd is provided, use it to compute pwt
-if (!is.null(sd)) {
-  if (!is.numeric(sd) || any(is.na(sd))) {
-    stop("sd must be a numeric vector with no missing values.")
-  }
-  if (length(sd) != nvar) {
-    stop("Length of sd must match number of coefficients (", nvar, ").")
-  }
-
-  # Compute pwt from sd and V0
-  V0_diag <- diag(V0)
-  if (any(V0_diag <= 0)) {
-    stop("Diagonal entries of V0 must be positive to compute pwt from sd.")
-  }
-
-  pwt <- V0_diag / (V0_diag + sd^2)
-  message("Computed pwt from user-specified prior standard deviations (sd).")
-}
-  
-    
-  ## n_prior may imply pwt only when pwt is still a single scalar not from `sd`.
-  ## If length(pwt) > 1 (vector pwt) or `sd` was supplied, do not overwrite pwt;
-  ## n_prior is then used only downstream as a scalar for Gamma / S_marg remap.
-  if (!is.null(n_prior)) {
-    if (!is.numeric(n_prior) || length(n_prior) != 1 || n_prior <= 0) {
-      stop("n_prior must be a single positive numeric value")
-    }
-    if (length(pwt) == 1L && is.null(sd)) {
+#   
+#   nvar=ncol(x)
+#   if (!is.numeric(k) || length(k) != 1L || !is.finite(k) || k < 0) {
+#     stop("k must be a single non-negative finite numeric value.", call. = FALSE)
+#   }
+#   if (k + nvar < 2) {
+#     stop(
+#       "Prior_Setup: require k + p >= 2, where p is the number of coefficients (ncol of model matrix). ",
+#       "Got k = ", k, ", p = ", nvar, ".",
+#       call. = FALSE
+#     )
+#   }
+#   
+#   ## ---------------------------------------------------------------------------
+#   ## Step 4: Resolve prior-weight inputs (pwt, sd, n_prior).
+#   ## Shared by Gaussian and non-Gaussian families.
+#   ## ---------------------------------------------------------------------------
+#   if (is.null(pwt)) {
+#     pwt <- if (nvar < 14) pwt_default_low else pwt_default_high
+#     ## n_prior (later) recomputes pwt; avoid implying the default applies.
+#     if (is.null(n_prior)) {
+#       message("Using default pwt = ", pwt,
+#               " (", if (nvar < 14) "low-d" else "high-d", " default).")
+#     }
+#   }
+#   
+#   ## Make sure the *columns* of x are named correctly:
+#   
+#   
+#   ## validate pwt  
+#   if (!is.numeric(pwt) || any(is.na(pwt))) {  
+#     stop("pwt must be numeric and non NA, either length 1 or length ", nvar)  
+#   }  
+#   if (! (length(pwt) %in% c(1, nvar)) ) {  
+#     stop("pwt must have length 1 or length(coef) = ", nvar,  
+#          "; you supplied length ", length(pwt))  
+#   }  
+#   if (any(pwt <= 0 | pwt >= 1)) {  
+#     stop("All elements of pwt must lie strictly between 0 and 1; you supplied:",  
+#          paste0(round(pwt, 3), collapse = ", "))  
+#   }  
+#   
+#   
+#   
+#   var_names <- colnames(x)
+#   colnames(x) <- var_names
+# 
+#   mu_internal <- matrix(0, nrow = nvar, ncol = 1, dimnames = list(var_names, "mu"))
+#  
+#   
+#   ## ---------------------------------------------------------------------------
+#   ## Step 5: Fit full GLM and extract baseline covariance (V0).
+#   ## ---------------------------------------------------------------------------
+#   
+# 
+#   glm_full <- glm.fit(
+#     x       = X,
+#     y       = Y,
+#     weights = weights,
+#     offset  = offset,
+#     family  = family
+#     ,control = glm.control(...)
+#   )
+#   
+# 
+#   glm_full$call      <- call
+#   glm_full$formula   <- formula
+#   glm_full$terms     <- mt
+#   glm_full$data      <- mf
+#   glm_full$offset    <- offset
+#   glm_full$contrasts <- attr(X, "contrasts")
+#   glm_full$xlevels   <- .getXlevels(mt, mf)
+#   class(glm_full)    <- c("glm", "lm")
+#   
+# 
+#   V0 <- vcov(glm_full)
+#   ## Saturated Gaussian blocks (n = p, RSS = 0): vcov(glm) is NA; use dispersion * (X'WX)^{-1}.
+#   if (anyNA(V0) && family$family %in% c("gaussian", "poisson")) {
+#     d_v0 <- if (!is.null(dispersion_input)) {
+#       dispersion_input
+#     } else if (identical(family$family, "poisson")) {
+#       1
+#     } else {
+#       NULL
+#     }
+#     if (!is.null(d_v0)) {
+#     w_fit <- if (is.null(weights)) rep(1, n_obs) else as.numeric(weights)
+#     XtW <- sweep(x, 1, w_fit, `*`)
+#     Gm <- crossprod(XtW, x)
+#     Ginv <- tryCatch(
+#       solve(Gm),
+#       error = function(e) {
+#         stop(
+#           "vcov(glm_full) is NA and (X'WX) is singular; the design is rank-deficient.",
+#           call. = FALSE
+#         )
+#       }
+#     )
+#     V0 <- d_v0 * Ginv
+#     dimnames(V0) <- list(var_names, var_names)
+#     }
+#   }
+# 
+#   glm_summary=summary(glm_full)
+#   
+#   ##n_likelihood <- glm_summary$df.residual + glm_summary$df[1]  # residual df + model rank
+#   n_likelihood <- n_effective
+#   
+#   # If sd is provided, use it to compute pwt
+# if (!is.null(sd)) {
+#   if (!is.numeric(sd) || any(is.na(sd))) {
+#     stop("sd must be a numeric vector with no missing values.")
+#   }
+#   if (length(sd) != nvar) {
+#     stop("Length of sd must match number of coefficients (", nvar, ").")
+#   }
+# 
+#   # Compute pwt from sd and V0
+#   V0_diag <- diag(V0)
+#   if (any(V0_diag <= 0)) {
+#     stop("Diagonal entries of V0 must be positive to compute pwt from sd.")
+#   }
+# 
+#   pwt <- V0_diag / (V0_diag + sd^2)
+#   message("Computed pwt from user-specified prior standard deviations (sd).")
+# }
+#   
+#     
+#   ## n_prior may imply pwt only when pwt is still a single scalar not from `sd`.
+#   ## If length(pwt) > 1 (vector pwt) or `sd` was supplied, do not overwrite pwt;
+#   ## n_prior is then used only downstream as a scalar for Gamma / S_marg remap.
+#   if (!is.null(n_prior)) {
+#     if (!is.numeric(n_prior) || length(n_prior) != 1 || n_prior <= 0) {
+#       stop("n_prior must be a single positive numeric value")
+#     }
+#     if (length(pwt) == 1L && is.null(sd)) {
 ##    pwt <- n_prior / (n_prior + n_likelihood)
-      pwt <- n_prior / (n_prior + n_effective)
-      message("Computed pwt = ", round(pwt, 4),
-              " from n_prior = ", n_prior,
-              " and n_effective = ", n_effective)
-    }
-  }
-  
-  # Compute n_prior if not supplied and pwt is scalar
-  if (is.null(n_prior) && length(pwt) == 1L) {
-    n_prior <- (pwt/(1-pwt)) * n_effective
-  #  message("Computed n_prior = ", round(n_prior, 4),
-  #          " from pwt = ", round(pwt, 4),
-  #          " and n_likelihood = ", n_likelihood)
-  }
-  if (identical(family$family, "gaussian") && is.null(n_prior)) {
-    stop(
-      "For Gaussian models, a scalar effective prior sample size `n_prior` is required. ",
-      "Use scalar `pwt` (it implies `n_prior`), or supply `n_prior` explicitly. ",
-      "Per-coefficient `sd` implies vector `pwt`; in that case you must pass `n_prior`.",
-      call. = FALSE
-    )
-  }
-
-  ## ---------------------------------------------------------------------------
-  ## Step 6: Family-specific dispersion baseline.
-  ## Gaussian: weighted RSS ratio; Gamma: MASS::gamma.dispersion; else NULL.
-  ## ---------------------------------------------------------------------------
-  ## --- CONDITIONAL DISPERSION (Gaussian): explicit ratio from glm.fit object -----
-  ## Uses stats::glm.fit (not glm()). Baseline dispersion = RSS_w / (n_effective - p),
-  ## p = ncol(x), matching weighted residual df and \code{\link{compute_gaussian_prior}}.
-  ## # Old MLE-style ratio (retained for reference, not used):
-  ## # dispersion <- rss_weighted / n_effective
-  ## With rate = dispersion * shape (shape = (n_prior + k) / 2), posterior summaries of tau = 1/d
-  ## depend on pwt unless additional structure holds (see Details).
-  rss_weighted_stored <- NA_real_
-  dispersion_classical <- NA_real_
-  if (family$family == "gaussian") {
-    res <- residuals(glm_full, type = "response")
-    w   <- glm_full$prior.weights
-    rss_weighted <- sum(w * res^2)
-    rss_weighted_stored <- rss_weighted
-    if (!is.null(dispersion_input)) {
-      dispersion <- dispersion_input
-      dispersion_classical <- dispersion_input
-    } else {
-      if (!is.finite(rss_weighted) || rss_weighted <= 0) {
-        stop("Weighted RSS must be strictly positive for Gaussian dispersion priors.")
-      }
-      if (!is.finite(n_effective) || n_effective <= 0) {
-        stop("n_effective must be strictly positive to compute Gaussian dispersion.")
-      }
-      if (n_effective <= nvar) {
-        stop(
-          "Gaussian dispersion requires n_effective > p (number of coefficients); ",
-          "use denominator n_effective - p, or pass a positive scalar `dispersion`. ",
-          "Got n_effective = ", n_effective, ", p = ", nvar, ".",
-          call. = FALSE
-        )
-      }
-      dispersion <- rss_weighted / (n_effective - nvar)
-      if (!is.finite(dispersion) || dispersion <= 0) {
-        stop("Computed Gaussian dispersion must be strictly positive.")
-      }
-      dispersion_classical <- dispersion
-    }
-
-  } else if (family$family == "Gamma") {
-    
-    # MASS::gamma.dispersion() already returns the correct quasi-likelihood
-    # dispersion estimate for Gamma GLMs.
-    dispersion <- MASS::gamma.dispersion(glm_full)
-    
-  } else {
-    
-    dispersion <- NULL
-  }
-  
-
-    if (!is.matrix(V0) || nrow(V0) != ncol(V0)) {
-    stop("vcov(glm_full) (V0) must be a square matrix.")
-  }
-  if (anyNA(V0)) {
-    stop("vcov(glm_full) (V0) contains missing values.")
-  }
-  
-  # 2. symmetry (up to numerical tolerance)
-  if (!isSymmetric(V0, tol = sqrt(.Machine$double.eps))) {
-    stop("vcov(glm_full) (V0) is not symmetric.")
-  }
-  
-  # 3. positive-definiteness via Cholesky
-  pd_try <- try(chol(V0), silent = TRUE)
-  if (inherits(pd_try, "try-error")) {
-    stop(
-      "Variance-covariance matrix V0 is not positive-definite.\n",
-      "This usually means the classical GLM is rank-deficient."
-    )
-  }
-
-  ## ---------------------------------------------------------------------------
-  ## Step 7: Construct prior mean vector mu.
-  ## Intercept and effects can be sourced from null/full model unless user sets mu.
-  ## ---------------------------------------------------------------------------
-  if (var_names[1] == "(Intercept)") {
-    # build 1-column design matrix for intercept only
-    X0 <- matrix(1, nrow = NROW(Y), ncol = 1,
-                 dimnames = list(NULL, "(Intercept)"))
-    
-    # fit intercept-only model via glm.fit()
-    fit0 <- glm.fit(
-      x       = X0,
-      y       = Y,
-      weights = weights,
-      offset  = offset,
-      family  = family,
-      control = glm.control(...)
-    )
-    
-    # pick the intercept from null or full model
-    chosen_int <- switch(
-      intercept_source,
-      null_model = fit0$coefficients[1],
-      full_model = glm_full$coefficients[1]
-    )
-    
-    mu_internal[1, 1] <- chosen_int
-  }
-  
-
-  # 5) effects prior means
-  if (nvar > 1) {
-    effect_names <- var_names[-1]
-    if (effects_source == "full_model") {
-      coefs <- coef(glm_full)[effect_names]
-      mu_internal[effect_names, 1] <- coefs
-    }
-    # else null_effects leaves mu[...] as zero
-  }
-  
-
-  # Validate user-supplied mu if provided
-  if (!is.null(mu)) {
-    if (!is.numeric(mu)) {
-      stop("mu must be numeric.")
-    }
-    if (is.vector(mu)) {
-      if (length(mu) != nvar) {
-        stop("Length of mu vector must match number of coefficients (", nvar, ").")
-      }
-      mu <- matrix(mu, ncol = 1, dimnames = list(var_names, "mu"))
-    } else if (is.matrix(mu)) {
-      if (!all(dim(mu) == c(nvar, 1))) {
-        stop("mu matrix must have dimensions [", nvar, ", 1].")
-      }
-      rownames(mu) <- var_names
-      colnames(mu) <- "mu"
-    } else {
-      stop("mu must be either a numeric vector or a matrix.")
-    }
-    message("Using user-specified prior mean vector (mu).")
-  } else {
-    mu <- mu_internal
-  }
-  
-    
-  ## ---------------------------------------------------------------------------
-  ## Step 8: Build prior covariance Sigma from pwt and V0.
-  ## Scalar pwt gives Zellner scaling; vector pwt applies element-wise scaling.
-  ## ---------------------------------------------------------------------------
-  
+#       pwt <- n_prior / (n_prior + n_effective)
+#       message("Computed pwt = ", round(pwt, 4),
+#               " from n_prior = ", n_prior,
+#               " and n_effective = ", n_effective)
+#     }
+#   }
+#   
+#   # Compute n_prior if not supplied and pwt is scalar
+#   if (is.null(n_prior) && length(pwt) == 1L) {
+#     n_prior <- (pwt/(1-pwt)) * n_effective
+#   #  message("Computed n_prior = ", round(n_prior, 4),
+#   #          " from pwt = ", round(pwt, 4),
+#   #          " and n_likelihood = ", n_likelihood)
+#   }
+#   if (identical(family$family, "gaussian") && is.null(n_prior)) {
+#     stop(
+#       "For Gaussian models, a scalar effective prior sample size `n_prior` is required. ",
+#       "Use scalar `pwt` (it implies `n_prior`), or supply `n_prior` explicitly. ",
+#       "Per-coefficient `sd` implies vector `pwt`; in that case you must pass `n_prior`.",
+#       call. = FALSE
+#     )
+#   }
+# 
+#   ## ---------------------------------------------------------------------------
+#   ## Step 6: Family-specific dispersion baseline.
+#   ## Gaussian: weighted RSS ratio; Gamma: MASS::gamma.dispersion; else NULL.
+#   ## ---------------------------------------------------------------------------
+#   ## --- CONDITIONAL DISPERSION (Gaussian): explicit ratio from glm.fit object -----
+#   ## Uses stats::glm.fit (not glm()). Baseline dispersion = RSS_w / (n_effective - p),
+#   ## p = ncol(x), matching weighted residual df and \code{\link{compute_gaussian_prior}}.
+#   ## # Old MLE-style ratio (retained for reference, not used):
+#   ## # dispersion <- rss_weighted / n_effective
+#   ## With rate = dispersion * shape (shape = (n_prior + k) / 2), posterior summaries of tau = 1/d
+#   ## depend on pwt unless additional structure holds (see Details).
+#   rss_weighted_stored <- NA_real_
+#   dispersion_classical <- NA_real_
+#   if (family$family == "gaussian") {
+#     res <- residuals(glm_full, type = "response")
+#     w   <- glm_full$prior.weights
+#     rss_weighted <- sum(w * res^2)
+#     rss_weighted_stored <- rss_weighted
+#     if (!is.null(dispersion_input)) {
+#       dispersion <- dispersion_input
+#       dispersion_classical <- dispersion_input
+#     } else {
+#       if (!is.finite(rss_weighted) || rss_weighted <= 0) {
+#         stop("Weighted RSS must be strictly positive for Gaussian dispersion priors.")
+#       }
+#       if (!is.finite(n_effective) || n_effective <= 0) {
+#         stop("n_effective must be strictly positive to compute Gaussian dispersion.")
+#       }
+#       if (n_effective <= nvar) {
+#         stop(
+#           "Gaussian dispersion requires n_effective > p (number of coefficients); ",
+#           "use denominator n_effective - p, or pass a positive scalar `dispersion`. ",
+#           "Got n_effective = ", n_effective, ", p = ", nvar, ".",
+#           call. = FALSE
+#         )
+#       }
+#       dispersion <- rss_weighted / (n_effective - nvar)
+#       if (!is.finite(dispersion) || dispersion <= 0) {
+#         stop("Computed Gaussian dispersion must be strictly positive.")
+#       }
+#       dispersion_classical <- dispersion
+#     }
+# 
+#   } else if (family$family == "Gamma") {
+#     
+#     # MASS::gamma.dispersion() already returns the correct quasi-likelihood
+#     # dispersion estimate for Gamma GLMs.
+#     dispersion <- MASS::gamma.dispersion(glm_full)
+#     
+#   } else {
+#     
+#     dispersion <- NULL
+#   }
+#   
+# 
+#     if (!is.matrix(V0) || nrow(V0) != ncol(V0)) {
+#     stop("vcov(glm_full) (V0) must be a square matrix.")
+#   }
+#   if (anyNA(V0)) {
+#     stop("vcov(glm_full) (V0) contains missing values.")
+#   }
+#   
+#   # 2. symmetry (up to numerical tolerance)
+#   if (!isSymmetric(V0, tol = sqrt(.Machine$double.eps))) {
+#     stop("vcov(glm_full) (V0) is not symmetric.")
+#   }
+#   
+#   # 3. positive-definiteness via Cholesky
+#   pd_try <- try(chol(V0), silent = TRUE)
+#   if (inherits(pd_try, "try-error")) {
+#     stop(
+#       "Variance-covariance matrix V0 is not positive-definite.\n",
+#       "This usually means the classical GLM is rank-deficient."
+#     )
+#   }
+# 
+#   ## ---------------------------------------------------------------------------
+#   ## Step 7: Construct prior mean vector mu.
+#   ## Intercept and effects can be sourced from null/full model unless user sets mu.
+#   ## ---------------------------------------------------------------------------
+#   if (var_names[1] == "(Intercept)") {
+#     # build 1-column design matrix for intercept only
+#     X0 <- matrix(1, nrow = NROW(Y), ncol = 1,
+#                  dimnames = list(NULL, "(Intercept)"))
+#     
+#     # fit intercept-only model via glm.fit()
+#     fit0 <- glm.fit(
+#       x       = X0,
+#       y       = Y,
+#       weights = weights,
+#       offset  = offset,
+#       family  = family,
+#       control = glm.control(...)
+#     )
+#     
+#     # pick the intercept from null or full model
+#     chosen_int <- switch(
+#       intercept_source,
+#       null_model = fit0$coefficients[1],
+#       full_model = glm_full$coefficients[1]
+#     )
+#     
+#     mu_internal[1, 1] <- chosen_int
+#   }
+#   
+# 
+#   # 5) effects prior means
+#   if (nvar > 1) {
+#     effect_names <- var_names[-1]
+#     if (effects_source == "full_model") {
+#       coefs <- coef(glm_full)[effect_names]
+#       mu_internal[effect_names, 1] <- coefs
+#     }
+#     # else null_effects leaves mu[...] as zero
+#   }
+#   
+# 
+#   # Validate user-supplied mu if provided
+#   if (!is.null(mu)) {
+#     if (!is.numeric(mu)) {
+#       stop("mu must be numeric.")
+#     }
+#     if (is.vector(mu)) {
+#       if (length(mu) != nvar) {
+#         stop("Length of mu vector must match number of coefficients (", nvar, ").")
+#       }
+#       mu <- matrix(mu, ncol = 1, dimnames = list(var_names, "mu"))
+#     } else if (is.matrix(mu)) {
+#       if (!all(dim(mu) == c(nvar, 1))) {
+#         stop("mu matrix must have dimensions [", nvar, ", 1].")
+#       }
+#       rownames(mu) <- var_names
+#       colnames(mu) <- "mu"
+#     } else {
+#       stop("mu must be either a numeric vector or a matrix.")
+#     }
+#     message("Using user-specified prior mean vector (mu).")
+#   } else {
+#     mu <- mu_internal
+#   }
+#   
+#     
+#   ## ---------------------------------------------------------------------------
+#   ## Step 8: Build prior covariance Sigma from pwt and V0.
+#   ## Scalar pwt gives Zellner scaling; vector pwt applies element-wise scaling.
+#   ## ---------------------------------------------------------------------------
+#   
 #  Sigma=as.matrix(diag(nvar))
- 
+#  
 #  Sigma=(1-pwt)/pwt*V0
-   
-  ## build prior covariance  
-  if (length(pwt) == 1L) {  
-    ## full matrix prior  
-    Sigma <- ((1 - pwt) / pwt) * V0  
-  }
-  else {  
-    scale_vec <- sqrt((1 - pwt) / pwt)
-    scale_mat <- outer(scale_vec, scale_vec)
-    Sigma <- V0 * scale_mat
-  }  
-
-  rownames(mu)=var_names
-  colnames(mu)=c("mu")
-  rownames(Sigma)=var_names
-  colnames(Sigma)=var_names
-
-  rate_gamma <- NULL
-  shape_ING <- NULL
-  ## ---------------------------------------------------------------------------
-  ## Step 9: Build Gamma(shape, rate) hyperparameters when available.
-  ## For Gaussian this provides precision-prior terms used in calibration.
-  ## ---------------------------------------------------------------------------
-  ## Gamma on precision: shape = (n_prior + 1) / 2, rate = dispersion * (n_prior/2).
-  ## compute_gaussian_prior() calibrates shape/rate from n_prior and S_marg only.
-  ## Sigma may be rescaled below by Gaussian calibration; shape/rate use current dispersion.
-  dispersion_for_shape_rate <- dispersion
-  if (!is.null(n_prior) && length(n_prior) == 1L && !is.null(dispersion_for_shape_rate)) {
-    ## n_prior is interpreted as effective prior sample size, on the same scale as sum(weights).
-    shape <- (n_prior + 1L) / 2
-    if (!is.finite(shape) || shape <= 0) {
-      stop("Computed shape must be strictly positive.")
-    }
-    rate <- dispersion_for_shape_rate * (n_prior / 2)
-    if (!is.finite(rate) || rate <= 0) {
-      stop("Computed rate must be strictly positive.")
-    }
-  } else {
-    shape <- NULL
-    rate <- NULL
-  }
-
-  ## ---------------------------------------------------------------------------
-  ## Step 10 (Gaussian): run Gaussian calibration pipeline and replace outputs.
-  ## compute_gaussian_prior() returns calibrated dispersion/shape/rate/Sigma.
-  ## ---------------------------------------------------------------------------
-  ## --- S_marg_new / S_marg_sigma0_vcov before Post_mean / Nelder (full Sigma_pre_nm: scalar or vector pwt)
-  ## Sigma_0 = Sigma_pre_nm / d with d = d_OLS or d_vcov = summary(glm)$dispersion (cancels vcov scale in V0).
-  ## S_marg keeps the same value for downstream b_0 / remap logic (identical to S_marg_new here).
-  Sigma_pre_nm <- Sigma
-  .gauss_helper_preview <- NULL
-  if (identical(family$family, "gaussian") &&
-      n_effective > nvar &&
-      is.finite(dispersion_classical) && dispersion_classical > 0 &&
-      !is.null(n_prior) && length(n_prior) == 1L && is.finite(n_prior) && n_prior > 0 &&
-      !is.null(mu) && length(as.numeric(mu)) == nvar && all(is.finite(as.numeric(mu)))) {
-    w_h <- if (is.null(weights)) rep(1, n_obs) else as.numeric(weights)
-    off_h <- if (is.null(offset)) rep(0, n_obs) else as.numeric(offset)
-    bhat_h <- coef(glm_full)
-    if (length(bhat_h) == nvar && all(is.finite(bhat_h))) {
-      Sigma_0_h <- Sigma_pre_nm / dispersion_classical
-      .gauss_helper_preview <- compute_gaussian_prior(
-        X = X,
-        Y = Y,
-        weights = w_h,
-        offset = off_h,
-        dispersion = dispersion_input,
-        n_effective = n_effective,
-        bhat = bhat_h,
-        mu = mu,
-        Sigma_0 = Sigma_0_h,
-        Sigma = if (!is.null(sd)) Sigma_pre_nm else NULL,
-        n_prior = n_prior,
-        k = k
-      )
-    }
-  }
-  coefficients_mle <- coef(glm_full)
-  coefficients <- coefficients_mle
-  ## Default returned coefficients: closed-form posterior mean blend when available.
-  if (identical(family$family, "gaussian") &&
-      length(coefficients_mle) == nvar &&
-      !is.null(mu) && length(mu) == nvar &&
-      all(is.finite(as.numeric(mu)))) {
-    mle_fp <- vapply(
-      var_names,
-      function(nm) {
-        if (!is.null(names(coefficients_mle)) && nm %in% names(coefficients_mle)) {
-          v <- unname(coefficients_mle[nm])
-          if (length(v) == 1L && is.finite(v)) v else NA_real_
-        } else {
-          NA_real_
-        }
-      },
-      NA_real_
-    )
-    mu_fp <- as.numeric(mu)
-    if (length(pwt) == 1L && is.finite(pwt)) {
-      coefficients <- (1 - pwt) * mle_fp + pwt * mu_fp
-      names(coefficients) <- var_names
-    } else if (length(pwt) == nvar && all(is.finite(pwt))) {
-      coefficients <- (1 - pwt) * mle_fp + pwt * mu_fp
-      names(coefficients) <- var_names
-    }
-  }
-
-  ## When calibration ran, take Gaussian dispersion and Gamma hyperparameters from compute_gaussian_prior().
-  if (identical(family$family, "gaussian") &&
-      !is.null(.gauss_helper_preview)) {
-    dispersion <- .gauss_helper_preview$dispersion
-    shape <- .gauss_helper_preview$shape
-    shape_ING <- .gauss_helper_preview$shape_ING
-    rate <- .gauss_helper_preview$rate
-    rate_gamma <- .gauss_helper_preview$rate_gamma
-    Sigma <- .gauss_helper_preview$Sigma
-    rownames(Sigma) <- var_names
-    colnames(Sigma) <- var_names
-  }
-  if (identical(family$family, "gaussian") &&
-      !is.null(shape) && length(shape) == 1L && is.finite(shape)) {
-    if (is.null(shape_ING)) {
-      shape_ING <- shape + nvar / 2
-    }
-  }
-
-  Sigma_0_out <- NULL
-  if (identical(family$family, "gaussian")) {
-    if (!is.null(.gauss_helper_preview)) {
-      Sigma_0_out <- .gauss_helper_preview$Sigma_0
-    } else if (is.finite(dispersion_classical) && dispersion_classical > 0) {
-      Sigma_0_out <- Sigma_pre_nm / dispersion_classical
-    }
-    if (!is.null(Sigma_0_out)) {
-      rownames(Sigma_0_out) <- var_names
-      colnames(Sigma_0_out) <- var_names
-    }
-  }
-
-  ## ---------------------------------------------------------------------------
-  ## Step 10b: Gamma–Poisson conjugate λ prior (intercept-only Poisson(link = "identity"))
-  ##
-  ## Effective prior observation count links to scalar pwt via
-  ##   n_prior / (n_prior + n_eff) = pwt  <=>  n_prior = (pwt / (1 - pwt)) * n_eff
-  ## Weighted arithmetic mean λ̄_w = Σ w_i y_i / Σ w_i.  Choosing
-  ##   λ ~ Gamma(shape = n_prior λ̄_w, rate = n_prior),
-  ## gives E[λ] = λ̄_w so the conjugate Poisson posterior mean remains λ̄_w.
-  ## ---------------------------------------------------------------------------
-
-  conj_poisson <- NULL
-  mu_arg_missing <- missing(mu)
-
-  gamma_poisson_conj_ok <- (
-    identical(family$family, "poisson") &&
-      identical(family$link, "identity") &&
-      ncol(x) == 1L &&
-      length(pwt) == 1L
-  )
-
-  if (gamma_poisson_conj_ok && !is.null(offset)) {
-    of <- suppressWarnings(as.numeric(offset))
-    if (length(of) != n_obs || any(!is.finite(of)) ||
-        max(abs(of), na.rm = TRUE) > sqrt(.Machine$double.eps)) {
-      gamma_poisson_conj_ok <- FALSE
-    }
-  }
-
-  if (gamma_poisson_conj_ok) {
-    ww <- glm_full$prior.weights
-    if (is.null(ww) || length(ww) != n_obs) ww <- rep(1, n_obs)
-
-    ## Nonnegative Poisson observations
-    if (any(as.numeric(Y) < 0, na.rm = TRUE)) {
-      stop(
-        "`Prior_Setup()` Poisson conjugate calibration requires nonnegative responses.", call. = FALSE
-      )
-    }
-
-    ybar <- sum(as.numeric(Y) * as.numeric(ww)) / sum(as.numeric(ww))
-    if (!(is.finite(ybar) && ybar > 0)) {
-      stop(
-        "`Prior_Setup()` Poisson(link='identity'), intercept-only conjugate calibration requires ",
-        "positive weighted mean counts (Gamma prior requires a positive Poisson rate); weighted mean ",
-        "= ", paste0("`", prettyNum(ybar), "`."), call. = FALSE
-      )
-    }
-
-    if (is.null(n_prior) || length(n_prior) != 1L || !is.finite(n_prior) || n_prior <= 0) {
-      warning(
-        "Poisson(link='identity') intercept-only: skipping `conj_poisson` Gamma rate prior ",
-        "calibration because scalar `n_prior` is unavailable or non-positive; supply finite positive ",
-        "`pwt` or `n_prior`.",
-        call. = FALSE
-      )
-    } else {
-      np <- as.numeric(n_prior)
-      ## Prior mean E[lambda] matches weighted data mean; conjugate Gamma(shape,rate) hyperparameters:
-      conj_shape <- np * ybar
-      conj_rate <- np
-
-      bm <- matrix(as.numeric(ybar), nrow = 1L, ncol = 1L,
-                   dimnames = list(NULL, var_names))
-
-      conj_poisson <- list(
-        shape = conj_shape,
-        rate = conj_rate,
-        beta = bm,
-        weighted_mean_rate = ybar,
-        n_prior_eff = np
-      )
-
-      ## Moment-matched surrogate Normal summaries for `\u03bc`/`Sigma` (single intercept only):
-      if (mu_arg_missing && nvar == 1L && is.finite(ybar) && is.finite(np) && np > 0) {
-        mu[1, 1] <- as.numeric(ybar)
-        Sigma[1, 1] <- as.numeric(ybar / np)
-        rownames(mu) <- var_names
-        colnames(mu) <- "mu"
-        rownames(Sigma) <- colnames(Sigma) <- var_names
-      }
-    }
-  }
-
-  ## ---------------------------------------------------------------------------
-  ## Step 10c: Beta–Binomial conjugate θ prior (intercept-only Binomial(link = "identity"))
-  ##
-  ## Effective prior observation count:
-  ##   n_prior / (n_prior + n_eff) = pwt  <=>  n_prior = (pwt / (1 - pwt)) * n_eff
-  ## Weighted proportion p̄_w = Σ w_i y_i / Σ w_i.  Choosing
-  ##   θ ~ Beta(shape1 = n_prior * p̄, shape2 = n_prior * (1 - p̄))
-  ## gives E[θ] = p̄ so the conjugate Binomial posterior mean starts at p̄.
-  ## ---------------------------------------------------------------------------
-
-  conj_binomial <- NULL
-
-  beta_binom_conj_ok <- (
-    identical(family$family, "binomial") &&
-      identical(family$link, "identity") &&
-      ncol(x) == 1L &&
-      length(pwt) == 1L
-  )
-
-  if (beta_binom_conj_ok && !is.null(offset)) {
-    of <- suppressWarnings(as.numeric(offset))
-    if (length(of) != n_obs || any(!is.finite(of)) ||
-        max(abs(of), na.rm = TRUE) > sqrt(.Machine$double.eps)) {
-      beta_binom_conj_ok <- FALSE
-    }
-  }
-
-  if (beta_binom_conj_ok) {
-    ww <- glm_full$prior.weights
-    if (is.null(ww) || length(ww) != n_obs) ww <- rep(1, n_obs)
-
-    y_num <- as.numeric(Y)
-    if (any(y_num < 0, na.rm = TRUE) || any(y_num > 1, na.rm = TRUE)) {
-      stop(
-        "`Prior_Setup()` Binomial(identity) conjugate calibration requires response in [0, 1].",
-        call. = FALSE
-      )
-    }
-
-    pbar <- sum(y_num * as.numeric(ww)) / sum(as.numeric(ww))
-    if (!(is.finite(pbar) && pbar > 0 && pbar < 1)) {
-      warning(
-        "Binomial(link='identity') intercept-only: skipping `conj_binomial` Beta prior ",
-        "calibration because the weighted proportion is not strictly in (0, 1); ",
-        "weighted proportion = ", paste0("`", prettyNum(pbar), "`."),
-        call. = FALSE
-      )
-    } else if (is.null(n_prior) || length(n_prior) != 1L || !is.finite(n_prior) || n_prior <= 0) {
-      warning(
-        "Binomial(link='identity') intercept-only: skipping `conj_binomial` Beta prior ",
-        "calibration because scalar `n_prior` is unavailable or non-positive; supply finite positive ",
-        "`pwt` or `n_prior`.",
-        call. = FALSE
-      )
-    } else {
-      np <- as.numeric(n_prior)
-      conj_shape1 <- np * pbar
-      conj_shape2 <- np * (1 - pbar)
-
-      bm <- matrix(as.numeric(pbar), nrow = 1L, ncol = 1L,
-                   dimnames = list(NULL, var_names))
-
-      conj_binomial <- list(
-        shape1             = conj_shape1,
-        shape2             = conj_shape2,
-        beta               = bm,
-        weighted_mean_prop = pbar,
-        n_prior_eff        = np
-      )
-
-      ## Moment-matched surrogate Normal mu/Sigma for single intercept
-      if (mu_arg_missing && nvar == 1L && is.finite(pbar) && is.finite(np) && np > 0) {
-        mu[1, 1] <- as.numeric(pbar)
-        Sigma[1, 1] <- as.numeric(pbar * (1 - pbar) / np)
-        rownames(mu) <- var_names
-        colnames(mu) <- "mu"
-        rownames(Sigma) <- colnames(Sigma) <- var_names
-      }
-    }
-  }
-
-  ## ---------------------------------------------------------------------------
-  ## Step 11: Assemble and return PriorSetup object.
-  ## ---------------------------------------------------------------------------
-  prior_list <- list(
-    mu = mu,
-    Sigma = Sigma,
-    Sigma_0 = Sigma_0_out,
-    dispersion = dispersion,
-    shape = shape,
-    shape_ING = shape_ING,
-    rate = rate,
-    rate_gamma = rate_gamma,
-    coefficients = coefficients,
-    conj_poisson  = conj_poisson,
-    conj_binomial = conj_binomial,
-    model = mf,
-    x = x,
-    y = Y,
-    call = call,
-    PriorSettings = list(
-      pwt = pwt,
-      n_prior = n_prior,
-      intercept_source = intercept_source,
-      effects_source = effects_source,
-      ## For now retain n_likelihood for backward compatibility
-      n_likelihood = n_likelihood,
-      n_effective = n_effective
-    )
-  )
-  
-  class(prior_list) <- "PriorSetup"
-  return(prior_list)
-  
-}
+#    
+#   ## build prior covariance  
+#   if (length(pwt) == 1L) {  
+#     ## full matrix prior  
+#     Sigma <- ((1 - pwt) / pwt) * V0  
+#   }
+#   else {  
+#     scale_vec <- sqrt((1 - pwt) / pwt)
+#     scale_mat <- outer(scale_vec, scale_vec)
+#     Sigma <- V0 * scale_mat
+#   }  
+# 
+#   rownames(mu)=var_names
+#   colnames(mu)=c("mu")
+#   rownames(Sigma)=var_names
+#   colnames(Sigma)=var_names
+# 
+#   rate_gamma <- NULL
+#   shape_ING <- NULL
+#   ## ---------------------------------------------------------------------------
+#   ## Step 9: Build Gamma(shape, rate) hyperparameters when available.
+#   ## For Gaussian this provides precision-prior terms used in calibration.
+#   ## ---------------------------------------------------------------------------
+#   ## Gamma on precision: shape = (n_prior + 1) / 2, rate = dispersion * (n_prior/2).
+#   ## compute_gaussian_prior() calibrates shape/rate from n_prior and S_marg only.
+#   ## Sigma may be rescaled below by Gaussian calibration; shape/rate use current dispersion.
+#   dispersion_for_shape_rate <- dispersion
+#   if (!is.null(n_prior) && length(n_prior) == 1L && !is.null(dispersion_for_shape_rate)) {
+#     ## n_prior is interpreted as effective prior sample size, on the same scale as sum(weights).
+#     shape <- (n_prior + 1L) / 2
+#     if (!is.finite(shape) || shape <= 0) {
+#       stop("Computed shape must be strictly positive.")
+#     }
+#     rate <- dispersion_for_shape_rate * (n_prior / 2)
+#     if (!is.finite(rate) || rate <= 0) {
+#       stop("Computed rate must be strictly positive.")
+#     }
+#   } else {
+#     shape <- NULL
+#     rate <- NULL
+#   }
+# 
+#   ## ---------------------------------------------------------------------------
+#   ## Step 10 (Gaussian): run Gaussian calibration pipeline and replace outputs.
+#   ## compute_gaussian_prior() returns calibrated dispersion/shape/rate/Sigma.
+#   ## ---------------------------------------------------------------------------
+#   ## --- S_marg_new / S_marg_sigma0_vcov before Post_mean / Nelder (full Sigma_pre_nm: scalar or vector pwt)
+#   ## Sigma_0 = Sigma_pre_nm / d with d = d_OLS or d_vcov = summary(glm)$dispersion (cancels vcov scale in V0).
+#   ## S_marg keeps the same value for downstream b_0 / remap logic (identical to S_marg_new here).
+#   Sigma_pre_nm <- Sigma
+#   .gauss_helper_preview <- NULL
+#   if (identical(family$family, "gaussian") &&
+#       n_effective > nvar &&
+#       is.finite(dispersion_classical) && dispersion_classical > 0 &&
+#       !is.null(n_prior) && length(n_prior) == 1L && is.finite(n_prior) && n_prior > 0 &&
+#       !is.null(mu) && length(as.numeric(mu)) == nvar && all(is.finite(as.numeric(mu)))) {
+#     w_h <- if (is.null(weights)) rep(1, n_obs) else as.numeric(weights)
+#     off_h <- if (is.null(offset)) rep(0, n_obs) else as.numeric(offset)
+#     bhat_h <- coef(glm_full)
+#     if (length(bhat_h) == nvar && all(is.finite(bhat_h))) {
+#       Sigma_0_h <- Sigma_pre_nm / dispersion_classical
+#       .gauss_helper_preview <- compute_gaussian_prior(
+#         X = X,
+#         Y = Y,
+#         weights = w_h,
+#         offset = off_h,
+#         dispersion = dispersion_input,
+#         n_effective = n_effective,
+#         bhat = bhat_h,
+#         mu = mu,
+#         Sigma_0 = Sigma_0_h,
+#         Sigma = if (!is.null(sd)) Sigma_pre_nm else NULL,
+#         n_prior = n_prior,
+#         k = k
+#       )
+#     }
+#   }
+#   coefficients_mle <- coef(glm_full)
+#   coefficients <- coefficients_mle
+#   ## Default returned coefficients: closed-form posterior mean blend when available.
+#   if (identical(family$family, "gaussian") &&
+#       length(coefficients_mle) == nvar &&
+#       !is.null(mu) && length(mu) == nvar &&
+#       all(is.finite(as.numeric(mu)))) {
+#     mle_fp <- vapply(
+#       var_names,
+#       function(nm) {
+#         if (!is.null(names(coefficients_mle)) && nm %in% names(coefficients_mle)) {
+#           v <- unname(coefficients_mle[nm])
+#           if (length(v) == 1L && is.finite(v)) v else NA_real_
+#         } else {
+#           NA_real_
+#         }
+#       },
+#       NA_real_
+#     )
+#     mu_fp <- as.numeric(mu)
+#     if (length(pwt) == 1L && is.finite(pwt)) {
+#       coefficients <- (1 - pwt) * mle_fp + pwt * mu_fp
+#       names(coefficients) <- var_names
+#     } else if (length(pwt) == nvar && all(is.finite(pwt))) {
+#       coefficients <- (1 - pwt) * mle_fp + pwt * mu_fp
+#       names(coefficients) <- var_names
+#     }
+#   }
+# 
+#   ## When calibration ran, take Gaussian dispersion and Gamma hyperparameters from compute_gaussian_prior().
+#   if (identical(family$family, "gaussian") &&
+#       !is.null(.gauss_helper_preview)) {
+#     dispersion <- .gauss_helper_preview$dispersion
+#     shape <- .gauss_helper_preview$shape
+#     shape_ING <- .gauss_helper_preview$shape_ING
+#     rate <- .gauss_helper_preview$rate
+#     rate_gamma <- .gauss_helper_preview$rate_gamma
+#     Sigma <- .gauss_helper_preview$Sigma
+#     rownames(Sigma) <- var_names
+#     colnames(Sigma) <- var_names
+#   }
+#   if (identical(family$family, "gaussian") &&
+#       !is.null(shape) && length(shape) == 1L && is.finite(shape)) {
+#     if (is.null(shape_ING)) {
+#       shape_ING <- shape + nvar / 2
+#     }
+#   }
+# 
+#   Sigma_0_out <- NULL
+#   if (identical(family$family, "gaussian")) {
+#     if (!is.null(.gauss_helper_preview)) {
+#       Sigma_0_out <- .gauss_helper_preview$Sigma_0
+#     } else if (is.finite(dispersion_classical) && dispersion_classical > 0) {
+#       Sigma_0_out <- Sigma_pre_nm / dispersion_classical
+#     }
+#     if (!is.null(Sigma_0_out)) {
+#       rownames(Sigma_0_out) <- var_names
+#       colnames(Sigma_0_out) <- var_names
+#     }
+#   }
+# 
+#   ## ---------------------------------------------------------------------------
+#   ## Step 10b: Gamma–Poisson conjugate λ prior (intercept-only Poisson(link = "identity"))
+#   ##
+#   ## Effective prior observation count links to scalar pwt via
+#   ##   n_prior / (n_prior + n_eff) = pwt  <=>  n_prior = (pwt / (1 - pwt)) * n_eff
+#   ## Weighted arithmetic mean λ̄_w = Σ w_i y_i / Σ w_i.  Choosing
+#   ##   λ ~ Gamma(shape = n_prior λ̄_w, rate = n_prior),
+#   ## gives E[λ] = λ̄_w so the conjugate Poisson posterior mean remains λ̄_w.
+#   ## ---------------------------------------------------------------------------
+# 
+#   conj_poisson <- NULL
+#   mu_arg_missing <- missing(mu)
+# 
+#   gamma_poisson_conj_ok <- (
+#     identical(family$family, "poisson") &&
+#       identical(family$link, "identity") &&
+#       ncol(x) == 1L &&
+#       length(pwt) == 1L
+#   )
+# 
+#   if (gamma_poisson_conj_ok && !is.null(offset)) {
+#     of <- suppressWarnings(as.numeric(offset))
+#     if (length(of) != n_obs || any(!is.finite(of)) ||
+#         max(abs(of), na.rm = TRUE) > sqrt(.Machine$double.eps)) {
+#       gamma_poisson_conj_ok <- FALSE
+#     }
+#   }
+# 
+#   if (gamma_poisson_conj_ok) {
+#     ww <- glm_full$prior.weights
+#     if (is.null(ww) || length(ww) != n_obs) ww <- rep(1, n_obs)
+# 
+#     ## Nonnegative Poisson observations
+#     if (any(as.numeric(Y) < 0, na.rm = TRUE)) {
+#       stop(
+#         "`Prior_Setup()` Poisson conjugate calibration requires nonnegative responses.", call. = FALSE
+#       )
+#     }
+# 
+#     ybar <- sum(as.numeric(Y) * as.numeric(ww)) / sum(as.numeric(ww))
+#     if (!(is.finite(ybar) && ybar > 0)) {
+#       stop(
+#         "`Prior_Setup()` Poisson(link='identity'), intercept-only conjugate calibration requires ",
+#         "positive weighted mean counts (Gamma prior requires a positive Poisson rate); weighted mean ",
+#         "= ", paste0("`", prettyNum(ybar), "`."), call. = FALSE
+#       )
+#     }
+# 
+#     if (is.null(n_prior) || length(n_prior) != 1L || !is.finite(n_prior) || n_prior <= 0) {
+#       warning(
+#         "Poisson(link='identity') intercept-only: skipping `conj_poisson` Gamma rate prior ",
+#         "calibration because scalar `n_prior` is unavailable or non-positive; supply finite positive ",
+#         "`pwt` or `n_prior`.",
+#         call. = FALSE
+#       )
+#     } else {
+#       np <- as.numeric(n_prior)
+#       ## Prior mean E[lambda] matches weighted data mean; conjugate Gamma(shape,rate) hyperparameters:
+#       conj_shape <- np * ybar
+#       conj_rate <- np
+# 
+#       bm <- matrix(as.numeric(ybar), nrow = 1L, ncol = 1L,
+#                    dimnames = list(NULL, var_names))
+# 
+#       conj_poisson <- list(
+#         shape = conj_shape,
+#         rate = conj_rate,
+#         beta = bm,
+#         weighted_mean_rate = ybar,
+#         n_prior_eff = np
+#       )
+# 
+#       ## Moment-matched surrogate Normal summaries for `\u03bc`/`Sigma` (single intercept only):
+#       if (mu_arg_missing && nvar == 1L && is.finite(ybar) && is.finite(np) && np > 0) {
+#         mu[1, 1] <- as.numeric(ybar)
+#         Sigma[1, 1] <- as.numeric(ybar / np)
+#         rownames(mu) <- var_names
+#         colnames(mu) <- "mu"
+#         rownames(Sigma) <- colnames(Sigma) <- var_names
+#       }
+#     }
+#   }
+# 
+#   ## ---------------------------------------------------------------------------
+#   ## Step 10c: Beta–Binomial conjugate θ prior (intercept-only Binomial(link = "identity"))
+#   ##
+#   ## Effective prior observation count:
+#   ##   n_prior / (n_prior + n_eff) = pwt  <=>  n_prior = (pwt / (1 - pwt)) * n_eff
+#   ## Weighted proportion p̄_w = Σ w_i y_i / Σ w_i.  Choosing
+#   ##   θ ~ Beta(shape1 = n_prior * p̄, shape2 = n_prior * (1 - p̄))
+#   ## gives E[θ] = p̄ so the conjugate Binomial posterior mean starts at p̄.
+#   ## ---------------------------------------------------------------------------
+# 
+#   conj_binomial <- NULL
+# 
+#   beta_binom_conj_ok <- (
+#     identical(family$family, "binomial") &&
+#       identical(family$link, "identity") &&
+#       ncol(x) == 1L &&
+#       length(pwt) == 1L
+#   )
+# 
+#   if (beta_binom_conj_ok && !is.null(offset)) {
+#     of <- suppressWarnings(as.numeric(offset))
+#     if (length(of) != n_obs || any(!is.finite(of)) ||
+#         max(abs(of), na.rm = TRUE) > sqrt(.Machine$double.eps)) {
+#       beta_binom_conj_ok <- FALSE
+#     }
+#   }
+# 
+#   if (beta_binom_conj_ok) {
+#     ww <- glm_full$prior.weights
+#     if (is.null(ww) || length(ww) != n_obs) ww <- rep(1, n_obs)
+# 
+#     y_num <- as.numeric(Y)
+#     if (any(y_num < 0, na.rm = TRUE) || any(y_num > 1, na.rm = TRUE)) {
+#       stop(
+#         "`Prior_Setup()` Binomial(identity) conjugate calibration requires response in [0, 1].",
+#         call. = FALSE
+#       )
+#     }
+# 
+#     pbar <- sum(y_num * as.numeric(ww)) / sum(as.numeric(ww))
+#     if (!(is.finite(pbar) && pbar > 0 && pbar < 1)) {
+#       warning(
+#         "Binomial(link='identity') intercept-only: skipping `conj_binomial` Beta prior ",
+#         "calibration because the weighted proportion is not strictly in (0, 1); ",
+#         "weighted proportion = ", paste0("`", prettyNum(pbar), "`."),
+#         call. = FALSE
+#       )
+#     } else if (is.null(n_prior) || length(n_prior) != 1L || !is.finite(n_prior) || n_prior <= 0) {
+#       warning(
+#         "Binomial(link='identity') intercept-only: skipping `conj_binomial` Beta prior ",
+#         "calibration because scalar `n_prior` is unavailable or non-positive; supply finite positive ",
+#         "`pwt` or `n_prior`.",
+#         call. = FALSE
+#       )
+#     } else {
+#       np <- as.numeric(n_prior)
+#       conj_shape1 <- np * pbar
+#       conj_shape2 <- np * (1 - pbar)
+# 
+#       bm <- matrix(as.numeric(pbar), nrow = 1L, ncol = 1L,
+#                    dimnames = list(NULL, var_names))
+# 
+#       conj_binomial <- list(
+#         shape1             = conj_shape1,
+#         shape2             = conj_shape2,
+#         beta               = bm,
+#         weighted_mean_prop = pbar,
+#         n_prior_eff        = np
+#       )
+# 
+#       ## Moment-matched surrogate Normal mu/Sigma for single intercept
+#       if (mu_arg_missing && nvar == 1L && is.finite(pbar) && is.finite(np) && np > 0) {
+#         mu[1, 1] <- as.numeric(pbar)
+#         Sigma[1, 1] <- as.numeric(pbar * (1 - pbar) / np)
+#         rownames(mu) <- var_names
+#         colnames(mu) <- "mu"
+#         rownames(Sigma) <- colnames(Sigma) <- var_names
+#       }
+#     }
+#   }
+# 
+#   ## ---------------------------------------------------------------------------
+#   ## Step 11: Assemble and return PriorSetup object.
+#   ## ---------------------------------------------------------------------------
+#   prior_list <- list(
+#     mu = mu,
+#     Sigma = Sigma,
+#     Sigma_0 = Sigma_0_out,
+#     dispersion = dispersion,
+#     shape = shape,
+#     shape_ING = shape_ING,
+#     rate = rate,
+#     rate_gamma = rate_gamma,
+#     coefficients = coefficients,
+#     conj_poisson  = conj_poisson,
+#     conj_binomial = conj_binomial,
+#     model = mf,
+#     x = x,
+#     y = Y,
+#     call = call,
+#     PriorSettings = list(
+#       pwt = pwt,
+#       n_prior = n_prior,
+#       intercept_source = intercept_source,
+#       effects_source = effects_source,
+#       ## For now retain n_likelihood for backward compatibility
+#       n_likelihood = n_likelihood,
+#       n_effective = n_effective
+#     )
+#   )
+#   
+#   class(prior_list) <- "PriorSetup"
+#   return(prior_list)
+#   
+# }
 
 #' @export
 #' @method print PriorSetup
