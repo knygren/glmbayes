@@ -1,0 +1,12 @@
+R/dic_info.R
+R/glmbayesCore-package.R
+R/ing_prior_guard.R
+R/multi_prior_setup.R
+R/multi_rlmb.R
+R/multi_rNormal_reg.R
+R/residuals.rglmb.R
+R/summary.mrglmb.R
+src/backup/kernel_loader_fat_pre_opencltools.cpp
+src/glmbayes_getRegisteredNamespace.cpp
+src/glmbayes_getRegisteredNamespace.h
+src/package_ns.h

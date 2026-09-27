@@ -78,6 +78,13 @@
   This component was not otherwise read internally, so this only affects code
   that inspects `summary(rglmb_object)$coef.mode` directly.
 
+* Stage 0 migration prep: file-vs-file inventory vs **glmbayesCore** in
+  `data-raw/CORE_MIGRATION_DIFF.md`; Stage 1 imports **glmbayesCore** (>= 0.5.4).
+
+* **Backend delegation:** C++ R callbacks resolve **glmbayesCore** via
+  `package_ns.h` / `R_interface.h`; **`Prior_Setup`** re-exported from Core
+  (local implementation in `R/prior.R` commented out pending full prior migration).
+
 # glmbayes 0.9.75
 
 ## Bug fixes
