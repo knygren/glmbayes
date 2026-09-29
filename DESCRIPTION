@@ -39,14 +39,10 @@ Imports:
     coda,
     insight,
     bayestestR,
-    glmbayesCore (>= 0.5.4),
-    Rcpp (>= 1.1.1),
-    RcppParallel,
+    glmbayesCore (>= 0.5.5),
     Rdpack (>= 0.11-0),
-    opencltools (>= 0.8.1),
-    nmathopencl
+    opencltools (>= 0.8.1)
 RdMacros: Rdpack
-LinkingTo: Rcpp, RcppArmadillo, RcppParallel, opencltools
 Depends: MASS, R (>= 3.5.0)
 Suggests:
     knitr,
@@ -54,9 +50,10 @@ Suggests:
     ggplot2,
     bayesrules,
     LearnBayes,
+    RcppParallel,
     testthat (>= 3.0.0),
     spelling
-SystemRequirements: Optional OpenCL support. If available, GPU acceleration will be used; otherwise, computation runs on CPU. 
+SystemRequirements: Optional OpenCL support via the glmbayesCore backend; source install of glmbayesCore with OpenCL for GPU acceleration.
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3

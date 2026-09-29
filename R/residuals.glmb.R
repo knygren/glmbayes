@@ -4,11 +4,12 @@
 #' use the family's deviance residuals function as in \code{\link[stats]{residuals.glm}}
 #' \insertCite{McCullagh1989}{glmbayes}.
 #'
-#' These functions are all \link{methods} for class \code{glmb}, \code{rglmb},
-#' \code{rlmb}, \code{summary.rglmb}, or \code{lmb} objects.
-#' @param object an object of class \code{glmb}, \code{rglmb}, \code{rlmb}, or
-#'   \code{summary.rglmb}, typically the result of a call to \link{glmb},
-#'   \link{rglmb}, \link{rlmb}, or \code{\link{summary.rglmb}}.
+#' These functions are \link{methods} for class \code{glmb} and \code{lmb}
+#' objects. Methods for \code{rglmb}, \code{rlmb}, and \code{summary.rglmb}
+#' are registered from \code{glmbayesCore} when this package is loaded; see
+#' \code{\link{residuals.rglmb}}.
+#' @param object an object of class \code{glmb} or \code{lmb}, typically the
+#'   result of a call to \link{glmb} or \link{lmb}.
 #' @param ysim Optional matrix of simulated responses (one row per draw), as
 #'   produced by a posterior-predictive simulation (e.g. \code{\link{simulate.glmb}}).
 #'   When supplied, \code{ysim} substitutes for the observed response \code{y}
@@ -24,7 +25,8 @@
 #' for residuals based on simulated data should be a more appropriate measure of
 #' whether individual residuals represent outliers or not.
 #' @seealso \code{\link{predict.glmb}}, \code{\link{summary.glmb}}, \code{\link{glmb}},
-#'   \code{\link{glmbayes-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
+#'   \code{\link{glmbayes-package}}; \code{\link{residuals.rglmb}};
+#'   \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
 #'   \code{\link[stats]{residuals.glm}}
 #' @references
 #' \insertAllCited{}
@@ -37,33 +39,6 @@
 ## residuals across posterior draws. See inst/COPYRIGHTS.
 residuals.glmb<-function(object,ysim=NULL,...)
 {
-  .residuals_rglmb_draws(object, ysim = ysim)
-}
-
-
-#' @rdname residuals.glmb
-#' @export 
-#' @method residuals rglmb
-
-residuals.rglmb <- function(object, ysim = NULL, ...) {
-  .residuals_rglmb_draws(object, ysim = ysim)
-}
-
-
-#' @rdname residuals.glmb
-#' @export
-#' @method residuals rlmb
-
-residuals.rlmb <- function(object, ysim = NULL, ...) {
-  .residuals_rglmb_draws(object, ysim = ysim)
-}
-
-
-#' @rdname residuals.glmb
-#' @export
-#' @method residuals summary.rglmb
-
-residuals.summary.rglmb <- function(object, ysim = NULL, ...) {
   .residuals_rglmb_draws(object, ysim = ysim)
 }
 

@@ -2,23 +2,22 @@
 % Please edit documentation in R/formula.summary.rglmb.R
 \name{formula.summary.rglmb}
 \alias{formula.summary.rglmb}
-\title{Model Formulae}
-\usage{
-\method{formula}{summary.rglmb}(x, ...)
-}
+\title{Model Formulae for \code{summary.rglmb} Objects}
 \arguments{
-\item{x}{an object of class \code{summary.rglmb}, typically the result of a call to \code{\link{summary.rglmb}}}
+\item{x}{an object of class \code{summary.rglmb}, typically from
+\code{\link{summary.rglmb}}.}
 
-\item{...}{further arguments to or from other methods}
+\item{...}{further arguments passed to or from other methods.}
 }
 \value{
-The function returns model formulae
+A model formula.
 }
 \description{
-This function is a method function for the \code{"summary.rglmb"} class used to
-Extract a formulae for the objective and the family
+Extract a formula for a \code{summary.rglmb} object by refitting a reference
+\code{\link[stats]{glm}} with the stored response and design matrix.
 }
 \seealso{
-\code{\link{rglmb}}, \code{\link{summary.rglmb}}; \code{\link{glmb}}, \code{\link{glmbayes-package}};
-\code{\link{rlmb}}, \code{\link{lmb}}; \code{\link[stats]{formula}}.
+\code{\link{rglmb}}, \code{\link{summary.rglmb}}; \code{\link{glmb}},
+\code{\link{glmbayes-package}}; \code{\link{rlmb}}, \code{\link{lmb}};
+\code{\link[stats]{formula}}.
 }

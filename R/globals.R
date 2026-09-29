@@ -1,1 +1,1 @@
-utils::globalVariables(c("_glmbayes_gpu_names"))
+## Placeholder for codetools / R CMD check globalVariables (none required after Phase 2).

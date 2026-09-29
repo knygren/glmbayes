@@ -2,112 +2,41 @@
 % Please edit documentation in R/gpu_diagnostics.R
 \name{diagnose_glmbayes}
 \alias{diagnose_glmbayes}
-\alias{print.diagnose_glmbayes}
 \alias{has_opencl}
 \alias{gpu_diagnostics}
 \title{GPU and OpenCL diagnostics for \pkg{glmbayes}}
 \usage{
 diagnose_glmbayes()
 
-\method{print}{diagnose_glmbayes}(x, ...)
-
 has_opencl()
 }
-\arguments{
-\item{x}{An object of class \code{"diagnose_glmbayes"}.}
-
-\item{...}{Unused; for S3 method compatibility.}
-}
 \value{
-\code{diagnose_glmbayes()} returns an object of class
-\code{"diagnose_glmbayes"} (also inheriting from \code{"list"}) with components
-\code{environment_info}, \code{driver_status}, \code{runtime_status},
-\code{env_diag}, \code{opencl_runtime_probe} (logical or \code{NA}), and
-\code{opencl_enabled} (logical). A human-readable report is produced by
-\code{\link{print.diagnose_glmbayes}} when the result is printed (for example
-at the top level in an interactive session). Assigned results stay quiet until
-\code{print()} is called.
-
-\code{has_opencl()} returns a length-1 logical: \code{TRUE}
-if this build was compiled with OpenCL support.
+\code{has_opencl()} returns a length-1 logical.
 }
 \description{
-Compile-time OpenCL probing for \pkg{glmbayes}, plus \code{diagnose_glmbayes()}
---- a readable report that combines \pkg{opencltools} host/runtime checks with
-this package's OpenCL build status (\code{\link{has_opencl}}).
+Compile-time OpenCL status comes from \strong{glmbayesCore} (sampler backend).
+\code{\link{diagnose_glmbayes}()} is re-exported from Core; \code{\link{has_opencl}()}
+reports whether that backend was built with OpenCL support.
 
-Workstation probes (GPU vendor detection, drivers, ICD/PATH, and related helpers)
-live in \pkg{opencltools}; call \code{opencltools::…} or see \code{?opencltools}.
+Host/runtime probes (GPU vendor, drivers, ICD/PATH) live in \pkg{opencltools}.
 }
 \details{
 GPU acceleration speeds up envelope construction and grid evaluation when you pass
-\code{use_opencl = TRUE} in \code{\link{glmb}} and related functions. CPU-only
+\code{use_opencl = TRUE} in \code{\link[glmbayesCore]{rglmb}}, \code{\link[glmbayesCore]{rlmb}}, and related functions. CPU-only
 builds remain fully usable for standard modelling.
 
-Start with \code{\link{diagnose_glmbayes}()} for a single readable report;
-use \code{\link{has_opencl}()} for a quick boolean when scripting. Full install
+Start with \code{\link[glmbayesCore]{diagnose_glmbayes}()} for a single readable report;
+use \code{\link[glmbayesCore]{glmbayesCore_has_opencl}()} for a quick boolean when scripting. Full install
 notes: \code{vignette("Chapter-16", package = "glmbayes")}
-(\insertCite{glmbayesChapter12}{glmbayes}).
-}
-\section{Diagnostics exported from \pkg{glmbayes}}{
-
-\itemize{
-\item \code{\link{diagnose_glmbayes}()} --- full report including compile-time
-OpenCL status for this package.
-\item \code{\link{has_opencl}()} --- \code{TRUE} if this build was compiled
-with OpenCL support.
-}
-}
-
-\section{Host / runtime checks (\pkg{opencltools})}{
-
-\itemize{
-\item \code{\link[opencltools:gpu_diagnostics]{detect_environment_and_gpus}()}
-\item \code{\link[opencltools:gpu_diagnostics]{detect_compute_runtimes}()}
-\item \code{\link[opencltools:gpu_diagnostics]{verify_opencl_runtime}()}
-\item \code{\link[opencltools:gpu_diagnostics]{check_runtime_env}()}
-\item \code{\link[opencltools:load_kernel_source]{load_kernel_source}()},
-\code{\link[opencltools:load_kernel_source]{load_kernel_library}()}
-(pass \code{package = "glmbayes"} for entry kernels under \code{inst/cl/src/};
-prelude and \code{nmath/} come from \pkg{nmathopencl} in the production GPU path)
-\item \code{\link[opencltools:add_to_path]{add_to_path_windows}()} and related PATH helpers
-}
-}
-
-\examples{
-############################### Start of load_kernel_source example ####################
-
-if (identical(Sys.getenv("NOT_CRAN"), "true") && has_opencl()) {
-  # Family entry kernels live in glmbayes; prelude/nmath in nmathopencl (production v2 path)
-  ksrc <- opencltools::load_kernel_source(
-    "src/f2_f3_binomial_logit.cl",
-    package = "glmbayes"
-  )
-  nmath_stem <- opencltools::load_kernel_source(
-    "nmath/bd0.cl",
-    package = "nmathopencl"
-  )
-  nmath_lib <- opencltools::load_kernel_library(
-    "nmath",
-    package = "nmathopencl"
-  )
-  cat("Entry kernel length:", nchar(ksrc), "\n")
-  cat("nmath stem length:", nchar(nmath_stem), "\n")
-  cat("nmath library length:", nchar(nmath_lib), "\n")
-} else {
-  message("Skipping OpenCL example (CRAN check or OpenCL not built).")
-}
-
-## End of load_kernel_source example
+((Nygren 2025)).
 }
 \references{
-\insertAllCited{}
+{Nygren K (2025).
+\dQuote{Chapter 16: Large models — GPU acceleration using OpenCL.}
+Vignette in the glmbayes R package.
+R vignette name: Chapter-16.}{}
 }
 \seealso{
-\code{\link{diagnose_glmbayes}}, \code{\link{has_opencl}}, \pkg{opencltools},
-\code{\link{glmb}}, \code{\link{rglmb}}.
+\code{\link{diagnose_glmbayes}}, \pkg{opencltools}, \pkg{glmbayesCore},
+\code{\link{rglmb}}, \code{\link{rlmb}}.
 }
-\keyword{diagnostics}
-\keyword{environment}
-\keyword{gpu}
-\keyword{opencl}

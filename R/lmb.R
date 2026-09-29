@@ -1,3 +1,6 @@
+## Phase 3: formula layer in glmbayes; sampling via glmbayesCore::rlmb().
+## Portions follow stats::lm(); see inst/COPYRIGHTS.
+
 #' Fitting Bayesian Linear Models
 #'
 #' \code{lmb} is used to fit Bayesian linear models, specified by giving a symbolic descriptions of the linear 
@@ -277,272 +280,6 @@ lmb <- function(
     pfamily_lists = pfamily_lists
   )
 }
-
-
-## Portions of the model-frame/model-matrix setup, fitted-object structure,
-## and method conventions follow or adapt stats::lm() and related stats
-## methods. See inst/COPYRIGHTS for derived-code notices.
-if (FALSE) {
-lmb <- function (
-    formula,
-    pfamily,
-    n = 1000,
-    data,
-    subset,
-    weights,
-    na.action,
-    method = "qr",
-    model = TRUE,
-    x = TRUE,
-    y = TRUE,
-    qr = TRUE,
-    singular.ok = TRUE,
-    contrasts = NULL,
-    offset,
-    Gridtype = 2,
-    n_envopt = NULL,
-    use_parallel = TRUE,
-    use_opencl = FALSE,
-    verbose = FALSE,
-    ...
-){
-  ret.x <- x
-  ret.y <- y
-  cl <- match.call(expand.dots = FALSE)
-  if (length(cl) >= 1L && is.function(cl[[1L]])) {
-    cl[[1L]] <- as.name("lmb")
-  }
-  mf <- cl
-  m <- match(c("formula", "data", "subset", "weights", "na.action", "offset"),
-             names(mf), 0L)
-  mf <- mf[c(1L, m)]
-  mf$drop.unused.levels <- TRUE
-  ## need stats:: for non-standard evaluation
-  mf[[1L]] <- quote(stats::model.frame)
-  mf <- eval(mf, parent.frame())
-  if (method == "model.frame")
-    return(mf)
-  else if (method != "qr")
-    warning(gettextf("method = '%s' is not supported. Using 'qr'", method),
-            domain = NA)
-  mt <- attr(mf, "terms") # allow model.frame to update it
-  y <- model.response(mf, "numeric")
-  ## avoid any problems with 1D or nx1 arrays by as.vector.
-  w <- as.vector(model.weights(mf))
-  if (!is.null(w) && !is.numeric(w))
-    stop("'weights' must be a numeric vector")
-  offset <- as.vector(model.offset(mf))
-  if (!is.null(offset)) {
-    if (length(offset) != NROW(y))
-      stop(gettextf("number of offsets is %d, should equal %d (number of observations)",
-                    length(offset), NROW(y)), domain = NA)
-  }
-  
-  if (is.empty.model(mt)) {
-    x <- NULL
-    z <- list(coefficients = if (is.matrix(y))
-      matrix(, 0, 3) else numeric(), residuals = y,
-      fitted.values = 0 * y, weights = w, rank = 0L,
-      df.residual = if (!is.null(w)) sum(w != 0) else
-        if (is.matrix(y)) nrow(y) else length(y))
-    if (!is.null(offset)) {
-      z$fitted.values <- offset
-      z$residuals <- y - offset
-    }
-  }
-  else {
-    x <- model.matrix(mt, mf, contrasts)
-    z <- if (is.null(w)) lm.fit(x, y, offset = offset,
-                                singular.ok = singular.ok, ...)
-    else lm.wfit(x, y, w, offset = offset, singular.ok = singular.ok, ...)
-  }
-  class(z) <- c(if (is.matrix(y)) "mlm", "lm")
-  
-  z$na.action <- attr(mf, "na.action")
-  z$offset <- offset
-  z$contrasts <- attr(x, "contrasts")
-  z$xlevels <- .getXlevels(mt, mf)
-  z$call <- cl
-  z$terms <- mt
-  if (model)
-    z$model <- mf
-  if (ret.x)
-    z$x <- x
-  if (ret.y)
-    z$y <- y
-  if (!qr) z$qr <- NULL
-  
-  if (!is.null(x)) {
-    z$assign <- attr(x, "assign")
-  }
-  
-  ######   End of lm function
-  # Verify inputs and Initialize
-  
-  ## Pull in information from the pfamily
-  prior_list <- pfamily$prior_list
-  y <- z$y
-  x <- z$x
-  b <- z$coefficients
-
-  if (pfamily$pfamily != "dGamma") {
-    mu <- as.matrix(as.vector(prior_list$mu))
-    Sigma <- as.matrix(prior_list$Sigma)
-    dispersion <- prior_list$dispersion
-
-    R <- chol(Sigma)
-    P <- chol2inv(R)
-    P <- 0.5 * (P + t(P))
-  }
-  
-  if (is.null(z$weights)) wtin <- rep(1, length(y))
-  else wtin <- z$weights
-  
-  ## normalize n_envopt (mirror glmb)
-  if (is.null(n_envopt)) n_envopt <- n
-  n_envopt <- as.integer(n_envopt)
-  
-  sim <- rlmb(
-    n       = n,
-    y       = y,
-    x       = x,
-    pfamily = pfamily,
-    offset  = offset,
-    weights = wtin,
-    Gridtype   = Gridtype,
-    n_envopt   = n_envopt,
-    use_parallel = use_parallel,
-    use_opencl  = use_opencl,
-    verbose     = verbose
-  )
-  
-  if (pfamily$pfamily == "dIndependent_Normal_Gamma") {
-    if (!is.null(sim$sim_bounds)) {
-      pfamily$prior_list$disp_lower <- sim$sim_bounds$low
-      pfamily$prior_list$disp_upper <- sim$sim_bounds$upp
-    } else {
-      cat("No simbounds returned in sim.\n")
-    }
-  }
-  
-  dispersion2 <- sim$dispersion
-  famfunc <- sim$famfunc
-
-  if (pfamily$pfamily == "dGamma") {
-    Prior <- list(shape = prior_list$shape, rate = prior_list$rate)
-  } else {
-    Prior <- list(mean = as.numeric(mu), Variance = Sigma)
-    names(Prior$mean) <- colnames(z$x)
-    colnames(Prior$Variance) <- colnames(z$x)
-    rownames(Prior$Variance) <- colnames(z$x)
-  }
-  
-  if (!is.null(offset)) {
-    
-    if (length(dispersion2) == 1) {
-      
-      # Scale weights by dispersion for consistent deviance computation
-      wt_scaled <- wtin / dispersion2
-      
-      DICinfo <- DIC_Info(sim$coefficients, y = y, x = x, alpha = offset,
-                          f1 = famfunc$f1, f4 = famfunc$f4,
-                          wt = wt_scaled, dispersion = 1)
-    }
-    
-    if (length(dispersion2) > 1) {
-      
-      DICinfo <- DIC_Info(sim$coefficients, y = y, x = x, alpha = 0,
-                          f1 = famfunc$f1, f4 = famfunc$f4,
-                          wt = wtin, dispersion = dispersion2)
-    }
-    
-    linear.predictors <- t(offset + x %*% t(sim$coefficients))
-    fitted.values <- linear.predictors
-    
-  }
-  
-  if (is.null(offset)) {
-    
-    if (length(dispersion2) == 1) {
-      
-      # Scale weights by dispersion for consistent deviance computation
-      wt_scaled <- wtin / dispersion2
-      
-      DICinfo <- DIC_Info(sim$coefficients, y = y, x = x, alpha = 0,
-                          f1 = famfunc$f1, f4 = famfunc$f4,
-                          wt = wt_scaled, dispersion = 1)
-    }
-    
-    if (length(dispersion2) > 1) {
-      
-      DICinfo <- DIC_Info(sim$coefficients, y = y, x = x, alpha = 0,
-                          f1 = famfunc$f1, f4 = famfunc$f4,
-                          wt = wtin, dispersion = dispersion2)
-    }
-    
-    linear.predictors <- t(x %*% t(sim$coefficients))
-    fitted.values <- linear.predictors
-    
-  }
-  
-  # For dGamma, coefficients have 1 row; replicate to n rows for consistent structure
-  if (nrow(sim$coefficients) == 1L) {
-    fitted.values <- matrix(rep(fitted.values, n), nrow = n, byrow = TRUE)
-    linear.predictors <- matrix(rep(linear.predictors, n), nrow = n, byrow = TRUE)
-  }
-  
-  residuals <- fitted.values
-  
-  for (i in 1:n) {
-    residuals[i, 1:length(y)] <- y - residuals[i, 1:length(y)]
-  }
-  
-  outlist <- list(
-    lm = z,
-    coefficients = sim$coefficients,
-    coef.means = colMeans(sim$coefficients),
-    coef.mode = sim$coef.mode,
-    dispersion = dispersion2,
-    residuals = residuals,
-    Prior = Prior,
-    fitted.values = fitted.values,
-    linear.predictors = linear.predictors,
-    deviance = DICinfo$Deviance,
-    pD = DICinfo$pD,
-    Dbar = DICinfo$Dbar,
-    Dthetabar = DICinfo$Dthetabar,
-    DIC = DICinfo$DIC,
-    prior.weights = wtin,
-    weights = wtin,
-    offset = offset,
-    y = z$y,
-    x = z$x,
-    model = z$model,
-    call = z$call,
-    formula = z$formula,
-    terms = z$terms,
-    data = mf,
-    fit = sim$fit,
-    famfunc = famfunc,
-    iters = sim$iters,
-    contrasts = z$contrasts,
-    xlevels = z$xlevels,
-    pfamily = pfamily,
-    simfun_call = sim$simfun_call,
-    simfun_args = sim$simfun_args
-  )
-  
-  outlist$call <- cl
-  
-  if (pfamily$pfamily == "dGamma") {
-    class(outlist) <- c("rGamma_reg", outlist$class, "lmb", "glmb", "glm", "lm")
-  } else {
-    class(outlist) <- c(outlist$class, "lmb", "glmb", "glm", "lm")
-  }
-  outlist
-}
-} ## end if(FALSE) -- old lmb
-
 #' @rdname lmb
 #' @method print lmb
 #' @export
@@ -561,8 +298,6 @@ print.lmb<-function (x, digits = max(3, getOption("digits") - 3), ...)
   }
   else cat("No coefficients\n\n")
 }
-
-#' @keywords internal
 .uni_lmb <- function (
     formula,
     pfamily,
@@ -682,7 +417,7 @@ print.lmb<-function (x, digits = max(3, getOption("digits") - 3), ...)
   if (is.null(n_envopt)) n_envopt <- n
   n_envopt <- as.integer(n_envopt)
   
-  sim <- rlmb(
+  sim <- glmbayesCore::rlmb(
     n       = n,
     y       = y,
     x       = x,
@@ -701,7 +436,7 @@ print.lmb<-function (x, digits = max(3, getOption("digits") - 3), ...)
       pfamily$prior_list$disp_lower <- sim$sim_bounds$low
       pfamily$prior_list$disp_upper <- sim$sim_bounds$upp
     } else {
-      cat("No simbounds returned in sim.\n")
+      warning("No simbounds returned in sim.", call. = FALSE)
     }
   }
   
@@ -821,39 +556,6 @@ print.lmb<-function (x, digits = max(3, getOption("digits") - 3), ...)
   }
   outlist
 }
-## Multi-response Bayesian linear models (\code{lmb})
-##
-## @description
-## Fits one \code{\link{lmb}} model per column of a multivariate response
-## (formula left-hand side with \code{cbind(...)}), sharing the same predictors
-## on the right-hand side. Returns a named list of \code{"lmb"} objects with
-## class \code{"mlmb"}.
-##
-## @details
-## This is the formula / \code{data} interface counterpart to
-## \code{\link{multi_rlmb}} (matrix \code{y}, \code{x}). Each response column
-## uses its own \code{pfamily_list[[j]]}. Use \code{\link{multi_prior_setup}}
-## to build aligned priors, then \code{\link{summary.mlmb}} or
-## \code{\link{print.mlmb}} for output styled like \code{\link[stats]{summary.mlm}}
-## (cf.\ \code{\link[stats]{lm}} with a matrix response via \code{cbind(...)}).
-##
-## @param formula A \code{\link{formula}} with a matrix response on the left-hand
-##   side (typically \code{cbind(...)}).
-## @param pfamily_list Named or unnamed list of length equal to the number of
-##   response columns; each element is a \code{\link{pfamily}} object for
-##   \code{\link{lmb}}.
-## @inheritParams lmb
-## @inheritParams multi_rlmb
-## @return A named list of class \code{"mlmb"}. Element \code{j} is an
-##   \code{"lmb"} fit for response \code{j}. Attributes include \code{call},
-##   \code{formula}, \code{coef_names}, \code{pred_names}, and
-##   \code{pfamily_lists}.
-## @seealso \code{\link{lmb}}, \code{\link{multi_rlmb}}, \code{\link{multi_prior_setup}},
-##   \code{\link{summary.mlmb}}, \code{\link{print.mlmb}},
-##   \code{\link[stats]{lm}} with \code{cbind} responses.
-## @family modelfuns
-## @example inst/examples/Ex_multi_lmb.R
-## @export
 #' @keywords internal
 #' Build a short \code{lmb()} call for printing (omits \code{pfamily}).
 .mlmb_lmb_display_call <- function(mc_multi, formula_j) {
@@ -978,112 +680,6 @@ print.lmb<-function (x, digits = max(3, getOption("digits") - 3), ...)
   dic <- vapply(object, function(fit) fit$DIC, numeric(1))
   cbind(pD = pD, DIC = dic)
 }
-
-#' Prior setup for multiple Gaussian responses
-#'
-#' @inheritParams Prior_Setup
-#' @return A named list of class \code{"multi_PriorSetup"}. Each element is a
-#'   \code{\link{Prior_Setup}} result for one column of the response (names from
-#'   \code{colnames(y)} or \code{Y1}, \code{Y2}, \ldots).
-#' @family prior
-#' @export
-multi_prior_setup <- function(
-    formula,
-    family = gaussian(),
-    data = NULL,
-    weights = NULL,
-    subset = NULL,
-    na.action = na.fail,
-    offset = NULL,
-    contrasts = NULL,
-    pwt = NULL,
-    pwt_default_low = 0.01,
-    pwt_default_high = 0.05,
-    n_prior = NULL,
-    sd = NULL,
-    dispersion = NULL,
-    intercept_source = c("null_model", "full_model"),
-    effects_source = c("null_effects", "full_model"),
-    mu = NULL,
-    k = 1,
-    ...
-) {
-  call <- match.call()
-  if (is.character(family)) {
-    family <- get(family, mode = "function", envir = parent.frame())
-  }
-  if (is.function(family)) {
-    family <- family()
-  }
-  if (is.null(family$family) || family$family != "gaussian") {
-    stop(
-      "multi_prior_setup() currently supports family = gaussian() only.",
-      call. = FALSE
-    )
-  }
-
-  if (missing(data)) {
-    data <- environment(formula)
-  }
-
-  mf <- match.call(expand.dots = FALSE)
-  m <- match(
-    c("formula", "data", "subset", "weights", "na.action", "offset"),
-    names(mf),
-    0L
-  )
-  mf <- mf[c(1L, m)]
-  mf$drop.unused.levels <- TRUE
-  mf[[1L]] <- quote(stats::model.frame)
-  mf <- eval(mf, parent.frame())
-
-  mt <- attr(mf, "terms")
-  Y <- as.matrix(model.response(mf, "any"))
-  l1 <- ncol(Y)
-  if (l1 < 1L) {
-    stop("formula must specify at least one response column.", call. = FALSE)
-  }
-  coef_names <- colnames(Y)
-  if (is.null(coef_names) || length(coef_names) != l1) {
-    coef_names <- paste0("Y", seq_len(l1))
-  }
-
-  termlabels <- attr(mt, "term.labels")
-  ps_args <- list(
-    family = gaussian(),
-    data = data,
-    weights = weights,
-    subset = subset,
-    na.action = na.action,
-    offset = offset,
-    contrasts = contrasts,
-    pwt = pwt,
-    pwt_default_low = pwt_default_low,
-    pwt_default_high = pwt_default_high,
-    n_prior = n_prior,
-    sd = sd,
-    dispersion = dispersion,
-    intercept_source = intercept_source,
-    effects_source = effects_source,
-    mu = mu,
-    k = k
-  )
-
-  setups <- setNames(vector("list", l1), coef_names)
-  for (j in seq_len(l1)) {
-    f_j <- stats::reformulate(termlabels, response = coef_names[j])
-    setups[[j]] <- do.call(
-      Prior_Setup,
-      c(list(formula = f_j), ps_args, list(...))
-    )
-  }
-
-  attr(setups, "call") <- call
-  attr(setups, "formula") <- formula
-  class(setups) <- c("multi_PriorSetup", "list")
-  setups
-}
-
 #' @keywords internal
 .mrglmb_normalize_pfamily_lists <- function(pfamily_list, l1, p, validate_fn) {
   if (!is.list(pfamily_list)) {

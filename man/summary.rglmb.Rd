@@ -5,78 +5,58 @@
 \alias{summary.rlmb}
 \alias{print.summary.rglmb}
 \title{Summarizing Bayesian Generalized Linear Model Distribution Functions}
-\usage{
-\method{summary}{rglmb}(object, ...)
-
-\method{summary}{rlmb}(object, ...)
-
-\method{print}{summary.rglmb}(x, digits = max(3, getOption("digits") - 3), ...)
-}
 \arguments{
 \item{object}{an object of class \code{"rglmb"} or \code{"rlmb"} for which a
 summary is desired.}
 
-\item{x}{an object of class \code{"summary.rglmb"} for which a printed output is desired.}
+\item{x}{an object of class \code{"summary.rglmb"} for which a printed output
+is desired.}
 
 \item{digits}{the number of significant digits to use when printing.}
 
-\item{\ldots}{Additional optional arguments}
+\item{\ldots}{additional optional arguments.}
 }
 \value{
-\code{summary.rglmb} returns a object of class \code{"summary.rglmb"}, a
-list with components:
-\item{n}{number of draws generated}
-\item{coefficients1}{Matrix with the prior mean and approximate weight for the prior relative to the data}
-\item{coefficients}{Matrix with columns for the posterior mode, posterior mean, posterior standard
-deviation, monte carlo error, and tail probabilities (posterior probability of observing a
-value for the coefficient as extreme as the prior mean)}
-\item{Percentiles}{Matrix with estimated percentiles associated with the posterior density}
+\code{summary.rglmb} returns an object of class \code{"summary.rglmb"}, a
+list with posterior summaries, DIC-related quantities, and tables suitable for
+\code{\link[glmbayesCore]{print.summary.rglmb}}.
 }
 \description{
 These functions are all \code{\link{methods}} for class \code{rglmb},
 \code{rlmb}, or \code{summary.rglmb} objects.
 }
 \details{
-The \code{summary.rglmb} function summarizes the output from the
-\code{\link{rglmb}} or \code{\link{rlmb}} function. It takes an object of class \code{rglmb}
-or \code{rlmb} as an input. For \code{dGamma} rate-prior fits, it delegates to
-\code{summary} on the dispersion draws directly.
-The output to a large extent mirrors the output from the \code{\link{summary.glm}}
-function. This is particularly true for the print output from the function
-(i.e. the output of the function \code{\link{print.summary.rglmb}}).
+\code{summary.rglmb} summarizes output from \code{\link[glmbayesCore]{rglmb}} or \code{\link[glmbayesCore]{rlmb}}.
+For \code{dGamma} rate-prior Poisson fits, it delegates to \code{\link[glmbayesCore]{summary.rGamma_reg}}.
 }
 \examples{
-data(menarche,package="MASS")
+data(menarche, package = "MASS")
 
 summary(menarche)
 
-Age2=menarche$Age-13
+Age2 <- menarche$Age - 13
 
-x<-matrix(as.numeric(1.0),nrow=length(Age2),ncol=2)
-x[,2]=Age2
+x <- matrix(as.numeric(1.0), nrow = length(Age2), ncol = 2)
+x[, 2] <- Age2
 
-y=menarche$Menarche/menarche$Total
-wt=menarche$Total
+y <- menarche$Menarche / menarche$Total
+wt <- menarche$Total
 
-mu<-matrix(as.numeric(0.0),nrow=2,ncol=1)
-mu[2,1]=(log(0.9/0.1)-log(0.5/0.5))/3
+mu <- matrix(as.numeric(0.0), nrow = 2, ncol = 1)
+mu[2, 1] <- (log(0.9 / 0.1) - log(0.5 / 0.5)) / 3
 
-V1<-1*diag(as.numeric(2.0))
+V1 <- 1 * diag(as.numeric(2.0))
 
-# 2 standard deviations for prior estimate at age 13 between 0.1 and 0.9
-## Specifies uncertainty around the point estimates
+V1[1, 1] <- ((log(0.9 / 0.1) - log(0.5 / 0.5)) / 2)^2
+V1[2, 2] <- (3 * mu[2, 1] / 2)^2
 
-V1[1,1]<-((log(0.9/0.1)-log(0.5/0.5))/2)^2 
-V1[2,2]=(3*mu[2,1]/2)^2  # Allows slope to be up to 3 times as large as point estimate 
-
-out<-rglmb(n = 1000, y=y, x=x, pfamily=dNormal(mu=mu,Sigma=V1), weights = wt, 
-           family = binomial(logit)) 
+out <- rglmb(
+  n = 1000, y = y, x = x, pfamily = dNormal(mu = mu, Sigma = V1),
+  weights = wt, family = binomial(logit)
+)
 summary(out)
-
-
 }
 \seealso{
-\code{\link{rglmb}}; \code{\link{glmb}}, \code{\link{glmbayes-package}},
-\code{\link{rlmb}}, \code{\link{lmb}}, \code{\link{summary}},
-\code{\link[stats]{summary.lm}}, \code{\link[stats]{summary.glm}}.
+\code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{summary.glmb}},
+\code{\link{summary.rGamma_reg}}, \code{\link[stats]{summary.glm}}.
 }

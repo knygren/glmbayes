@@ -1,3 +1,6 @@
+## Phase 3: formula layer in glmbayes; sampling via glmbayesCore::rglmb().
+## Portions follow stats::glm(); see inst/COPYRIGHTS.
+
 #' Fitting Bayesian Generalized Linear Models
 #'
 #' \code{glmb} is used to fit Bayesian generalized linear models, specified by giving a symbolic descriptions of 
@@ -292,7 +295,7 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
   #           start=b,Gridtype=Gridtype)
   
   
-    sim<-rglmb(n=n,y=y,x=x,family=family,pfamily=pfamily,offset=offset,
+    sim <- glmbayesCore::rglmb(n=n,y=y,x=x,family=family,pfamily=pfamily,offset=offset,
              weights=wtin,
              Gridtype=Gridtype,      n_envopt = n_envopt,     # NEW: pass through
              use_parallel = use_parallel, use_opencl = use_opencl, verbose = verbose)
@@ -478,9 +481,6 @@ glmb<-function (formula, family = binomial,pfamily=dNormal(mu,Sigma,dispersion=1
   }
   outlist
 }
-
-
-
 #' @rdname glmb
 #' @method print glmb
 #' @export
@@ -501,12 +501,3 @@ print.glmb<-function (x, digits = max(3, getOption("digits") - 3), ...)
   cat("Expected Residual Deviance:",mean(x$deviance),"\n")
   cat("DIC:",x$DIC,"\n\n")
 }
-
-## DIC_Info() moved to R/dic_info.R (pure move, no behavior change; matches
-## glmbayesCore's file layout so the function can migrate to glmbayesCore
-## later without also having to split it out of glmb.R at that time).
-
-
-
-
-

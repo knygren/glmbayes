@@ -383,9 +383,7 @@ OpenCL/GPU: \insertCite{glmbayesChapter12,glmbayesChapterA10}{glmbayes}.
 and the methods and generic functions for classes \code{glm} and \code{lm} from which class \code{glmb} inherits.
 
 glmbayes Modeling Functions
-\code{\link{lmb}()},
-\code{\link{rglmb}()},
-\code{\link{rlmb}()}
+\code{\link{lmb}()}
 }
 \author{
 The \R implementation of \code{glmb} has been written by Kjell Nygren and

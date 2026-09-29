@@ -7,7 +7,7 @@
 #' since these all inherit \code{"glmb"} in their class vector).
 #'
 #' \code{simulate_prior.glmb()} delegates to the \code{pfun} stored in
-#' \code{x$pfamily} (see \code{\link{pfamily}} and \code{\link{prior_simfuncs}}),
+#' \code{x$pfamily} (see \code{\link{pfamily}} and \code{\link[glmbayesCore]{prior_simfuncs}}),
 #' drawing \code{n} independent samples directly from the \emph{actual} prior
 #' specification in \code{prior_list}, rather than reconstructing an approximation
 #' \code{\link{glmbayes_insight_methods}}'s \code{get_priors.glmb()} flattened
@@ -103,7 +103,7 @@
 #' \code{describe_prior.glmb()} returns the fit's \code{"pfamily"} object
 #' (see \code{\link{pfamily}}).
 #' @seealso \code{\link{glmbayes_insight_methods}}, \code{\link{pfamily}},
-#'   \code{\link{prior_simfuncs}}; \code{\link[bayestestR]{simulate_prior}},
+#'   \code{\link[glmbayesCore]{prior_simfuncs}}; \code{\link[bayestestR]{simulate_prior}},
 #'   \code{\link[bayestestR]{check_prior}}, \code{\link[bayestestR]{describe_prior}}.
 #' @example inst/examples/Ex_glmbayes_bayestestR_prior_methods.R
 #' @name glmbayes_bayestestR_prior_methods

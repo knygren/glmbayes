@@ -286,9 +286,7 @@ inherited from class \code{glmb} and the methods and generic functions for class
 \code{lm} from which class \code{lmb} also inherits.
 
 glmbayes Modeling Functions
-\code{\link{glmb}()},
-\code{\link{rglmb}()},
-\code{\link{rlmb}()}
+\code{\link{glmb}()}
 }
 \author{
 The \R implementation of \code{lmb} has been written by Kjell Nygren and

@@ -10,6 +10,5 @@ get_opencl_core_count()
 Integer count of compute units.
 }
 \description{
-Returns the number of compute units (cores) available on the default
-OpenCL device. This can be useful for diagnostics or performance tuning.
+Delegates to \pkg{opencltools} (same policy as \strong{glmbayesCore}).
 }

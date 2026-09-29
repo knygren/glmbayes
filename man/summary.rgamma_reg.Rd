@@ -4,20 +4,16 @@
 \alias{summary.rGamma_reg}
 \alias{print.summary.rGamma_reg}
 \title{Summarizing Bayesian gamma_reg Distribution Functions}
-\usage{
-\method{summary}{rGamma_reg}(object, ...)
-
-\method{print}{summary.rGamma_reg}(x, digits = max(3, getOption("digits") - 3), ...)
-}
 \arguments{
-\item{object}{an object of class \code{"rGamma_reg"} for which a
-summary is desired.}
+\item{object}{an object of class \code{"rGamma_reg"} for which a summary is
+desired.}
 
-\item{x}{an object of class \code{"summary.rGamma_reg"} for which a printed output is desired.}
+\item{x}{an object of class \code{"summary.rGamma_reg"} for which a printed
+output is desired.}
 
 \item{digits}{the number of significant digits to use when printing.}
 
-\item{\ldots}{Additional optional arguments}
+\item{\ldots}{additional optional arguments.}
 }
 \value{
 \code{summary.rGamma_reg()} returns an object of class
@@ -41,7 +37,7 @@ These functions are all \code{\link{methods}} for class \code{rGamma_reg} or \co
 }
 \examples{
 ## summary.rGamma_reg: dGamma prior (dispersion-only; coefficients fixed)
-## All five functions (rGamma_reg, rglmb, rlmb, glmb, lmb) use summary.rGamma_reg when
+## All three functions (rGamma_reg, rglmb, rlmb) use summary.rGamma_reg when
 ## prior is dGamma.
 ##
 ## This example uses the Boston data: Prior_Setup() for hyperparameters and
@@ -86,14 +82,7 @@ out3 <- rlmb(n = 1000, y = y, x = x,
   pfamily = dGamma(shape = ps.boston$shape, rate = rate_dg, beta = ps.boston$coefficients),
   weights = wt)
 summary(out3)
-
-## 4. glmb
-out4 <- glmb(form, data = Boston_centered, family = gaussian(),
-  pfamily = dGamma(shape = ps.boston$shape, rate = rate_dg, beta = ps.boston$coefficients))
-summary(out4)
-
-## 5. lmb
-out5 <- lmb(form, data = Boston_centered,
-  pfamily = dGamma(shape = ps.boston$shape, rate = rate_dg, beta = ps.boston$coefficients))
-summary(out5)
+}
+\seealso{
+\code{\link{summary.rglmb}}, \code{\link{rGamma_reg}}.
 }

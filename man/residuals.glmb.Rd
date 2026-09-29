@@ -2,26 +2,16 @@
 % Please edit documentation in R/residuals.glmb.R
 \name{residuals.glmb}
 \alias{residuals.glmb}
-\alias{residuals.rglmb}
-\alias{residuals.rlmb}
-\alias{residuals.summary.rglmb}
 \alias{residuals.lmb}
 \title{Accessing Bayesian Generalized Linear Model Fits}
 \usage{
 \method{residuals}{glmb}(object, ysim = NULL, ...)
 
-\method{residuals}{rglmb}(object, ysim = NULL, ...)
-
-\method{residuals}{rlmb}(object, ysim = NULL, ...)
-
-\method{residuals}{summary.rglmb}(object, ysim = NULL, ...)
-
 \method{residuals}{lmb}(object, ysim = NULL, ...)
 }
 \arguments{
-\item{object}{an object of class \code{glmb}, \code{rglmb}, \code{rlmb}, or
-\code{summary.rglmb}, typically the result of a call to \link{glmb},
-\link{rglmb}, \link{rlmb}, or \code{\link{summary.rglmb}}.}
+\item{object}{an object of class \code{glmb} or \code{lmb}, typically the
+result of a call to \link{glmb} or \link{lmb}.}
 
 \item{ysim}{Optional matrix of simulated responses (one row per draw), as
 produced by a posterior-predictive simulation (e.g. \code{\link{simulate.glmb}}).
@@ -47,8 +37,10 @@ use the family's deviance residuals function as in \code{\link[stats]{residuals.
 \insertCite{McCullagh1989}{glmbayes}.
 }
 \details{
-These functions are all \link{methods} for class \code{glmb}, \code{rglmb},
-\code{rlmb}, \code{summary.rglmb}, or \code{lmb} objects.
+These functions are \link{methods} for class \code{glmb} and \code{lmb}
+objects. Methods for \code{rglmb}, \code{rlmb}, and \code{summary.rglmb}
+are registered from \code{glmbayesCore} when this package is loaded; see
+\code{\link{residuals.rglmb}}.
 }
 \examples{
 data(menarche,package="MASS")
@@ -124,6 +116,7 @@ par(oldpar)
 }
 \seealso{
 \code{\link{predict.glmb}}, \code{\link{summary.glmb}}, \code{\link{glmb}},
-\code{\link{glmbayes-package}}; \code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
+\code{\link{glmbayes-package}}; \code{\link{residuals.rglmb}};
+\code{\link{rglmb}}, \code{\link{rlmb}}, \code{\link{lmb}};
 \code{\link[stats]{residuals.glm}}
 }

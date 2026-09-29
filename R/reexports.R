@@ -45,8 +45,30 @@ bayestestR::check_prior
 #' @export
 bayestestR::describe_prior
 
-## Type (2): canonical implementation in glmbayesCore (see R/prior.R for documentation).
-#' @rdname Prior_Setup
-#' @importFrom glmbayesCore Prior_Setup
+## Type (2): canonical implementation in glmbayesCore; help from @inherit (local roxygen in R/prior.R is commented out).
+#' @inherit glmbayesCore::Prior_Setup params return details title description references examples format note
+#' @family prior
+#' @seealso
+#' \code{\link{pfamily}} for prior-family objects and the constructors
+#' \code{\link{dNormal}}, \code{\link{dNormal_Gamma}}, \code{\link{dGamma}},
+#' and \code{\link{dIndependent_Normal_Gamma}}.
+#'
+#' \code{\link{glmb}}, \code{\link{lmb}} for formula-based fits with a
+#' \code{pfamily} built from \code{Prior_Setup()} output; \code{\link{rglmb}},
+#' \code{\link{rlmb}} for matrix-based sampling that consumes the same prior
+#' structure; \code{\link[glmbayesCore]{simfuncs}} for functions that take a \code{prior_list}
+#' assembled from those components (including
+#' \code{\link{rindepNormalGamma_reg}} for
+#' \code{\link{dIndependent_Normal_Gamma}()}).
+#' \code{\link{multi_prior_setup}} for a matrix/cbind response with Gaussian;
+#' use with \code{\link{lmb}}
+#' \code{Prior_Setup} per column.
+#'
+#' \insertCite{zellner1986gprior}{glmbayes};
+#' \insertCite{Raiffa1961}{glmbayes};
+#' \insertCite{Gelman2013}{glmbayes};
+#' \insertCite{McCullagh1989}{glmbayes};
+#' \insertCite{glmbayesChapter03}{glmbayes};
+#' \insertCite{glmbayesChapterA12}{glmbayes}.
 #' @export
-glmbayesCore::Prior_Setup
+Prior_Setup <- glmbayesCore::Prior_Setup

@@ -31,9 +31,10 @@ construction, diagnostics, and optional GPU acceleration using OpenCL.
 \strong{Releases:} Current version \strong{0.9.7} on CRAN (\code{install.packages("glmbayes")}).
 Source is available from GitHub; R-Universe (\url{https://knygren.r-universe.dev/glmbayes})
 also builds binaries from that source.
-Prebuilt CRAN and R-Universe binaries do not include OpenCL; GPU support
-requires a source install once the host OpenCL environment is ready
-(see \code{vignette("Chapter-16", "glmbayes")} for the three-step process).
+Prebuilt CRAN and R-Universe binaries are typically CPU-only for the sampler
+backend (\pkg{glmbayesCore}); GPU support requires a source install of
+\strong{glmbayesCore} (and dependencies) with OpenCL at compile time
+(see \code{vignette("Chapter-16", "glmbayes")}).
 
 IID posterior simulation for non-Gaussian GLMs and several non-conjugate
 linear-model setups uses the likelihood-subgradient envelope method of
@@ -52,8 +53,8 @@ In interactive sessions, attaching the package with \code{library(glmbayes)}
 may emit a short \code{\link{packageStartupMessage}}
 when \code{has_opencl()} is \code{FALSE} (typical for CRAN binaries) but a
 GPU or OpenCL stack appears available on the host. OpenCL modelling paths
-require a source install of \pkg{glmbayes} with OpenCL at compile time;
-\code{has_opencl()} then reports whether that build succeeded. The note
+require a source install of \pkg{glmbayesCore} with OpenCL at compile time;
+\code{has_opencl()} reports whether that backend build succeeded. The note
 confirms full CPU use and points to \code{vignette("Chapter-16")}. Machines
 without a detectable GPU stack stay silent.
 Set \code{options(glmbayes.quiet_opencl_startup = TRUE)} to suppress attach
@@ -206,7 +207,7 @@ show(glmb.D93)
 \seealso{
 Main interfaces: \code{\link{glmb}}, \code{\link{lmb}},
 \code{\link{rglmb}}, \code{\link{rlmb}}; low-level simulation API
-\code{\link{simfuncs}}; envelope construction \code{\link{EnvelopeBuild}}.
+\code{\link[glmbayesCore]{simfuncs}}; envelope construction \code{\link{EnvelopeBuild}}.
 
 Useful links:
 \itemize{

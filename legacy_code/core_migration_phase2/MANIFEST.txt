@@ -1,0 +1,21 @@
+R/glmb.R
+R/lmb.R
+R/pfamily.R
+R/prior.R
+R/prior_simfunction.R
+R/compute_gaussian_prior.R
+R/rglmb.R
+R/rlmb.R
+R/simfunction.R
+R/simulationpipeline.R
+R/envelopeorchestrator.R
+R/fitter_functions.R
+R/normal_ct.R
+R/gamma_ct.R
+R/invgamma_ct.R
+R/gpu_diagnostics.R
+R/RcppExports.R
+R/rcpp_wrappers.R
+src/ (full tree)
+configure
+configure.win

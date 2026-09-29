@@ -58,6 +58,98 @@ After wiring `glmb()` / `lmb()` to **`glmbayesCore::rglmb()` / `rlmb()`**, OpenC
 
 ---
 
+## Checklist — `glmb()` / `lmb()` via Core backend (three phases)
+
+**Goal:** One sampler stack and one OpenCL dynlib (**`glmbayesCore`**) before splitting
+formula-layer code back into **glmbayes**.
+
+**Golden rule for Phase 3:** Move **formula / object shape / glmb-only S3** back into
+glmbayes one function at a time. **Never** move **`rglmb` / `rlmb` / simfuncs / envelope /
+`src/`** back into glmbayes. Engine calls stay **`glmbayesCore::…`** (or re-exports
+that assign from Core).
+
+**Pin during this work:** `Imports: glmbayesCore (>= 0.5.5)` (raise when Core gains staged
+fitters).
+
+### Phase 1 — Stage formula fitters in glmbayesCore; validate there
+
+Use internal export names in Core if you want to avoid committing to permanent
+`glmbayesCore::glmb` / **`lmb`** as permanent Core API — Phase 1 uses the **same
+names** temporarily in Core, then **glmbayes** re-exports in Phase 2 and owns formula
+code again in Phase 3.
+
+- [x] **Core: port post-sample assembly** (inlined in **`R/glmb.R`** and **`.uni_lmb`** in
+  **`R/lmb.R`**: Prior, **`DIC_Info`**, dispersion branches, `outlist`, classes).
+- [x] **Core: port `glmb()`** in **`R/glmb.R`** (`glm.fit` → **`rglmb()`**).
+- [x] **Core: port `lmb()`** in **`R/lmb.R`** (single + **`mlmb`** via **`.uni_lmb`**).
+- [x] **`multi_prior_setup()`** — already in Core; not duplicated in **`lmb.R`** extract.
+- [x] **Core: COPYRIGHTS** — **skipped** for Phase 1 temporary staging (notices stay on **glmbayes**).
+- [x] **Core: do not** add insight / bayestestR Imports for staged fitters.
+- [x] **Core tests:** **`tests/testthat/test-glmb.R`**, **`test-lmb.R`** (CPU); **`test-opencl-glmb.R`**, **`test-opencl-lmb.R`**
+  when **`glmbayesCore_has_opencl()`** is **`TRUE`** (smoke + structure checks; skipped on CRAN).
+- [ ] **Core tests (optional CI job):** one smoke fit with **`use_opencl = TRUE`** on
+  source-built Core + opencltools + nmathopencl.
+- [x] **Assert simfun namespace:** tests check **`environment(pfamily$simfun)`** is Core.
+
+### Phase 2 — Re-export from glmbayes; disable local copies; single backend
+
+- [ ] **glmbayes: Type (2) re-export** (before or with fitters): **`pfamily`**, **`d*`**, prior
+  **`r*_prior`**, **`rglmb`**, **`rlmb`**, **`simfunction`**, envelope exports, **`Prior_Setup`**
+  (done), **`diagnose_glmbayes`**, etc. — `@inherit` + assignment pattern in **`R/reexports.R`**
+  (or dedicated doc stubs where S3-only).
+- [ ] **glmbayes: re-export staged fitters**, e.g. `glmb <- glmbayesCore::glmb` and
+  `lmb <- glmbayesCore::lmb` with roxygen `@inherit` (same pattern as **`Prior_Setup`**).
+- [ ] **glmbayes: comment out** (archive) local implementations in **`R/glmb.R`**, **`R/lmb.R`**
+  (and duplicate **`multi_prior_setup`** in **`lmb.R`** if Core is canonical) so roxygen does
+  not register duplicate exports.
+- [ ] **glmbayes: remove duplicate S3** from NAMESPACE where Core registers via Imports
+  (**`pfamily.default`**, **`simfunction.default`**, summary/residuals for rglmb, etc.).
+- [ ] **glmbayes: drop `src/`** when no R code path calls **`useDynLib(glmbayes)`** symbols
+  (remove **`R/RcppExports.R`**, **`R/rcpp_wrappers.R`**, configure OpenCL in glmbayes, etc.).
+- [ ] **glmbayes tests:** full **`devtools::test()`** / examples with **`library(glmbayes)`**
+  only (no attached Core).
+- [ ] **Confirm OpenCL path:** **`diagnose_glmbayes()`** / **`has_opencl()`** reflect Core +
+  opencltools; main fits do not load glmbayes duplicate C++.
+- [ ] **Re-run parity checklist** (§ below) on glmbayes after re-exports.
+
+### Phase 3 — Move formula layer back to glmbayes one function at a time
+
+Each item: restore **glmbayes** source + docs; **keep** sampling and priors on Core.
+
+- [x] **`.uni_lmb()` / single-response `lmb()`** — local **`model.frame` / `lm.fit`** in
+  glmbayes; sampling line **`glmbayesCore::rlmb(...)`**; assembly local; **`mlmb`**
+  helpers in **`R/lmb.R`**.
+- [x] **`glmb()`** — local glm preamble; **`glmbayesCore::rglmb(...)`**; assembly in **`R/glmb.R`**.
+- [ ] **Multi-response `lmb()` / `mlmb`** — local orchestration; per-column
+  **`glmbayesCore::rlmb`** (or one **`multi_rlmb`** when aligned with **`.mlmb_assemble`**).
+- [ ] **`multi_prior_setup`** — glmbayes docs + **`glmbayesCore::multi_prior_setup`** or
+  thin wrapper only.
+- [x] **Remove temporary Core exports** — **`glmb()`** / **`lmb()`** removed from Core 0.5.5 (keep
+  **`rglmb` / `rlmb`** in Core permanently).
+- [ ] After **each** Phase 3 function: parity tests + note in NEWS; bump Core version pin if
+  assembly API changed.
+
+### Parity gates (run after Phase 1, 2, and each Phase 3 step)
+
+Same as § **Parity checklist** below; minimum:
+
+- [ ] Gaussian — conjugate **`lmb`** / **`rlmb`** + **`dNormal_Gamma`** (or ING as used in tests).
+- [ ] Binomial logit — **`glmb`** / **`rglmb`** + **`dNormal`** envelope path.
+- [ ] Poisson — envelope path; Poisson + **`dGamma`** coercion if covered in tests.
+- [ ] **`Prior_Setup()`** → **`glmb` / `lmb`** on small model.
+- [ ] **`simulate_prior.glmb`** still finds **`pfamily$pfun`** (Core constructors with **`pfun`**).
+- [ ] **`summary.glmb`**, **`directional_tail`**, **`extractDIC`** on object from new path.
+
+### Anti-patterns (do not do in Phase 3)
+
+- [ ] Do **not** copy **`rglmb` / `rlmb` / `R/simfunction.R` / `simulationpipeline.R`** back into
+  glmbayes.
+- [ ] Do **not** re-enable glmbayes **`src/`** for the main formula path.
+- [ ] Do **not** build **`pfamily`** with local **`dNormal()`** while calling Core **`rglmb`**
+  unless **`dNormal`** is a re-export from Core (otherwise **`simfun`** binds to glmbayes simfuncs).
+
+---
+
 # Stage 0 — glmbayes vs glmbayesCore file inventory
 
 **Date:** 2026-08-06  

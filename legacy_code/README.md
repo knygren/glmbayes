@@ -3,6 +3,11 @@
 Files here are excluded from `R CMD build` via `.Rbuildignore`.
 Copy or source manually when experimenting; they are not exported from **glmbayes**.
 
+## `core_migration_phase2/`
+
+Snapshot of the pre–Phase 2 **engine** (`R/` sampler layer, `src/`, configure)
+before re-exporting from **glmbayesCore**. See that folder’s `README.md`.
+
 ## `pp_check.glmb.R`
 
 Former S3 method `pp_check.glmb()` (wrapper around **bayesplot** for `glmb` fits).
