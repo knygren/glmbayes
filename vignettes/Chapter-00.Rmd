@@ -133,12 +133,10 @@ These chapters explore more complex modeling scenarios and computational strateg
 The appendices document the mathematical and algorithmic foundations of the samplers used in **glmbayes**, including likelihood subgradient methods, envelope construction, and accept-reject schemes for both regression and dispersion parameters.
 
 - **Chapter A01: A detailed overview of the glmbayes package**  
-  Present the mathematical foundations behind each sampler, including derivations of the posterior, the structure of enveloping functions, and bounds on expected draws per acceptance.  
+  Package map for `lmb()`, `glmb()`, priors, methods, and `rlmb`/`rglmb`; envelope engine APIs are documented under **glmbayesCore** (see also `vignettes/legacy/` appendices).  
   <https://knygren.r-universe.dev/articles/glmbayes/Chapter-A01.html>
 
-- **Chapter A02: Overview of Estimation Procedures**  
-  Present the mathematical foundations behind each sampler, including derivations of the posterior, the structure of enveloping functions, and bounds on expected draws per acceptance. 
-  <https://knygren.r-universe.dev/articles/glmbayes/Chapter-A02.html>
+- **Chapter A02: Overview of Estimation Procedures** — `vignettes/legacy/` (same).
 
 - **Chapter A03 - Methods Available in glmbayes**  
   Summarize the key functions, samplers, and diagnostics implemented in the package, with a focus on how they relate to the underlying estimation framework.  
@@ -148,33 +146,13 @@ The appendices document the mathematical and algorithmic foundations of the samp
   Document the directional tail diagnostic, its theoretical interpretation as a Bayesian analogue to t- and F-style evidence, scalar and multivariate decompositions, and its use in summary output.  
   <https://knygren.r-universe.dev/articles/glmbayes/Chapter-A04.html>
 
-- **Chapter A05: Simulation Methods - Likelihood Subgradient Densities**  
-  Detail the likelihood-subgradient approach for non-Gaussian families. Show how subgradients define tangent envelopes and explain why this yields valid accept-reject sampling for log-concave likelihoods.  
-  <https://knygren.r-universe.dev/articles/glmbayes/Chapter-A05.html>
+- **Chapter A05: Simulation Methods - Likelihood Subgradient Densities** — `vignettes/legacy/` (subgradient envelopes; **glmbayesCore**).
 
 - **Chapter A06 - Accept-Reject Sampling for Dispersion in Gamma Regression**  
   Describe the specialized accept-reject scheme for dispersion parameters in Gamma regression, including envelope design, proposal choices, and efficiency considerations.  
   <https://knygren.r-universe.dev/articles/glmbayes/Chapter-A06.html>
 
-- **Chapter A07 - Accept-Reject Sampling for Gaussian Regression Models with Independent Normal-Gamma Priors**  
-  Detail the accept-reject-based approach for Gaussian regression with independent normal-gamma priors, including the structure of the joint prior, conditional distributions, and sampler efficiency.  
-  <https://knygren.r-universe.dev/articles/glmbayes/Chapter-A07.html>
-
-- **Chapter A08 - Overview of Envelope Related Functions**  
-  Provide a central overview of the envelope-related functions. Consolidate the theoretical foundations, function map, and workflow for users and developers.  
-  <https://knygren.r-universe.dev/articles/glmbayes/Chapter-A08.html>
-
-- **Chapter A09 - Parallel Sampling Implementation using RcppParallel**  
-  Describe the parallel sampling implementation, pilot logic, and interactive safeguards.  
-  <https://knygren.r-universe.dev/articles/glmbayes/Chapter-A09.html>
-
-- **Chapter A10 - Accelerated EnvelopeBuild Implementation using OpenCL**  
-  Document the OpenCL implementation for accelerating envelope construction on the GPU.  
-  <https://knygren.r-universe.dev/articles/glmbayes/Chapter-A10.html>
-
-- **Chapter A11 - Implementation Companion for Independent Normal-Gamma**  
-  Document the implementation workflow for independent Normal-Gamma sampling, with a deep dive into `rIndepNormalGammaReg`, `EnvelopeOrchestrator`, `EnvelopeDispersionBuild`, and the standardized accept-reject sampler.  
-  <https://knygren.r-universe.dev/articles/glmbayes/Chapter-A11.html>
+- **Chapters A07–A11** (ING pipeline, envelopes, parallel/OpenCL implementation notes) — `vignettes/legacy/`; APIs live in **glmbayesCore**.
 
 - **Chapter A12 - Technical Derivations for Priors Returned by `Prior_Setup()`**  
   Full mathematical derivations for Gaussian calibration, Normal--Gamma and independent Normal--Gamma prior pieces, and the objects returned by `Prior_Setup()` (including `compute_gaussian_prior`).  

@@ -456,9 +456,9 @@ if (!is.null(ps_p$conj_poisson)) {
 }
 \references{
 {Nygren K (2025).
-\dQuote{Chapter A12: Technical Derivations for Priors Returned by Prior_ Setup.}
-Vignette in the glmbayes R package.
-R vignette name: Chapter-A12.}{}
+\dQuote{Core 10: Technical Derivations for Priors Returned by Prior_ Setup.}
+Vignette in the glmbayesCore R package.
+R vignette name: Core-10; formerly glmbayes appendix Chapter-A12.}{}
 }
 \seealso{
 \code{\link{pfamily}} for prior-family objects and the constructors

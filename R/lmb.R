@@ -138,7 +138,7 @@
 #'
 #' \code{\link{glmb}}, \code{\link{rglmb}}, \code{\link{rlmb}}
 #'   for related Bayesian GLM/linear interfaces;
-#' \code{\link{EnvelopeBuild}} for envelope construction when accept--reject sampling is used.
+#' \code{\link[glmbayesCore]{EnvelopeBuild}} for envelope construction when accept--reject sampling is used.
 #' 
 #' \code{\link{pfamily}} for documentation of pfamily functions used to specify priors.
 #' 

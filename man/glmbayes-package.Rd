@@ -207,7 +207,7 @@ show(glmb.D93)
 \seealso{
 Main interfaces: \code{\link{glmb}}, \code{\link{lmb}},
 \code{\link{rglmb}}, \code{\link{rlmb}}; low-level simulation API
-\code{\link[glmbayesCore]{simfuncs}}; envelope construction \code{\link{EnvelopeBuild}}.
+\code{\link[glmbayesCore]{simfuncs}}; envelope construction \code{\link[glmbayesCore]{EnvelopeBuild}}.
 
 Useful links:
 \itemize{

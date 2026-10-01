@@ -156,7 +156,7 @@
 #' 
 #'  \code{\link{Prior_Setup}}, \code{\link{Prior_Check}} for functions used to initialize and to check priors,  
 #'
-#'  \code{\link{EnvelopeBuild}} for envelope construction  methods.
+#'  \code{\link[glmbayesCore]{EnvelopeBuild}} for envelope construction methods.
 #'
 #'  Further reading: \insertCite{Nygren2006}{glmbayes};
 #'  \insertCite{glmbayesChapter00,glmbayesChapterA02,glmbayesSimmethods,glmbayesChapterA08}{glmbayes};

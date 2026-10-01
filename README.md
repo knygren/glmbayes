@@ -211,12 +211,6 @@ Use `example()` and `demo()` to explore built-in examples and demos for supporte
     ## Hierarchical generalized linear model (Poisson BikeSharing) via rglmb
     demo("Ex_09_BikeSharingPoisson")
 
-    ## Detailed simulation pipeline for rNormalGLM models (JASA 2006; Vignette Chapter A05)
-    example("rNormalGLM_std")
-
-    ## Detailed simulation pipeline for rIndepNormalGammaReg models (Vignette Chapter A07)
-    example("rIndepNormalGammaReg_std")
-
 ## Methodology
 
 For generalized linear models where well known sampling methods are unavailable, sampling follows the
@@ -326,8 +320,7 @@ OpenCL.
 - **Chapter A01 - A detailed overview of the glmbayes package**  
 https://knygren.r-universe.dev/articles/glmbayes/Chapter-A01.html
 
-- **Chapter A02 - Overview of Estimation Procedures**  
-https://knygren.r-universe.dev/articles/glmbayes/Chapter-A02.html
+- **Chapter A02 - Overview of Estimation Procedures** — `vignettes/legacy/`
 
 - **Chapter A03 - Methods Available in glmbayes**  
 https://knygren.r-universe.dev/articles/glmbayes/Chapter-A03.html
@@ -335,26 +328,12 @@ https://knygren.r-universe.dev/articles/glmbayes/Chapter-A03.html
 - **Chapter A04 - Directional Tail Diagnostics for Prior-Posterior Disagreement**  
 https://knygren.r-universe.dev/articles/glmbayes/Chapter-A04.html
 
-- **Chapter A05 - Simulation Methods - Likelihood Subgradient Densities**  
-https://knygren.r-universe.dev/articles/glmbayes/Chapter-A05.html
+- **Chapter A05 - Simulation Methods - Likelihood Subgradient Densities** — `vignettes/legacy/`
 
 - **Chapter A06 - Accept-Reject Sampling for Dispersion in Gamma Regression**  
 https://knygren.r-universe.dev/articles/glmbayes/Chapter-A06.html
 
-- **Chapter A07 - Accept-Reject Sampling for gaussian Regression models with independent normal-gamma priors**  
-https://knygren.r-universe.dev/articles/glmbayes/Chapter-A07.html
-
-- **Chapter A08 - Overview of Envelope Related Functions**  
-https://knygren.r-universe.dev/articles/glmbayes/Chapter-A08.html
-
-- **Chapter A09 - Parallel Sampling Implementation using RcppParallel**  
-https://knygren.r-universe.dev/articles/glmbayes/Chapter-A09.html
-
-- **Chapter A10 - Accelerated EnvelopeBuild Implementation using OpenCL**  
-https://knygren.r-universe.dev/articles/glmbayes/Chapter-A10.html
-
-- **Chapter A11 - Implementation Companion for Independent Normal-Gamma**  
-https://knygren.r-universe.dev/articles/glmbayes/Chapter-A11.html
+- **Chapters A07–A11** (ING accept–reject, envelopes, parallel/OpenCL) — `vignettes/legacy/`; see **glmbayesCore**
 
 - **Chapter A12 - Technical Derivations for Priors Returned by `Prior_Setup()`**  
 https://knygren.r-universe.dev/articles/glmbayes/Chapter-A12.html

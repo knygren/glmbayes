@@ -27,14 +27,15 @@ builds remain fully usable for standard modelling.
 
 Start with \code{\link[glmbayesCore]{diagnose_glmbayes}()} for a single readable report;
 use \code{\link[glmbayesCore]{glmbayesCore_has_opencl}()} for a quick boolean when scripting. Full install
-notes: \code{vignette("Chapter-16", package = "glmbayes")}
+notes: \code{vignette("Core-11", package = "glmbayesCore")} (backend);
+\code{vignette("Chapter-16", package = "glmbayes")} for the formula interface
 ((Nygren 2025)).
 }
 \references{
 {Nygren K (2025).
-\dQuote{Chapter 16: Large models — GPU acceleration using OpenCL.}
-Vignette in the glmbayes R package.
-R vignette name: Chapter-16.}{}
+\dQuote{Core 11: Large models — GPU acceleration using OpenCL (backend installation).}
+Vignette in the glmbayesCore R package.
+R vignette name: Core-11; glmbayes user tutorial remains Chapter-16.}{}
 }
 \seealso{
 \code{\link{diagnose_glmbayes}}, \pkg{opencltools}, \pkg{glmbayesCore},

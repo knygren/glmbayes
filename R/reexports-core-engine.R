@@ -2,46 +2,6 @@
 ## Archived implementations: legacy_code/core_migration_phase2/R/.
 
 NULL
-#' @inherit glmbayesCore::EnvelopeBuild return title description params details examples references format note
-#' @export
-EnvelopeBuild <- glmbayesCore::EnvelopeBuild
-
-#' @inherit glmbayesCore::EnvelopeCentering return title description params details examples references format note
-#' @export
-EnvelopeCentering <- glmbayesCore::EnvelopeCentering
-
-#' @inherit glmbayesCore::EnvelopeDispersionBuild return title description params details examples references format note
-#' @export
-EnvelopeDispersionBuild <- glmbayesCore::EnvelopeDispersionBuild
-
-#' @inherit glmbayesCore::EnvelopeEval return title description params details examples references format note
-#' @export
-EnvelopeEval <- glmbayesCore::EnvelopeEval
-
-#' @inherit glmbayesCore::EnvelopeOpt return title description params details examples references format note
-#' @export
-EnvelopeOpt <- glmbayesCore::EnvelopeOpt
-
-#' @inherit glmbayesCore::EnvelopeOrchestrator return title description params details examples references format note
-#' @export
-EnvelopeOrchestrator <- glmbayesCore::EnvelopeOrchestrator
-
-#' @inherit glmbayesCore::EnvelopeSetGrid return title description params details examples references format note
-#' @export
-EnvelopeSetGrid <- glmbayesCore::EnvelopeSetGrid
-
-#' @inherit glmbayesCore::EnvelopeSetLogP return title description params details examples references format note
-#' @export
-EnvelopeSetLogP <- glmbayesCore::EnvelopeSetLogP
-
-#' @inherit glmbayesCore::EnvelopeSize return title description params details examples references format note
-#' @export
-EnvelopeSize <- glmbayesCore::EnvelopeSize
-
-#' @inherit glmbayesCore::EnvelopeSort return title description params details examples references format note
-#' @export
-EnvelopeSort <- glmbayesCore::EnvelopeSort
-
 #' @inherit glmbayesCore::Prior_Check return title description params details examples references format note
 #' @export
 Prior_Check <- glmbayesCore::Prior_Check
@@ -133,19 +93,11 @@ rGamma_prior <- glmbayesCore::rGamma_prior
 #' @export
 rGamma_reg <- glmbayesCore::rGamma_reg
 
-#' @inherit glmbayesCore::rIndepNormalGammaReg_std return title description params details examples references format note
-#' @export
-rIndepNormalGammaReg_std <- glmbayesCore::rIndepNormalGammaReg_std
-
 #' @inherit glmbayesCore::rIndependent_Normal_Gamma_prior return title description params details examples references format note
 #' @inheritParams glmbayesCore::prior_simfuncs
 #' @param ... Additional arguments; currently unused (see \code{\link[glmbayesCore]{prior_simfuncs}}).
 #' @export
 rIndependent_Normal_Gamma_prior <- glmbayesCore::rIndependent_Normal_Gamma_prior
-
-#' @inherit glmbayesCore::rNormalGLM_std return title description params details examples references format note
-#' @export
-rNormalGLM_std <- glmbayesCore::rNormalGLM_std
 
 #' @inherit glmbayesCore::rNormalGamma_reg return title description params details examples references format note
 #' @export

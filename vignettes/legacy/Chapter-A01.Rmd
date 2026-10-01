@@ -20,7 +20,7 @@ the two aforementioned functions, functions used to specify and check prior dist
 
 For advanced users who are interested in implementing Block-Gibbs sampling procedures or in doing simulation for other more complex models, we recommend continuing on to the third section in this vignette that covers the two functions *rlmb* and *rglmb* and are designed for implementation of precisely that type of sampling. The third section discusses how those functions can be called, references some examples/demos where they are used, and describes how to use the output from the functions to access similar output to that produced by the *lmb* and *glmb* functions.
 
-For users who are interested in how posterior simulation is wired, the final section summarizes **glmbayes**-exported registration and accept--reject helpers (`rNormal_reg`, `rnorm_ct`, and related symbols). Envelope construction and standardized sampler entry points are implemented in the companion package **glmbayesCore** (used internally by `glmb()` and `lmb()` but not re-exported by **glmbayes**). That deeper material is technical; the likelihood-subgradient foundation is given by [@Nygren2006]. Archived appendix sources under `vignettes/legacy/` (including Chapter A02 and Chapter A08) and **glmbayesCore** vignettes document the envelope layer in full.
+For users who are interested in the details of how the simulation is performed there is the final section that contains a discussion of the various simulation functions that are used to sample from the posterior distributions.  This includes a discussion of three core function that simulate for the currently implemented prior families and a couple of functions related to what we call the Central Normal distribution (the normal distribution between a lower and an upper bound). It also includes a discussion of a set of functions that are used in order to utilize the enveloping functions needed to get iid samples for some of the posterior distributions. That material is rather technical; the likelihood-subgradient foundation is given by [@Nygren2006], with estimation architecture summarized in [@glmbayesChapterA02] and envelope details in [@glmbayesChapterA08]. 
 
 
 | Function Type | Functions | Vignettes |
@@ -42,12 +42,12 @@ For users who are interested in how posterior simulation is wired, the final sec
 |**Main Model Interfaces (GLM / LM)**|**glmb** | Chapter 11 — Models for the Gamma family |
 | **Lower-Level Interfaces (GLM / LM)** | **rlmb** | Chapter 17 — Linear mixed-effects models |
 | **Lower-Level Interfaces (GLM / LM)** | **rglmb** | Chapter 18 — Generalized linear mixed-effects models |
-| **Model-Specific Simulation Functions** | **rNormal_reg, rGamma_reg, rNormalGamma_reg, rindepNormalGamma_reg** | This vignette (Advanced Topics); legacy Chapter A02 |
+| **Model-Specific Simulation Functions** | **rNormal_reg, rGamma_reg, rNormal_Gamma_reg, rindependent_norm_gamma_reg** | Chapter A02: Overview of Estimation Procedures |
 | **pfamilies** |**dGamma, dNormal_Gamma, dIndependent_Normal_Gamma** | Chapter 15 — Estimating models with unknown dispersion parameters |
 | **Methods**| **Various method functions for glmbayes** | Chapter A03 — Methods Available in glmbayes |
-| **Envelope / standardized sim (engine)** | **glmbayesCore** (`Envelope*`, `rNormalGLM_std`, …) | **glmbayesCore** help and vignettes; legacy Chapters A08–A11 |
-| **Parallel simulation (engine)** | **glmbayesCore** | Legacy Chapter A09 |
-| **OpenCL envelope acceleration** | **glmbayesCore**; `use_opencl` on **glmbayes** `glmb()` / `lmb()` | Chapter 16; legacy Chapter A10 |
+| **Envelope Related Functions** | Various Functions | Chapter A08 — Overview of Envelope Related Functions |
+| **Parallel Simulation Related Functions** | Various Functions | Chapter A09: Parallel Sampling Implementation using RcppParallel |
+| **Accelerated EnvelopedBuild Related Functions** | Various Functions | Chapter A10: Accelerated EnvelopeBuild Implementation using OpenCL |
 | **OpenCL host utilities** | \pkg{opencltools} (`detect_*`, PATH helpers, …) | Chapter 00 — Introduction; Chapter 01 — Getting Started |
 | **Datasets** | AMI, carinsca, Cleveland | Chapter 01 — Getting Started |
 
@@ -379,9 +379,9 @@ methods(class="rlmb")
 In this section, we cover additional functions included in the package that most users likely would not call directly but which provide visibility to the simulation methods utilized as part of the package. These functions can be broadly broken down into four distinct categories:. 
 
 * A set of simulation functions (one for each pfamily) that gets called during the estimation process when the respective pfamily is specified.
-* Two functions for the Central Normal Distribution that play a key role in accept--reject sampling for some GLM families.
-* Envelope construction and standardized simulators in **glmbayesCore** (called from registration functions such as `rNormal_reg()`; see below).
-* A set of utility functions used by various method functions to produce the desired outputs.
+* Two functions for the Central Normal Distribution that play a key role in generating candidates for the envelope used to estimate some of the models 
+* A set of functions related to the envelope construction and simulation from a model in Standard form that uses the envelope as part of the simulation process
+* A set of utility functions used by various method functions to produce the desired outputs
 
 ## Simulation Functions
 
@@ -389,19 +389,27 @@ One of the key items returned by the *pfamily* functions is an assigned simulati
 
 * The *rNormal_reg* function is used for the *dNormal* *pfamily*
 * The *rGamma_reg* function is used for the *dGamma* *pfamily*
-* The *rNormalGamma_reg* function is used for the *dNormal_Gamma* *pfamily* (Gaussian regression with unknown dispersion)
-* The *rindepNormalGamma_reg* function is used for the *dIndependent_Normal_Gamma* *pfamily*
+* The *rNormalGamma_reg* function is used for the *dNormal_Gamma* *pfamily*
 
 ## Normal_ct Functions
 
 For estimation of Bayesian generalized linear models with Normal Priors but non-gaussian families, accept-reject 
 procedures are used where candidates are generated from mixtures of restricted multivariate normal distributions. Two functions for univariate restricted normal distributions (*rnorm_ct* and *pnorm_ct*) play a key role during this process and can be viewed as generalizations of the rnorm and pnorm functions.
 
-## Envelope-based sampling (**glmbayesCore**)
+## Envelope Related Functions
 
-For Bayesian GLMs with Normal priors and non-Gaussian families, `glmb()` ultimately relies on registration-level simulators such as *rNormal_reg*, which call envelope machinery in **glmbayesCore**. **glmbayes** still exports *glmb_Standardize_Model* (model standardization used in that pipeline) and the *rNormal_reg* / *rnorm_ct* helpers above; it does **not** re-export low-level envelope builders or `*_std` samplers.
+For estimation of Bayesian generalized linear models with Normal Priors but with non-gaussian families, there are a number of functions that are used in order to generate the samples and that all in one-way-or another are related to the Enveloping functions used. The below is a list of these functions (we refer the reader to the respective function documentation for details).
 
-To work with those engine functions directly, load **glmbayesCore** and see its documentation (for example `EnvelopeBuild`, `EnvelopeOpt`, `EnvelopeSort`, `EnvelopeSetGrid`, `EnvelopeSetLogP`, and `rNormalGLM_std`). Step-by-step appendix write-ups that still refer to **glmbayes** naming are kept under `vignettes/legacy/` (Chapters A02, A05, and A08–A11) for reference while the split between user-facing **glmbayes** and engine **glmbayesCore** is finalized.
+* *glmb_Standardize_Model* standardizes a Bayesian Generalized Linear Model so it can be sampled using an Enveloping function
+* *EnvelopeBuild* builds the enveloping function used during the simulation 
+* *EnvelopeOpt* selects an "optimal" size for the Grid used during Envelope construction
+* *EnvelopeSort* sorts the envelope after construction to increade efficiency of the simulation
+* *EnvelopeSetGrid* calculates log-densities associated with the restricted normals used to generate candidates
+* *EnvelopeSetLogP* calculates constants used during sampling from the constructed envelope
+* *rNormalGLM_std* simulates from a standardized Bayesian Generalized linear model using an Enveloping function
+* *Neg_logLik*  returns the Negative log-likelihood for a Generalized Linear Model
+* *Neg_logPost* returns the negative log-posterior for a Bayesian Generalized Linear Model
+* *Neg_logPost_Gradient* returns the Gradient for the Negative Log-posteror of a Bayesian Generalized Linear Model
 
 ## Utility Functions 
 
